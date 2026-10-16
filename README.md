@@ -23,7 +23,7 @@ sh Rule30PrizeKit/setup.sh
 2. It builds `Rule30PrizeKit` and the template `Rule30Submission`.
 3. It runs the checker on the template, which passes.
 
-LeanLink needs version 1.0.13 or later to load from the kit with `LeanImportString[src, "ProjectDir" -> kit]`. Earlier versions do not follow Lake path dependencies such as `lean/`.
+LeanLink needs version 1.0.14 or later. Since 1.0.13 it loads from the kit with `LeanImportString[src, "ProjectDir" -> kit]`, following Lake path dependencies such as `lean/`, and 1.0.14 adds `"KernelCheck"`, the kernel replay described below.
 
 ## The statements
 
@@ -75,7 +75,7 @@ lake env lean --run Check.lean Rule30Submission --claim partial --headline Rule3
 2. **Statement.** The module imports the official statements, so `Problem1` and `Problem2` are the kit's: a module cannot declare its own under the official names. The headline has exactly the official type. For a partial result, it only has to exist and be a theorem.
 3. **Axioms.** The headline uses only `propext`, `Classical.choice` and `Quot.sound`.
 
-**Why replay matters.** In Lean 4.30, `#print axioms` and LeanLink's `"Axioms"` read the axiom lists stored in the compiled module. A file can add a theorem without type checking it (`set_option debug.skipKernelTC true`), and an axiom check then reports nothing wrong. [`tests/T05SkipKernel.lean`](tests/T05SkipKernel.lean) does this. LeanLink shows its type as `Problem1` with no axioms and the term `True.intro`. Only the replay rejects it.
+**Why replay matters.** In Lean 4.30, `#print axioms` and LeanLink's `"Axioms"` read the axiom lists stored in the compiled module. A file can add a theorem without type checking it (`set_option debug.skipKernelTC true`), and an axiom check then reports nothing wrong. [`tests/T05SkipKernel.lean`](tests/T05SkipKernel.lean) does this. LeanLink shows its type as `Problem1` with no axioms and the term `True.intro`. Only the replay rejects it: `Check.lean`'s, or LeanLink's `"KernelCheck"`.
 
 `sh tests/run.sh` runs ten checker runs over seven test files: one template that passes, then `sorry`, a new axiom, `native_decide`, the forged theorem, a wrong type and a `Problem1` of the module's own, which all fail.
 

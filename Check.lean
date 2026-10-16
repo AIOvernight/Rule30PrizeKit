@@ -1,6 +1,7 @@
 import Lean.CoreM
 import Lean.Replay
 import Lean.Util.CollectAxioms
+import Lean.Util.FoldConsts
 
 /-!
 # The Rule 30 Prize submission checker
@@ -19,7 +20,9 @@ three things.
    declarations that were added without type checking, for example under `debug.skipKernelTC`, which
    an axiom audit alone does not see.
 2. **Statement.** The headline theorem has exactly the official type, as an expression, not just up to
-   definitional unfolding:
+   definitional unfolding, and its `Problem1` or `Problem2` is the kit's. Every submission must import
+   the statement module `Ruliology.CellularAutomata.Rule30Prize` (`Rule30PrizeKit` does), so it
+   cannot declare a `Problem1` of its own under the official name:
 
    | `--claim`      | theorem                         | type                                               |
    |----------------|---------------------------------|----------------------------------------------------|
@@ -48,6 +51,16 @@ def standardAxioms : Array Name := #[`propext, `Classical.choice, `Quot.sound]
 def problem1 : Expr := .const `Ruliology.CellularAutomata.Rule30Prize.Problem1 []
 def problem2 : Expr := .const `Ruliology.CellularAutomata.Rule30Prize.Problem2 []
 def mkNotExpr (p : Expr) : Expr := .app (.const `Not []) p
+
+/-- The module that states the problems. -/
+def statementModule : Name := `Ruliology.CellularAutomata.Rule30Prize
+
+/-- Whether the constant `c` was imported from the statement module, rather than declared by the
+module under check. -/
+def fromStatementModule (env : Environment) (c : Name) : Bool :=
+  match env.getModuleIdxFor? c, env.getModuleIdx? statementModule with
+  | some i, some j => i == j
+  | _, _ => false
 
 /-- The claims with an official statement: claim, theorem name, expected type. -/
 def officialTargets : List (String × Name × Expr) :=
@@ -128,16 +141,23 @@ def checkTheorem (env : Environment) (mine : Std.HashMap Name ConstantInfo) (n :
     let typeOk := match expected? with
       | some e => stripMData ci.type == e
       | none => true
+    -- The official constants in the type must be the statement module's. `Not` is Init's: a module
+    -- that imports the statement module cannot declare another.
+    let foreign := match expected? with
+      | some e => e.getUsedConstants.filter fun c => c != ``Not && !fromStatementModule env c
+      | none => #[]
     let axs := axiomsOf env n
     let bad := axs.filter (fun a => !standardAxioms.contains a)
-    let ok := isThm && monomorphic && typeOk && bad.isEmpty
+    let ok := isThm && monomorphic && typeOk && foreign.isEmpty && bad.isEmpty
     let problems : List String :=
       (if isThm then [] else [s!"{n} is a {kindOf ci}, not a theorem"]) ++
       (if monomorphic then [] else [s!"{n} has universe parameters"]) ++
       (if typeOk then [] else [s!"{n} does not have the official type"]) ++
+      (if foreign.isEmpty then [] else
+        [s!"{n} states {foreign.toList} from the module itself, not from {statementModule}"]) ++
       (if bad.isEmpty then [] else [s!"{n} uses non-standard axioms: {bad.toList}"])
     (Json.mkObj [("name", toJson n.toString), ("found", true), ("kind", toJson (kindOf ci)),
-      ("typeMatches", toJson typeOk), ("axioms", toJson (axs.map (·.toString))),
+      ("typeMatches", toJson (typeOk && foreign.isEmpty)), ("axioms", toJson (axs.map (·.toString))),
       ("ok", toJson ok), ("problems", toJson problems)], ok)
 
 structure Args where
@@ -188,8 +208,12 @@ unsafe def run (args : Args) : IO UInt32 := do
       if ci matches .axiomInfo _ then some n.toString else none
     let inconsistent := (passed.contains "problem1" && passed.contains "not_problem1") ||
       (passed.contains "problem2" && passed.contains "not_problem2")
+    -- Partial results too must be about the official definitions.
+    let importsStatements := (env.getModuleIdx? statementModule).isSome
     let (ok, reasons) : Bool × List String :=
-      if inconsistent then
+      if !importsStatements then
+        (false, [s!"the module does not import {statementModule}, the official statements: import Rule30PrizeKit"])
+      else if inconsistent then
         (false, ["the module proves a statement and its negation: the environment is inconsistent"])
       else match args.claim with
       | "auto" =>
@@ -204,6 +228,7 @@ unsafe def run (args : Args) : IO UInt32 := do
     IO.println <| Json.compress <| Json.mkObj [
       ("module", toJson args.module.toString), ("claim", toJson args.claim),
       ("replay", Json.mkObj [("ok", true), ("constants", toJson mine.size)]),
+      ("importsStatements", toJson importsStatements),
       ("official", Json.arr official), ("verifiedTargets", toJson passed),
       ("headlines", Json.arr (headlines.map (·.1))), ("newAxioms", toJson newAxioms),
       ("declared", Json.arr declared),

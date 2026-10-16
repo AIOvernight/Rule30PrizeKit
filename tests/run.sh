@@ -22,5 +22,7 @@ check T03NewAxiom 1 --claim problem1
 check T04NativeDecide 1 --claim partial --headline Rule30Submission.first_bits
 check T05SkipKernel 1 --claim problem1
 check T06WrongType 1 --claim problem1
+check T07Redefine 1 --claim problem1
+check T07Redefine 1 --claim partial --headline Rule30Submission.problem1
 echo "scratch: $OUT"
 [ "$fails" = 0 ] && echo "all checks behaved as expected" || { echo "$fails unexpected"; exit 1; }

@@ -57,7 +57,7 @@ A submission is one file, [`Rule30Submission.lean`](Rule30Submission.lean): the 
 | Problem 2 fails | `Rule30Submission.not_problem2` | `¬ Ruliology.CellularAutomata.Rule30Prize.Problem2` |
 | A partial result | any `Rule30Submission.*` name you list as a headline | any statement; a person reviews what it means |
 
-- **Imports.** The file may import `Rule30PrizeKit`, `Ruliology.*` (the catalog of partial results), `Rule30Equivalents.*`, Mathlib, Batteries and Lean.
+- **Imports.** The file must import the official statements, which `import Rule30PrizeKit` does. It may also import `Ruliology.*` (the catalog of partial results), `Rule30Equivalents.*`, Mathlib, Batteries and Lean.
 - **Types.** Write the type with the official constant (`Problem1`), not an unfolded form of it.
 - **Forbidden.** No `sorry`; no `native_decide`, `decide +native` or `bv_decide`; no `axiom`.
 
@@ -72,12 +72,12 @@ lake env lean --run Check.lean Rule30Submission --claim partial --headline Rule3
 [`Check.lean`](Check.lean) prints one JSON object and exits with 0 when the claim verifies. It checks three things:
 
 1. **Kernel replay.** Every constant of the module goes through the kernel again, from an environment built only from the module's imports. This is the check `leanchecker` does.
-2. **Statement.** The headline has exactly the official type. For a partial result, it only has to exist and be a theorem.
+2. **Statement.** The module imports the official statements, so `Problem1` and `Problem2` are the kit's: a module cannot declare its own under the official names. The headline has exactly the official type. For a partial result, it only has to exist and be a theorem.
 3. **Axioms.** The headline uses only `propext`, `Classical.choice` and `Quot.sound`.
 
 **Why replay matters.** In Lean 4.30, `#print axioms` and LeanLink's `"Axioms"` read the axiom lists stored in the compiled module. A file can add a theorem without type checking it (`set_option debug.skipKernelTC true`), and an axiom check then reports nothing wrong. [`tests/T05SkipKernel.lean`](tests/T05SkipKernel.lean) does this. LeanLink shows its type as `Problem1` with no axioms and the term `True.intro`. Only the replay rejects it.
 
-`sh tests/run.sh` runs eight checker runs over six test files: one template that passes, then `sorry`, a new axiom, `native_decide`, the forged theorem and a wrong type, which all fail.
+`sh tests/run.sh` runs ten checker runs over seven test files: one template that passes, then `sorry`, a new axiom, `native_decide`, the forged theorem, a wrong type and a `Problem1` of the module's own, which all fail.
 
 ## Trust
 
@@ -93,7 +93,7 @@ lake env lean --run Check.lean Rule30Submission --claim partial --headline Rule3
 | `Check.lean` | The verifier's checker. |
 | `Rule30PrizeKit.lean`, `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | The kit's Lake project. |
 | `setup.sh` | Fetches prebuilt Mathlib, builds the kit and checks the template. |
-| `tests/` | The checker's controls: one passing file, five failing ones. |
+| `tests/` | The checker's controls: one passing file, six failing ones. |
 | `comparator/` | The official targets with `sorry`, for Lean's comparator. |
 | [`lean/`](lean) | The statements and the catalog of partial results, namespace `Ruliology.CellularAutomata`. |
 | [`equivalents/`](equivalents) | The equivalent forms of Problem 1, namespace `Rule30Equivalents`. |

@@ -79,6 +79,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_ncard_factors_lt_succ
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_strictMono_ncard_factors
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_ncard_factors_unbounded
+#print axioms Rule30Equivalents.SkolemMahlerLech.problem1_iff_not_LRS_zero_set
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_complement
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_of_eq
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_of_eq_not

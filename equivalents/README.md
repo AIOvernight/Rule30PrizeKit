@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 48 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 132 theorems named `problem1_iff_*`.
-- For 3 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
+- 49 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 133 theorems named `problem1_iff_*`.
+- For one more form, [42], and for the frozen-boundary conjecture, the direction "the statement implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-six later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree and AlgebraicDFinite) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-eight later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree, AlgebraicDFinite, Strassmann and SkolemMahlerLech) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -53,6 +53,8 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [GoldenPowers](Rule30Equivalents/GoldenPowers.lean) | no new form: the Mignosi–Restivo–Salemi theorem. An infinite word is eventually periodic iff every sufficiently long prefix ends with a repetition of exponent at least φ². The proof follows the paper: a two-period window lemma (Lemma 4), the first-maximum bound and period propagation (Theorem 1), and an induction on the bounded local periods (Theorem 2). This proves the converse of [47] | `eventuallyPeriodic_of_gp`, `first_lt`, `period_until`, `gp_sub` |
 | [ContextFree](Rule30Equivalents/ContextFree.lean) | the unary language {1ⁿ : c(n) = 1} and the language of prefixes of c are not context-free ([40]). The library proves the pumping lemma for every `ContextFreeGrammar` (Bar-Hillel, Perles and Shamir) and that regular languages over a finite alphabet are context-free; a unary context-free language is then eventually periodic (Ginsburg–Rice), and so is a sequence with a context-free prefix language (Book) | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree`, `pumping`, `isContextFree_of_isRegular` |
 | [AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean) | Σ c(t)Xᵗ is transcendental over ℚ(X) ([38]). The library proves that, over a field of characteristic zero, a power series algebraic over K[X] is D-finite (Abel, Comtet, Stanley), so [31] applies; Fatou's theorem is not needed | `problem1_iff_transcendental`, `exists_dfinite_of_isAlgebraic`, `eventuallyPeriodic_iff_isAlgebraic` |
+| [Strassmann](Rule30Equivalents/Strassmann.lean) | no new form: Strassmann's theorem. A nonzero power series over ℚ_p whose coefficients tend to 0 has finitely many zeros in the closed unit ball, at most the last index of a coefficient of largest norm | `strassmann`, `exists_zeros_subset`, `psum_sub_psum` |
+| [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean) | the black times are not the zero set of any linear recurrence sequence over ℚ ([45]). The library proves the Skolem–Mahler–Lech theorem: a companion matrix invertible mod an odd prime p has a power 1 + pB, so along each residue class the sequence is a p-adic power series in n, and Strassmann's theorem applies | `problem1_iff_not_LRS_zero_set`, `skolem_mahler_lech`, `epSet_zeros_matrix` |
 | [Symmetry](Rule30Equivalents/Symmetry.lean) | the same question for rule 86 (black seed), for rules 135 and 149 (white seed), and for the complemented column | `problem1_iff_rule86`, `problem1_iff_rule135`, `problem1_iff_rule149` |
 | [Basic](Rule30Equivalents/Basic.lean) | — (shared definitions: the center column `c` and `EventuallyPeriodic`) | `problem1_iff_not_eventuallyPeriodic` |
 
@@ -86,6 +88,7 @@ lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_if
 5. Have someone other than the author restate the main theorem from scratch and check that it says what it claims.
 
 Next targets:
-- Euler–Lagrange (eventually periodic continued fraction ⟺ quadratic irrational) for [39] and [49];
+- the Diophantine graph of c in [14](c), through binomial coefficients and one big history number (moderate);
+- Büchi's theorem for the MSO form of [36].
 
-The hard classical ones are Fatou/Pólya–Carlson (natural boundary), Skolem–Mahler–Lech (zero sets over ℚ), Cobham–Christol, and the one-tape time gap.
+The hard classical ones are Szegő and Pólya–Carlson (natural boundary, [41]), Cobham and Christol ([42]), Durand ([46]) and the one-tape time gap ([43]).

@@ -15,6 +15,8 @@ import Rule30Equivalents.Lyndon
 import Rule30Equivalents.GoldenPowers
 import Rule30Equivalents.ContextFree
 import Rule30Equivalents.AlgebraicDFinite
+import Rule30Equivalents.Strassmann
+import Rule30Equivalents.SkolemMahlerLech
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

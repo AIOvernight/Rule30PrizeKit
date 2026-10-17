@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 142 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 143 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -169,7 +169,7 @@ files. The rows follow the order of Section 3.
 | 17 | rational-any-field | algebra | Σ c(t)Xᵗ ∉ K(X) for any field K; c satisfies no `LinearRecurrence` over K | Proved (library) | `LinearRelations.problem1_iff_series_not_rational`, `LinearRelations.problem1_iff_no_linearRecurrence` |
 | 44 | linear-relations | linear algebra | the shifts σⁿc are linearly independent over any field; their span is infinite-dimensional; no polynomial in σ kills c | Proved (library) | `LinearRelations.problem1_iff_shifts_linearIndependent`, `LinearRelations.problem1_iff_not_torsion` |
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
-| 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Stated | `problem1_iff_not_LRS_zero_set` |
+| 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Proved (library) | `SkolemMahlerLech.problem1_iff_not_LRS_zero_set`, `SkolemMahlerLech.skolem_mahler_lech`, `Strassmann.strassmann` |
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
@@ -201,8 +201,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 48 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 21 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 49 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 22 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -214,8 +214,9 @@ batch 2, and 21 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), [54] in
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean), [39] in [Lagrange](Rule30Equivalents/Lagrange.lean),
 [49] in [Minkowski](Rule30Equivalents/Minkowski.lean), [40] in
-[ContextFree](Rule30Equivalents/ContextFree.lean), and [38] in
-[AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean). One more, [7], is proved in the core catalog and
+[ContextFree](Rule30Equivalents/ContextFree.lean), [38] in
+[AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean), and [45] in
+[SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
 form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
@@ -224,9 +225,11 @@ through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean
 ([GoldenPowers](Rule30Equivalents/GoldenPowers.lean)). [40] is proved through the pumping lemma for
 context-free languages, which the library proves for every grammar
 ([ContextFree](Rule30Equivalents/ContextFree.lean)). [38] is proved through "algebraic ⟹ D-finite"
-and [31], without Fatou's theorem ([AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean)). 3 forms
-are stated, [41], [42] and [45], and for [42] and [45] the direction "the form implies Problem 1" is
-proved. 2 forms are sketches.
+and [31], without Fatou's theorem ([AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean)). [45] is
+proved through the Skolem–Mahler–Lech theorem, which the library proves in the p-adic way, with
+Strassmann's theorem ([Strassmann](Rule30Equivalents/Strassmann.lean),
+[SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean)). 2 forms are stated, [41] and [42], and
+for [42] the direction "the form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1015,16 +1018,31 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   arithmetic progressions, so it is EP as a set, and c would be EP. The finite-field version is
   elementary, since the windows take finitely many values. Over infinite fields of characteristic
   p, zero sets need not be EP, so that version is strictly stronger ([Der07]; Section 4).
-- *Difficulty.* Hard: it needs Skolem–Mahler–Lech, which Mathlib lacks.
-- *Lean.* Stated (critic).
+- *Difficulty.* Hard: it needs Skolem–Mahler–Lech, which Mathlib lacks (proved here).
+- *Lean.* Proved in the library
+  ([SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean)). The finite-field version is
+  `LinearRelations.problem1_iff_not_zero_set`.
 
   ```lean
   theorem problem1_iff_not_LRS_zero_set :
       Rule30Prize.Problem1 ↔ ∀ (E : LinearRecurrence ℚ) (u : ℕ → ℚ), E.IsSolution u →
-        {t | u t = 0} ≠ {t | Rule30Prize.center t = true}
+        {t | u t = 0} ≠ {t | c t = true}
   ```
 
-- *Sources.* [Sko34]; [Mah35]; [Lec53]; [Der07].
+  - `skolem_mahler_lech`: the zero set of a linear recurrence sequence over ℚ is eventually
+    periodic. The proof is the p-adic one.
+    - If a₀ = 0, the shifted sequence solves a shorter recurrence (induction on the order).
+    - Otherwise pick an odd prime p dividing no denominator of the coefficients or initial values,
+      nor the numerator of a₀. The state vectors are Aⁿv for a companion matrix A over ℤ_p that is
+      invertible mod p.
+    - A mod p has finite order m, so Aᵐ = 1 + pB (`exists_pow_eq_one_add`). Then
+      u(r + mn) = Σₖ C(n, k) pᵏ βₖ, and C(n, k) = (n)ₖ / k! turns this into a power series in n.
+      Its coefficients tend to 0 because ‖pᵏ / k!‖ ≤ p^(−k/2) by Legendre's formula.
+  - `Strassmann.strassmann`: a nonzero power series over ℚ_p with coefficients tending to 0 has
+    finitely many zeros in the unit ball. The proof divides by x − α at a zero α, which lowers the
+    last index of a largest coefficient (Strassmann 1928). So along each residue class r mod m the
+    zeros are finite or everything, and the zero set is eventually periodic.
+- *Sources.* [Sko34]; [Mah35]; [Lec53]; [Str28]; [Der07].
 
 **[31] p-recursive: polynomial-coefficient recurrences and D-finiteness.**
 - *Statement.* Problem 1 ⟺ there is no recurrence Σ_{i≤d} p_i(n)·c(n + i) = 0 for n ≥ N with
@@ -2384,7 +2402,8 @@ with Turing machines reading n. Notes:
       `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`.
     - Mathlib lacks: an eventually-periodic predicate; the digits-rationality lemma for arbitrary
       digits; Morse–Hedlund (now in this library); Kronecker's, Fatou's, Szegő's, Pólya–Carlson's,
-      Euler–Lagrange's, Skolem–Mahler–Lech's, Christol's and Cobham's theorems; automatic
+      Euler–Lagrange's and Skolem–Mahler–Lech's (both now in this library), Christol's and Cobham's
+      theorems; Strassmann's theorem (now in this library); automatic
       sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping lemma (now in this
       library); the gap
       theorems; normal numbers; natural density; the pointwise ergodic theorem (Mathlib has
@@ -2521,6 +2540,8 @@ Algebra, power series and coding theory
 - [Mah35] K. Mahler, Eine arithmetische Eigenschaft der Taylor-Koeffizienten rationaler Funktionen,
   Proc. Akad. Wetensch. Amsterdam 38 (1935) 50–60.
 - [Lec53] C. Lech, A note on recurring series, Ark. Mat. 2 (1953) 417–421.
+- [Str28] R. Strassmann, Über den Wertevorrat von Potenzreihen im Gebiet der p-adischen Zahlen, J.
+  Reine Angew. Math. 159 (1928) 13–28.
 - [Der07] H. Derksen, A Skolem–Mahler–Lech theorem in positive characteristic and finite automata,
   Invent. Math. 168 (2007) 175–224.
 - [ADH21] B. Adamczewski, T. Dreyfus, C. Hardouin, Hypertranscendence and linear difference

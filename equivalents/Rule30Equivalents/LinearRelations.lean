@@ -118,7 +118,8 @@ Special cases:
   *The Theory of Matrices*, vol. 2, Chelsea (1959). The proofs here are self-contained and work over
   any field. The determinant-free rank argument is standard linear algebra; the critic's note in the
   catalog survey sketches it.
-* The Skolem–Mahler–Lech theorem would give the converse of `problem1_of_not_zero_set` over `ℚ`.
+* The Skolem–Mahler–Lech theorem gives the converse of `problem1_of_not_zero_set` over `ℚ`; it is
+  proved in `SkolemMahlerLech`.
   It says that over a field of characteristic `0`, the zero set of a linear recurrence sequence is a
   finite set plus finitely many arithmetic progressions; see C. Lech, *A note on recurring series*,
   Ark. Mat. 2 (1953) 417–421. The theorem is not in Mathlib, and this file does not prove it.
@@ -1012,8 +1013,8 @@ theorem problem1_iff_not_zero_set (K : Type*) [Field K] [Finite K] : Rule30Prize
     exact h E u hu hS
 
 /-- **Zero sets, any field.** If the black times of the center column are not the zero set of any
-linear recurrence sequence over `K`, Problem 1 holds. Over a field of characteristic `0` (for
-example `ℚ`) the converse is the Skolem–Mahler–Lech theorem, which is not proved here. -/
+linear recurrence sequence over `K`, Problem 1 holds. Over `ℚ` the converse is the
+Skolem–Mahler–Lech theorem (`SkolemMahlerLech.problem1_iff_not_LRS_zero_set`). -/
 theorem problem1_of_not_zero_set (K : Type*) [Field K]
     (h : ∀ (E : LinearRecurrence K) (u : ℕ → K), E.IsSolution u →
       {t | u t = 0} ≠ {t | c t = true}) :

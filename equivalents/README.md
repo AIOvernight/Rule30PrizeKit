@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 44 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 127 theorems named `problem1_iff_*`.
+- 45 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 128 theorems named `problem1_iff_*`.
 - For 4 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-two later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon and Lagrange) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-three later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange and Minkowski) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -49,6 +49,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [WordForms](Rule30Equivalents/WordForms.lean) | for every N, some finite prefix has more than N distinct factors of one length (finite certificates); the gaps between black cells, the gaps between white cells and the run lengths are not eventually periodic; every tail has unbordered factors of unbounded length ([51]). Sufficient conditions: infinitely many prefixes without a repetition of exponent φ²; unbounded Lempel–Ziv complexity | `problem1_iff_prefix_certificates`, `problem1_iff_black_gaps`, `problem1_iff_run_lengths`, `problem1_of_lz_unbounded`, `problem1_iff_late_long_unbordered_factors` |
 | [Lyndon](Rule30Equivalents/Lyndon.lean) | no new form: Lyndon words and the Ehrenfeucht–Silberger theorem for infinite words. A Lyndon word is unbordered, and the product `u ++ v` of Lyndon words `u < v` is Lyndon. Over a finite ordered alphabet, an infinite word whose long factors are all bordered is eventually periodic: repeatedly cutting off the longest Lyndon prefix gives a non-increasing, hence eventually constant, sequence of short Lyndon words. This proves the converse of [51] | `eventuallyPeriodic_of_bordered`, `IsLyndon.not_bordered`, `IsLyndon.append` |
 | [Lagrange](Rule30Equivalents/Lagrange.lean) | θ = [1 + c(0); 1 + c(1), 1 + c(2), …] is not a quadratic irrational ([39]). It rests on the Euler–Lagrange theorem for every irrational: its continued-fraction digits are eventually periodic iff it satisfies a nontrivial integer quadratic equation. Also: for any digits bₖ ≥ 1, the number [b₀; b₁, …] is irrational and has digits b | `problem1_iff_not_quadratic`, `digit_periodic_iff`, `quadratic_cfValue_iff`, `digit_cfValue`, `irrational_cfValue` |
+| [Minkowski](Rule30Equivalents/Minkowski.lean) | y = [0; 1, r₁, r₂, …] (r_k the run lengths of the center column), which is ?⁻¹(x₂) by Denjoy's formula for Minkowski's function, is not a quadratic irrational ([49]). It follows from Euler–Lagrange and [29]; the identity with ?⁻¹ is not formalized | `problem1_iff_minkowski_not_quadratic` |
 | [Symmetry](Rule30Equivalents/Symmetry.lean) | the same question for rule 86 (black seed), for rules 135 and 149 (white seed), and for the complemented column | `problem1_iff_rule86`, `problem1_iff_rule135`, `problem1_iff_rule149` |
 | [Basic](Rule30Equivalents/Basic.lean) | — (shared definitions: the center column `c` and `EventuallyPeriodic`) | `problem1_iff_not_eventuallyPeriodic` |
 

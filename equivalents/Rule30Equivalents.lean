@@ -13,6 +13,7 @@ import Rule30Equivalents.LogicAutomata
 import Rule30Equivalents.Realization
 import Rule30Equivalents.Lyndon
 import Rule30Equivalents.Lagrange
+import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms
 import Rule30Equivalents.Expansions
 import Rule30Equivalents.Holonomic

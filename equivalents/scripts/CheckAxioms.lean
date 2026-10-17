@@ -15,6 +15,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_base
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_binary
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal
+#print axioms Rule30Equivalents.ContextFree.problem1_iff_unary_not_contextFree
+#print axioms Rule30Equivalents.ContextFree.problem1_iff_prefixes_not_contextFree
 #print axioms Rule30Equivalents.CoupledHalves.problem1_iff_coupled_halves
 #print axioms Rule30Equivalents.DFinite.problem1_iff_not_dFinite
 #print axioms Rule30Equivalents.Expansions.problem1_iff_engel_infinite

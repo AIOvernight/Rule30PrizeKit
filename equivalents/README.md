@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 46 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 129 theorems named `problem1_iff_*`.
+- 47 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 131 theorems named `problem1_iff_*`.
 - For 4 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-four later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski and GoldenPowers) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The twenty-five later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers and ContextFree) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -51,6 +51,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [Lagrange](Rule30Equivalents/Lagrange.lean) | θ = [1 + c(0); 1 + c(1), 1 + c(2), …] is not a quadratic irrational ([39]). It rests on the Euler–Lagrange theorem for every irrational: its continued-fraction digits are eventually periodic iff it satisfies a nontrivial integer quadratic equation. Also: for any digits bₖ ≥ 1, the number [b₀; b₁, …] is irrational and has digits b | `problem1_iff_not_quadratic`, `digit_periodic_iff`, `quadratic_cfValue_iff`, `digit_cfValue`, `irrational_cfValue` |
 | [Minkowski](Rule30Equivalents/Minkowski.lean) | y = [0; 1, r₁, r₂, …] (r_k the run lengths of the center column), which is ?⁻¹(x₂) by Denjoy's formula for Minkowski's function, is not a quadratic irrational ([49]). It follows from Euler–Lagrange and [29]; the identity with ?⁻¹ is not formalized | `problem1_iff_minkowski_not_quadratic` |
 | [GoldenPowers](Rule30Equivalents/GoldenPowers.lean) | no new form: the Mignosi–Restivo–Salemi theorem. An infinite word is eventually periodic iff every sufficiently long prefix ends with a repetition of exponent at least φ². The proof follows the paper: a two-period window lemma (Lemma 4), the first-maximum bound and period propagation (Theorem 1), and an induction on the bounded local periods (Theorem 2). This proves the converse of [47] | `eventuallyPeriodic_of_gp`, `first_lt`, `period_until`, `gp_sub` |
+| [ContextFree](Rule30Equivalents/ContextFree.lean) | the unary language {1ⁿ : c(n) = 1} and the language of prefixes of c are not context-free ([40]). The library proves the pumping lemma for every `ContextFreeGrammar` (Bar-Hillel, Perles and Shamir) and that regular languages over a finite alphabet are context-free; a unary context-free language is then eventually periodic (Ginsburg–Rice), and so is a sequence with a context-free prefix language (Book) | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree`, `pumping`, `isContextFree_of_isRegular` |
 | [Symmetry](Rule30Equivalents/Symmetry.lean) | the same question for rule 86 (black seed), for rules 135 and 149 (white seed), and for the complemented column | `problem1_iff_rule86`, `problem1_iff_rule135`, `problem1_iff_rule149` |
 | [Basic](Rule30Equivalents/Basic.lean) | — (shared definitions: the center column `c` and `EventuallyPeriodic`) | `problem1_iff_not_eventuallyPeriodic` |
 

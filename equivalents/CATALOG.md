@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 139 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 141 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -192,7 +192,7 @@ files. The rows follow the order of Section 3.
 | 33 | coupled-halves | cellular automata | the causal coupled-halves system has no EP solution | Proved (library) | `CoupledHalves.problem1_iff_coupled_halves` |
 | 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Proved (library) | `LogicAutomata.problem1_iff_not_presburger`, `LogicAutomata.problem1_iff_not_semilinear` |
 | 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Proved (library) | `LogicAutomata.problem1_iff_unary_not_regular`, `LogicAutomata.problem1_iff_prefixes_not_regular` |
-| 40 | context-free | automata | the same two languages are not context-free | Stated | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree` |
+| 40 | context-free | automata | the same two languages are not context-free | Proved (library) | `ContextFree.problem1_iff_unary_not_contextFree`, `ContextFree.problem1_iff_prefixes_not_contextFree`, `ContextFree.pumping` |
 | 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Proved (library) for the Büchi form; Stated (MSO) | `OmegaRegular.problem1_iff_not_omega_regular` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
@@ -201,8 +201,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 46 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 18 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 47 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 20 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -211,15 +211,19 @@ batch 2, and 18 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [48] (β = 1 + √2) in
 [PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
-[CoupledHalves](Rule30Equivalents/CoupledHalves.lean), and [54] in
-[AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). One more, [7], is proved in the core catalog and
+[CoupledHalves](Rule30Equivalents/CoupledHalves.lean), [54] in
+[AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean), [39] in [Lagrange](Rule30Equivalents/Lagrange.lean),
+[49] in [Minkowski](Rule30Equivalents/Minkowski.lean), and [40] in
+[ContextFree](Rule30Equivalents/ContextFree.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
 form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
 through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean)), and [49] from it and [29]
 ([Minkowski](Rule30Equivalents/Minkowski.lean)). [47] is proved through the Mignosi–Restivo–Salemi theorem
-([GoldenPowers](Rule30Equivalents/GoldenPowers.lean)). 5 forms are stated, and for 2 of them, [38] and [42], the direction "the
-form implies Problem 1" is proved. 2 forms are sketches.
+([GoldenPowers](Rule30Equivalents/GoldenPowers.lean)). [40] is proved through the pumping lemma for
+context-free languages, which the library proves for every grammar
+([ContextFree](Rule30Equivalents/ContextFree.lean)). 4 forms are stated, and for 2 of them, [38] and [42],
+the direction "the form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1658,17 +1662,36 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Proof route.* Unary context-free languages are regular [GR62], [Par66]. An infinite context-free
   language made of prefixes of a single infinite word forces that word to be ultimately periodic
   [Boo77]; Book's proof uses the context-free pumping lemma. Then apply [18].
-- *Difficulty.* Hard: it needs Parikh's theorem or Ginsburg–Rice, and Book's theorem.
-- *Lean.* Stated, with `unaryLang` and `prefixLang` as in [18].
+- *Difficulty.* Moderate: both directions need only the pumping lemma [BPS61], and Parikh's theorem
+  is not needed.
+- *Lean.* Proved in the library ([ContextFree](Rule30Equivalents/ContextFree.lean)), with
+  `LogicAutomata.unaryLang` and `LogicAutomata.prefLang` as in [18].
 
   ```lean
-  theorem problem1_iff_unary_not_contextFree : Rule30Prize.Problem1 ↔ ¬ unaryLang.IsContextFree
-  theorem problem1_iff_prefixes_not_contextFree : Rule30Prize.Problem1 ↔ ¬ prefixLang.IsContextFree
+  theorem problem1_iff_unary_not_contextFree :
+      Rule30Prize.Problem1 ↔ ¬ (LogicAutomata.unaryLang c).IsContextFree
+  theorem problem1_iff_prefixes_not_contextFree :
+      Rule30Prize.Problem1 ↔ ¬ (LogicAutomata.prefLang c).IsContextFree
   ```
 
+  - `pumping`: the pumping lemma for every `ContextFreeGrammar`.
+    - It works with derivation forests and forests with one hole.
+    - Take a derivation of `w` with the fewest rule applications. If no node has a descendant with
+      its own label, the yield has length at most `b ^ N`, where `b` bounds the rule lengths and
+      `N` counts the nonterminals.
+    - Otherwise some node has a descendant with its label, and none of its children does. The two
+      nodes give the split `u v x y z` with `|v x y| ≤ b ^ (N + 1)`. Minimality makes `v y`
+      nonempty.
+  - `isContextFree_of_isRegular`: regular languages over a finite alphabet are context-free, through
+    the right-linear grammar of a DFA.
+  - Unary: each member `n ≥ p` has a pump of length `k ≤ p`, so `c(n) = 1` forces `c(n + p!) = 1`.
+    Along each residue class mod `p!` the sequence is then monotone, hence eventually constant
+    (`eventuallyPeriodic_of_imp`).
+  - Prefixes: pumping the prefix of length `p` makes every `u vⁱ`, or every `u x yⁱ`, a prefix of
+    c, so c is periodic after it (`periodic_of_pumped_prefixes`).
 - *Mathlib.* `Language.IsContextFree`, `ContextFreeGrammar`, and the regular pumping lemmas
-  `DFA.pumping_lemma` and `NFA.pumping_lemma`. Missing: the context-free pumping lemma and Parikh's
-  theorem.
+  `DFA.pumping_lemma` and `NFA.pumping_lemma`. Mathlib has neither the context-free pumping lemma nor
+  the inclusion of regular languages in context-free ones (both proved here), nor Parikh's theorem.
 - *A stronger relative.* "c is not morphic", equivalently "c is determined by no indexed language"
   [Smi14]; see Section 4.
 - *Sources.* [GR62]; [Par66]; [Boo77]; [Smi14].
@@ -2347,7 +2370,8 @@ with Turing machines reading n. Notes:
     - Mathlib lacks: an eventually-periodic predicate; the digits-rationality lemma for arbitrary
       digits; Morse–Hedlund (now in this library); Kronecker's, Fatou's, Szegő's, Pólya–Carlson's,
       Euler–Lagrange's, Skolem–Mahler–Lech's, Christol's and Cobham's theorems; automatic
-      sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping lemma; the gap
+      sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping lemma (now in this
+      library); the gap
       theorems; normal numbers; natural density; the pointwise ergodic theorem (Mathlib has
       Birkhoff sums and the von Neumann mean ergodic theorem); and cellular automata.
 
@@ -2585,6 +2609,8 @@ Logic, automata and computation
 - [Mar02] D. Marker, Model Theory: An Introduction, GTM 217, Springer (2002).
 - [HU79] J. E. Hopcroft, J. D. Ullman, Introduction to Automata Theory, Languages, and Computation,
   Addison-Wesley (1979).
+- [BPS61] Y. Bar-Hillel, M. Perles, E. Shamir, On formal properties of simple phrase structure
+  grammars, Z. Phonetik Sprachwiss. Kommunikationsforsch. 14 (1961) 143–172.
 - [GR62] S. Ginsburg, H. G. Rice, Two families of languages related to ALGOL, J. ACM 9 (1962)
   350–371.
 - [Par66] R. J. Parikh, On context-free languages, J. ACM 13 (1966) 570–581.

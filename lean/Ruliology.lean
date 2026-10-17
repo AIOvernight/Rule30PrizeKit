@@ -42,6 +42,7 @@ import Ruliology.CellularAutomata.Rule30WhiteRunEight
 import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
 import Ruliology.CellularAutomata.Rule30LightCone
 import Ruliology.CellularAutomata.Rule30FiniteConfigs
+import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
 
 /-!
 # Rule 30 Prize: Lean snapshot

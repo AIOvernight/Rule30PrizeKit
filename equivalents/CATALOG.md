@@ -118,14 +118,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [WordsAutomata](Rule30Equivalents/WordsAutomata.lean) and
   [TransformsSeeds](Rule30Equivalents/TransformsSeeds.lean). Later (2026-10-17):
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
-  [Realization](Rule30Equivalents/Realization.lean) and [WordForms](Rule30Equivalents/WordForms.lean).
+  [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean)
+  and [Expansions](Rule30Equivalents/Expansions.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 113 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 115 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -154,7 +155,7 @@ files. The rows follow the order of Section 3.
 | 10 | circle-rotation | circle dynamics | x₂ has infinite order in ℝ/ℤ; its multiples are dense; it is not preperiodic for doubling | Proved (library) | `NumberTheory.problem1_iff_infinite_order`, `NumberTheory.problem1_iff_dense_multiples`, `NumberTheory.problem1_iff_doubling_not_preperiodic` |
 | 39 | lagrange | real numbers | θ = [1+c(0); 1+c(1), 1+c(2), …] is not a quadratic irrational | Stated | `problem1_iff_not_quadratic` |
 | 49 | minkowski | real numbers | ?⁻¹(x₂) = [0; 1, r₁, r₂, …] (r_k the run lengths) is not a quadratic irrational | Stated | `problem1_iff_minkowski_not_quadratic` |
-| 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Stated (Engel); Sketch (others) | `problem1_iff_engel_infinite` |
+| 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Proved (library) for Engel and Sylvester; Sketch (factorial base, Lüroth) | `Expansions.problem1_iff_engel_infinite`, `Expansions.problem1_iff_sylvester_infinite` |
 | 48 | pisot-base | real numbers | Σ c(t)β^−(t+1) ∉ ℚ(β) for a Pisot number β > 2, such as 1 + √2 | Stated (β = 1 + √2) | `problem1_iff_not_mem_Q_sqrt_two` |
 | 15 | two-adic | p-adic numbers | Σ c(t)2ᵗ ∈ ℤ₂ is not rational; an integer congruence form for every prime p | Proved (library) | `TwoAdic.problem1_iff_padic_irrational`, `TwoAdic.problem1_iff_padic_int` |
 | 30 | fcsr-complexity | coding theory | the 2-adic (FCSR) complexity of c is unbounded | Proved (library) | `TwoAdic.problem1_iff_two_adic_complexity` |
@@ -194,18 +195,19 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 34 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 7 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 53 equivalent forms, 35 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 8 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
-[Realization](Rule30Equivalents/Realization.lean), and [24] and [29] in
-[WordForms](Rule30Equivalents/WordForms.lean). One more, [7], is proved in the core catalog and
-also has a library proof. For [14] only the Diophantine part is merely stated. 16 forms are
-stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
+[Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
+[WordForms](Rule30Equivalents/WordForms.lean), and [50] (Engel and Sylvester) in
+[Expansions](Rule30Equivalents/Expansions.lean). One more, [7], is proved in the core catalog and
+also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
+factorial-base and Lüroth forms are sketches. 15 forms are stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
 proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
-- Engel or factorial-base termination [50] (easy);
+- factorial-base termination [50] (easy, but Mathlib has no factorial-base expansion);
 - automatic complexity [52] (moderate);
 - the Pisot base 1 + √2 [48] (moderate);
 - Kopra's limit-point theorems, a proved related result (moderate; Section 6.3).
@@ -674,8 +676,11 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Data.* Engel digits of x₂: 2, 2, 3, 3, 22, 79, 250, 1981, 2718, 23578, 140432, …. Sylvester
   denominators: 2, 3, 35, 2062, 17860254, 1527430603451300, …. The critic computed these from 1500
   bits, and they were rechecked here from 3000 bits.
-- *Lean.* The Engel form is stated (critic). The other three have no statement, since Mathlib has
-  none of these expansions.
+- *Lean.* The Engel and Sylvester forms are proved in the library:
+  `Expansions.problem1_iff_engel_infinite` and `Expansions.problem1_iff_sylvester_infinite`, from
+  `irrational_iff_engelRem_ne_zero` and `irrational_iff_sylvesterRem_ne_zero` (for x ≥ 0, each
+  expansion is infinite iff x is irrational). The factorial-base and Lüroth forms have no
+  statement, since Mathlib has neither expansion. The critic's original statement was:
 
   ```lean
   noncomputable def engelRem : ℕ → ℝ

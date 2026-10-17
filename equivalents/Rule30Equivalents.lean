@@ -12,3 +12,4 @@ import Rule30Equivalents.IntegerRows
 import Rule30Equivalents.LogicAutomata
 import Rule30Equivalents.Realization
 import Rule30Equivalents.WordForms
+import Rule30Equivalents.Expansions

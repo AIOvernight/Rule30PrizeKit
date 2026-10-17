@@ -89,7 +89,8 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   marks numerics run by the project. *Data* is evidence about a finite prefix; it proves nothing
   about the tail. *Kernel-checked* marks a Lean theorem.
 - **Lean blocks** show signatures. Proofs are in the files named in each entry's status line;
-  statements marked *stated* have `sorry` proofs in scratch files.
+  statements marked *stated* have `sorry` proofs in the original survey's scratch files, which are
+  not part of this kit.
 - **The common pattern.** Most equivalences instantiate a general theorem
   `∀ b : ℕ → Bool, EventuallyPeriodic b ↔ X b` at b = c. Two kinds do not:
   - forms that cannot see a constant tail (greedy digits, gaps, run lengths) also need the proved
@@ -121,17 +122,14 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean) prints the axioms of
-  all 96 library theorems whose names begin with `problem1_iff`.
+  all 105 library theorems whose names begin with `problem1_iff`.
 - **Proved (core catalog)**: proved in the core-Lean catalog [`../lean`](../lean).
-- **Scratch proof**: a complete Lean proof exists in a scratch file of the original survey, which
-  is not part of this kit, and it has not been ported into the library. Do not rely on it until it is
-  ported.
-- **Stated**: a Lean statement typechecks with `sorry` in a scratch statement file. The entry
-  quotes it.
+- **Stated**: a Lean statement typechecks with `sorry` in a scratch statement file of the original
+  survey, which is not part of this kit. The entry quotes it.
 - **Sketch**: stating the form needs definitions that Mathlib lacks.
 
 Library names below are relative to `Rule30Equivalents`, and core-catalog names are relative to
-`Ruliology.CellularAutomata`. Stated and scratch theorems carry the names used in the scratch
+`Ruliology.CellularAutomata`. Stated theorems carry the names used in the scratch
 files. The rows follow the order of Section 3.
 
 | # | id | Field | Problem 1 ⟺ … | Lean status | Lean name |
@@ -140,10 +138,10 @@ files. The rows follow the order of Section 3.
 | 53 | mathlib-bridges | bookkeeping | the same, in Mathlib's vocabulary: `Filter.atTop` and `List.HasPeriod` forms | Proved (library) | `WordsAutomata.problem1_iff_filter`, `WordsAutomata.problem1_iff_no_hasPeriod_tail` |
 | 8 | fc-bridge | bookkeeping | the formal-conjectures statement; Wolfram's 2019 statement, read as intended | Proved (library) | `TransformsSeeds.problem1_iff_fc`, `TransformsSeeds.problem1_iff_wolfram` |
 | 14 | pi2-normal-form | logic | for all T and P ≥ 1 some t ≥ T has c(t+P) ≠ c(t); no eventual period k!; Diophantine form | Proved (library) for the first two; Stated (Diophantine) | `TransformsSeeds.problem1_iff_pi2`, `TransformsSeeds.problem1_iff_factorial_periods`, `center_diophFn` |
-| 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Stated | `problem1_iff_nksRow` |
-| 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Stated | `problem1_iff_diagArray` |
+| 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows` |
+| 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic` |
 | 1 | binary-irrational | real numbers | x₂ = 0.c(0)c(1)c(2)…₂ is irrational | Proved (library) | `BinaryIrrational.problem1_iff_irrational_binary` |
-| 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library); Scratch proof (`Real.ofDigits`); Stated (Cantor function) | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal` |
+| 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library), including the `Real.ofDigits` form; Stated (Cantor function) | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal`, `Realization.problem1_iff_irrational_ofDigits` |
 | 16 | integer-digits | real numbers, without reals | no fraction p/q has binary digits c | Proved (library) | `NumberTheory.problem1_iff_not_rational_digits` |
 | 11 | continued-fraction | real numbers | the continued fraction of x₂ does not terminate | Proved (library) | `NumberTheory.problem1_iff_cf_not_terminates` |
 | 12 | dirichlet-liouville | Diophantine approximation | infinitely many rationals q have abs(x₂ − q) < 1/den(q)²; `LiouvilleWith 2 x₂` | Proved (library) | `NumberTheory.problem1_iff_dirichlet`, `NumberTheory.problem1_iff_liouvilleWith_two` |
@@ -177,10 +175,10 @@ files. The rows follow the order of Section 3.
 | 20 | decimations | words | for each k some decimation c(kn+r) is not EP; every modulus has a non-constant residue class | Proved (library) | `TransformsSeeds.problem1_iff_decimation`, `TransformsSeeds.problem1_iff_nonconstant_class` |
 | 6 | symmetric-rules | cellular automata | the center columns of rule 86 (black seed) and of rules 135 and 149 (white seed) are not EP | Proved (library) | `Symmetry.problem1_iff_rule86`, `Symmetry.problem1_iff_rule135`, `Symmetry.problem1_iff_rule149` |
 | 21 | stripe-seeds | cellular automata | rule 30 from 1, 11, 101, 1011, … has a non-EP center column | Proved (library) | `TransformsSeeds.problem1_iff_stripeSeed` |
-| 22 | realization | cellular automata | the single seed realizes no EP column | Scratch proof | `problem1_iff_realization` |
+| 22 | realization | cellular automata | the single seed realizes no EP column | Proved (library) | `Realization.problem1_iff_realization` |
 | 33 | coupled-halves | cellular automata | the causal coupled-halves system has no EP solution | Stated | `problem1_iff_coupled_halves` |
-| 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Scratch proof | `problem1_iff_not_presburger`, `problem1_iff_not_semilinear` |
-| 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Scratch proof | `problem1_iff_unary_not_regular`, `problem1_iff_prefixes_not_regular` |
+| 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Proved (library) | `LogicAutomata.problem1_iff_not_presburger`, `LogicAutomata.problem1_iff_not_semilinear` |
+| 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Proved (library) | `LogicAutomata.problem1_iff_unary_not_regular`, `LogicAutomata.problem1_iff_prefixes_not_regular` |
 | 40 | context-free | automata | the same two languages are not context-free | Stated | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree` |
 | 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Stated (Büchi form) | `problem1_iff_not_omega_regular` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
@@ -190,14 +188,15 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 27 are proved in the library: 6 in batch 1 and 21 in
-batch 2. One more, [7], is proved in the core catalog and also has a library proof. For [14] only
-the Diophantine part is merely stated. 3 forms have scratch proofs, 20 are stated, and 2 are
-sketches.
+**Summary.** Of the 53 equivalent forms, 32 are proved in the library: 6 in batch 1, 21 in
+batch 2, [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), and [9], [18] and
+[22] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean) and
+[Realization](Rule30Equivalents/Realization.lean). One more, [7], is proved in the core catalog
+and also has a library proof. For [14] only the Diophantine part is merely stated. 18 forms are
+stated and 2 are sketches; no scratch-only proofs remain.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
-- porting the scratch proofs [9], [18], [22] and the `Real.ofDigits` bridge of [2] (trivial);
 - Engel or factorial-base termination [50] (easy);
 - automatic complexity [52] (moderate);
 - the Pisot base 1 + √2 [48] (moderate);
@@ -475,7 +474,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   - In a non-integer base the statement changes. In base φ (the golden ratio) the blocks 100 and
     011 have the same value; for Pisot bases β > 2 see [48].
 - *Difficulty.* Easy.
-- *Lean.* Series form: proved (library). `Real.ofDigits` form: scratch proof, a 15-line bridge.
+- *Lean.* Series form: proved (library). `Real.ofDigits` form: proved (library),
+  `Realization.problem1_iff_irrational_ofDigits`.
   Cantor-function form: stated.
 
   ```lean
@@ -484,7 +484,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
       Rule30Prize.Problem1 ↔ Irrational (∑' t, (if c t then (1 : ℝ) else 0) / (B : ℝ) ^ (t + 1))
   noncomputable def centerDecimal : ℝ := ∑' t, (if c t then 1 else 0) / 10 ^ (t + 1)
   theorem problem1_iff_irrational_decimal : Rule30Prize.Problem1 ↔ Irrational centerDecimal
-  -- scratch proof; the critic notes that `[NeZero b]` follows from `hb` and can be dropped
+  -- library, namespace Rule30Equivalents.Realization; `[NeZero b]` follows from `hb`, but the
+  -- digits `0, 1 : Fin b` in the statement need it as an instance
   theorem problem1_iff_irrational_ofDigits (b : ℕ) [NeZero b] (hb : 2 ≤ b) : Rule30Prize.Problem1 ↔
       Irrational (Real.ofDigits (b := b) fun t => if Rule30Prize.center t then 1 else 0)
   -- stated
@@ -1431,7 +1432,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   center column c up to time n and white afterwards. So no argument that looks only at a bounded
   part of the row can prove Problem 1.
 - *Difficulty.* Easy.
-- *Lean.* Scratch proof, in core Lean. It is not in batch 2.
+- *Lean.* Proved in the library: `Realization.problem1_iff_realization`. The same module proves
+  `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence between Problem 1 and the same
+  question for another column would prove both statements.
 
   ```lean
   theorem problem1_iff_realization : Rule30Prize.Problem1 ↔
@@ -1477,7 +1480,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Proof route.* By Presburger's quantifier elimination, or by Ginsburg–Spanier, the definable
   subsets of ℕ are exactly the ultimately periodic sets. Mathlib proves this.
 - *Difficulty.* Trivial.
-- *Lean.* Scratch proofs, three lines each on top of Mathlib. Not in batch 2.
+- *Lean.* Proved in the library: `LogicAutomata.problem1_iff_not_presburger` (any parameter set)
+  and `LogicAutomata.problem1_iff_not_semilinear`, through Mathlib's
+  `presburger.definable₁_iff_ultimately_periodic` and `Nat.isSemilinearSet_iff_ultimately_periodic`.
 
   ```lean
   theorem problem1_iff_not_presburger (A : Set ℕ) : Rule30Prize.Problem1 ↔
@@ -1501,7 +1506,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Kernel consequence.* A unary DFA that computes c, if one existed, would need at least 16359
   states.
 - *Difficulty.* Easy.
-- *Lean.* Scratch proofs (logic survey). Not in batch 2.
+- *Lean.* Proved in the library: `LogicAutomata.problem1_iff_unary_not_regular` and
+  `LogicAutomata.problem1_iff_prefixes_not_regular`, by counting left quotients (Myhill–Nerode).
 
   ```lean
   def unaryLang : Language Unit := {l | Rule30Prize.center l.length = true}
@@ -1982,8 +1988,8 @@ with Turing machines reading n. Notes:
 ### 6.3 Other related questions
 
 - **Column j ≠ 0, and the white seed (column −1).** "Problem 1 or column j is not EP" is proved
-  (Jen). So proving "Problem 1 ⟺ column j is not EP" is the same as proving both (scratch proof
-  `problem1_iff_column_iff_both`). No other column can be shown equivalent to Problem 1 without
+  (Jen). So proving "Problem 1 ⟺ column j is not EP" is the same as proving both (library,
+  `Realization.problem1_iff_column_iff_both`). No other column can be shown equivalent to Problem 1 without
   solving both problems. See also `Rule30WhiteSeed.problem1_black_or_white` and
   `problem1_30_or_135`.
 - **Diagonals (solved).** Right diagonals are purely periodic, with periods dividing 2^j ([26]).

@@ -1,13 +1,15 @@
 import Rule30Equivalents
 
 /-! Prints the axioms of every `problem1_iff_*` theorem in the library.
-Run from the project root: `lake env lean scripts/CheckAxioms.lean`. -/
+Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`. -/
 
 #print axioms Rule30Equivalents.problem1_iff
 #print axioms Rule30Equivalents.problem1_iff_not_eventuallyPeriodic
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_base
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_binary
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal
+#print axioms Rule30Equivalents.IntegerRows.problem1_iff_integer_rows
+#print axioms Rule30Equivalents.IntegerRows.problem1_iff_diagArray
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_series_not_rational
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_series_not_rational_coeff_zero
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_no_linearRecurrence
@@ -22,6 +24,10 @@ Run from the project root: `lake env lean scripts/CheckAxioms.lean`. -/
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_hankel_det_int
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_hankel_det_odd
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_not_zero_set
+#print axioms Rule30Equivalents.LogicAutomata.problem1_iff_not_presburger
+#print axioms Rule30Equivalents.LogicAutomata.problem1_iff_not_semilinear
+#print axioms Rule30Equivalents.LogicAutomata.problem1_iff_unary_not_regular
+#print axioms Rule30Equivalents.LogicAutomata.problem1_iff_prefixes_not_regular
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_cf_not_terminates
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_dirichlet
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_liouvilleWith_two
@@ -39,6 +45,9 @@ Run from the project root: `lake env lean scripts/CheckAxioms.lean`. -/
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_no_eventual_linear_recurrence
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_no_lfsr
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_linear_complexity_unbounded
+#print axioms Rule30Equivalents.Realization.problem1_iff_realization
+#print axioms Rule30Equivalents.Realization.problem1_iff_column_iff_both
+#print axioms Rule30Equivalents.Realization.problem1_iff_irrational_ofDigits
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_infinite_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_injective_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_not_preperiodic

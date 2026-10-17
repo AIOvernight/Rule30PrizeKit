@@ -17,6 +17,8 @@ that the catalog calls FinConf and NumberLike, at periods 1 and 2.
 * `CQ01_iff_no_finite_period_two`: **`CQ01` is exactly FinConf at period 2 for one column**. It holds
   iff no nonzero finite configuration has a center column that is eventually 2-periodic, whatever
   the transient.
+* `no_leftFinite_period_two_of_Q01`: `Q01` gives the same for every configuration with a leftmost
+  black cell (NumberLike at period 2 for one column).
 
 **Proof.** If two adjacent columns are eventually periodic with a common start and period, the
 reconstruction `cell t (i - 1) = cell (t + 1) i ⊕ (cell t i ∨ cell t (i + 1))` makes every column to
@@ -292,6 +294,35 @@ theorem altCol_succ (t : Nat) : altCol (t + 1) = !altCol t := by
   · rw [h, show (t + 1) % 2 = 1 by omega]; rfl
   · rw [show t % 2 = 1 by omega, show (t + 1) % 2 = 0 by omega]; rfl
 
+/-- An eventually 2-periodic sequence that is not eventually constant alternates. -/
+theorem alternates_of_period_two {f : Nat → Bool} {T : Nat} (hT : ∀ t, T ≤ t → f (t + 2) = f t)
+    (hnc : ¬ ∃ T b, ∀ t, T ≤ t → f t = b) : ∀ t, T ≤ t → f (t + 1) = !f t := by
+  intro t ht
+  refine Classical.byContradiction fun hne => ?_
+  have h1 : f (t + 1) = f t := by revert hne; cases f (t + 1) <;> cases f t <;> simp
+  have hconst : ∀ k, f (t + k) = f t ∧ f (t + k + 1) = f t := by
+    intro k
+    induction k with
+    | zero => exact ⟨rfl, h1⟩
+    | succ k ih =>
+      refine ⟨by rw [← Nat.add_assoc]; exact ih.2, ?_⟩
+      rw [show t + (k + 1) + 1 = (t + k) + 2 by omega, hT _ (by omega)]
+      exact ih.1
+  exact hnc ⟨t, f t, fun s hs => by
+    have := (hconst (s - t)).1; rwa [show t + (s - t) = s by omega] at this⟩
+
+/-- An alternating tail can be restarted at a black time. -/
+theorem exists_restart {f : Nat → Bool} {T : Nat} (halt : ∀ t, T ≤ t → f (t + 1) = !f t) :
+    ∃ T', T ≤ T' ∧ ∀ t, f (T' + t) = altCol t := by
+  obtain ⟨T', hT', hblack⟩ : ∃ T', T ≤ T' ∧ f T' = true := by
+    cases hc : f T
+    · exact ⟨T + 1, by omega, by rw [halt T (Nat.le_refl T), hc]; rfl⟩
+    · exact ⟨T, Nat.le_refl T, hc⟩
+  refine ⟨T', hT', fun t => ?_⟩
+  induction t with
+  | zero => rw [Nat.add_zero, hblack]; rfl
+  | succ t ih => rw [show T' + (t + 1) = (T' + t) + 1 by omega, halt _ (by omega), ih, altCol_succ]
+
 /-- **`CQ01` is FinConf at period 2 for one column**: it holds iff no nonzero finite configuration
 has an eventually 2-periodic center column, whatever the transient. -/
 theorem CQ01_iff_no_finite_period_two : CQ01 ↔
@@ -300,39 +331,31 @@ theorem CQ01_iff_no_finite_period_two : CQ01 ↔
   rw [CQ01_iff_no_finite_alternating]
   constructor
   · rintro hC x hfin hne ⟨T, hT⟩
-    -- the center is not eventually constant, so it alternates from `T` on
-    have halt : ∀ t, T ≤ t → evol x (t + 1) 0 = !evol x t 0 := by
-      intro t ht
-      refine Classical.byContradiction fun hne' => ?_
-      have h1 : evol x (t + 1) 0 = evol x t 0 := by
-        revert hne'; cases evol x (t + 1) 0 <;> cases evol x t 0 <;> simp
-      have hconst : ∀ k, evol x (t + k) 0 = evol x t 0 ∧ evol x (t + k + 1) 0 = evol x t 0 := by
-        intro k
-        induction k with
-        | zero => exact ⟨rfl, h1⟩
-        | succ k ih =>
-          refine ⟨by rw [← Nat.add_assoc]; exact ih.2, ?_⟩
-          rw [show t + (k + 1) + 1 = (t + k) + 2 by omega, hT _ (by omega)]
-          exact ih.1
-      exact no_column_eventually_constant_finite hfin hne 0
-        ⟨t, evol x t 0, fun s hs => by
-          have := (hconst (s - t)).1; rwa [show t + (s - t) = s by omega] at this⟩
-    -- restart at a black time
-    obtain ⟨T', hT', hblack⟩ : ∃ T', T ≤ T' ∧ evol x T' 0 = true := by
-      cases hc : evol x T 0
-      · exact ⟨T + 1, by omega, by rw [halt T (Nat.le_refl T), hc]; rfl⟩
-      · exact ⟨T, Nat.le_refl T, hc⟩
+    obtain ⟨T', -, hT'⟩ := exists_restart
+      (alternates_of_period_two hT (no_column_eventually_constant_finite hfin hne 0))
     refine hC ⟨fun p => evol x T' p, evol_finConfig hfin T', fun t => ?_⟩
     rw [Rule30ZeroBoundaryBarriers.evol_restart x T' t 0]
-    induction t with
-    | zero => rw [Nat.add_zero, hblack]; rfl
-    | succ t ih =>
-      rw [show T' + (t + 1) = (T' + t) + 1 by omega, halt _ (by omega), ih, altCol_succ]
+    exact hT' t
   · rintro h ⟨x, hfin, hx⟩
     refine h x hfin ⟨0, hx 0⟩ ⟨0, fun t _ => ?_⟩
     rw [hx, hx]
     unfold altCol
     rw [show (t + 2) % 2 = t % 2 by omega]
+
+/-- **`Q01` settles period 2 for every left-finite configuration** (NumberLike at period 2 for one
+column): if `Q01` holds, no configuration with a leftmost black cell has an eventually 2-periodic
+center column, whatever the transient. -/
+theorem no_leftFinite_period_two_of_Q01 (hQ : Rule30ZeroBoundary.Q01) {x : Int → Bool} {lo : Int}
+    (hlo : x lo = true) (hzero : ∀ p, p < lo → x p = false) :
+    ¬ ∃ T, ∀ t, T ≤ t → evol x (t + 2) 0 = evol x t 0 := by
+  rintro ⟨T, hT⟩
+  obtain ⟨T', -, hT'⟩ := exists_restart
+    (alternates_of_period_two hT (no_column_eventually_constant hlo hzero 0))
+  refine Q01_no_leftfinite_alternating hQ
+    ⟨fun p => evol x T' p, ⟨(T' - lo).toNat, fun p hp => evol_eq_false_of_lt hzero T' p (by omega)⟩,
+      fun t => ?_⟩
+  rw [Rule30ZeroBoundaryBarriers.evol_restart x T' t 0]
+  exact hT' t
 
 end Rule30FiniteConfigs
 end Ruliology.CellularAutomata

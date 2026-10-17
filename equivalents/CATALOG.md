@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 134 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 135 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -161,7 +161,7 @@ files. The rows follow the order of Section 3.
 | 10 | circle-rotation | circle dynamics | x₂ has infinite order in ℝ/ℤ; its multiples are dense; it is not preperiodic for doubling | Proved (library) | `NumberTheory.problem1_iff_infinite_order`, `NumberTheory.problem1_iff_dense_multiples`, `NumberTheory.problem1_iff_doubling_not_preperiodic` |
 | 39 | lagrange | real numbers | θ = [1+c(0); 1+c(1), 1+c(2), …] is not a quadratic irrational | Stated | `problem1_iff_not_quadratic` |
 | 49 | minkowski | real numbers | ?⁻¹(x₂) = [0; 1, r₁, r₂, …] (r_k the run lengths) is not a quadratic irrational | Stated | `problem1_iff_minkowski_not_quadratic` |
-| 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Proved (library) for Engel, Sylvester and the factorial base; Sketch (Lüroth) | `Expansions.problem1_iff_engel_infinite`, `Expansions.problem1_iff_sylvester_infinite`, `Expansions.problem1_iff_factorial_infinite` |
+| 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Proved (library), all four | `Expansions.problem1_iff_engel_infinite`, `Expansions.problem1_iff_sylvester_infinite`, `Expansions.problem1_iff_factorial_infinite`, `Expansions.problem1_iff_luroth_not_eventuallyPeriodic` |
 | 48 | pisot-base | real numbers | Σ c(t)β^−(t+1) ∉ ℚ(β) for a Pisot number β > 2, such as 1 + √2 | Proved (library) for β = 1 + √2 | `PisotBase.problem1_iff_not_mem_Q_sqrt_two` |
 | 15 | two-adic | p-adic numbers | Σ c(t)2ᵗ ∈ ℤ₂ is not rational; an integer congruence form for every prime p | Proved (library) | `TwoAdic.problem1_iff_padic_irrational`, `TwoAdic.problem1_iff_padic_int` |
 | 30 | fcsr-complexity | coding theory | the 2-adic (FCSR) complexity of c is unbounded | Proved (library) | `TwoAdic.problem1_iff_two_adic_complexity` |
@@ -213,8 +213,8 @@ batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), and [54] in
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). One more, [7], is proved in the core catalog and
-also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
-Lüroth form is a sketch; for [36] the MSO form is stated. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
+also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
+form is stated. All four parts of [50] are proved, Lüroth included. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -729,7 +729,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   `irrational_iff_engelRem_ne_zero` and `irrational_iff_sylvesterRem_ne_zero` (for x ≥ 0, each
   expansion is infinite iff x is irrational). The factorial-base form is proved too:
   `Expansions.problem1_iff_factorial_infinite`, with the remainders fract(k!·x₂) and the expansion
-  identity `fract_eq_sum`. The Lüroth form has no statement, since Mathlib has no Lüroth expansion. The critic's original statement was:
+  identity `fract_eq_sum`. The Lüroth form is proved as well (2026-10-17), with the expansion defined in the
+  library: `Expansions.problem1_iff_luroth_not_eventuallyPeriodic`. Its core is
+  `lurothDigits_eventuallyPeriodic_iff`: for x ∈ (0, 1] the digits are eventually periodic iff x is
+  rational. A rational orbit stays among the points k/q. Points with the same digits are within
+  2⁻ⁿ for every n, so periodic digits make a remainder the fixed point of an affine map with
+  rational coefficients. The critic's original statement was:
 
   ```lean
   noncomputable def engelRem : ℕ → ℝ

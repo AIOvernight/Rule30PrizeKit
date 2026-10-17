@@ -39,6 +39,7 @@ import Ruliology.CellularAutomata.Rule30EtherThreeReach
 import Ruliology.CellularAutomata.Rule30EtherThreeLeft
 import Ruliology.CellularAutomata.Rule30EtherThreeSkeleton
 import Ruliology.CellularAutomata.Rule30WhiteRunEight
+import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
 
 /-!
 # Rule 30 Prize: Lean snapshot

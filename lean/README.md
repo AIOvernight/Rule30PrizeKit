@@ -17,7 +17,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 | Period 1 | **Proved** for every column | `Rule30Prize.no_column_eventually_constant`, `center_not_eventually_period_one` |
 | Small periods | **Proved:** no eventual period P ≤ 4096 with transient ≤ 8192 | `Rule30Window` |
 | Any period | **Proved:** T + P ≥ 16359 | `Rule30FactorWindow` |
-| Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52, and of width ≤ 56 in `Rule30ZeroBoundaryWidth56`, which `lake build` skips. | `Rule30PeriodTwo`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30ZeroBoundaryWidth56`, `Rule30PeriodTwoWidth5/6` |
+| Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52, and of width ≤ 56 in `Rule30ZeroBoundaryWidth56`, which `lake build` skips. | `Rule30PeriodTwo`, `Rule30PeriodTwoCoupled`, `Rule30PeriodTwoSideways`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30ZeroBoundaryWidth56`, `Rule30PeriodTwoWidth5/6` |
 | Least period 3 | Reduced. 001 needs one of AbsorptionT t001, Q001 or C3s001. 011 needs C3w(011). All four are **open**. | `Rule30EtherThree*` |
 | Least period 4 | Reduced to Absorption, the ether-and-wall trap, which is **open**. The pure ether lies in no trap of width ≤ 20. | `Rule30Ether`, `Rule30PeriodFourSkeleton`, `Rule30EtherTrapWidth20` |
 | Longer periods | **Open.** Some words are excluded, for example by long black runs and 30 certified words. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight` |
@@ -47,7 +47,7 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30ZeroBoundaryStripeFamily Rule30EtherTrap Rule30Certificates.EtherTrap{0,1,2,3,4,5} \
     Rule30EtherTrapWidth20 Rule30PeriodTwoLanguage Rule30PeriodTwoWidth5 Rule30PeriodTwoWidth6 \
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
-    Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight; do
+    Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
@@ -84,6 +84,7 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | Module | Added | What it proves | Headline theorems |
 |---|---|---|---|
 | `Rule30WhiteRunEight` | 2026-10-17 | The words `0^r 1 1` with `r ≥ 8` are excluded, for every transient: `Rule30BlackRuns.no_white_run_11` needs `r ≥ 10`. Proved on 2026-10-15 by the verifier of the white-run exclusion and left out of the catalog; ported here. | `no_white_run_11_ge8` |
+| `Rule30PeriodTwoSideways` | 2026-10-17 | The coupled question `CQ01` in two more forms. It holds iff no configuration with finitely many black cells has center column `1, 0, 1, 0, …` from time 0. Sideways: for every finite right half `R`, one explicit left row `Psi R` (the constrained start whose free bits complement column 1 of the driven right half) has infinitely many black cells. Exact death: a left row keeps the center alternating exactly until the first depth where it differs from `Psi R`. States the `R = ∅` milestone `CQ01Empty` (**open**). Barrier: from finite configurations the center alternates arbitrarily long, so no ranking through a finite abstraction of configurations decreases at every double step over which the center flips twice. | `CQ01_iff_no_finite_alternating`, `Q01_no_leftfinite_alternating`, `CQ01_iff_Psi`, `exact_death_center`, `truncation_death`, `CQ01Empty_iff`, `no_finite_abstract_ranking_coupled` |
 | `Rule30ZeroBoundaryWidth56` | 2026-10-17 | `Q01` holds for every start of width ≤ 56: depth 1 turns white at an even time ≤ 100. Kernel-checked on 2026-10-15 and left out of the catalog because of its build cost; ported here with only the names changed. **Not imported by `Ruliology.lean`.** | `q01_width_le_56`, `q01_width_le_56_linear`, `not_inX_of_width_le_56` |
 | `Rule30Certificates/ZeroBoundaryWidth56Chunks0`–`15` | 2026-10-17 | Data: the 1024 chunk checks behind width 56, 64 per file (namespaces `Rule30ZeroBoundaryWidth56.C0`–`C63`). | — |
 

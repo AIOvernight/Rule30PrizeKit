@@ -1862,7 +1862,12 @@ Each statement below is implied by Problem 1.
   - Any eventual period has T + P ≥ 16359 (`Rule30FactorWindow.transient_add_period_ge`,
     kernel-checked).
   - P = 2 is reduced to Q01 (`not_eventually_period_two_of_Q01`) and to CQ01. Q01 is proved for
-    starts of width ≤ 52 (`q01_width_le_52`).
+    starts of width ≤ 52 (`q01_width_le_52`) and ≤ 56 (`q01_width_le_56`). CQ01 says that no finite
+    configuration keeps the center alternating from time 0
+    (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`); equivalently, for every finite right
+    half R one explicit left row Ψ(R) has infinitely many black cells (`CQ01_iff_Psi`), and a left
+    row keeps the center alternating exactly until its first difference from Ψ(R)
+    (`exact_death_center`).
   - Least period 3 is reduced: for the word 001 to AbsorptionT t001, Q001 or C3s001; for 011 to
     C3w.
   - Least period 4 is reduced to Absorption (`least_period_four_of_absorption`).
@@ -2102,7 +2107,8 @@ with Turing machines reading n. Notes:
    proving A ∧ B. So neither another column nor the white seed can be proved equivalent to
    Problem 1 without solving both problems.
 8. **A uniformity hierarchy** (CA-structure survey). LHC ⟹ NumberLike ⟹ FinConf ⟹ Problem 1
-   (Section 4). Every classical partial result (Jen; Kopra's width 2; Condrey's period 1) and every
+   (Section 4). At period 2 one rung is exact: CQ01 holds iff no finite configuration has center
+   column 1, 0, 1, 0, … from time 0 (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`). Every classical partial result (Jen; Kopra's width 2; Condrey's period 1) and every
    project reduction is uniform over finite rows. A proof of Problem 1 that does not also prove FinConf must use something
    specific to the seed's orbit, such as the odometer structure of its right edge.
 9. **Odometer and diagonals.** In the frame of the right edge, the orbit closure of the seed is the
@@ -2468,6 +2474,8 @@ Software and project
   [Rule30Equivalents.lean](Rule30Equivalents.lean). Axioms: [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean).
 - *Library, batch 2* (proved, verified and imported by the root module): `NumberTheory`, `TwoAdic`, `LinearRelations`,
   `WordsAutomata` and `TransformsSeeds` in the same folder.
+- *Library, later*: `IntegerRows` ([25], [26]), `LogicAutomata` ([9], [18]) and `Realization`
+  ([22], the `Real.ofDigits` form of [2]), ported from the scratch proofs on 2026-10-17.
 - *Core catalog*: [`../lean`](../lean), with `SHA256SUMS` for its sources.
 - *Scratch files* of the original survey, not part of this kit, at the paths below. They are
   not part of the library build. The statement files contain `sorry` on purpose, marking
@@ -2479,7 +2487,8 @@ Software and project
   - The critic's statements: `critique/Additions.lean` and `critique/Additions2.lean`.
   - The survey proofs: `logic-computation/lean/` (`PresburgerTest`, `RegularTest`, `PrefixTest`,
     `LinRecTest`), `words-dynamics/` (`CoreEquiv`, `PresburgerCheck`) and `ca-structure/lean/`
-    (`SymSeeds`, `CQ01Finite`).
+    (`SymSeeds`, `CQ01Finite`). The library and the kit's `Rule30PeriodTwoSideways` now hold all of
+    these proofs.
 
   The critic recompiled `SymSeeds`, `LinRecTest` and `CoreEquiv`, which are axiom-clean, and found
   no `sorry` in the library.

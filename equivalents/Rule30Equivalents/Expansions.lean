@@ -14,6 +14,11 @@ import Rule30Equivalents.BinaryIrrational
   expansion: a nonzero remainder `r` is followed by `r - 1/⌈1/r⌉`.
   `problem1_iff_sylvester_infinite`: Problem 1 holds iff the Sylvester expansion of `x₂` is
   infinite.
+* **Factorial base.** `factRem x k = fract (k! x)` and `factDigit x k = ⌊(k + 1) factRem x k⌋`
+  satisfy `r_{k+1} = (k + 1) r_k - d_{k+1}` with `0 ≤ d_{k+1} ≤ k`, and `fract_eq_sum` is the
+  expansion `fract x = ∑ d_{j+1}/(j+1)! + r_n/n!`. `irrational_iff_factRem_ne_zero`: the expansion
+  is infinite iff `x` is irrational. `problem1_iff_factorial_infinite`: Problem 1 holds iff no
+  `k! · x₂` is an integer.
 
 **Proof.** For a rational remainder `m / d` with `m > 0`, let `a = ⌈d / m⌉`. Then
 `d ≤ a m < d + m`, so the next remainder is `(a m - d) / d` (Engel) or `(a m - d) / (a d)`
@@ -219,5 +224,85 @@ theorem problem1_iff_sylvester_infinite :
   rw [BinaryIrrational.problem1_iff_irrational_binary]
   refine irrational_iff_sylvesterRem_ne_zero (tsum_nonneg fun t => ?_)
   split_ifs <;> positivity
+
+/-! ### The factorial base -/
+
+/-- The factorial-base remainders of `x`: `factRem x k = fract (k! · x)`. -/
+noncomputable def factRem (x : ℝ) (k : ℕ) : ℝ := Int.fract ((k.factorial : ℝ) * x)
+
+/-- The factorial-base digits: `factDigit x k = ⌊(k + 1) · factRem x k⌋`, the digit of `1/(k+1)!`. -/
+noncomputable def factDigit (x : ℝ) (k : ℕ) : ℕ := ⌊((k + 1 : ℕ) : ℝ) * factRem x k⌋₊
+
+theorem factRem_nonneg (x : ℝ) (k : ℕ) : 0 ≤ factRem x k := Int.fract_nonneg _
+
+theorem factRem_lt_one (x : ℝ) (k : ℕ) : factRem x k < 1 := Int.fract_lt_one _
+
+/-- The digit of `1/(k+1)!` lies in `[0, k]`. -/
+theorem factDigit_le (x : ℝ) (k : ℕ) : factDigit x k ≤ k := by
+  unfold factDigit
+  have h1 := factRem_lt_one x k
+  have h0 := factRem_nonneg x k
+  have : ((k + 1 : ℕ) : ℝ) * factRem x k < ((k + 1 : ℕ) : ℝ) := by
+    have : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := by positivity
+    nlinarith
+  have hfl := (Nat.floor_lt (by positivity)).2 this
+  omega
+
+/-- The remainder recursion `r_{k+1} = (k + 1) r_k - d_{k+1}`. -/
+theorem factRem_succ (x : ℝ) (k : ℕ) :
+    factRem x (k + 1) = ((k + 1 : ℕ) : ℝ) * factRem x k - factDigit x k := by
+  have hy : 0 ≤ ((k + 1 : ℕ) : ℝ) * factRem x k := by
+    have := factRem_nonneg x k
+    positivity
+  have e : ((k + 1).factorial : ℝ) * x =
+      ((((k + 1 : ℕ) : ℤ) * ⌊(k.factorial : ℝ) * x⌋ : ℤ) : ℝ) + ((k + 1 : ℕ) : ℝ) * factRem x k := by
+    rw [factRem, Nat.factorial_succ, Int.fract]
+    push_cast
+    ring
+  rw [factRem, e, Int.fract_intCast_add, Int.fract, factDigit, ← Int.natCast_floor_eq_floor hy]
+  push_cast
+  ring
+
+/-- **The factorial-base expansion**: for `n ≥ 1`,
+`fract x = ∑_{1 ≤ j < n} d_{j+1}/(j+1)! + r_n/n!`. -/
+theorem fract_eq_sum (x : ℝ) {n : ℕ} (hn : 1 ≤ n) :
+    Int.fract x = ∑ j ∈ Finset.Ico 1 n, (factDigit x j : ℝ) / ((j + 1).factorial : ℝ) +
+      factRem x n / (n.factorial : ℝ) := by
+  induction n, hn using Nat.le_induction with
+  | base => simp [factRem]
+  | succ n hn ih =>
+    rw [Finset.sum_Ico_succ_top hn, ih, factRem_succ]
+    have hf : (n.factorial : ℝ) ≠ 0 := by positivity
+    have hf' : ((n + 1).factorial : ℝ) ≠ 0 := by positivity
+    rw [Nat.factorial_succ]
+    push_cast
+    field_simp
+    ring
+
+/-- **The factorial-base expansion of `x` is infinite iff `x` is irrational**: no remainder
+`fract (k! x)` vanishes. -/
+theorem irrational_iff_factRem_ne_zero (x : ℝ) : Irrational x ↔ ∀ n, factRem x n ≠ 0 := by
+  constructor
+  · intro h n hn
+    have hirr : Irrational ((n.factorial : ℝ) * x) := h.natCast_mul (Nat.factorial_ne_zero n)
+    have e : (n.factorial : ℝ) * x = ⌊(n.factorial : ℝ) * x⌋ := by
+      have := hn; unfold factRem Int.fract at this; linarith
+    exact hirr.ne_int _ e
+  · intro h hq
+    obtain ⟨q, rfl⟩ := hq
+    refine h q.den ?_
+    have e : ((q.den.factorial : ℕ) : ℝ) * (q : ℝ) = ((q.num * ((q.den - 1).factorial : ℕ) : ℤ) : ℝ) := by
+      have hd : (q.den : ℝ) ≠ 0 := by positivity
+      rw [Rat.cast_def, ← Nat.mul_factorial_pred q.den_pos.ne']
+      push_cast
+      field_simp
+    rw [factRem, e, Int.fract_intCast]
+
+/-- **Problem 1 ⟺ the factorial-base expansion of `x₂` is infinite** (catalog [50]): no `k! · x₂`
+is an integer. -/
+theorem problem1_iff_factorial_infinite :
+    Rule30Prize.Problem1 ↔ ∀ n, factRem BinaryIrrational.centerBinary n ≠ 0 := by
+  rw [BinaryIrrational.problem1_iff_irrational_binary]
+  exact irrational_iff_factRem_ne_zero _
 
 end Rule30Equivalents.Expansions

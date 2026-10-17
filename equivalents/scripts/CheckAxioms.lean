@@ -13,6 +13,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_base
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_binary
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal
+#print axioms Rule30Equivalents.CoupledHalves.problem1_iff_coupled_halves
 #print axioms Rule30Equivalents.Expansions.problem1_iff_engel_infinite
 #print axioms Rule30Equivalents.Expansions.problem1_iff_sylvester_infinite
 #print axioms Rule30Equivalents.Holonomic.problem1_iff_not_pRecursive
@@ -60,6 +61,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Realization.problem1_iff_realization
 #print axioms Rule30Equivalents.Realization.problem1_iff_column_iff_both
 #print axioms Rule30Equivalents.Realization.problem1_iff_irrational_ofDigits
+#print axioms Rule30Equivalents.Realization.problem1_iff_irrational_cantorFunction
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_infinite_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_injective_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_not_preperiodic

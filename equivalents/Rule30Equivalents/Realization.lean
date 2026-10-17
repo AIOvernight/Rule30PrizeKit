@@ -1,6 +1,7 @@
 import Rule30Equivalents.BinaryIrrational
 import Ruliology.CellularAutomata.Rule30Realization
 import Mathlib.Analysis.Real.OfDigits
+import Mathlib.Analysis.Real.Cardinality
 
 /-!
 # The inverse problem, other columns, and `Real.ofDigits`
@@ -16,6 +17,8 @@ import Mathlib.Analysis.Real.OfDigits
   outright: no such equivalence can be proved without solving the problem.
 * `problem1_iff_irrational_ofDigits`: Problem 1 in Mathlib's `Real.ofDigits` vocabulary, in every
   base `b ≥ 2`, through `BinaryIrrational.problem1_iff_irrational_base`. Catalog entry [2].
+* `problem1_iff_irrational_cantorFunction`: the same with Mathlib's `Cardinal.cantorFunction` at
+  `1/b`, which is `b` times the base-`b` value. Catalog entry [2].
 -/
 
 namespace Rule30Equivalents.Realization
@@ -88,5 +91,32 @@ theorem problem1_iff_irrational_ofDigits (b : ℕ) [NeZero b] (hb : 2 ≤ b) :
     Rule30Prize.Problem1 ↔ Irrational (Real.ofDigits (b := b) fun t => if c t then 1 else 0) := by
   rw [ofDigits_eq b hb]
   exact BinaryIrrational.problem1_iff_irrational_base hb
+
+/-! ### The Cantor function -/
+
+theorem cantorFunction_eq (b : ℕ) (hb : 2 ≤ b) :
+    Cardinal.cantorFunction (1 / (b : ℝ)) c =
+      (b : ℝ) * ∑' t, (if c t then (1 : ℝ) else 0) / (b : ℝ) ^ (t + 1) := by
+  unfold Cardinal.cantorFunction
+  rw [← tsum_mul_left]
+  congr 1
+  funext t
+  have hb0 : (b : ℝ) ≠ 0 := by
+    have : (2 : ℝ) ≤ b := by exact_mod_cast hb
+    linarith
+  unfold Cardinal.cantorFunctionAux
+  rcases Bool.eq_false_or_eq_true (c t) with h | h
+  · rw [h]
+    simp only [cond_true, if_true, one_div, inv_pow]
+    rw [pow_succ]
+    field_simp
+  · rw [h]; simp
+
+/-- **Problem 1 in the vocabulary of the Cantor function**: `Cardinal.cantorFunction (1/b) c`, the
+number `∑ c(t) b^-t`, is irrational, for every base `b ≥ 2`. -/
+theorem problem1_iff_irrational_cantorFunction (b : ℕ) (hb : 2 ≤ b) : Rule30Prize.Problem1 ↔
+    Irrational (Cardinal.cantorFunction (1 / (b : ℝ)) Rule30Prize.center) := by
+  rw [cantorFunction_eq b hb, irrational_natCast_mul_iff, BinaryIrrational.problem1_iff_irrational_base hb]
+  exact ⟨fun h => ⟨by omega, h⟩, fun h => h.2⟩
 
 end Rule30Equivalents.Realization

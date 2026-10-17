@@ -121,15 +121,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
   [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean),
   [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
-  [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean) and
-  [LempelZiv](Rule30Equivalents/LempelZiv.lean).
+  [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean),
+  [LempelZiv](Rule30Equivalents/LempelZiv.lean) and [CoupledHalves](Rule30Equivalents/CoupledHalves.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 125 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 127 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -151,7 +151,7 @@ files. The rows follow the order of Section 3.
 | 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows` |
 | 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic` |
 | 1 | binary-irrational | real numbers | x₂ = 0.c(0)c(1)c(2)…₂ is irrational | Proved (library) | `BinaryIrrational.problem1_iff_irrational_binary` |
-| 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library), including the `Real.ofDigits` form; Stated (Cantor function) | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal`, `Realization.problem1_iff_irrational_ofDigits` |
+| 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library), including the `Real.ofDigits` and Cantor-function forms | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal`, `Realization.problem1_iff_irrational_ofDigits`, `Realization.problem1_iff_irrational_cantorFunction` |
 | 16 | integer-digits | real numbers, without reals | no fraction p/q has binary digits c | Proved (library) | `NumberTheory.problem1_iff_not_rational_digits` |
 | 11 | continued-fraction | real numbers | the continued fraction of x₂ does not terminate | Proved (library) | `NumberTheory.problem1_iff_cf_not_terminates` |
 | 12 | dirichlet-liouville | Diophantine approximation | infinitely many rationals q have abs(x₂ − q) < 1/den(q)²; `LiouvilleWith 2 x₂` | Proved (library) | `NumberTheory.problem1_iff_dirichlet`, `NumberTheory.problem1_iff_liouvilleWith_two` |
@@ -186,7 +186,7 @@ files. The rows follow the order of Section 3.
 | 6 | symmetric-rules | cellular automata | the center columns of rule 86 (black seed) and of rules 135 and 149 (white seed) are not EP | Proved (library) | `Symmetry.problem1_iff_rule86`, `Symmetry.problem1_iff_rule135`, `Symmetry.problem1_iff_rule149` |
 | 21 | stripe-seeds | cellular automata | rule 30 from 1, 11, 101, 1011, … has a non-EP center column | Proved (library) | `TransformsSeeds.problem1_iff_stripeSeed` |
 | 22 | realization | cellular automata | the single seed realizes no EP column | Proved (library) | `Realization.problem1_iff_realization` |
-| 33 | coupled-halves | cellular automata | the causal coupled-halves system has no EP solution | Stated | `problem1_iff_coupled_halves` |
+| 33 | coupled-halves | cellular automata | the causal coupled-halves system has no EP solution | Proved (library) | `CoupledHalves.problem1_iff_coupled_halves` |
 | 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Proved (library) | `LogicAutomata.problem1_iff_not_presburger`, `LogicAutomata.problem1_iff_not_semilinear` |
 | 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Proved (library) | `LogicAutomata.problem1_iff_unary_not_regular`, `LogicAutomata.problem1_iff_prefixes_not_regular` |
 | 40 | context-free | automata | the same two languages are not context-free | Stated | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree` |
@@ -198,8 +198,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 40 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 13 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 53 equivalent forms, 41 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -207,10 +207,11 @@ batch 2, and 13 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [Holonomic](Rule30Equivalents/Holonomic.lean), [36] (the Büchi form) in
 [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [48] (β = 1 + √2) in
 [PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
-[37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean). One more, [7], is proved in the core catalog and
+[37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
+[CoupledHalves](Rule30Equivalents/CoupledHalves.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
 factorial-base and Lüroth forms are sketches; for [31] the D-finite form and for [36] the MSO form
-are stated. 10 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
+are stated. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -505,7 +506,7 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   -- digits `0, 1 : Fin b` in the statement need it as an instance
   theorem problem1_iff_irrational_ofDigits (b : ℕ) [NeZero b] (hb : 2 ≤ b) : Rule30Prize.Problem1 ↔
       Irrational (Real.ofDigits (b := b) fun t => if Rule30Prize.center t then 1 else 0)
-  -- stated
+  -- library, namespace Rule30Equivalents.Realization
   theorem problem1_iff_irrational_cantorFunction (b : ℕ) (hb : 2 ≤ b) : Rule30Prize.Problem1 ↔
       Irrational (Cardinal.cantorFunction (1 / (b : ℝ)) Rule30Prize.center)
   ```
@@ -1494,7 +1495,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Context.* The project's period-specific reductions relax this system by dropping one half. Q01,
   Q001, C3, C3w and C3s001 keep the left half; Absorption and AbsorptionT keep the right half.
 - *Difficulty.* Moderate.
-- *Lean.* Stated.
+- *Lean.* Proved in the library: `CoupledHalves.problem1_iff_coupled_halves`. The center column
+  solves the system (`center_solves`), and it is the only solution (`eq_center_of_solves`), because
+  the driven halves are causal (`L_causal`, `drv_causal`).
 
   ```lean
   theorem problem1_iff_coupled_halves : Rule30Prize.Problem1 ↔

@@ -25,3 +25,4 @@ import Rule30Equivalents.TFunction
 import Rule30Equivalents.TFunctionCycles
 import Rule30Equivalents.DFinite
 import Rule30Equivalents.AutomatonGroup
+import Rule30Equivalents.FrozenBoundary

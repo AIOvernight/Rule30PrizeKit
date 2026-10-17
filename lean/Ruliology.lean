@@ -45,6 +45,7 @@ import Ruliology.CellularAutomata.Rule30FiniteConfigs
 import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
 import Ruliology.CellularAutomata.Rule30Coupled
 import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
+import Ruliology.CellularAutomata.Rule30FiniteBlackRunBlocks
 import Ruliology.CellularAutomata.Rule30FiniteDiagonals
 import Ruliology.CellularAutomata.Rule30FiniteWhiteRuns
 

@@ -18,6 +18,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Holonomic.problem1_iff_not_pRecursive
 #print axioms Rule30Equivalents.IntegerRows.problem1_iff_integer_rows
 #print axioms Rule30Equivalents.IntegerRows.problem1_iff_diagArray
+#print axioms Rule30Equivalents.LempelZiv.problem1_iff_lz_unbounded
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_series_not_rational
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_series_not_rational_coeff_zero
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_no_linearRecurrence

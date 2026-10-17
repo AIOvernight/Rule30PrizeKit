@@ -18,3 +18,4 @@ import Rule30Equivalents.OmegaRegular
 import Rule30Equivalents.PisotBase
 import Rule30Equivalents.Automatic
 import Rule30Equivalents.Transcendence
+import Rule30Equivalents.LempelZiv

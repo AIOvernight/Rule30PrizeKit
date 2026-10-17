@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 39 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 115 theorems named `problem1_iff_*`.
-- For 5 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
+- 40 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 116 theorems named `problem1_iff_*`.
+- For 4 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The ten later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic and Transcendence) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The eleven later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence and LempelZiv) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -32,6 +32,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
 | [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) | no Büchi automaton accepts exactly the center column: {c} is not ω-regular | `problem1_iff_not_omega_regular`, `eventuallyPeriodic_iff_omegaRegular_singleton` |
 | [Holonomic](Rule30Equivalents/Holonomic.lean) | c satisfies no recurrence Σ pᵢ(n)·c(n + i) = 0, from any point on, with polynomial coefficients not all zero (c is not P-recursive) | `problem1_iff_not_pRecursive`, `eventuallyPeriodic_iff_pRecursive` |
+| [LempelZiv](Rule30Equivalents/LempelZiv.lean) | the Lempel–Ziv (1976) complexity of the prefixes of c is unbounded | `problem1_iff_lz_unbounded`, `eventuallyPeriodic_iff_lz_bounded` |
 | [Transcendence](Rule30Equivalents/Transcendence.lean) | sufficient conditions only: Σ c(t)Xᵗ is transcendental over K(X) for some field K, such as ℚ (the converse is Fatou's theorem), or over F₂(X) or F₃(X) | `problem1_of_transcendental`, `problem1_of_transcendental_F2_or_F3` |
 | [Automatic](Rule30Equivalents/Automatic.lean) | the automatic complexity of the prefixes of c tends to ∞ (no DFA with K states uniquely accepts infinitely many prefixes). Sufficient conditions: c is not k-automatic for some k ≥ 2, or not both 2- and 3-automatic (the converse is Cobham's theorem) | `problem1_iff_automaticComplexity_tendsto_top`, `problem1_of_not_two_three_automatic` |
 | [PisotBase](Rule30Equivalents/PisotBase.lean) | the value Σ c(t)·β^−(t+1) in the Pisot base β = 1 + √2 is not of the form a + b√2 with a, b rational | `problem1_iff_not_mem_Q_sqrt_two`, `eventuallyPeriodic_iff_mem_qsqrt2` |
@@ -70,7 +71,6 @@ lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_if
 5. Have someone other than the author restate the main theorem from scratch and check that it says what it claims.
 
 Next targets:
-- the converse of [37] (Lempel–Ziv): the critic's compactness argument over the cut points of bounded histories;
 - Euler–Lagrange (eventually periodic continued fraction ⟺ quadratic irrational) for [39] and [49];
 - factorial-base expansions [50].
 

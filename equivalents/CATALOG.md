@@ -445,6 +445,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   to their values at time 0 exactly at the multiples of that cycle length for x = 1
   (`seed_rows_return_iff`). An `#eval` of it gives 1, 2, 2, 4, 8, 8, 16, 32, 32, 64 for
   j = 0, …, 9, the start of A094605.
+  For every a ≠ 0 the cycle length of a modulo 2ⁿ is unbounded (`per_unbounded`): Φ raises the
+  top bit of every nonzero number by two. So every nonzero finite configuration has the same
+  infinite cycle structure at its right edge as the seed.
 - *Difficulty.* Easy.
 - *Lean.* Stated, with the bridge to [25]. The bridge statement typechecks in core Lean, `#eval`
   agrees with it for j, t < 10, and the critic checked it numerically for j, t < 80.

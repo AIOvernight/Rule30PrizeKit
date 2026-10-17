@@ -25,6 +25,10 @@ proves that description for every such `f`, and applies it to rule 30's `Φ`.
 * `Phi_bit`, `Phi_cycle`: for `Φ(x) = x ⊕ (2x ∨ 4x)`, `ψ_i(y) = y_{i-1} ∨ y_{i-2}`.
   `seed_rows_return_iff`: the first `j + 1` right diagonals of rule 30 return to their values at
   time `0` exactly at the multiples of `per Φ ψΦ 1 (j + 1)`.
+* `per_unbounded`: for every `a ≠ 0` the cycle length of `a` modulo `2^n` is unbounded, because
+  `Φ` raises the top bit of every nonzero number by two (`lt_Phi`). So every nonzero finite
+  configuration, not only the seed, has an infinite cycle structure in the frame of its right
+  edge.
 
 None of this reaches the center column. It reads bit `t` of `Φ^t(1)`, and the cycle structure
 describes each bit for all times, not the bit that moves with `t`.
@@ -275,5 +279,57 @@ theorem seed_rows_return_iff (j P : ℕ) :
   constructor
   · intro h i hi; exact h i (by omega)
   · intro h i hi; exact h i (by omega)
+
+/-! ### Every nonzero orbit is infinite -/
+
+/-- `Φ` moves every nonzero number up: its top bit rises by two. -/
+theorem lt_Phi {x : ℕ} (hx : x ≠ 0) : x < Phi x := by
+  have h1 : x < 2 ^ (x.log2 + 1) := Nat.lt_log2_self
+  have hz : x.testBit (x.log2 + 2) = false :=
+    Nat.testBit_lt_two_pow (Nat.lt_of_lt_of_le h1 (Nat.pow_le_pow_right (by omega) (by omega)))
+  have hb : (Phi x).testBit (x.log2 + 2) = true := by
+    rw [testBit_Phi, hz]
+    have hl : low x (x.log2 + 2) = true := by
+      unfold low
+      rw [show x.log2 + 2 - 2 = x.log2 by omega, Nat.testBit_log2 hx,
+        decide_eq_true (show 2 ≤ x.log2 + 2 by omega)]
+      simp
+    rw [hl]
+    rfl
+  have h2 := Nat.ge_two_pow_of_testBit hb
+  have h3 : 2 ^ (x.log2 + 1) ≤ 2 ^ (x.log2 + 2) := Nat.pow_le_pow_right (by omega) (by omega)
+  omega
+
+theorem lt_iterate_Phi {x : ℕ} (hx : x ≠ 0) : ∀ t, 1 ≤ t → x < Phi^[t] x
+  | 0, h => absurd h (by omega)
+  | t + 1, _ => by
+    rw [Function.iterate_succ_apply']
+    rcases Nat.eq_zero_or_pos t with h0 | hpos
+    · subst h0
+      exact lt_Phi hx
+    · exact Nat.lt_trans (lt_iterate_Phi hx t hpos) (lt_Phi (by have := lt_iterate_Phi hx t hpos; omega))
+
+/-- **Every nonzero orbit of `Φ` is 2-adically infinite**: for `a ≠ 0` the cycle length of `a`
+modulo `2^n` is unbounded in `n`. In the frame of its right edge, every nonzero finite
+configuration (`TFunction.row a`) has an infinite cycle structure, as the seed `a = 1` does. -/
+theorem per_unbounded {a : ℕ} (ha : a ≠ 0) (K : ℕ) : ∃ n, K < per Phi ψΦ a n := by
+  refine Classical.byContradiction fun hcon => ?_
+  have hle : ∀ n, per Phi ψΦ a n ≤ K := fun n => Nat.le_of_not_lt fun h => hcon ⟨n, h⟩
+  -- every cycle length is a power of two at most `K`, so it divides `2^K`
+  have hdvd : ∀ n, per Phi ψΦ a n ∣ 2 ^ K := by
+    intro n
+    obtain ⟨k, -, he⟩ := per_eq_two_pow Phi ψΦ a n
+    have hk := hle n
+    rw [he] at hk ⊢
+    have : k < 2 ^ k := Nat.lt_two_pow_self
+    exact Nat.pow_dvd_pow 2 (by omega)
+  -- so `Φ^(2^K)` fixes `a` modulo every `2^n`, hence fixes `a`, but it moves `a` up
+  have hmod : ∀ n, Phi^[2 ^ K] a % 2 ^ n = a % 2 ^ n :=
+    fun n => (Phi_cycle a n (2 ^ K)).2 (hdvd n)
+  have hlt := lt_iterate_Phi ha (2 ^ K) Nat.one_le_two_pow
+  have h := hmod (Phi^[2 ^ K] a)
+  rw [Nat.mod_eq_of_lt Nat.lt_two_pow_self,
+    Nat.mod_eq_of_lt (Nat.lt_trans hlt Nat.lt_two_pow_self)] at h
+  omega
 
 end Rule30Equivalents.TFunctionCycles

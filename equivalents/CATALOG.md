@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 143 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 144 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -149,7 +149,7 @@ files. The rows follow the order of Section 3.
 | 7 | eventual-word | bookkeeping | c is not eventually w w w … for any nonempty word w | Proved (core catalog and library) | `Rule30StripCertificates.problem1_iff_no_word`, `WordsAutomata.problem1_iff_no_eventual_word` |
 | 53 | mathlib-bridges | bookkeeping | the same, in Mathlib's vocabulary: `Filter.atTop` and `List.HasPeriod` forms | Proved (library) | `WordsAutomata.problem1_iff_filter`, `WordsAutomata.problem1_iff_no_hasPeriod_tail` |
 | 8 | fc-bridge | bookkeeping | the formal-conjectures statement; Wolfram's 2019 statement, read as intended | Proved (library) | `TransformsSeeds.problem1_iff_fc`, `TransformsSeeds.problem1_iff_wolfram` |
-| 14 | pi2-normal-form | logic | for all T and P ≥ 1 some t ≥ T has c(t+P) ≠ c(t); no eventual period k!; Diophantine form | Proved (library) for the first two; Stated (Diophantine) | `TransformsSeeds.problem1_iff_pi2`, `TransformsSeeds.problem1_iff_factorial_periods`, `center_diophFn` |
+| 14 | pi2-normal-form | logic | for all T and P ≥ 1 some t ≥ T has c(t+P) ≠ c(t); no eventual period k!; Diophantine form | Proved (library) | `TransformsSeeds.problem1_iff_pi2`, `TransformsSeeds.problem1_iff_factorial_periods`, `DiophantineGraph.center_diophFn`, `DiophantineGraph.problem1_iff_forall_exists_poly` |
 | 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows`, `TFunction.problem1_iff_orbit` |
 | 54 | black-wall | CA / automaton group | t ↦ bit t − 1 of aᵗ(0) is not EP, where a(y) = y ⊕ (2y ∨ 4y ∨ 3): the column at distance t − 1 from a black wall | Proved (library) | `AutomatonGroup.problem1_iff_black_wall` |
 | 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic`, `TFunction.testBit_orbit_periodic` |
@@ -217,8 +217,8 @@ batch 2, and 22 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [ContextFree](Rule30Equivalents/ContextFree.lean), [38] in
 [AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean), and [45] in
 [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean). One more, [7], is proved in the core catalog and
-also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
-form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
+also has a library proof. All three parts of [14] are proved, the Diophantine graph included
+([DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean)), and for [36] the MSO form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
 through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean)), and [49] from it and [29]
 ([Minkowski](Rule30Equivalents/Minkowski.lean)). [47] is proved through the Mignosi–Restivo–Salemi theorem
@@ -378,8 +378,16 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Lean.* (a) and (b): proved in the library (batch 2: `TransformsSeeds.problem1_iff_pi2`,
   `problem1_iff_forall_exists_refutes`, `problem1_iff_cofinal_periods` and
   `problem1_iff_factorial_periods`). Before batch 2, (a) had a scratch proof and (b) was stated.
-  (c) is stated in the graph form the critic suggests. It covers both colors, so it gives the ∀∃
-  form directly; it replaces the earlier `Dioph {v | center (v 0) = true}`.
+  (c) is proved in [DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean), in the graph form
+  the critic suggests; it covers both colors, so it gives the ∀∃ form directly
+  (`problem1_iff_forall_exists_poly`: one polynomial p with p(n, y, x) = 0 solvable iff y = c(n)).
+  - `sub_iff_odd_choose`: Lucas mod 2. `choose_eq`: C(n, k) is digit k of (u + 1)ⁿ in base
+    u = 2ⁿ + 1. With `Dioph.pow_dioph` this makes bit inclusion Diophantine.
+  - `or_iff` and `xor_iff`, from the half adder x + y = (x ⊕ y) + 2(x ∧ y), make one step Φ
+    Diophantine (`Φ_iff`).
+  - `center_iff`: the history H has blocks of width w = 2n + 4. The conditions H mod 2^w = 1 and
+    ⌊H/2^w⌋ = Φ(H mod 2^(nw)) force block t to be row a(t), by induction, because Φ acts block by
+    block while rows stay below 2^(2t+1). Then c(n) is bit nw + n of H.
 
   ```lean
   theorem problem1_iff_pi2 : Rule30Prize.Problem1 ↔
@@ -388,6 +396,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
       ∀ k : ℕ, ¬ ∃ T, ∀ t, T ≤ t → Rule30Prize.center (t + (k + 1).factorial) = Rule30Prize.center t
   theorem center_diophFn :
       Dioph.DiophFn fun v : Fin 1 → ℕ => if Rule30Prize.center (v 0) then 1 else 0
+  theorem problem1_iff_forall_exists_poly : ∃ (β : Type) (p : Poly (Option (Fin 1) ⊕ β)),
+      (∀ n y, (if center n then 1 else 0) = y ↔ ∃ x, p (Sum.elim (Option.elim' y fun _ => n) x) = 0) ∧
+      (Problem1 ↔ ∀ T P, 0 < P → ∃ t, T ≤ t ∧ ∃ x x', (p(t + P, 1, x) = 0 ∧ p(t, 0, x') = 0) ∨ …)
   ```
 
 - *Sources.* [W19]; [NKS] p. 1160; [Dav73]; [Aar20]; [Luc78]; [Kum52]; critic (the coding

@@ -20,6 +20,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.ContextFree.problem1_iff_prefixes_not_contextFree
 #print axioms Rule30Equivalents.CoupledHalves.problem1_iff_coupled_halves
 #print axioms Rule30Equivalents.DFinite.problem1_iff_not_dFinite
+#print axioms Rule30Equivalents.DiophantineGraph.problem1_iff_forall_exists_poly
 #print axioms Rule30Equivalents.Expansions.problem1_iff_engel_infinite
 #print axioms Rule30Equivalents.Expansions.problem1_iff_sylvester_infinite
 #print axioms Rule30Equivalents.Expansions.problem1_iff_factorial_infinite

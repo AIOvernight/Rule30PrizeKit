@@ -1,4 +1,5 @@
 import Rule30Equivalents.TFunctionCycles
+import Rule30Equivalents.TransformsSeeds
 
 /-!
 # Rule 30's automaton group 2369: the states and the light cone
@@ -27,6 +28,22 @@ and `s = 3` (black, any) for `a`.
   the seed, whose bit `2n` is set; so its depth is exactly `2n + 1`, and these conjugates are
   pairwise distinct.
 
+**The black wall and the frozen-boundary conjecture.**
+* `Phi_two_mul`, `Phi_two_mul_add_one`: `Φ(2y) = 2 Φ(y)` and `Φ(2y + 1) = 2 a(y) + 1`, where
+  `a = PhiS 3`. `Φ` never changes the lowest bit, and on odd numbers it continues as the
+  black-boundary step.
+* `orbit_one_eq_wall`, `problem1_iff_black_wall` (catalog [54]): `Φᵗ(1) = 2 aᵗ(0) + 1`. So the center
+  column is `c(t) = bit (t - 1) of aᵗ(0)`: the column at distance `t - 1` from a black wall that
+  moves right with speed 1, on the half-line that starts white.
+* `FrozenBoundaryConjecture` (**open**): for each of the 8 frozen-boundary steps (`Φ`, then one of
+  the 8 automorphisms of the two lowest bits) and each seed whose orbit is unbounded, no diagonal
+  readout `t ↦ bit (t + d)` of the orbit is eventually periodic. It implies Problem 1
+  (`problem1_of_frozenBoundaryConjecture`). It also implies FinConf
+  (`column_not_eventuallyPeriodic_of_conjecture`): every column `-d` of every `row a`, `a ≠ 0`, and
+  so, by translation, every column of every nonzero finite configuration. The research notes test
+  it for the 8 steps with seeds 1, 3, 5, and for all 4096 depth-4 forcings in group 2369. The only
+  eventually periodic readouts come from forcings that stop the seed's orbit.
+
 **Consequence** (proved in the notes, not here): the conjugates `Φⁿ f Φ⁻ⁿ` (`n ≥ 0`, `f ∈ ⟨σ, τ⟩`)
 generate a group `L` of finitary automorphisms, which is locally finite, with `Φ L Φ⁻¹ ⊆ L`. The
 normal closure of `⟨σ, τ⟩` is the ascending union of the `Φ⁻ᵐ L Φᵐ`, a locally finite 2-group,
@@ -38,6 +55,7 @@ finitely presented. The argument is the one P. V. Silva and B. Steinberg use for
 
 namespace Rule30Equivalents.AutomatonGroup
 
+open Ruliology.CellularAutomata
 open Rule30Equivalents.TFunction (Phi orbit low testBit_Phi low_congr testBit_orbit)
 open IntegerRows (testBit_two_mul testBit_four_mul)
 
@@ -152,5 +170,121 @@ theorem conj_sigma_depth (n : ℕ) :
     simp
   · rw [show (0 : ℕ) ^^^ 1 = 1 from rfl, testBit_orbit_one_two_mul, orbit_zero, Nat.zero_testBit]
     decide
+
+/-! ### The black wall -/
+
+theorem testBit_two_mul_add_one (z j : ℕ) :
+    (2 * z + 1).testBit j = (decide (j = 0) || z.testBit (j - 1)) := by
+  rcases j with _ | j
+  · rw [Nat.testBit_zero, show (2 * z + 1) % 2 = 1 by omega]
+    rfl
+  · rw [Nat.testBit_succ, show (2 * z + 1) / 2 = z by omega]
+    simp
+
+/-- `Φ` never changes the lowest bit: on even numbers it is `Φ` one bit higher. -/
+theorem Phi_two_mul (y : ℕ) : Phi (2 * y) = 2 * Phi y := by
+  apply Nat.eq_of_testBit_eq
+  intro j
+  simp only [Phi, Nat.testBit_xor, Nat.testBit_or, testBit_two_mul, testBit_four_mul]
+  rcases j with _ | _ | _ | j <;> simp
+
+/-- **The black wall.** On odd numbers `Φ` is the black-boundary step `a = PhiS 3`, one bit
+higher: `Φ(2y + 1) = 2 a(y) + 1`. -/
+theorem Phi_two_mul_add_one (y : ℕ) : Phi (2 * y + 1) = 2 * PhiS 3 y + 1 := by
+  apply Nat.eq_of_testBit_eq
+  intro j
+  simp only [Phi, PhiS, Nat.testBit_xor, Nat.testBit_or, testBit_two_mul, testBit_four_mul,
+    testBit_two_mul_add_one, testBit_three_eq]
+  rcases j with _ | _ | _ | j <;> simp
+
+/-- The seed's rows: `Φᵗ(1) = 2 aᵗ(0) + 1`. -/
+theorem orbit_one_eq_wall : ∀ t, orbit 1 t = 2 * (PhiS 3)^[t] 0 + 1
+  | 0 => rfl
+  | t + 1 => by
+    show Phi (orbit 1 t) = 2 * (PhiS 3)^[t + 1] 0 + 1
+    rw [orbit_one_eq_wall t, Phi_two_mul_add_one, Function.iterate_succ_apply']
+
+theorem center_succ_eq_wall (t : ℕ) : c (t + 1) = ((PhiS 3)^[t + 1] 0).testBit t := by
+  show Rule30Prize.center (t + 1) = _
+  rw [IntegerRows.center_eq_testBit, ← TFunction.orbit_one_eq_a, orbit_one_eq_wall,
+    testBit_two_mul_add_one]
+  simp
+
+/-- **Problem 1 ⟺ the black-wall readout is not eventually periodic** (catalog [54]): with
+`a(y) = y ⊕ (2y ∨ 4y ∨ 3)`, the sequence `t ↦ bit t of a^(t+1)(0)` is not eventually periodic. -/
+theorem problem1_iff_black_wall : Rule30Prize.Problem1 ↔
+    ¬ EventuallyPeriodic (fun t => ((PhiS 3)^[t + 1] 0).testBit t) := by
+  rw [TransformsSeeds.problem1_iff_shifted 1]
+  have h : (fun t => c (t + 1)) = fun t => ((PhiS 3)^[t + 1] 0).testBit t :=
+    funext center_succ_eq_wall
+  rw [h]
+
+/-! ### The frozen-boundary conjecture -/
+
+/-- The 8 automorphisms of the two lowest bits: flip bit `0` if `α`, and flip bit `1` if `β` (when
+bit `0` was `0`) or if `γ` (when it was `1`). -/
+def bdry (α β γ : Bool) (y : ℕ) : ℕ :=
+  y ^^^ ((if α then 1 else 0) +
+    2 * (if y % 2 = 0 then (if β then 1 else 0) else (if γ then 1 else 0)))
+
+/-- A frozen-boundary step: one rule-30 step, then a fixed change of the two cells at the edge.
+`step false false false = Φ`; the states `b` and `a` of the automaton are among the others. -/
+def step (α β γ : Bool) (x : ℕ) : ℕ := bdry α β γ (Phi x)
+
+/-- **The frozen-boundary conjecture** (open). For each of the 8 frozen-boundary steps, each seed
+`a` whose orbit is unbounded, and each offset `d`, the diagonal readout `t ↦ bit (t + d)` of the
+orbit is not eventually periodic. -/
+def FrozenBoundaryConjecture : Prop :=
+  ∀ (α β γ : Bool) (a d : ℕ), (∀ K, ∃ t, K < (step α β γ)^[t] a) →
+    ¬ EventuallyPeriodic (fun t => ((step α β γ)^[t] a).testBit (t + d))
+
+theorem step_white : step false false false = Phi := by
+  funext x
+  simp [step, bdry]
+
+/-- Nonzero orbits of `Φ` grow by at least one per step. -/
+theorem le_iterate_Phi {a : ℕ} (ha : a ≠ 0) : ∀ t, a + t ≤ Phi^[t] a
+  | 0 => by simp
+  | t + 1 => by
+    have ih := le_iterate_Phi ha t
+    rw [Function.iterate_succ_apply']
+    have := TFunctionCycles.lt_Phi (x := Phi^[t] a) (by omega)
+    omega
+
+theorem white_unbounded {a : ℕ} (ha : a ≠ 0) : ∀ K, ∃ t, K < (step false false false)^[t] a := by
+  intro K
+  refine ⟨K + 1, ?_⟩
+  rw [step_white]
+  have := le_iterate_Phi ha (K + 1)
+  omega
+
+/-- **The conjecture implies FinConf**: for every nonzero `a` and every `d`, column `-d` of the
+evolution of `row a` is not eventually periodic. Every column of every nonzero finite configuration
+is such a column after a translation. -/
+theorem column_not_eventuallyPeriodic_of_conjecture (h : FrozenBoundaryConjecture) {a : ℕ}
+    (ha : a ≠ 0) (d : ℕ) :
+    ¬ EventuallyPeriodic (fun t => Ruliology.CellularAutomata.Rule30Realization.evol
+      (TFunction.row a) t (-(d : ℤ))) := by
+  have hc := h false false false a d (white_unbounded ha)
+  rw [step_white] at hc
+  have e : (fun t => (Phi^[t] a).testBit (t + d)) = fun t =>
+      Ruliology.CellularAutomata.Rule30Realization.evol (TFunction.row a) t (-(d : ℤ)) := by
+    funext t
+    rw [← TFunctionCycles.orbit_eq_iterate, TFunction.testBit_orbit]
+    congr 1
+    omega
+  rwa [e] at hc
+
+/-- **The conjecture implies Problem 1**: take the white boundary, the seed `1` and `d = 0`. -/
+theorem problem1_of_frozenBoundaryConjecture (h : FrozenBoundaryConjecture) :
+    Rule30Prize.Problem1 := by
+  have hc := h false false false 1 0 (white_unbounded one_ne_zero)
+  rw [step_white] at hc
+  rw [problem1_iff_not_eventuallyPeriodic]
+  have e : (fun t => (Phi^[t] 1).testBit (t + 0)) = c := by
+    funext t
+    rw [← TFunctionCycles.orbit_eq_iterate, TFunction.orbit_one_eq_a, Nat.add_zero]
+    exact (IntegerRows.center_eq_testBit t).symm
+  rwa [e] at hc
 
 end Rule30Equivalents.AutomatonGroup

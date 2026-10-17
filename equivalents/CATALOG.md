@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 132 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 134 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -151,6 +151,7 @@ files. The rows follow the order of Section 3.
 | 8 | fc-bridge | bookkeeping | the formal-conjectures statement; Wolfram's 2019 statement, read as intended | Proved (library) | `TransformsSeeds.problem1_iff_fc`, `TransformsSeeds.problem1_iff_wolfram` |
 | 14 | pi2-normal-form | logic | for all T and P ≥ 1 some t ≥ T has c(t+P) ≠ c(t); no eventual period k!; Diophantine form | Proved (library) for the first two; Stated (Diophantine) | `TransformsSeeds.problem1_iff_pi2`, `TransformsSeeds.problem1_iff_factorial_periods`, `center_diophFn` |
 | 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows`, `TFunction.problem1_iff_orbit` |
+| 54 | black-wall | CA / automaton group | t ↦ bit t − 1 of aᵗ(0) is not EP, where a(y) = y ⊕ (2y ∨ 4y ∨ 3): the column at distance t − 1 from a black wall | Proved (library) | `AutomatonGroup.problem1_iff_black_wall` |
 | 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic`, `TFunction.testBit_orbit_periodic` |
 | 1 | binary-irrational | real numbers | x₂ = 0.c(0)c(1)c(2)…₂ is irrational | Proved (library) | `BinaryIrrational.problem1_iff_irrational_binary` |
 | 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library), including the `Real.ofDigits` and Cantor-function forms | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal`, `Realization.problem1_iff_irrational_ofDigits`, `Realization.problem1_iff_irrational_cantorFunction` |
@@ -200,7 +201,7 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 41 are proved in the library: 6 in batch 1, 21 in
+**Summary.** Of the 54 equivalent forms, 42 are proved in the library: 6 in batch 1, 21 in
 batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
@@ -210,7 +211,8 @@ batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [48] (β = 1 + √2) in
 [PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
-[CoupledHalves](Rule30Equivalents/CoupledHalves.lean). One more, [7], is proved in the core catalog and
+[CoupledHalves](Rule30Equivalents/CoupledHalves.lean), and [54] in
+[AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
 Lüroth form is a sketch; for [36] the MSO form is stated. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
@@ -464,6 +466,21 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 
 - *Sources.* [Row06]; [CPY07]; [Ner26a] and [Ner26b] (unrefereed); OEIS A363343, A094605; the
   catalog's `Rule30Diagonals`; critic (the T-function argument).
+
+**[54] black-wall: the column next to a black wall** (new, 2026-10-17).
+- *Statement.* Let a(y) = y ⊕ (2y ∨ 4y ∨ 3). This is one rule-30 step of the half-line whose two
+  cells beyond the edge are frozen, with the first one black. Then Φᵗ(1) = 2·aᵗ(0) + 1, so
+  c(t) = bit t − 1 of aᵗ(0) for t ≥ 1. Problem 1 ⟺ t ↦ bit t of a^(t+1)(0) is not EP. In words:
+  the center column of the seed is the column at distance t − 1 from a black wall moving right at
+  speed 1, read on the half-line that starts white.
+- *Proof route.* Φ never changes the lowest bit. On odd numbers it continues as the automaton state
+  that follows a 1, which is a: Φ(2y + 1) = 2·a(y) + 1, and Φ(2y) = 2·Φ(y). Induct on t.
+- *Why it is useful.* a is one of the three states of rule 30's transducer, which generate automaton
+  group 2369 (Section 7.9). This form places Problem 1 inside the family of frozen-boundary readouts
+  of the stronger statement in Section 4.
+- *Lean.* Proved in the library: `AutomatonGroup.problem1_iff_black_wall`, from `Phi_two_mul_add_one`
+  and `orbit_one_eq_wall`.
+- *Sources.* Own observation (2026-10-17); [BGK+08] for the automaton.
 
 ### 3.2 Real numbers and Diophantine approximation
 
@@ -1856,6 +1873,7 @@ so they are strictly stronger.
 | **FinConf**: for every nonzero finite row, no column is EP | apply it to the seed | Jen: at most one EP column. Condrey: no eventually constant column. Both are proved in the kit for every nonzero row with a leftmost black cell, so for NumberLike rows too (`Rule30FiniteConfigs.jen`, `no_column_eventually_constant`). A project search found no row supported in [−9, 9] whose center column has period ≤ 512 on [1024, 2048). CQ01 is exactly FinConf at period 2 for one column, whatever the transient (`Rule30FiniteConfigs.CQ01_iff_no_finite_period_two`; from time 0: `Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`). | [Jen90], [Con26], [Kop23] |
 | **NumberLike**: for every nonzero left-finite row, no column is EP | it implies FinConf | Width-2 traces are never EP ([Kop23] Thm 3.5). | [Kop23] |
 | **LHC**: for every primitive word w, no finite driven left half is consistent with w^∞ | LHC ⟹ NumberLike ⟹ FinConf ⟹ Problem 1, with period 1 from Condrey | Q01 is LHC(10) and Q001 is LHC(001); C3, C3w and C3s001 follow from LHC. Searches up to width about 36 found no survivors. | project, round 1 |
+| **Frozen-boundary conjecture** (new): for each of the 8 frozen-boundary steps fΦ (f an automorphism of the two lowest bits), each seed a with an unbounded orbit, and each d, t ↦ bit t + d of (fΦ)ᵗ(a) is not EP | take f = id, a = 1, d = 0 (`AutomatonGroup.problem1_of_frozenBoundaryConjecture`) | It also implies FinConf (`column_not_eventuallyPeriodic_of_conjecture`). Data: no eventual period ≤ 600 in 4000 steps for the 8 steps with seeds 1, 3, 5. Among all 4096 depth-4 forcings ℓΦ in group 2369 with seed 1, the 384 eventually periodic readouts all come from forcings that stop the orbit; the 3712 growing orbits have no eventual period ≤ 300 in 1500 steps. The family is closed under sections (Section 7.9). | own, 2026-10-17 |
 | **Effective boundary**: t ↦ c(t) ∧ c(t + 1) is not EP | an EP c makes it EP | open | `Rule30MaskedJen` |
 | **Every line**: no line of rational slope s with abs(s) < 1 carries an EP sequence | slope 0 is Problem 1 | Slopes ±1 are periodic (`Rule30Diagonals`). The other slopes tested look aperiodic (data, CA-structure survey). | [W86] §6, [W19] |
 | **Unbounded runs**: 0ⁿ (or 1ⁿ) occurs in c for every n | if c were EP, its runs would be bounded, because c is not eventually constant (`center_not_eventually_constant`) | Strictly stronger: Thue–Morse has no run longer than 2. In 10⁷ bits the longest runs have lengths 22 and 23. | words survey |
@@ -2094,6 +2112,12 @@ with Turing machines reading n. Notes:
   ⌊m/2⌋ + 1 on the period at depth m (checked by the critic).
 - **Lines of a single other slope** p/q ∉ {0, ±1}: open, and numerically aperiodic (CA-structure
   survey, 6000 rows).
+- **Powers of 3: the same readout with carries.** x ↦ 3x is also an invertible T-function. The
+  columns of the bit grid of 3ⁿ are periodic from the start, and the middle looks random [Row09].
+  The readout "bit t of 3ᵗ" is the analogue of Problem 1, and it is open. The difference is memory:
+  bit i of Φ(x) reads only bits i, i − 1, i − 2, so Φ has a light cone and rule 30's group is
+  locally-finite-by-ℤ (Section 7.9). Multiplication by 3 carries, and its bit i reads every lower
+  bit.
 - **The project's period reductions**: Q01, CQ01, Q001, C3, C3w, C3s001, Absorption and AbsorptionT.
   Each is uniform over finite rows, and each is used to exclude one period or one word. Problem 1
   implies none of them.
@@ -2492,6 +2516,8 @@ Cellular automata
 - [Ner26b] Nersissian, Diagonal Bases and Diagonal Periods of Elementary Cellular Automata,
   arXiv:2609.25078 (2026, unrefereed).
 - [Row06] E. S. Rowland, Local nested structure in Rule 30, Complex Systems 16 (2006) 239–258.
+- [Row09] E. S. Rowland, Regularity versus complexity in the binary representation of 3ⁿ,
+  arXiv:0902.3257 (2009).
 - [BGK+08] I. Bondarenko, R. Grigorchuk, R. Kravchenko, Ye. Muntyan, V. Nekrashevych, D. Savchuk,
   Z. Šunić, On classification of groups generated by 3-state automata over a 2-letter alphabet,
   Algebra Discrete Math. 7 (2008) no. 1, 1–163; arXiv:math/0612178 for part I.

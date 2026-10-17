@@ -22,3 +22,4 @@ import Rule30Equivalents.LempelZiv
 import Rule30Equivalents.CoupledHalves
 import Rule30Equivalents.TailLanguage
 import Rule30Equivalents.TFunction
+import Rule30Equivalents.TFunctionCycles

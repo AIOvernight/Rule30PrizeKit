@@ -123,7 +123,8 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
   [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean),
   [LempelZiv](Rule30Equivalents/LempelZiv.lean), [CoupledHalves](Rule30Equivalents/CoupledHalves.lean),
-  [TailLanguage](Rule30Equivalents/TailLanguage.lean) and [TFunction](Rule30Equivalents/TFunction.lean).
+  [TailLanguage](Rule30Equivalents/TailLanguage.lean), [TFunction](Rule30Equivalents/TFunction.lean) and
+  [TFunctionCycles](Rule30Equivalents/TFunctionCycles.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
@@ -435,6 +436,15 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   Row t of the configuration whose cells at 0, −1, −2, … are the bits of a is Φᵗ(a)
   (`testBit_orbit`). The CA form, for every configuration that is white right of some cell, is
   `Rule30FiniteDiagonals.Rd_periodic`.
+
+  The least periods follow from Klimov and Shamir's cycle theory, proved in
+  [TFunctionCycles](Rule30Equivalents/TFunctionCycles.lean) for every invertible T-function. If bit i
+  of f(x) is xᵢ ⊕ ψᵢ(x mod 2ⁱ), the cycle length of x modulo 2ⁿ starts at 1 and doubles at level i
+  exactly when the parity of ψᵢ around the cycle modulo 2ⁱ is odd (`lift_iff`,
+  `iterate_mod_iff_dvd`). For Φ, ψᵢ(y) = y_{i−1} ∨ y_{i−2}, and the rows 0, …, j of the array return
+  to their values at time 0 exactly at the multiples of that cycle length for x = 1
+  (`seed_rows_return_iff`). An `#eval` of it gives 1, 2, 2, 4, 8, 8, 16, 32, 32, 64 for
+  j = 0, …, 9, the start of A094605.
 - *Difficulty.* Easy.
 - *Lean.* Stated, with the bridge to [25]. The bridge statement typechecks in core Lean, `#eval`
   agrees with it for j, t < 10, and the critic checked it numerically for j, t < 80.

@@ -11,6 +11,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal
 #print axioms Rule30Equivalents.Expansions.problem1_iff_engel_infinite
 #print axioms Rule30Equivalents.Expansions.problem1_iff_sylvester_infinite
+#print axioms Rule30Equivalents.Holonomic.problem1_iff_not_pRecursive
 #print axioms Rule30Equivalents.IntegerRows.problem1_iff_integer_rows
 #print axioms Rule30Equivalents.IntegerRows.problem1_iff_diagArray
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_series_not_rational

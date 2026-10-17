@@ -118,15 +118,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [WordsAutomata](Rule30Equivalents/WordsAutomata.lean) and
   [TransformsSeeds](Rule30Equivalents/TransformsSeeds.lean). Later (2026-10-17):
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
-  [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean)
-  and [Expansions](Rule30Equivalents/Expansions.lean).
+  [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
+  [Expansions](Rule30Equivalents/Expansions.lean) and [Holonomic](Rule30Equivalents/Holonomic.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 115 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 116 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -164,7 +164,7 @@ files. The rows follow the order of Section 3.
 | 44 | linear-relations | linear algebra | the shifts σⁿc are linearly independent over any field; their span is infinite-dimensional; no polynomial in σ kills c | Proved (library) | `LinearRelations.problem1_iff_shifts_linearIndependent`, `LinearRelations.problem1_iff_not_torsion` |
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Stated | `problem1_iff_not_LRS_zero_set` |
-| 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Stated | `problem1_iff_not_pRecursive` |
+| 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library) for the recurrence form; Stated (D-finite) | `Holonomic.problem1_iff_not_pRecursive` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Stated | `problem1_iff_transcendental_Q` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
 | 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated | `problem1_iff_natural_boundary` |
@@ -195,14 +195,16 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 35 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 8 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 53 equivalent forms, 36 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 9 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
-[WordForms](Rule30Equivalents/WordForms.lean), and [50] (Engel and Sylvester) in
-[Expansions](Rule30Equivalents/Expansions.lean). One more, [7], is proved in the core catalog and
+[WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
+[Expansions](Rule30Equivalents/Expansions.lean), and [31] (the recurrence form) in
+[Holonomic](Rule30Equivalents/Holonomic.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
-factorial-base and Lüroth forms are sketches. 15 forms are stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
+factorial-base and Lüroth forms are sketches; for [31] the D-finite form is stated. 14 forms are
+stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
 proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -955,7 +957,11 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   equation have nothing to work with. This covers Siegel–Shidlovskii and Apéry- or Beukers-type
   Padé approximations.
 - *Difficulty.* Moderate.
-- *Lean.* Stated.
+- *Lean.* The recurrence form is proved in the library: `Holonomic.problem1_iff_not_pRecursive`,
+  from `Holonomic.eventuallyPeriodic_iff_pRecursive`. The proof avoids the estimate above: past some
+  point every window recurs, so for each window a the polynomial Σ aᵢ pᵢ has infinitely many roots
+  and vanishes, and its top coefficients give a constant-coefficient recurrence. The D-finite form
+  is stated.
 
   ```lean
   theorem problem1_iff_not_pRecursive : Rule30Prize.Problem1 ↔

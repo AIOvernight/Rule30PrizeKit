@@ -9,8 +9,10 @@ steps. This module takes the period-2 case as far as the finite-seed case has be
 
 **Exact death.** Every step is triangular: bit `i` of `g(x)` is `x_i` plus a function of the bits
 below `i`.
-* `step_triangular`, `iterate_triangular`: if two seeds agree below bit `i`, so do their orbits,
-  and bit `i` of the orbits differs exactly when bit `i` of the seeds does.
+* `step_triangular`, `testBit_step_eq`: if two seeds agree below bit `i`, so do their images, and
+  bit `i` of the images differs exactly when bit `i` of the seeds does. So every step satisfies the
+  hypothesis of `TFunctionCycles`. The two theorems below are instances of its
+  `diagonal_exact_death` and `eq_of_diagonal_eq`, which hold for every invertible T-function.
 * `exact_death`: two seeds that agree below bit `d + m` and differ at bit `d + m` have the same
   readout `d` before time `m` and different readouts at time `m`.
 * `eq_of_readout_eq`: a seed is determined by its bits below `d` and its readout `d`. So for each
@@ -95,49 +97,31 @@ theorem step_triangular {i x y : ℕ} (h : ∀ j, j < i → x.testBit j = y.test
     · rw [testBit_step_add_two, testBit_step_add_two, h (i + 1) (by omega), h i (by omega),
         xor_xor_cancel]
 
-theorem iterate_triangular {i x y : ℕ} (h : ∀ j, j < i → x.testBit j = y.testBit j) :
-    ∀ t, (∀ j, j < i → ((step α β γ)^[t] x).testBit j = ((step α β γ)^[t] y).testBit j) ∧
-      xor (((step α β γ)^[t] x).testBit i) (((step α β γ)^[t] y).testBit i) =
-        xor (x.testBit i) (y.testBit i)
-  | 0 => ⟨h, rfl⟩
-  | t + 1 => by
-    obtain ⟨h1, h2⟩ := iterate_triangular h t
-    obtain ⟨h3, h4⟩ := step_triangular α β γ h1
-    rw [Function.iterate_succ_apply', Function.iterate_succ_apply']
-    exact ⟨h3, h4.trans h2⟩
+/-- So each step satisfies the hypothesis of `TFunctionCycles`: bit `i` of `g(x)` is `x_i` plus a
+function of `x mod 2^i`. -/
+theorem testBit_step_eq (i x : ℕ) :
+    (step α β γ x).testBit i = xor (x.testBit i) ((step α β γ (x % 2 ^ i)).testBit i) := by
+  have hlow : ∀ j, j < i → x.testBit j = (x % 2 ^ i).testBit j := fun j hj => by
+    rw [Nat.testBit_mod_two_pow, decide_eq_true hj, Bool.true_and]
+  have h := (step_triangular α β γ hlow).2
+  rw [Nat.testBit_mod_two_pow, decide_eq_false (Nat.lt_irrefl i), Bool.false_and,
+    Bool.xor_false] at h
+  rw [← h, Bool.xor_assoc, Bool.xor_self, Bool.xor_false]
 
 /-- **Exact death.** Two seeds that agree below bit `d + m` and differ at bit `d + m` have the same
 readout `d` before time `m`, and different readouts at time `m`. -/
 theorem exact_death {a b d m : ℕ} (hag : ∀ j, j < d + m → a.testBit j = b.testBit j)
     (hne : a.testBit (d + m) ≠ b.testBit (d + m)) :
     (∀ t, t < m → readout α β γ a d t = readout α β γ b d t) ∧
-      readout α β γ a d m ≠ readout α β γ b d m := by
-  refine ⟨fun t ht => (iterate_triangular α β γ hag t).1 (t + d) (by omega), fun heq => hne ?_⟩
-  have h := (iterate_triangular α β γ hag m).2
-  have heq' : ((step α β γ)^[m] a).testBit (d + m) = ((step α β γ)^[m] b).testBit (d + m) := by
-    rw [Nat.add_comm d m]
-    exact heq
-  rw [heq', Bool.xor_self] at h
-  revert h
-  cases a.testBit (d + m) <;> cases b.testBit (d + m) <;> simp
+      readout α β γ a d m ≠ readout α β γ b d m :=
+  TFunctionCycles.diagonal_exact_death (f := step α β γ) (ψ := fun i z => (step α β γ z).testBit i)
+    (testBit_step_eq α β γ) ((TFunctionCycles.mod_two_pow_eq_iff _ _ _).2 hag) hne
 
 /-- **A seed is determined by its bits below `d` and its readout `d`.** -/
 theorem eq_of_readout_eq {a b d : ℕ} (hlow : ∀ j, j < d → a.testBit j = b.testBit j)
-    (hr : ∀ t, readout α β γ a d t = readout α β γ b d t) : a = b := by
-  have key : ∀ n j, j < n → a.testBit j = b.testBit j := by
-    intro n
-    induction n with
-    | zero => intro j hj; omega
-    | succ n ih =>
-      intro j hj
-      rcases Nat.lt_or_ge j n with hjn | hjn
-      · exact ih j hjn
-      · rw [show j = n by omega]
-        rcases Nat.lt_or_ge n d with hnd | hnd
-        · exact hlow n hnd
-        · obtain ⟨m, rfl⟩ : ∃ m, n = d + m := ⟨n - d, by omega⟩
-          exact Classical.byContradiction fun hne => (exact_death α β γ ih hne).2 (hr m)
-  exact Nat.eq_of_testBit_eq fun n => key (n + 1) n (by omega)
+    (hr : ∀ t, readout α β γ a d t = readout α β γ b d t) : a = b :=
+  TFunctionCycles.eq_of_diagonal_eq (f := step α β γ) (ψ := fun i z => (step α β γ z).testBit i)
+    (testBit_step_eq α β γ) ((TFunctionCycles.mod_two_pow_eq_iff _ _ _).2 hlow) hr
 
 /-- **At most one alternating seed for each right part.** -/
 theorem alternating_seed_unique {a b d : ℕ} (hlow : ∀ j, j < d → a.testBit j = b.testBit j)

@@ -22,6 +22,13 @@ proves that description for every such `f`, and applies it to rule 30's `Φ`.
   length of `x` modulo `2^n`. `per_eq_two_pow`: it is a power of two, at most `2^n`.
   `per_eq_two_pow_iff`: it equals `2^n` (the cycle of `x` contains every residue) iff the parity is
   odd at every level, which is Klimov and Shamir's single-cycle criterion.
+* `diagonal_exact_death`, `eq_of_diagonal_eq`, `exists_diagonal_prefix`: **diagonal readouts.**
+  - A seed is determined by its residue modulo `2^d` and its readout `t ↦ bit (t + d)` of `fᵗ(x)`.
+  - Seeds that first differ at bit `d + m` have readouts that first differ at time `m`.
+  - Every residue together with every readout prefix of length `m` is realized below `2^(d + m)`.
+  - So on the 2-adic integers, `x ↦ (x mod 2^d, readout d)` is a bijection onto
+    `ℤ/2^d × {0,1}^ℕ`. The Lean states its finite levels.
+  - For the frozen-boundary steps, see `FrozenBoundaryPeriodTwo`.
 * `Phi_bit`, `Phi_cycle`: for `Φ(x) = x ⊕ (2x ∨ 4x)`, `ψ_i(y) = y_{i-1} ∨ y_{i-2}`.
   `seed_rows_return_iff`: the first `j + 1` right diagonals of rule 30 return to their values at
   time `0` exactly at the multiples of `per Φ ψΦ 1 (j + 1)`.
@@ -242,6 +249,71 @@ theorem iterate_mod_iff_dvd (x : ℕ) :
       · exact Nat.dvd_mul_right _ _
     · rintro ⟨q, rfl⟩
       exact iterate_mul_mod hf (iterate_per_mod hf x (n + 1)) q
+
+/-! ### Diagonal readouts -/
+
+/-- The parity of `ψ_i` along the orbit depends only on the start modulo `2^i`. -/
+theorem par_congr {i x y : ℕ} (h : x % 2 ^ i = y % 2 ^ i) : ∀ L, par f ψ i x L = par f ψ i y L
+  | 0 => rfl
+  | L + 1 => by
+    simp only [par]
+    rw [par_congr h L, iterate_mod_eq hf h L]
+
+/-- **Exact death for diagonal readouts.** If `x, y` agree below bit `d + m` and differ at bit
+`d + m`, their readouts `t ↦ bit (t + d)` of `fᵗ` agree before time `m` and differ at time `m`. -/
+theorem diagonal_exact_death {x y d m : ℕ} (h : x % 2 ^ (d + m) = y % 2 ^ (d + m))
+    (hne : x.testBit (d + m) ≠ y.testBit (d + m)) :
+    (∀ t, t < m → (f^[t] x).testBit (t + d) = (f^[t] y).testBit (t + d)) ∧
+      (f^[m] x).testBit (m + d) ≠ (f^[m] y).testBit (m + d) := by
+  refine ⟨fun t ht => (mod_two_pow_eq_iff _ _ _).1 (iterate_mod_eq hf h t) (t + d) (by omega), ?_⟩
+  rw [Nat.add_comm m d, testBit_iterate hf (d + m) x m, testBit_iterate hf (d + m) y m,
+    par_congr hf h]
+  intro heq
+  apply hne
+  revert heq
+  cases x.testBit (d + m) <;> cases y.testBit (d + m) <;> cases par f ψ (d + m) y m <;> simp
+
+/-- **A seed is determined by its residue modulo `2^d` and its diagonal readout `d`.** -/
+theorem eq_of_diagonal_eq {x y d : ℕ} (hlow : x % 2 ^ d = y % 2 ^ d)
+    (hr : ∀ t, (f^[t] x).testBit (t + d) = (f^[t] y).testBit (t + d)) : x = y := by
+  have key : ∀ m, x % 2 ^ (d + m) = y % 2 ^ (d + m) := by
+    intro m
+    induction m with
+    | zero => exact hlow
+    | succ m ih =>
+      rw [← Nat.add_assoc, mod_two_pow_succ_iff]
+      exact ⟨ih, Classical.byContradiction fun hne => (diagonal_exact_death hf ih hne).2 (hr m)⟩
+  apply Nat.eq_of_testBit_eq
+  intro i
+  exact (mod_two_pow_eq_iff _ _ _).1 (key (i + 1)) i (by omega)
+
+/-- **Every readout prefix is realized**: for every residue `r < 2^d`, every target `w` and every
+`m`, some `x < 2^(d + m)` with `x ≡ r mod 2^d` has readout `w` before time `m`. -/
+theorem exists_diagonal_prefix {d r : ℕ} (hr : r < 2 ^ d) (w : ℕ → Bool) :
+    ∀ m, ∃ x, x < 2 ^ (d + m) ∧ x % 2 ^ d = r ∧ ∀ t, t < m → (f^[t] x).testBit (t + d) = w t
+  | 0 => ⟨r, hr, Nat.mod_eq_of_lt hr, fun _ ht => absurd ht (Nat.not_lt_zero _)⟩
+  | m + 1 => by
+    obtain ⟨x, hx, hxr, hxw⟩ := exists_diagonal_prefix hr w m
+    have hpow : 2 ^ (d + (m + 1)) = 2 ^ (d + m) * 2 := by rw [← Nat.add_assoc, Nat.pow_succ]
+    by_cases hm : (f^[m] x).testBit (m + d) = w m
+    · refine ⟨x, by omega, hxr, fun t ht => ?_⟩
+      rcases Nat.lt_or_ge t m with h | h
+      · exact hxw t h
+      · rw [show t = m by omega]; exact hm
+    · have hmod : (2 ^ (d + m) + x) % 2 ^ (d + m) = x % 2 ^ (d + m) := Nat.add_mod_left _ _
+      have hbit : (2 ^ (d + m) + x).testBit (d + m) ≠ x.testBit (d + m) := by
+        rw [Nat.testBit_two_pow_add_eq]
+        cases x.testBit (d + m) <;> simp
+      obtain ⟨h1, h2⟩ := diagonal_exact_death hf hmod hbit
+      refine ⟨2 ^ (d + m) + x, by omega, ?_, fun t ht => ?_⟩
+      · rw [Nat.add_comm (2 ^ (d + m)) x, Nat.pow_add, Nat.add_mul_mod_self_left]
+        exact hxr
+      · rcases Nat.lt_or_ge t m with h | h
+        · rw [h1 t h]; exact hxw t h
+        · rw [show t = m by omega]
+          revert h2 hm
+          cases (f^[m] (2 ^ (d + m) + x)).testBit (m + d) <;> cases (f^[m] x).testBit (m + d) <;>
+            cases w m <;> simp
 
 end
 

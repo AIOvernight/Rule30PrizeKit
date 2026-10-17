@@ -130,7 +130,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 130 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 131 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -178,7 +178,7 @@ files. The rows follow the order of Section 3.
 | 23 | special-factors | words | c has a right-special factor of every length | Proved (library) | `WordsAutomata.problem1_iff_right_special` |
 | 24 | finite-certificates | words, computation | for every N, some prefix has more than N distinct factors of one length | Proved (library) | `WordForms.problem1_iff_prefix_certificates` |
 | 34 | omega-limit | topological dynamics | the ω-limit set of c under the shift is infinite | Proved (library) | `WordsAutomata.problem1_iff_omegaLimit_infinite` |
-| 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library) for this form and the Rauzy form; the subshift form is stated | `WordsAutomata.problem1_iff_tail_complexity`, `TailLanguage.problem1_iff_tail_strictMono` |
+| 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library), all three forms | `WordsAutomata.problem1_iff_tail_complexity`, `TailLanguage.problem1_iff_tail_strictMono`, `TailLanguage.problem1_iff_tailSubshift_infinite` |
 | 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths` |
 | 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Stated; sufficient direction proved (library) | `problem1_iff_infinitely_many_prefixes_without_golden_power`; `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power` |
 | 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Stated; sufficient direction proved (library) | `problem1_iff_late_long_unbordered_factors`; `WordForms.problem1_of_late_long_unbordered_factors` |
@@ -1230,7 +1230,11 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   `WordsAutomata.problem1_iff_tail_complexity`, with `tailFactors` defined through `∃ᶠ i in Filter.atTop`.
   The Rauzy-graph form is proved as strict growth of p∞ (a Rauzy graph is a single cycle exactly at a
   flat step): `TailLanguage.problem1_iff_tail_strictMono`, from `eventuallyPeriodic_iff_tail_flat`.
-  The subshift form is stated. The original statement was:
+  The subshift form is proved: `TailLanguage.problem1_iff_tailSubshift_infinite`, from
+  `infinite_tailSubshift_iff`. Here Ω(c) is `tailSubshift c`, the sequences ℤ → Bool all of
+  whose windows lie in L∞(c). Every word of L∞(c) is a window of a point of Ω(c): take a cluster
+  point, in the compact space ℤ → Bool, of the shifts of c that put an occurrence at 0
+  (`exists_mem_tailSubshift`). The original statement of the complexity form was:
 
   ```lean
   def tailFactors (n : ℕ) : Set (Fin n → Bool) :=

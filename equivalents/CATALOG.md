@@ -2220,6 +2220,17 @@ with Turing machines reading n. Notes:
    has infinite order is the growth of rule 30: the orbit of 10^∞ is infinite because the nonzero
    prefix grows by 2 at each step. The classification does not mention rule 30.
 
+   **G2369 is locally-finite-by-ℤ** (2026-10-17). The states are b = σΦ and a = τΦ, where σ and τ
+   change only the two lowest bits, so G2369 = ⟨Φ, σ, τ⟩ with ⟨σ, τ⟩ the 8-element automorphism
+   group of the depth-2 tree. By rule 30's light cone, every conjugate Φⁿ f Φ⁻ⁿ (n ≥ 0) of such an f
+   is finitary. These conjugates generate a locally finite 2-group L with Φ L Φ⁻¹ ⊆ L. The normal
+   closure N of ⟨σ, τ⟩ is the ascending union of the Φ⁻ᵐ L Φᵐ, and Φ has infinite order. So
+   G2369 = N ⋊ ⟨Φ⟩ is an ascending HNN extension of L. It is elementary amenable, of exponential
+   growth (Chou), and not finitely presented (Bieri–Strebel). This is the argument of Silva and
+   Steinberg for reset automata; the automaton here is 2-definite. The Lean inputs are in
+   [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). The proof and the GAP and word-problem
+   computations are in the vibe-proof repository, `research/g2369/`.
+
    None of this is special to the seed. For every starting value a, Φ^(2^j) is the identity
    modulo 2^(j+1) (`TFunction.orbit_two_pow_mod`). For every configuration that is white right
    of some cell, the right diagonals have period dividing 2^j

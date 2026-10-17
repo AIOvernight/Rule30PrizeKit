@@ -21,6 +21,10 @@ half driven by the alternating column.
   `Psi_unique`: every left row that does so agrees with `Psi R` at every depth `≥ 1`.
 * `CQ01_iff_Psi`: `CQ01` says that `Psi R` has infinitely many black cells for every finitely
   supported `R`.
+* `not_finSupp_Psi_of_eventuallyPeriodic` (the absorption route): this holds whenever `u R` is
+  eventually periodic.
+* `not_finSupp_Psi_of_R2`: it holds for `R` whenever it holds for `R2 R`, the right half two steps
+  later.
 
 **Exact death.** A left row `L` keeps the center alternating exactly until the first depth `d ≥ 1`
 where it differs from `Psi R`.
@@ -306,6 +310,57 @@ theorem CQ01_iff_Psi : CQ01 ↔ ∀ R, FinSupp R → ¬ FinSupp (Psi R) := by
     refine h R hR ⟨W, fun k hk => ?_⟩
     rw [← Psi_unique hX hC, zrow_zero_of_pos _ (by omega)]
     exact hW k hk
+
+/-- **The absorption route**: if `u R` is eventually periodic, `Psi R` has infinitely many black
+cells, because the free bits of a finitely supported constrained start are never eventually periodic
+(`Rule30ZeroBoundary.free_not_eventuallyPeriodic`). -/
+theorem not_finSupp_Psi_of_eventuallyPeriodic (R : Nat → Bool) (h : EventuallyPeriodic (u R)) :
+    ¬ FinSupp (Psi R) := by
+  intro hfin
+  apply free_not_eventuallyPeriodic hfin (Psi_inX R)
+  obtain ⟨T, P, hP, hper⟩ := h
+  refine ⟨T, P, hP, fun t ht => ?_⟩
+  show zrow (Psi R) (2 * (t + P) + 1) 1 = zrow (Psi R) (2 * t + 1) 1
+  rw [Psi_free, Psi_free]
+  exact congrArg (!·) (hper t ht)
+
+/-- Restarting the driven right half at time `a`. -/
+theorem drv_shift (c x : Nat → Bool) (a : Nat) :
+    ∀ t p, drv c x (a + t) p = drv (fun t => c (a + t)) (fun p => drv c x a p) t p
+  | 0, 0 => by rw [drv_col0, drv_col0]
+  | 0, p + 1 => by rw [drv_init _ _ _ (by omega)]; rfl
+  | t + 1, 0 => by rw [drv_col0, drv_col0]
+  | t + 1, p + 1 => by
+    show rule (drv c x (a + t) p) (drv c x (a + t) (p + 1)) (drv c x (a + t) (p + 2)) =
+      rule (drv _ _ t p) (drv _ _ t (p + 1)) (drv _ _ t (p + 2))
+    rw [drv_shift c x a t p, drv_shift c x a t (p + 1), drv_shift c x a t (p + 2)]
+
+/-- The right half two steps later. -/
+def R2 (R : Nat → Bool) : Nat → Bool := fun p => drv altCol R 2 p
+
+theorem u_R2 (R : Nat → Bool) (s : Nat) : u (R2 R) s = u R (s + 1) := by
+  unfold u R2
+  rw [show 2 * (s + 1) + 1 = 2 + (2 * s + 1) by omega, drv_shift altCol R 2 (2 * s + 1) 1]
+  have : (fun t => altCol (2 + t)) = altCol := funext fun t => by
+    unfold altCol; rw [show (2 + t) % 2 = t % 2 by omega]
+  rw [this]
+
+/-- **The statements propagate backwards in time**: if the row for the right half two steps later
+has infinitely many black cells, so has `Psi R`. For example `CQ01Empty` follows from the case of
+the right half `11`, which the white right half becomes two steps later. -/
+theorem not_finSupp_Psi_of_R2 (R : Nat → Bool) (h : ¬ FinSupp (Psi (R2 R))) :
+    ¬ FinSupp (Psi R) := by
+  rintro ⟨W, hW⟩
+  have hX : InX (zrow (Psi R) 2) := fun s => by
+    rw [← zrow_shift, show 2 + 2 * s = 2 * (s + 1) by omega]
+    exact Psi_inX R (s + 1)
+  have hC : ∀ s, zrow (zrow (Psi R) 2) (2 * s + 1) 1 = !drv altCol (R2 R) (2 * s + 1) 1 := by
+    intro s
+    rw [← zrow_shift, show 2 + (2 * s + 1) = 2 * (s + 1) + 1 by omega, Psi_free]
+    exact congrArg (!·) (u_R2 R s).symm
+  refine h ⟨W + 2, fun k hk => ?_⟩
+  rw [← Psi_unique hX hC, zrow_zero_of_pos _ (by omega)]
+  exact zrow_fin hW 2 k (by omega)
 
 /-! ### Exact death -/
 

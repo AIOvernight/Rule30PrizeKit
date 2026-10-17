@@ -15,3 +15,4 @@ import Rule30Equivalents.WordForms
 import Rule30Equivalents.Expansions
 import Rule30Equivalents.Holonomic
 import Rule30Equivalents.OmegaRegular
+import Rule30Equivalents.PisotBase

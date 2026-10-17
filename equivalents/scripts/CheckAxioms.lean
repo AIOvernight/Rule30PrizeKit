@@ -45,6 +45,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_digits_base
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_decimal_digits
 #print axioms Rule30Equivalents.OmegaRegular.problem1_iff_not_omega_regular
+#print axioms Rule30Equivalents.PisotBase.problem1_iff_not_mem_Q_sqrt_two
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational_coeff_zero
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_ne_mul_inv

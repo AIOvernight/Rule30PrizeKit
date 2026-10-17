@@ -122,14 +122,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean),
   [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
   [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean),
-  [LempelZiv](Rule30Equivalents/LempelZiv.lean) and [CoupledHalves](Rule30Equivalents/CoupledHalves.lean).
+  [LempelZiv](Rule30Equivalents/LempelZiv.lean), [CoupledHalves](Rule30Equivalents/CoupledHalves.lean),
+  [TailLanguage](Rule30Equivalents/TailLanguage.lean) and [TFunction](Rule30Equivalents/TFunction.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 129 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 130 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -148,8 +149,8 @@ files. The rows follow the order of Section 3.
 | 53 | mathlib-bridges | bookkeeping | the same, in Mathlib's vocabulary: `Filter.atTop` and `List.HasPeriod` forms | Proved (library) | `WordsAutomata.problem1_iff_filter`, `WordsAutomata.problem1_iff_no_hasPeriod_tail` |
 | 8 | fc-bridge | bookkeeping | the formal-conjectures statement; Wolfram's 2019 statement, read as intended | Proved (library) | `TransformsSeeds.problem1_iff_fc`, `TransformsSeeds.problem1_iff_wolfram` |
 | 14 | pi2-normal-form | logic | for all T and P ≥ 1 some t ≥ T has c(t+P) ≠ c(t); no eventual period k!; Diophantine form | Proved (library) for the first two; Stated (Diophantine) | `TransformsSeeds.problem1_iff_pi2`, `TransformsSeeds.problem1_iff_factorial_periods`, `center_diophFn` |
-| 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows` |
-| 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic` |
+| 25 | nks-integer-rows | bookkeeping | t ↦ bit t of a(t), where a(t+1) = a(t) ⊕ (2a(t) ∨ 4a(t)), is not EP | Proved (library) | `IntegerRows.problem1_iff_integer_rows`, `TFunction.problem1_iff_orbit` |
+| 26 | diagonal-array | CA / odometer | the main diagonal of the right-diagonal array is not EP | Proved (library) | `IntegerRows.problem1_iff_diagArray`, `IntegerRows.diagArray_row_periodic`, `TFunction.testBit_orbit_periodic` |
 | 1 | binary-irrational | real numbers | x₂ = 0.c(0)c(1)c(2)…₂ is irrational | Proved (library) | `BinaryIrrational.problem1_iff_irrational_binary` |
 | 2 | base-b-irrational | real numbers | 0.c(0)c(1)… read in any integer base B ≥ 2 is irrational | Proved (library), including the `Real.ofDigits` and Cantor-function forms | `BinaryIrrational.problem1_iff_irrational_base`, `BinaryIrrational.problem1_iff_irrational_decimal`, `Realization.problem1_iff_irrational_ofDigits`, `Realization.problem1_iff_irrational_cantorFunction` |
 | 16 | integer-digits | real numbers, without reals | no fraction p/q has binary digits c | Proved (library) | `NumberTheory.problem1_iff_not_rational_digits` |
@@ -423,6 +424,17 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   This explains the odometer of [CPY07]: in the frame moving with the right edge, the orbit closure
   of the seed is the 2-adic odometer, and c is the diagonal of an odometer orbit. It also puts [25]
   and [26] one lemma apart. Both routes are identity transfers.
+
+  The critic's argument is proved in [TFunction](Rule30Equivalents/TFunction.lean), for every
+  starting value a, not only 1:
+  - bit j of Φ(x) is x_j ⊕ (x_{j−1} ∨ x_{j−2}) (`testBit_Phi`);
+  - Φ permutes ℤ/2ⁿ and is injective on ℕ (`mod_of_Phi_mod`, `Phi_injective`);
+  - bit j of Φᵗ(a) has period dividing 2^j in t (`testBit_orbit_periodic`);
+  - Φ^(2^j) is the identity modulo 2^(j+1) (`orbit_two_pow_mod`).
+
+  Row t of the configuration whose cells at 0, −1, −2, … are the bits of a is Φᵗ(a)
+  (`testBit_orbit`). The CA form, for every configuration that is white right of some cell, is
+  `Rule30FiniteDiagonals.Rd_periodic`.
 - *Difficulty.* Easy.
 - *Lean.* Stated, with the bridge to [25]. The bridge statement typechecks in core Lean, `#eval`
   agrees with it for j, t < 10, and the critic checked it numerically for j, t < 80.
@@ -2165,9 +2177,11 @@ with Turing machines reading n. Notes:
    Problem 1 without solving both problems.
 8. **A uniformity hierarchy** (CA-structure survey). LHC ⟹ NumberLike ⟹ FinConf ⟹ Problem 1
    (Section 4). At period 2 one rung is exact: CQ01 holds iff no finite configuration has center
-   column 1, 0, 1, 0, … from time 0 (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`). Every classical partial result (Jen; Kopra's width 2; Condrey's period 1) and every
-   project reduction is uniform over finite rows. A proof of Problem 1 that does not also prove FinConf must use something
-   specific to the seed's orbit, such as the odometer structure of its right edge.
+   column 1, 0, 1, 0, … from time 0 (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`). Every classical partial result (Jen; Kopra's width 2; Condrey's period 1), the black-run
+   exclusions (`Rule30FiniteBlackRuns`) and every project reduction are uniform over finite
+   rows. So is the periodicity of the diagonals (item 9). A proof of Problem 1 that does not
+   also prove FinConf must use something specific to the seed's orbit, and the odometer
+   structure of its right edge is not such a thing.
 9. **Odometer and diagonals.** In the frame of the right edge, the orbit closure of the seed is the
    2-adic odometer [CPY07]. The T-function Φ(x) = x ⊕ (2x ∨ 4x) makes this concrete (critic):
    - row j of the diagonal array is bit j of the Φ-orbit of 1;
@@ -2177,6 +2191,13 @@ with Turing machines reading n. Notes:
    c(t) reads row t of this array at time t, inside that row's first period. The left diagonals,
    which are only eventually periodic, are read inside their transients. This is why diagonal
    periodicity does not reach c.
+
+   None of this is special to the seed. For every starting value a, Φ^(2^j) is the identity
+   modulo 2^(j+1) (`TFunction.orbit_two_pow_mod`). For every configuration that is white right
+   of some cell, the right diagonals have period dividing 2^j
+   (`Rule30FiniteDiagonals.Rd_periodic`). For every configuration that is white left of some
+   cell, the left diagonals are eventually periodic with period 2^j (`Ld_periodic`). Every column
+   reads its array along a line of slope one (`column_reads_periodic_rows`).
 10. **Distribution mod 1 and Mahler.** Rows of rule 30 are dyadic numbers, and c(t) is the first
     binary digit of the right half of row t ([20]). Kopra [Kop23] puts rule 30 and the ×p/q automata
     in one class, the rapidly left expansive automata (number-like configurations are the nonzero

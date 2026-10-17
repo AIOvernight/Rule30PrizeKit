@@ -41,11 +41,11 @@ def a : Nat → Nat
 /-- The first rows, as in OEIS A110240. -/
 theorem a_values : (List.range 6).map a = [1, 7, 25, 111, 401, 1783] := by decide
 
-private theorem testBit_two_mul (x j : Nat) :
+theorem testBit_two_mul (x j : Nat) :
     (2 * x).testBit j = (decide (1 ≤ j) && x.testBit (j - 1)) := by
   rw [show 2 * x = x <<< 1 by rw [Nat.shiftLeft_eq]; omega, Nat.testBit_shiftLeft]
 
-private theorem testBit_four_mul (x j : Nat) :
+theorem testBit_four_mul (x j : Nat) :
     (4 * x).testBit j = (decide (2 ≤ j) && x.testBit (j - 2)) := by
   rw [show 4 * x = x <<< 2 by rw [Nat.shiftLeft_eq]; omega, Nat.testBit_shiftLeft]
 

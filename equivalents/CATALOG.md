@@ -120,14 +120,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
   [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
   [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean),
-  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) and [PisotBase](Rule30Equivalents/PisotBase.lean).
+  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean) and
+  [Automatic](Rule30Equivalents/Automatic.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 118 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 121 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -191,8 +192,8 @@ files. The rows follow the order of Section 3.
 | 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Proved (library) for the Büchi form; Stated (MSO) | `OmegaRegular.problem1_iff_not_omega_regular` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Stated; sufficient direction proved (library) | `problem1_iff_lz_unbounded`; `WordForms.problem1_of_lz_unbounded` |
-| 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Stated | `problem1_iff_automaticComplexity_tendsto_top` |
-| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Stated | `problem1_iff_not_two_three_automatic`, `problem1_iff_transcendental_F2_or_F3` |
+| 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Stated; sufficient direction proved (library) | `problem1_iff_automaticComplexity_tendsto_top`; `Automatic.problem1_of_automaticComplexity_tendsto_top` |
+| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Stated; sufficient direction proved (library) | `problem1_iff_not_two_three_automatic`, `problem1_iff_transcendental_F2_or_F3`; `Automatic.problem1_of_not_two_three_automatic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
@@ -207,8 +208,8 @@ batch 2, and 11 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [PisotBase](Rule30Equivalents/PisotBase.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
 factorial-base and Lüroth forms are sketches; for [31] the D-finite form and for [36] the MSO form
-are stated. 12 forms are stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
-proved. 2 forms are sketches.
+are stated. 12 forms are stated, and for 5 of them, [37], [42], [47], [51] and [52], the direction "the form
+implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1689,7 +1690,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Difficulty.* Moderate.
 - *Known.* Shallit and Wang show that A(x) ≥ n/13 for almost all binary words x of length n [SW01].
   Nothing has been computed for c.
-- *Lean.* Stated (critic). Mathlib has `DFA`, `DFA.accepts`, `DFA.evalFrom` and `DFA.pumping_lemma`,
+- *Lean.* The sufficient direction is proved in the library:
+  `Automatic.problem1_of_automaticComplexity_tendsto_top`, through
+  `autComplexityLE_of_eventuallyPeriodic` (the lasso DFA `lassoDFA` gives complexity ≤ T + P + 1).
+  The equivalence is stated (critic). Mathlib has `DFA`, `DFA.accepts`, `DFA.evalFrom` and `DFA.pumping_lemma`,
   plus `List.HasPeriod` and the Fine–Wilf lemma. It lacks automatic complexity and the commuting-words
   lemma (xy = yx ⟹ common root), which follows from Fine–Wilf.
 
@@ -1727,7 +1731,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   262,143 states (critic). An earlier bound of 8191 states has been attributed to [Ner26a], but
   that paper's abstract does not mention it; treat it as unverified. The kernel data supersede it
   in any case.
-- *Lean.* Stated.
+- *Lean.* The sufficient directions are proved in the library: `Automatic.problem1_of_not_automatic`
+  (not k-automatic for some k ≥ 2) and `Automatic.problem1_of_not_two_three_automatic`, from
+  `isAutomatic_of_eventuallyPeriodic` (an EP sequence has a finite k-kernel for every k ≥ 2), with the
+  definitions below. The equivalences are stated.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=

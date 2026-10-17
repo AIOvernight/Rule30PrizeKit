@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 138 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 139 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -182,7 +182,7 @@ files. The rows follow the order of Section 3.
 | 34 | omega-limit | topological dynamics | the ω-limit set of c under the shift is infinite | Proved (library) | `WordsAutomata.problem1_iff_omegaLimit_infinite` |
 | 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library), all three forms | `WordsAutomata.problem1_iff_tail_complexity`, `TailLanguage.problem1_iff_tail_strictMono`, `TailLanguage.problem1_iff_tailSubshift_infinite` |
 | 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths` |
-| 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Stated; sufficient direction proved (library) | `problem1_iff_infinitely_many_prefixes_without_golden_power`; `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power` |
+| 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Proved (library) | `WordForms.problem1_iff_infinitely_many_prefixes_without_golden_power`, `GoldenPowers.eventuallyPeriodic_of_gp` |
 | 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Proved (library) | `WordForms.problem1_iff_late_long_unbordered_factors`, `Lyndon.eventuallyPeriodic_of_bordered` |
 | 19 | simple-transforms | words | ¬c, the shifts of c, the XOR derivative and the running parity are not EP | Proved (library) | `Symmetry.problem1_iff_complement`, `TransformsSeeds.problem1_iff_xor_derivative` |
 | 20 | decimations | words | for each k some decimation c(kn+r) is not EP; every modulus has a non-constant residue class | Proved (library) | `TransformsSeeds.problem1_iff_decimation`, `TransformsSeeds.problem1_iff_nonconstant_class` |
@@ -201,10 +201,10 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 45 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 17 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 46 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 18 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
-[Realization](Rule30Equivalents/Realization.lean), [24], [29] and [51] in
+[Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
 [Expansions](Rule30Equivalents/Expansions.lean), [31] in [Holonomic](Rule30Equivalents/Holonomic.lean)
 (the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] (the Büchi form) in
@@ -217,7 +217,8 @@ also has a library proof. For [14] only the Diophantine part is merely stated, a
 form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
 through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean)), and [49] from it and [29]
-([Minkowski](Rule30Equivalents/Minkowski.lean)). 6 forms are stated, and for 3 of them, [38], [42] and [47], the direction "the
+([Minkowski](Rule30Equivalents/Minkowski.lean)). [47] is proved through the Mignosi–Restivo–Salemi theorem
+([GoldenPowers](Rule30Equivalents/GoldenPowers.lean)). 5 forms are stated, and for 2 of them, [38] and [42], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -1350,9 +1351,20 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Data.* 2054 of the first 3000 prefixes of c have no suffix of exponent ≥ φ², including those of
   lengths 2989, 2990, 2996, 2997 and 2998 (critic, own computation). A random word behaves the same
   way.
-- *Lean.* The sufficient direction is proved in the library:
-  `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`. The equivalence is stated
-  (critic).
+- *Lean.* Proved in the library (2026-10-18):
+  `WordForms.problem1_iff_infinitely_many_prefixes_without_golden_power`. Its converse direction is
+  `GoldenPowers.eventuallyPeriodic_of_gp`, a formalization of [MRS98] that follows the paper's
+  Lemmas 1–4 and Theorems 1–2.
+  - Lemma 4: a window of length ⌈φP⌉ with periods P and Q, where φQ ≥ P, ends with a
+    φ²-repetition of period P − Q.
+  - Theorem 1 (`first_lt`, `period_until`): the first index Z where the φ-local period reaches its
+    maximum P satisfies Z < k + P, and from Z − ⌈φ²P⌉ to every later index with local period P the
+    word has period P.
+  - Theorem 2: the local periods are therefore bounded by k, and an induction on the bound gives
+    eventual periodicity.
+
+  The sufficient direction was already `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`.
+  The critic's statement was:
 
   ```lean
   def EndsWithGoldenPower (n : ℕ) : Prop :=

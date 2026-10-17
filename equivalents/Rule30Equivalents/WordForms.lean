@@ -2,6 +2,7 @@ import Rule30Equivalents.ShiftOrbit
 import Rule30Equivalents.TransformsSeeds
 import Rule30Equivalents.Symmetry
 import Rule30Equivalents.Lyndon
+import Rule30Equivalents.GoldenPowers
 import Mathlib.Data.Nat.Nth
 import Mathlib.NumberTheory.Real.GoldenRatio
 
@@ -23,14 +24,15 @@ import Mathlib.NumberTheory.Real.GoldenRatio
   `problem1_of_late_long_unbordered_factors`. The converse is the Ehrenfeucht–Silberger theorem for
   infinite words, `Lyndon.eventuallyPeriodic_of_bordered`, proved through the Lyndon factorization.
 
-Two sufficient conditions: one direction of catalog entries whose other direction needs a
-classical theorem that Mathlib lacks, or a longer argument:
-* `problem1_of_infinitely_many_prefixes_without_golden_power` (catalog [47]): if infinitely many
-  prefixes end with no repetition of exponent at least `φ²`, Problem 1 holds. The converse is the
-  theorem of Mignosi, Restivo and Salemi (1998).
+* `problem1_iff_infinitely_many_prefixes_without_golden_power` (catalog [47]): Problem 1 holds iff
+  infinitely many prefixes end with no repetition of exponent at least `φ²`. The sufficient
+  direction is `problem1_of_infinitely_many_prefixes_without_golden_power`. The converse is the
+  theorem of Mignosi, Restivo and Salemi (1998), `GoldenPowers.eventuallyPeriodic_of_gp`.
+
+One sufficient condition:
 * `problem1_of_lz_unbounded` (catalog [37]): if the Lempel–Ziv (1976) complexity of the prefixes is
-  unbounded, Problem 1 holds (`lzComplexity_le_of_eventuallyPeriodic`). The converse needs the
-  critic's compactness argument over the cut points of bounded histories.
+  unbounded, Problem 1 holds (`lzComplexity_le_of_eventuallyPeriodic`). The equivalence is proved in
+  `LempelZiv`.
 -/
 
 namespace Rule30Equivalents.WordForms
@@ -306,6 +308,22 @@ theorem problem1_of_infinitely_many_prefixes_without_golden_power :
   obtain ⟨N, hN⟩ := eventually_endsWithGoldenPower hep
   obtain ⟨n, hn, hne⟩ := h N
   exact hne (hN n hn)
+
+theorem gp_of_endsWithGoldenPower {b : ℕ → Bool} {n : ℕ} (h : EndsWithGoldenPower b n) :
+    ∃ d, GoldenPowers.GP b n d := by
+  obtain ⟨p, ℓ, hp, hℓn, hφ, hper⟩ := h
+  have hneed : GoldenPowers.need p ≤ ℓ := Nat.ceil_le.2 hφ
+  exact ⟨p, hp, by omega, fun i h1 h2 => hper i (by omega) h2⟩
+
+/-- **Problem 1 ⟺ infinitely many prefixes end with no repetition of exponent `φ²`** (catalog
+[47]). The converse direction is the theorem of Mignosi, Restivo and Salemi
+(`GoldenPowers.eventuallyPeriodic_of_gp`). -/
+theorem problem1_iff_infinitely_many_prefixes_without_golden_power : Rule30Prize.Problem1 ↔
+    ∀ N, ∃ n, N ≤ n ∧ ¬ EndsWithGoldenPower c n := by
+  refine ⟨fun hP N => ?_, problem1_of_infinitely_many_prefixes_without_golden_power⟩
+  by_contra hall
+  push Not at hall
+  exact hP (GoldenPowers.eventuallyPeriodic_of_gp fun n hn => gp_of_endsWithGoldenPower (hall n hn))
 
 /-! ### [51] Unbordered factors: the sufficient direction -/
 

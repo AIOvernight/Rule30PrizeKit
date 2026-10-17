@@ -12,8 +12,8 @@ two driven neighbours (`coupled_of_evol`). Conversely, gluing two driven halves 
 * `Coupled ω s x`: the column `ω`, the left half `s` and the right half `x` satisfy the update
   `ω (t + 1) = rule (L ω s t (-1)) (ω t) (drv ω x t 1)` at every time.
 * `CQ ω` (**open** for every nonconstant periodic `ω`): no finite left half and finite right half
-  are coupled to `ω`. For the alternating column this is `Rule30PeriodTwoCoupled.CQ01` in
-  another form.
+  are coupled to `ω`. `CQ_altCol_iff_CQ01`: for the alternating column this is
+  `Rule30PeriodTwoCoupled.CQ01`.
 * `CQ_iff_no_finite_config`: `CQ ω` holds iff no finite configuration has center column `ω`.
 * `finConf_center_iff`: **FinConf for one column is the family of coupled questions**. No nonzero
   finite configuration has an eventually periodic center column iff `CQ ω` holds for every
@@ -148,6 +148,10 @@ theorem CQ_iff_no_finite_config (ω : Nat → Bool) :
     by_cases hn : p < 0
     · rw [if_pos hn]; exact hW₁ p (by omega)
     · rw [if_neg hn, if_neg (by omega)]; exact hW₂ _ (by omega)
+
+/-- For the alternating column the coupled question is `CQ01`. -/
+theorem CQ_altCol_iff_CQ01 : CQ Rule30PeriodTwoCoupled.altCol ↔ Rule30PeriodTwoCoupled.CQ01 :=
+  (CQ_iff_no_finite_config _).trans CQ01_iff_no_finite_alternating.symm
 
 /-- The zero configuration stays zero. -/
 theorem evol_zero {y : Int → Bool} (hz : ∀ p, y p = false) : ∀ t p, evol y t p = false

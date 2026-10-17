@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 141 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 142 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -171,7 +171,7 @@ files. The rows follow the order of Section 3.
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Stated | `problem1_iff_not_LRS_zero_set` |
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
-| 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Stated; sufficient direction proved (library) | `problem1_iff_transcendental_Q`; `Transcendence.problem1_of_transcendental` |
+| 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
 | 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated | `problem1_iff_natural_boundary` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
@@ -201,8 +201,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 47 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 20 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 48 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 21 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -213,8 +213,9 @@ batch 2, and 20 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), [54] in
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean), [39] in [Lagrange](Rule30Equivalents/Lagrange.lean),
-[49] in [Minkowski](Rule30Equivalents/Minkowski.lean), and [40] in
-[ContextFree](Rule30Equivalents/ContextFree.lean). One more, [7], is proved in the core catalog and
+[49] in [Minkowski](Rule30Equivalents/Minkowski.lean), [40] in
+[ContextFree](Rule30Equivalents/ContextFree.lean), and [38] in
+[AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
 form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
@@ -222,8 +223,10 @@ through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean
 ([Minkowski](Rule30Equivalents/Minkowski.lean)). [47] is proved through the Mignosi–Restivo–Salemi theorem
 ([GoldenPowers](Rule30Equivalents/GoldenPowers.lean)). [40] is proved through the pumping lemma for
 context-free languages, which the library proves for every grammar
-([ContextFree](Rule30Equivalents/ContextFree.lean)). 4 forms are stated, and for 2 of them, [38] and [42],
-the direction "the form implies Problem 1" is proved. 2 forms are sketches.
+([ContextFree](Rule30Equivalents/ContextFree.lean)). [38] is proved through "algebraic ⟹ D-finite"
+and [31], without Fatou's theorem ([AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean)). 3 forms
+are stated, [41], [42] and [45], and for [42] and [45] the direction "the form implies Problem 1" is
+proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1062,21 +1065,33 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   [Sta80], then apply [31].
 - *The characteristic matters.* Over F_p(z), algebraic ⟺ p-automatic (Christol). So transcendence
   over F₂(z) is strictly stronger than Problem 1 (Section 4).
-- *Difficulty.* Hard: it needs Fatou's theorem, or "algebraic ⟹ D-finite".
-- *Lean.* The sufficient direction is proved in the library, over every field:
-  `Transcendence.problem1_of_transcendental`, from `isAlgebraic_of_eventuallyPeriodic` (a rational
-  series P/Q satisfies Q·s − P = 0 over K(X)). The equivalence is stated. It needs
-  `open scoped RatFunc` for the algebra RatFunc ℚ → LaurentSeries ℚ.
+- *Difficulty.* Moderate along the D-finite route; Fatou's theorem is not needed.
+- *Lean.* Proved in the library ([AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean)).
 
   ```lean
-  open scoped RatFunc in
-  theorem problem1_iff_transcendental_Q : Rule30Prize.Problem1 ↔
-      Transcendental (RatFunc ℚ) ((series ℚ : PowerSeries ℚ) : LaurentSeries ℚ)
+  theorem problem1_iff_transcendental : Rule30Prize.Problem1 ↔
+      Transcendental (RatFunc ℚ) ((LinearRelations.series ℚ c : PowerSeries ℚ) : ℚ⸨X⸩)
   ```
 
+  - The sufficient direction, over every field, is `Transcendence.problem1_of_transcendental`, from
+    `isAlgebraic_of_eventuallyPeriodic` (a rational series P/Q satisfies Q·s − P = 0 over K(X)).
+  - `exists_dfinite_of_isAlgebraic`: over a field of characteristic zero, a power series F algebraic
+    over K[X] is D-finite [Com64], [Sta80].
+    - Take P of least degree d with P(F) = 0. Then P_Y(F) ≠ 0, and the chain rule gives
+      P_Y(F)·F′ = −P^∂(F), where P^∂ differentiates the coefficients.
+    - P_Y(F) is algebraic, so P_Y(F)·G(F) = r with r ∈ K[X] nonzero (Mathlib's
+      `IsAlgebraic.exists_nonzero_eq_adjoin_mul`). Hence r·F′ ∈ K[X][F], and by induction
+      r^m·F^(k) ∈ K[X][F] for every k.
+    - A power of the leading coefficient of P puts each element of K[X][F] into the K[X]-span of
+      1, F, …, F^(d−1). So d + 1 scaled derivatives lie in a module spanned by d elements, and the
+      strong rank condition makes them linearly dependent.
+  - `isAlgebraic_polynomial_of_isAlgebraic`: algebraic over ℚ(X) as a Laurent series means algebraic
+    over ℚ[X] as a power series. Then `DFinite.eventuallyPeriodic_of_dFinite` ([31]) finishes.
+
 - *Mathlib.* `Transcendental`, `IsAlgebraic`, `RatFunc`, `LaurentSeries`, `RatFunc.coeToLaurentSeries`
-  and the scoped instance `RatFunc.liftAlgebra`. Missing: Fatou's theorem and "algebraic ⟹ D-finite".
-- *Sources.* [Fat06]; [Sta80]; [BC17].
+  and the scoped instance `RatFunc.liftAlgebra`. Missing: Fatou's theorem, and "algebraic ⟹ D-finite"
+  (proved here).
+- *Sources.* [Fat06]; [Com64]; [Sta80]; [BC17].
 
 **[28] nlfsr: nonlinear feedback shift registers and maximum-order complexity.**
 - *Statement.* Problem 1 ⟺ each of:
@@ -2490,6 +2505,8 @@ Algebra, power series and coding theory
 - [BC17] J. P. Bell, S. Chen, Power series with coefficients from a finite set, J. Combin. Theory
   Ser. A (2017), arXiv:1606.04986.
 - [Sta80] R. P. Stanley, Differentiably finite power series, European J. Combin. 1 (1980) 175–188.
+- [Com64] L. Comtet, Calcul pratique des coefficients de Taylor d'une fonction algébrique, Enseign.
+  Math. 10 (1964) 267–270.
 - [Fat06] P. Fatou, Séries trigonométriques et séries de Taylor, Acta Math. 30 (1906) 335–400.
 - [Sze22] G. Szegő, Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten, Sitzungsber.
   Preuss. Akad. Wiss. (1922) 88–91.

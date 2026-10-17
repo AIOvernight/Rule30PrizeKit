@@ -10,8 +10,8 @@ eventually periodic, `C(X)` would be a rational function, hence algebraic over `
 * `isAlgebraic_of_eventuallyPeriodic`: for every field `K`, an eventually periodic `b` has a
   generating function that is algebraic (indeed of degree `1`) over `K(X)`.
 * `problem1_of_transcendental` (catalog [38]): if `C(X)` is transcendental over `ℚ(X)`, or over
-  `K(X)` for any field `K`, Problem 1 holds. The converse over `ℚ` is Fatou's theorem (1906), or
-  Stanley's "algebraic ⟹ D-finite" combined with `Holonomic.problem1_iff_not_pRecursive`.
+  `K(X)` for any field `K`, Problem 1 holds. The converse over `ℚ` is Fatou's theorem (1906); the
+  library proves it instead through "algebraic ⟹ D-finite" and [31], in `AlgebraicDFinite`.
 * `problem1_of_transcendental_F2_or_F3` (catalog [42]): the same if `C(X)` is transcendental over
   `F₂(X)` or over `F₃(X)`. By Christol's theorem the converse needs Cobham's theorem.
 

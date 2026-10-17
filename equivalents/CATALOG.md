@@ -2195,8 +2195,8 @@ with Turing machines reading n. Notes:
 8. **A uniformity hierarchy** (CA-structure survey). LHC ⟹ NumberLike ⟹ FinConf ⟹ Problem 1
    (Section 4). At period 2 one rung is exact: CQ01 holds iff no finite configuration has center
    column 1, 0, 1, 0, … from time 0 (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`). Every classical partial result (Jen; Kopra's width 2; Condrey's period 1), the black-run
-   exclusions (`Rule30FiniteBlackRuns`) and every project reduction are uniform over finite
-   rows. So is the periodicity of the diagonals (item 9). A proof of Problem 1 that does not
+   and white-run exclusions (`Rule30FiniteBlackRuns`, `Rule30FiniteWhiteRuns`) and every project
+   reduction are uniform over finite rows. So is the periodicity of the diagonals (item 9). A proof of Problem 1 that does not
    also prove FinConf must use something specific to the seed's orbit, and the odometer
    structure of its right edge is not such a thing.
 9. **Odometer and diagonals.** In the frame of the right edge, the orbit closure of the seed is the

@@ -23,3 +23,4 @@ import Rule30Equivalents.CoupledHalves
 import Rule30Equivalents.TailLanguage
 import Rule30Equivalents.TFunction
 import Rule30Equivalents.TFunctionCycles
+import Rule30Equivalents.DFinite

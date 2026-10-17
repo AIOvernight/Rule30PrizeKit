@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 41 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 122 theorems named `problem1_iff_*`.
+- 41 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 123 theorems named `problem1_iff_*`.
 - For 4 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The fifteen later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction and TFunctionCycles) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The sixteen later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles and DFinite) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -34,6 +34,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base, and of the Cantor function `cantorFunction (1/b) c`. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
 | [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) | no Büchi automaton accepts exactly the center column: {c} is not ω-regular | `problem1_iff_not_omega_regular`, `eventuallyPeriodic_iff_omegaRegular_singleton` |
 | [Holonomic](Rule30Equivalents/Holonomic.lean) | c satisfies no recurrence Σ pᵢ(n)·c(n + i) = 0, from any point on, with polynomial coefficients not all zero (c is not P-recursive) | `problem1_iff_not_pRecursive`, `eventuallyPeriodic_iff_pRecursive` |
+| [DFinite](Rule30Equivalents/DFinite.lean) | Σ c(t) Xᵗ is not D-finite over ℚ(X): it satisfies no linear differential equation Σ qᵢ(X)·F⁽ⁱ⁾ = 0 with polynomial coefficients not all zero | `problem1_iff_not_dFinite`, `eventuallyPeriodic_iff_dFinite` |
 | [TailLanguage](Rule30Equivalents/TailLanguage.lean) | the number of words occurring infinitely often in c is strictly increasing in their length: no Rauzy graph of the tail language is a single cycle. The two-sided subshift with that language is infinite | `problem1_iff_tail_strictMono`, `eventuallyPeriodic_iff_tail_flat`, `problem1_iff_tailSubshift_infinite` |
 | [CoupledHalves](Rule30Equivalents/CoupledHalves.lean) | no solution of the causal system u(t+1) = rule(left half driven by u at −1, u(t), right half driven by u at 1), u(0) = 1, is eventually periodic; its only solution is the center column | `problem1_iff_coupled_halves`, `eq_center_of_solves` |
 | [LempelZiv](Rule30Equivalents/LempelZiv.lean) | the Lempel–Ziv (1976) complexity of the prefixes of c is unbounded | `problem1_iff_lz_unbounded`, `eventuallyPeriodic_iff_lz_bounded` |

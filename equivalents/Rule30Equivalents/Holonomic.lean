@@ -26,7 +26,7 @@ periodicity (`eventuallyPeriodic_of_const_relation`).
 This is the elementary half of the classical picture: a P-recursive sequence with finitely many
 values has a rational generating function (van der Poorten and Shparlinski 1996), and P-recursive
 is equivalent to D-finite (Stanley 1980), so Problem 1 also says that `∑ c(t) Xᵗ` is not D-finite.
-The D-finite form is not proved here.
+The D-finite form is proved in `DFinite`.
 
 Sources: A. J. van der Poorten and I. E. Shparlinski, *On linear recurrence sequences with
 polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155; R. P. Stanley, *Differentiably

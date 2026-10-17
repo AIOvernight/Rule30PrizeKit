@@ -123,15 +123,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
   [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean),
   [LempelZiv](Rule30Equivalents/LempelZiv.lean), [CoupledHalves](Rule30Equivalents/CoupledHalves.lean),
-  [TailLanguage](Rule30Equivalents/TailLanguage.lean), [TFunction](Rule30Equivalents/TFunction.lean) and
-  [TFunctionCycles](Rule30Equivalents/TFunctionCycles.lean).
+  [TailLanguage](Rule30Equivalents/TailLanguage.lean), [TFunction](Rule30Equivalents/TFunction.lean),
+  [TFunctionCycles](Rule30Equivalents/TFunctionCycles.lean) and [DFinite](Rule30Equivalents/DFinite.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 131 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 132 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -169,7 +169,7 @@ files. The rows follow the order of Section 3.
 | 44 | linear-relations | linear algebra | the shifts σⁿc are linearly independent over any field; their span is infinite-dimensional; no polynomial in σ kills c | Proved (library) | `LinearRelations.problem1_iff_shifts_linearIndependent`, `LinearRelations.problem1_iff_not_torsion` |
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Stated | `problem1_iff_not_LRS_zero_set` |
-| 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library) for the recurrence form; Stated (D-finite) | `Holonomic.problem1_iff_not_pRecursive` |
+| 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Stated; sufficient direction proved (library) | `problem1_iff_transcendental_Q`; `Transcendence.problem1_of_transcendental` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
 | 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated | `problem1_iff_natural_boundary` |
@@ -205,15 +205,14 @@ batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
-[Expansions](Rule30Equivalents/Expansions.lean), [31] (the recurrence form) in
-[Holonomic](Rule30Equivalents/Holonomic.lean), [36] (the Büchi form) in
+[Expansions](Rule30Equivalents/Expansions.lean), [31] in [Holonomic](Rule30Equivalents/Holonomic.lean)
+(the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] (the Büchi form) in
 [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [48] (β = 1 + √2) in
 [PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
-Lüroth form is a sketch; for [31] the D-finite form and for [36] the MSO form
-are stated. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
+Lüroth form is a sketch; for [36] the MSO form is stated. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -995,7 +994,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   from `Holonomic.eventuallyPeriodic_iff_pRecursive`. The proof avoids the estimate above: past some
   point every window recurs, so for each window a the polynomial Σ aᵢ pᵢ has infinitely many roots
   and vanishes, and its top coefficients give a constant-coefficient recurrence. The D-finite form
-  is stated.
+  is proved in [DFinite](Rule30Equivalents/DFinite.lean): `DFinite.problem1_iff_not_dFinite`, from
+  `eventuallyPeriodic_iff_dFinite`. An eventually periodic column has a rational series G/H, which
+  solves H G · F′ − (G′H − G H′) · F = 0. Conversely, take the largest order i₀ with q_{i₀} ≠ 0 and a
+  bound K on the degrees. Coefficient t + K of the equation is a polynomial in t once the window
+  b(t), …, b(t + K + r) is fixed. A recurring window makes it vanish identically, and its
+  coefficient of t^{i₀} is the constant-coefficient relation Σ_{m ≤ K} q_{i₀, K−m} · b(t + i₀ + m) = 0.
 
   ```lean
   theorem problem1_iff_not_pRecursive : Rule30Prize.Problem1 ↔

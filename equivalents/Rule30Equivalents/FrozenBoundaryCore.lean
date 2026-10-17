@@ -26,6 +26,16 @@ conjecture for these three steps follows from the conjecture for `Φ` and `b`. B
 `FrozenBoundary.genuineFrozen_iff_finConfRows` it therefore follows from FinConf.
 `noPeriodicReadout_101_black`: the same holds for `(1,0,1)` on seeds whose bit `1` is black.
 
+**The core as switching boundaries.** Above its two edge bits, each core step applies the genuine
+steps in a fixed cycle. In the language of `FrozenBoundary` it is rule 30 on a half-line whose frozen
+boundary switches periodically between genuine ones.
+* `step_101_four_mul`, `step_101_four_mul_add_one`, `step_101_two_steps`: the white-blinking edge
+  alternates `Φ` and `b`, so two of its steps are `b ∘ Φ`.
+* `step_111_four_mul` and its three companions, `step_111_four_steps`: `(1,1,1)` cycles through
+  `Φ, a, a, b`, so four of its steps are `b ∘ a ∘ a ∘ Φ`.
+* Both products lie in the automaton group 2369. FinConf is the case of a boundary that never
+  switches.
+
 **The core.** `frozenBoundaryConjecture_iff_core`: the frozen-boundary conjecture holds iff FinConf
 holds, the white-blinking edge of `(1,0,1)` has no eventually periodic readout (`WhiteBlinking`:
 bit `1` white, bit `0` blinking), and neither has the step `(1,1,1)`. Earlier computations, which
@@ -365,5 +375,89 @@ theorem noPeriodicReadout_of_finConfRows (hF : FinConfRows) :
     noPeriodicReadout_011 hΦ hb⟩
   rw [step_white]
   exact hΦ
+
+/-! ### The core: genuine boundaries switching periodically -/
+
+theorem Phi_four_mul (y : ℕ) : Phi (4 * y) = 2 * (2 * Phi y) := by
+  rw [show 4 * y = 2 * (2 * y) by omega, Phi_two_mul, Phi_two_mul]
+
+theorem Phi_four_mul_add_one (y : ℕ) : Phi (4 * y + 1) = 2 * (2 * Phi y ^^^ 3) + 1 := by
+  rw [show 4 * y + 1 = 2 * (2 * y) + 1 by omega, Phi_two_mul_add_one, PhiS_three, if_pos (by omega),
+    Phi_two_mul]
+
+theorem Phi_four_mul_add_two (y : ℕ) : Phi (4 * y + 2) = 2 * (2 * PhiS 3 y + 1) := by
+  rw [show 4 * y + 2 = 2 * (2 * y + 1) by omega, Phi_two_mul, Phi_two_mul_add_one]
+
+theorem Phi_four_mul_add_three (y : ℕ) :
+    Phi (4 * y + 3) = 2 * ((2 * PhiS 3 y + 1) ^^^ 1) + 1 := by
+  rw [show 4 * y + 3 = 2 * (2 * y + 1) + 1 by omega, Phi_two_mul_add_one, PhiS_three,
+    if_neg (by omega), Phi_two_mul_add_one]
+
+/-- **The white-blinking edge applies `Φ` and `b` in turn** to the bits above the edge:
+`(1,0,1)(4y) = 4·Φ(y) + 1` and `(1,0,1)(4y + 1) = 4·b(y)`. -/
+theorem step_101_four_mul (y : ℕ) : step true false true (4 * y) = 4 * Phi y + 1 := by
+  rw [step_of_even _ _ _ (by omega), Phi_four_mul, show 4 * Phi y + 1 = 2 * (2 * Phi y) + 1 by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, testBit_one_eq,
+    Bool.false_eq_true, ↓reduceIte, Nat.add_zero]
+  rcases j with _ | _ | j <;> simp
+
+theorem step_101_four_mul_add_one (y : ℕ) :
+    step true false true (4 * y + 1) = 4 * step true false false y := by
+  rw [step_b, PhiS_one, step_of_odd _ _ _ (by omega), Phi_four_mul_add_one,
+    show 4 * (Phi y ^^^ 1) = 2 * (2 * (Phi y ^^^ 1)) by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, testBit_one_eq,
+    ↓reduceIte]
+  rcases j with _ | _ | _ | j <;> simp [testBit_three_eq]
+
+/-- **Step `(1,1,1)` cycles through `Φ, a, a, b`** on the bits above the edge, with edge states
+`0 → 3 → 2 → 1 → 0`. -/
+theorem step_111_four_mul (y : ℕ) : step true true true (4 * y) = 4 * Phi y + 3 := by
+  rw [step_of_even _ _ _ (by omega), Phi_four_mul,
+    show 4 * Phi y + 3 = 2 * (2 * Phi y + 1) + 1 by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, ↓reduceIte]
+  rcases j with _ | _ | j <;> simp [testBit_three_eq]
+
+theorem step_111_four_mul_add_three (y : ℕ) :
+    step true true true (4 * y + 3) = 4 * step true true false y + 2 := by
+  rw [step_a, step_of_odd _ _ _ (by omega), Phi_four_mul_add_three,
+    show 4 * PhiS 3 y + 2 = 2 * (2 * PhiS 3 y + 1) by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, testBit_one_eq,
+    ↓reduceIte]
+  rcases j with _ | _ | _ | j <;> simp [testBit_three_eq]
+
+theorem step_111_four_mul_add_two (y : ℕ) :
+    step true true true (4 * y + 2) = 4 * step true true false y + 1 := by
+  rw [step_a, step_of_even _ _ _ (by omega), Phi_four_mul_add_two,
+    show 4 * PhiS 3 y + 1 = 2 * (2 * PhiS 3 y) + 1 by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, ↓reduceIte]
+  rcases j with _ | _ | _ | j <;> simp [testBit_three_eq]
+
+theorem step_111_four_mul_add_one (y : ℕ) :
+    step true true true (4 * y + 1) = 4 * step true false false y := by
+  rw [step_b, PhiS_one, step_of_odd _ _ _ (by omega), Phi_four_mul_add_one,
+    show 4 * (Phi y ^^^ 1) = 2 * (2 * (Phi y ^^^ 1)) by omega]
+  apply Nat.eq_of_testBit_eq; intro j
+  simp only [Nat.testBit_xor, testBit_two_mul, testBit_two_mul_add_one, testBit_one_eq,
+    ↓reduceIte]
+  rcases j with _ | _ | _ | j <;> simp [testBit_three_eq]
+
+/-- Two steps of the white-blinking edge are `b ∘ Φ`, an element of the automaton group 2369. -/
+theorem step_101_two_steps (y : ℕ) :
+    (step true false true)^[2] (4 * y) = 4 * step true false false (Phi y) := by
+  show step true false true (step true false true (4 * y)) = _
+  rw [step_101_four_mul, step_101_four_mul_add_one]
+
+/-- Four steps of `(1,1,1)` are `b ∘ a ∘ a ∘ Φ`, an element of the automaton group 2369. -/
+theorem step_111_four_steps (y : ℕ) :
+    (step true true true)^[4] (4 * y) =
+      4 * step true false false (step true true false (step true true false (Phi y))) := by
+  show step true true true (step true true true (step true true true (step true true true (4 * y)))) = _
+  rw [step_111_four_mul, step_111_four_mul_add_three, step_111_four_mul_add_two,
+    step_111_four_mul_add_one]
 
 end Rule30Equivalents.FrozenBoundaryCore

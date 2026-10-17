@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 136 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 137 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -159,7 +159,7 @@ files. The rows follow the order of Section 3.
 | 11 | continued-fraction | real numbers | the continued fraction of x₂ does not terminate | Proved (library) | `NumberTheory.problem1_iff_cf_not_terminates` |
 | 12 | dirichlet-liouville | Diophantine approximation | infinitely many rationals q have abs(x₂ − q) < 1/den(q)²; `LiouvilleWith 2 x₂` | Proved (library) | `NumberTheory.problem1_iff_dirichlet`, `NumberTheory.problem1_iff_liouvilleWith_two` |
 | 10 | circle-rotation | circle dynamics | x₂ has infinite order in ℝ/ℤ; its multiples are dense; it is not preperiodic for doubling | Proved (library) | `NumberTheory.problem1_iff_infinite_order`, `NumberTheory.problem1_iff_dense_multiples`, `NumberTheory.problem1_iff_doubling_not_preperiodic` |
-| 39 | lagrange | real numbers | θ = [1+c(0); 1+c(1), 1+c(2), …] is not a quadratic irrational | Stated | `problem1_iff_not_quadratic` |
+| 39 | lagrange | real numbers | θ = [1+c(0); 1+c(1), 1+c(2), …] is not a quadratic irrational | Proved (library) | `Lagrange.problem1_iff_not_quadratic`, `Lagrange.digit_periodic_iff` |
 | 49 | minkowski | real numbers | ?⁻¹(x₂) = [0; 1, r₁, r₂, …] (r_k the run lengths) is not a quadratic irrational | Stated | `problem1_iff_minkowski_not_quadratic` |
 | 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Proved (library), all four | `Expansions.problem1_iff_engel_infinite`, `Expansions.problem1_iff_sylvester_infinite`, `Expansions.problem1_iff_factorial_infinite`, `Expansions.problem1_iff_luroth_not_eventuallyPeriodic` |
 | 48 | pisot-base | real numbers | Σ c(t)β^−(t+1) ∉ ℚ(β) for a Pisot number β > 2, such as 1 + √2 | Proved (library) for β = 1 + √2 | `PisotBase.problem1_iff_not_mem_Q_sqrt_two` |
@@ -201,8 +201,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 43 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 15 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 44 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 16 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -215,7 +215,8 @@ batch 2, and 15 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
 form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
-Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). 8 forms are stated, and for 3 of them, [38], [42] and [47], the direction "the
+Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
+through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean)). 7 forms are stated, and for 3 of them, [38], [42] and [47], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -661,7 +662,18 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   form is not a corollary of [1]: it needs its own hub, "eventually periodic continued fraction ⟺
   quadratic irrational" (critic).
 - *Difficulty.* Hard. Grep finds neither direction of Euler–Lagrange in Mathlib.
-- *Lean.* Stated.
+- *Lean.* Proved in the library (2026-10-18): `Lagrange.problem1_iff_not_quadratic`, with
+  `θ = Lagrange.theta`, the limit of the convergents of `[1 + c(0); 1 + c(1), …]`.
+  - `Lagrange.digit_periodic_iff` is Euler–Lagrange for every irrational: its digits are eventually
+    periodic iff it satisfies a nontrivial integer quadratic.
+    - Euler: a periodic tail is a fixed point of an integer Möbius map, transported back with
+      determinant ±1.
+    - Lagrange: the leading coefficients `F(Pₙ, Qₙ)` are bounded because `|x Qₙ - Pₙ| ≤ 1/Qₙ`.
+      The discriminant is invariant. So two complete quotients coincide.
+  - `Lagrange.cfValue` builds the number with prescribed digits `bₖ ≥ 1`. It is irrational
+    because Euclid's algorithm terminates on rationals.
+  - The statement below, from the survey, used Mathlib's `GenContFract` convergents. The library
+    uses its own continuants.
 
   ```lean
   noncomputable def θ : ℝ :=

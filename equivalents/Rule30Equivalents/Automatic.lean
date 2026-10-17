@@ -2,32 +2,42 @@ import Rule30Equivalents.OmegaRegular
 import Mathlib.Computability.DFA
 import Mathlib.Order.Filter.AtTopBot.Basic
 import Mathlib.Data.Set.Finite.Range
+import Mathlib.Order.Interval.Finset.Basic
+import Mathlib.Data.Fintype.Pigeonhole
+import Mathlib.Data.Fintype.Powerset
+import Mathlib.Data.Finite.Prod
+import Mathlib.Data.Fintype.Pi
+import Mathlib.Order.Interval.Finset.Nat
 
 /-!
-# Automatic sequences and automatic complexity: two sufficient conditions
+# Automatic sequences and automatic complexity
 
-An eventually periodic sequence is as simple as possible for finite automata in two senses. This
-gives the direction "the form implies Problem 1" of two catalog entries whose converses need deep
-theorems.
+An eventually periodic sequence is as simple as possible for finite automata in two senses.
 
-* **k-automatic sequences** (catalog [42]). `IsAutomatic k f` says that the k-kernel
-  `{n ↦ f(kᵉ n + r) : r < kᵉ}` is finite (Eilenberg's criterion).
-  `isAutomatic_of_eventuallyPeriodic`: an eventually periodic sequence is k-automatic for every
-  `k ≥ 2`. So `problem1_of_not_automatic`: if the center column is not k-automatic for some
-  `k ≥ 2`, Problem 1 holds; `problem1_of_not_two_three_automatic`: the same if it is not both 2- and
-  3-automatic. The converse of the second is Cobham's theorem (1969).
 * **Automatic complexity** (catalog [52]). `AutComplexityLE x K` says that some DFA with `K` states
   accepts `x` and no other word of the same length (Shallit and Wang).
-  `autComplexityLE_of_eventuallyPeriodic`: for an eventually periodic sequence with period `P` from
-  `T`, every prefix has automatic complexity at most `T + P + 1`, through the lasso automaton with a
-  dead state (`lassoDFA`). So `problem1_of_automaticComplexity_tendsto_top`: if the automatic
-  complexity of the prefixes of the center column tends to infinity, Problem 1 holds. The converse
-  needs the Lyndon–Schützenberger theorem on commuting words.
+  `problem1_iff_automaticComplexity_tendsto_top`: **Problem 1 holds iff the automatic complexity of
+  the prefixes of the center column tends to infinity.**
+  - `autComplexityLE_of_eventuallyPeriodic`: with period `P` from `T`, every prefix has automatic
+    complexity at most `T + P + 1`, through the lasso automaton with a dead state (`lassoDFA`).
+  - `eventuallyPeriodic_of_frequently_autComplexityLE`: conversely, if one bound `K` holds for
+    infinitely many prefixes, a single DFA uniquely accepts infinitely many of them (finitely many
+    DFAs on `Fin K`). Some state `q` recurs along its run on `b`, at times `t₀ < t₁ < ⋯`. Swapping
+    the loop `A = b[t₀, t₁)` with a later loop `B = b[t₁, s)` gives another accepted word of the same
+    length, so `B ++ A = A ++ B`. Reading the first `|B|` letters, `b(t₀ + j) = b(t₁ + j)` for
+    `j < |B|`, and `|B|` is unbounded: `b` has period `t₁ - t₀` from `t₀`. No Lyndon–Schützenberger
+    theorem is needed.
+* **k-automatic sequences** (catalog [42]), one direction. `IsAutomatic k f` says that the k-kernel
+  `{n ↦ f(kᵉ n + r) : r < kᵉ}` is finite (Eilenberg's criterion).
+  `isAutomatic_of_eventuallyPeriodic`: an eventually periodic sequence is k-automatic for every
+  `k ≥ 2`. So `problem1_of_not_automatic`: if the center column is not k-automatic for some `k ≥ 2`,
+  Problem 1 holds; `problem1_of_not_two_three_automatic`: the same if it is not both 2- and
+  3-automatic. The converse of the second is Cobham's theorem (1969).
 
-Sources: A. Cobham, *On the base-dependence of sets of numbers recognizable by finite automata*,
-Math. Systems Theory 3 (1969) 186–192; S. Eilenberg, *Automata, Languages, and Machines* A (1974);
-J. Shallit and M.-w. Wang, *Automatic complexity of strings*, J. Autom. Lang. Comb. 6 (2001)
-537–554. Catalog entries [42] and [52].
+Sources: J. Shallit and M.-w. Wang, *Automatic complexity of strings*, J. Autom. Lang. Comb. 6
+(2001) 537–554; A. Cobham, *On the base-dependence of sets of numbers recognizable by finite
+automata*, Math. Systems Theory 3 (1969) 186–192; S. Eilenberg, *Automata, Languages, and Machines*
+A (1974). Catalog entries [42] and [52].
 -/
 
 namespace Rule30Equivalents.Automatic
@@ -186,5 +196,136 @@ theorem problem1_of_automaticComplexity_tendsto_top
   obtain ⟨K, hK⟩ := autComplexityLE_of_eventuallyPeriodic hep
   obtain ⟨N, hN⟩ := Filter.eventually_atTop.1 (h K)
   exact hN N le_rfl (hK N)
+
+/-! ### The converse: bounded automatic complexity forces eventual periodicity -/
+
+/-- The word `b(a), …, b(a + n - 1)`. -/
+def seg (b : ℕ → Bool) (a n : ℕ) : List Bool := (List.range n).map fun i => b (a + i)
+
+theorem seg_add (b : ℕ → Bool) (a m n : ℕ) : seg b a (m + n) = seg b a m ++ seg b (a + m) n := by
+  simp only [seg, List.range_add, List.map_append, List.map_map]
+  congr 1
+  refine List.map_congr_left fun i _ => ?_
+  simp only [Function.comp_apply]
+  congr 1
+  omega
+
+theorem prefixOf_add (b : ℕ → Bool) (m n : ℕ) : prefixOf b (m + n) = prefixOf b m ++ seg b m n := by
+  simp only [prefixOf, seg, List.range_add, List.map_append, List.map_map]
+  rfl
+
+theorem length_seg (b : ℕ → Bool) (a n : ℕ) : (seg b a n).length = n := by simp [seg]
+
+theorem getD_seg (b : ℕ → Bool) (a n : ℕ) {j : ℕ} (hj : j < n) : (seg b a n).getD j false = b (a + j) := by
+  simp [seg, List.getD_eq_getElem?_getD, List.getElem?_range hj]
+
+/-- A DFA on `Fin K` is determined by finitely many data. -/
+instance finite_dfa (K : ℕ) : Finite (DFA Bool (Fin K)) :=
+  Finite.of_injective (fun M : DFA Bool (Fin K) => (M.step, M.start, M.accept)) fun M₁ M₂ h => by
+    cases M₁; cases M₂; simp only [Prod.mk.injEq] at h; obtain ⟨h1, h2, h3⟩ := h; subst h1 h2 h3; rfl
+
+/-- **Bounded automatic complexity forces eventual periodicity.** If some DFA with `K` states
+uniquely accepts infinitely many prefixes of `b`, a state recurs along the run on `b`, and swapping
+two loops at that state gives `B ++ A = A ++ B`; so `b` has period `|A|` from the first visit. -/
+theorem eventuallyPeriodic_of_frequently_autComplexityLE {b : ℕ → Bool} {K : ℕ}
+    (h : ∃ᶠ n in Filter.atTop, AutComplexityLE ((List.range n).map b) K) : EventuallyPeriodic b := by
+  classical
+  -- one DFA uniquely accepts infinitely many prefixes
+  have hN : {n | AutComplexityLE (prefixOf b n) K}.Infinite :=
+    Set.infinite_of_forall_exists_gt fun a => by
+      obtain ⟨n, hn, hA⟩ := Filter.frequently_atTop.1 h (a + 1)
+      exact ⟨n, hA, by omega⟩
+  haveI := hN.to_subtype
+  obtain ⟨D, hD⟩ := Finite.exists_infinite_fiber
+    (fun n : {n | AutComplexityLE (prefixOf b n) K} => Classical.choose n.2)
+  have hDinf : ((Subtype.val) '' ((fun n : {n | AutComplexityLE (prefixOf b n) K} =>
+      Classical.choose n.2) ⁻¹' {D})).Infinite :=
+    (Set.infinite_coe_iff.1 hD).image Subtype.val_injective.injOn
+  have hgood : ∀ k, ∃ n, k ≤ n ∧ UniquelyAccepts D (prefixOf b n) := by
+    intro k
+    obtain ⟨n, ⟨m, hm, rfl⟩, hkn⟩ := hDinf.exists_gt k
+    refine ⟨m, hkn.le, ?_⟩
+    have := Classical.choose_spec m.2
+    rw [show Classical.choose m.2 = D from hm] at this
+    exact this
+  -- a recurring state along the run on `b`
+  let r : ℕ → Fin K := fun t => D.eval (prefixOf b t)
+  obtain ⟨q, hq⟩ := Finite.exists_infinite_fiber r
+  have hqinf : ∀ k, ∃ t, k ≤ t ∧ r t = q := by
+    intro k
+    obtain ⟨t, ht, hkt⟩ := (Set.infinite_coe_iff.1 hq).exists_gt k
+    exact ⟨t, hkt.le, ht⟩
+  obtain ⟨t₀, -, ht₀⟩ := hqinf 0
+  obtain ⟨t₁, ht₁, ht₁q⟩ := hqinf (t₀ + 1)
+  -- the run returns to `q` along each loop
+  have hloop : ∀ u v, u ≤ v → r u = q → r v = q → D.evalFrom q (seg b u (v - u)) = q := by
+    intro u v huv hu hv
+    have e : prefixOf b v = prefixOf b u ++ seg b u (v - u) := by
+      rw [← prefixOf_add, show u + (v - u) = v by omega]
+    have := hv
+    simp only [r, DFA.eval, e, DFA.evalFrom_of_append] at this
+    simp only [r, DFA.eval] at hu
+    rwa [hu] at this
+  -- swapping the loop `A` with a later loop `B`
+  have key : ∀ s, t₁ ≤ s → r s = q → ∀ j, j < s - t₁ → b (t₀ + j) = b (t₁ + j) := by
+    intro s hs hsq j hj
+    obtain ⟨n, hn, hU⟩ := hgood s
+    set A := seg b t₀ (t₁ - t₀) with hAdef
+    set B := seg b t₁ (s - t₁) with hBdef
+    set R := seg b s (n - s) with hRdef
+    have hpre : prefixOf b n = prefixOf b t₀ ++ (A ++ (B ++ R)) := by
+      have e1 : prefixOf b n = prefixOf b s ++ R := by rw [← prefixOf_add, show s + (n - s) = n by omega]
+      have e2 : prefixOf b s = prefixOf b t₁ ++ B := by rw [← prefixOf_add, show t₁ + (s - t₁) = s by omega]
+      have e3 : prefixOf b t₁ = prefixOf b t₀ ++ A := by
+        rw [← prefixOf_add, show t₀ + (t₁ - t₀) = t₁ by omega]
+      rw [e1, e2, e3]
+      simp only [List.append_assoc]
+    have hA := hloop t₀ t₁ (by omega) ht₀ ht₁q
+    have hB := hloop t₁ s hs ht₁q hsq
+    have hstart : D.evalFrom D.start (prefixOf b t₀) = q := ht₀
+    have hacc : prefixOf b t₀ ++ (B ++ (A ++ R)) ∈ D.accepts := by
+      have h1 := hU.1
+      rw [DFA.mem_accepts, DFA.eval, hpre] at h1
+      rw [DFA.mem_accepts, DFA.eval]
+      simp only [DFA.evalFrom_of_append, hstart] at h1 ⊢
+      rw [hA] at h1
+      rw [hB, hA]
+      rwa [hB] at h1
+    have hlen : (prefixOf b t₀ ++ (B ++ (A ++ R))).length = (prefixOf b n).length := by
+      rw [hpre]; simp only [List.length_append]; omega
+    have heq := hU.2 _ hlen hacc
+    rw [hpre] at heq
+    have hBA : B ++ A = A ++ B := by
+      have h1 := List.append_cancel_left heq
+      rw [← List.append_assoc, ← List.append_assoc] at h1
+      exact List.append_cancel_right h1
+    -- read the first `|B|` letters of both sides
+    have hAB : A ++ B = seg b t₀ ((s - t₁) + (t₁ - t₀)) := by
+      rw [hAdef, hBdef, show (s - t₁) + (t₁ - t₀) = (t₁ - t₀) + (s - t₁) by omega, seg_add,
+        show t₀ + (t₁ - t₀) = t₁ by omega]
+    have htake := congrArg (fun l => l.take (s - t₁)) hBA
+    simp only at htake
+    rw [List.take_left' (length_seg b t₁ (s - t₁)), hAB, seg_add,
+      List.take_left' (length_seg b t₀ (s - t₁))] at htake
+    have hget := congrArg (fun l => l.getD j false) htake
+    simp only at hget
+    rw [getD_seg b t₁ _ hj, getD_seg b t₀ _ hj] at hget
+    exact hget.symm
+  refine ⟨t₀, t₁ - t₀, by omega, fun t ht => ?_⟩
+  obtain ⟨s, hs, hsq⟩ := hqinf (t + t₁ + 1)
+  have := key s (by omega) hsq (t - t₀) (by omega)
+  rw [show t₀ + (t - t₀) = t by omega, show t₁ + (t - t₀) = t + (t₁ - t₀) by omega] at this
+  exact this.symm
+
+/-- **Problem 1 ⟺ the automatic complexity of the prefixes of the center column tends to
+infinity** (catalog [52]). -/
+theorem problem1_iff_automaticComplexity_tendsto_top : Rule30Prize.Problem1 ↔
+    ∀ K : ℕ, ∀ᶠ n in Filter.atTop,
+      ¬ AutComplexityLE ((List.range n).map Rule30Prize.center) K := by
+  refine ⟨fun h K => ?_, problem1_of_automaticComplexity_tendsto_top⟩
+  by_contra hK
+  rw [Filter.not_eventually] at hK
+  simp only [not_not] at hK
+  exact h (eventuallyPeriodic_of_frequently_autComplexityLE hK)
 
 end Rule30Equivalents.Automatic

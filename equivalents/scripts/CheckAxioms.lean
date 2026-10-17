@@ -9,6 +9,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Automatic.problem1_of_not_automatic
 #print axioms Rule30Equivalents.Automatic.problem1_of_not_two_three_automatic
 #print axioms Rule30Equivalents.Automatic.problem1_of_automaticComplexity_tendsto_top
+#print axioms Rule30Equivalents.Automatic.problem1_iff_automaticComplexity_tendsto_top
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_base
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_binary
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal

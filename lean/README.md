@@ -47,7 +47,8 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30ZeroBoundaryStripeFamily Rule30EtherTrap Rule30Certificates.EtherTrap{0,1,2,3,4,5} \
     Rule30EtherTrapWidth20 Rule30PeriodTwoLanguage Rule30PeriodTwoWidth5 Rule30PeriodTwoWidth6 \
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
-    Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways; do
+    Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways \
+    Rule30LightCone; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
@@ -85,6 +86,7 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 |---|---|---|---|
 | `Rule30WhiteRunEight` | 2026-10-17 | The words `0^r 1 1` with `r ≥ 8` are excluded, for every transient: `Rule30BlackRuns.no_white_run_11` needs `r ≥ 10`. Proved on 2026-10-15 by the verifier of the white-run exclusion and left out of the catalog; ported here. | `no_white_run_11_ge8` |
 | `Rule30PeriodTwoSideways` | 2026-10-17 | The coupled question `CQ01` in two more forms. It holds iff no configuration with finitely many black cells has center column `1, 0, 1, 0, …` from time 0. Sideways: for every finite right half `R`, one explicit left row `Psi R` (the constrained start whose free bits complement column 1 of the driven right half) has infinitely many black cells; this holds for `R` whenever it holds for the right half two steps later, or whenever column 1 of the driven right half is eventually periodic at the white steps. Exact death: a left row keeps the center alternating exactly until the first depth where it differs from `Psi R`. States the `R = ∅` milestone `CQ01Empty` (**open**). Barrier: from finite configurations the center alternates arbitrarily long, so no ranking through a finite abstraction of configurations decreases at every double step over which the center flips twice. | `CQ01_iff_no_finite_alternating`, `Q01_no_leftfinite_alternating`, `CQ01_iff_Psi`, `not_finSupp_Psi_of_R2`, `exact_death_center`, `truncation_death`, `CQ01Empty_iff`, `no_finite_abstract_ranking_coupled` |
+| `Rule30LightCone` | 2026-10-17 | The locality behind space-efficient evaluation. A cell at time `t` depends only on the initial cells within distance `t`. With space blocks and time steps of width `b`, each block is a fixed function of the three blocks around it one time step earlier, so the center cell at time `m b` is the root of a fan-in-3 tree of `b`-bit blocks with height `m`. This is the shape that Williams's square-root-space simulation passes to Cook–Mertz tree evaluation, about `√n · log n` bits for the center cell at time `n`; neither algorithm is formalized. | `evol_window`, `block_step`, `center_eq_root` |
 | `Rule30ZeroBoundaryWidth56` | 2026-10-17 | `Q01` holds for every start of width ≤ 56: depth 1 turns white at an even time ≤ 100. Kernel-checked on 2026-10-15 and left out of the catalog because of its build cost; ported here with only the names changed. **Not imported by `Ruliology.lean`.** | `q01_width_le_56`, `q01_width_le_56_linear`, `not_inX_of_width_le_56` |
 | `Rule30Certificates/ZeroBoundaryWidth56Chunks0`–`15` | 2026-10-17 | Data: the 1024 chunk checks behind width 56, 64 per file (namespaces `Rule30ZeroBoundaryWidth56.C0`–`C63`). | — |
 

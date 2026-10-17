@@ -17,9 +17,9 @@ soundness is `Rule30ZeroBoundaryLanes.q01_of_chunks`.
 * `q01_width_le_52_linear`: the bound `2 W + 8`.
 * `not_inX_of_width_le_52`: `Q01` restricted to widths `≤ 52` (`¬ Rule30ZeroBoundary.InX x`).
 
-`W ≤ 56` is kernel-checked in `Rule30ZeroBoundaryWidth56` (bound `100`; `1024` chunks in `16`
-modules, about `345` s of kernel time), which `Ruliology.lean` does not import because of its
-build cost.
+`W ≤ 56` was also kernel-checked (`KC.Q01W56.q01_width_le_56`, bound `100`; `1024` chunks in `64`
+files, about `345` s of kernel time). That run, with its build scripts, is not part of this kit:
+it is not in the catalog because of build cost.
 
 Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
 round 2 (`kernel-certify-r2`, target 1); adversarially verified.

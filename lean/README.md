@@ -17,7 +17,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 | Period 1 | **Proved** for every column, and for every nonzero configuration with a leftmost black cell | `Rule30Prize.no_column_eventually_constant`, `center_not_eventually_period_one`, `Rule30FiniteConfigs.no_column_eventually_constant` |
 | Small periods | **Proved:** no eventual period P ≤ 4096 with transient ≤ 8192 | `Rule30Window` |
 | Any period | **Proved:** T + P ≥ 16359 | `Rule30FactorWindow` |
-| Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52, and of width ≤ 56 in `Rule30ZeroBoundaryWidth56`, which `lake build` skips. | `Rule30PeriodTwo`, `Rule30PeriodTwoCoupled`, `Rule30PeriodTwoSideways`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30ZeroBoundaryWidth56`, `Rule30PeriodTwoWidth5/6` |
+| Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52. | `Rule30PeriodTwo`, `Rule30PeriodTwoCoupled`, `Rule30PeriodTwoSideways`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30PeriodTwoWidth5/6` |
 | Least period 3 | Reduced. 001 needs one of AbsorptionT t001, Q001 or C3s001. 011 needs C3w(011). All four are **open**. | `Rule30EtherThree*` |
 | Least period 4 | Reduced to Absorption, the ether-and-wall trap, which is **open**. The pure ether lies in no trap of width ≤ 20. | `Rule30Ether`, `Rule30PeriodFourSkeleton`, `Rule30EtherTrapWidth20` |
 | Longer periods | **Open.** Some words are excluded, for example by long black runs and 30 certified words. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight` |
@@ -90,10 +90,6 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | `Rule30FiniteMaskedJen` | 2026-10-17 | The masked and window forms of Jen's theorem (`Rule30MaskedJen`) for every configuration with a leftmost black cell: if column `i` is eventually periodic, column `i + 1` is not periodic with the same period on the white times of column `i`, and `column i ∨ column (i + 1)` is not eventually periodic; with no periodicity assumed, two times never carry the same (column, or-column) window reaching the left edge; a periodic column has, in every window `[n, n + m)` with `n` past the transient and `m = n + i - lo`, a white time where the next column breaks the period. | `masked_jen`, `orCol_not_eventuallyPeriodic`, `window_jen_col`, `periodic_window` |
 | `Rule30Coupled` | 2026-10-17 | Every period, as coupled questions. In any configuration the two halves evolve as the halves driven by the center column, and the center is updated from its two driven neighbours; conversely, two driven halves glued to a column satisfying that update give a configuration with that center. `CQ ω` (**open** for every nonconstant periodic `ω`): no finite left half and finite right half are coupled to `ω`; it holds iff no finite configuration has center column `ω`. FinConf for one column is exactly the family `CQ ω` over all periodic `ω` with a black cell, and the family implies Problem 1. For the alternating column, `CQ` is `CQ01`. | `left_eq_L`, `right_eq_drv`, `evol_glue`, `CQ_iff_no_finite_config`, `CQ_altCol_iff_CQ01`, `finConf_center_iff`, `problem1_of_CQ` |
 | `Rule30LightCone` | 2026-10-17 | The locality behind space-efficient evaluation. A cell at time `t` depends only on the initial cells within distance `t`. With space blocks and time steps of width `b`, each block is a fixed function of the three blocks around it one time step earlier, so the center cell at time `m b` is the root of a fan-in-3 tree of `b`-bit blocks with height `m`. This is the shape that Williams's square-root-space simulation passes to Cook–Mertz tree evaluation, about `√n · log n` bits for the center cell at time `n`; neither algorithm is formalized. | `evol_window`, `block_step`, `center_eq_root` |
-| `Rule30ZeroBoundaryWidth56` | 2026-10-17 | `Q01` holds for every start of width ≤ 56: depth 1 turns white at an even time ≤ 100. Kernel-checked on 2026-10-15 and left out of the catalog because of its build cost; ported here with only the names changed. **Not imported by `Ruliology.lean`.** | `q01_width_le_56`, `q01_width_le_56_linear`, `not_inX_of_width_le_56` |
-| `Rule30Certificates/ZeroBoundaryWidth56Chunks0`–`15` | 2026-10-17 | Data: the 1024 chunk checks behind width 56, 64 per file (namespaces `Rule30ZeroBoundaryWidth56.C0`–`C63`). | — |
-
-`lake build` skips `Rule30ZeroBoundaryWidth56`. To build it, run `lake build Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth56Chunks$i` for `i = 0, …, 15`, one at a time, then `lake build Ruliology.CellularAutomata.Rule30ZeroBoundaryWidth56`. On 2026-10-17 each chunk module took about 22 s and 3.1 GB on an Apple M3 Max, about 6 minutes in all.
 
 ## Which modules predate the attempt
 
@@ -174,7 +170,7 @@ All modules live in `Ruliology/CellularAutomata/`. Theorems live in the namespac
 | `Rule30PeriodTwoWidth5` | final | Period-2 constraints at strip width 5; for example, the free bits never spell `00` or `11111`. | `col1_constraints`, `free_bit_constraints` |
 | `Rule30PeriodTwoWidth6` | final | The same at strip width 6, with more forbidden patterns. | `col1_constraints`, `free_bit_constraints` |
 
-Q01 for width ≤ 56 is in `Rule30ZeroBoundaryWidth56`, under [Added in the kit](#added-in-the-kit).
+Q01 was also kernel-checked for width ≤ 56 during the attempt. That finite check is not part of this kit.
 
 ### Ether and period 4
 

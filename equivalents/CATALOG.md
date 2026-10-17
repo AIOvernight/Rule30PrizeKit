@@ -1919,7 +1919,7 @@ Each statement below is implied by Problem 1.
   - Any eventual period has T + P ≥ 16359 (`Rule30FactorWindow.transient_add_period_ge`,
     kernel-checked).
   - P = 2 is reduced to Q01 (`not_eventually_period_two_of_Q01`) and to CQ01. Q01 is proved for
-    starts of width ≤ 52 (`q01_width_le_52`) and ≤ 56 (`q01_width_le_56`). CQ01 says that no finite
+    starts of width ≤ 52 (`q01_width_le_52`). CQ01 says that no finite
     configuration keeps the center alternating from time 0
     (`Rule30PeriodTwoSideways.CQ01_iff_no_finite_alternating`); equivalently, for every finite right
     half R one explicit left row Ψ(R) has infinitely many black cells (`CQ01_iff_Psi`), and a left

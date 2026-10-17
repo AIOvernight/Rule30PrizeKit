@@ -57,8 +57,7 @@ byte except one docstring sentence in `Rule30ZeroBoundaryWidth52`, and `SHA256SU
 SHA-256 hashes.
 
 It then imports the modules added in the kit since; `README.md` lists them under "Added in the
-kit". `Rule30ZeroBoundaryWidth56` and its 16 data modules are added too, but not imported here:
-they take about 6 minutes of kernel time.
+kit".
 
 Core Lean 4.30.0, no dependencies. `README.md` maps the modules, names the headline theorems and
 says how to build.

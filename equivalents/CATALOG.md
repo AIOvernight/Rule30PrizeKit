@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 144 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 145 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -173,7 +173,7 @@ files. The rows follow the order of Section 3.
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
-| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated | `problem1_iff_natural_boundary` |
+| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
@@ -229,7 +229,7 @@ and [31], without Fatou's theorem ([AlgebraicDFinite](Rule30Equivalents/Algebrai
 proved through the Skolem–Mahler–Lech theorem, which the library proves in the p-adic way, with
 Strassmann's theorem ([Strassmann](Rule30Equivalents/Strassmann.lean),
 [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean)). 2 forms are stated, [41] and [42], and
-for [42] the direction "the form implies Problem 1" is proved. 2 forms are sketches.
+for both the direction "the form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1162,7 +1162,11 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   Conversely, an EP sequence gives P(z)/(1 − z^P), which is meromorphic with poles only at roots of
   unity. Then apply [17] over ℂ.
 - *Difficulty.* Hard: it needs Szegő's theorem or Pólya–Carlson.
-- *Lean.* Stated.
+- *Lean.* Stated. The sufficient direction is proved in
+  [NaturalBoundary](Rule30Equivalents/NaturalBoundary.lean): `problem1_of_natural_boundary`. If c has
+  period P from time T, then on the unit disk (1 − z^P)·f(z) is a polynomial (`mul_genFun_eq`), so f
+  continues as a rational function across the circle at z₀ = e^(iπ/P), where 1 − z₀^P = 2
+  (`exists_continuation`).
 
   ```lean
   noncomputable def genFun (z : ℂ) : ℂ := ∑' t, (if Rule30Prize.center t then (1 : ℂ) else 0) * z ^ t

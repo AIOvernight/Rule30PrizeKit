@@ -1,6 +1,7 @@
 import Rule30Equivalents.ShiftOrbit
 import Rule30Equivalents.TransformsSeeds
 import Rule30Equivalents.Symmetry
+import Rule30Equivalents.Lyndon
 import Mathlib.Data.Nat.Nth
 import Mathlib.NumberTheory.Real.GoldenRatio
 
@@ -17,13 +18,16 @@ import Mathlib.NumberTheory.Real.GoldenRatio
   `eventuallyPeriodic_iff_gap`: a `Bool` sequence with infinitely many `true` values is eventually
   periodic iff the gaps between its `true` values are.
 
-Three sufficient conditions: one direction of catalog entries whose other direction needs a
+* `problem1_iff_late_long_unbordered_factors` (catalog [51]): Problem 1 holds iff every tail has
+  unbordered factors of unbounded length. The sufficient direction is
+  `problem1_of_late_long_unbordered_factors`. The converse is the Ehrenfeucht–Silberger theorem for
+  infinite words, `Lyndon.eventuallyPeriodic_of_bordered`, proved through the Lyndon factorization.
+
+Two sufficient conditions: one direction of catalog entries whose other direction needs a
 classical theorem that Mathlib lacks, or a longer argument:
 * `problem1_of_infinitely_many_prefixes_without_golden_power` (catalog [47]): if infinitely many
   prefixes end with no repetition of exponent at least `φ²`, Problem 1 holds. The converse is the
   theorem of Mignosi, Restivo and Salemi (1998).
-* `problem1_of_late_long_unbordered_factors` (catalog [51]): if every tail has unbordered factors of
-  unbounded length, Problem 1 holds. The converse rests on Duval's theorem (Holub and Nowotka).
 * `problem1_of_lz_unbounded` (catalog [37]): if the Lempel–Ziv (1976) complexity of the prefixes is
   unbounded, Problem 1 holds (`lzComplexity_le_of_eventuallyPeriodic`). The converse needs the
   critic's compactness argument over the cut points of bounded histories.
@@ -305,9 +309,7 @@ theorem problem1_of_infinitely_many_prefixes_without_golden_power :
 
 /-! ### [51] Unbordered factors: the sufficient direction -/
 
-/-- A word is bordered when a nonempty proper prefix of it is also a suffix. -/
-def Bordered (w : List Bool) : Prop :=
-  ∃ k, 0 < k ∧ k < w.length ∧ w.take k = w.drop (w.length - k)
+open Lyndon (Bordered)
 
 /-- In a purely periodic stretch with period `P`, every factor longer than `P` is bordered. -/
 theorem bordered_of_periodic {b : ℕ → Bool} {T P : ℕ} (hP : 0 < P)
@@ -331,6 +333,22 @@ theorem problem1_of_late_long_unbordered_factors :
   rintro h ⟨T, P, hP, hper⟩
   obtain ⟨i, ℓ, hi, hℓ, hnb⟩ := h T (P + 1)
   exact hnb (bordered_of_periodic hP hper hi (by omega))
+
+/-- **Problem 1 ⟺ every tail has unbordered factors of unbounded length** (catalog [51]). The
+converse direction is the Ehrenfeucht–Silberger theorem for infinite words. -/
+theorem problem1_iff_late_long_unbordered_factors : Rule30Prize.Problem1 ↔
+    ∀ n L : ℕ, ∃ i ℓ : ℕ, n ≤ i ∧ L ≤ ℓ ∧
+      ¬ Bordered ((List.range ℓ).map fun j => Rule30Prize.center (i + j)) := by
+  refine ⟨fun hP n L => ?_, problem1_of_late_long_unbordered_factors⟩
+  by_contra hall
+  push Not at hall
+  obtain ⟨T, P, hP0, hper⟩ := Lyndon.eventuallyPeriodic_of_bordered
+    (x := fun t => Rule30Prize.center (n + t)) (L := L) fun i ℓ hℓ => by
+      have := hall (n + i) ℓ (by omega) hℓ
+      simpa [Lyndon.factor, Nat.add_assoc] using this
+  exact hP ⟨n + T, P, hP0, fun t ht => by
+    have := hper (t - n) (by omega)
+    simpa [show n + (t - n + P) = t + P by omega, show n + (t - n) = t by omega] using this⟩
 
 /-! ### [37] Lempel–Ziv complexity: the sufficient direction -/
 

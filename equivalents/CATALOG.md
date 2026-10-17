@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 135 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 136 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -183,7 +183,7 @@ files. The rows follow the order of Section 3.
 | 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library), all three forms | `WordsAutomata.problem1_iff_tail_complexity`, `TailLanguage.problem1_iff_tail_strictMono`, `TailLanguage.problem1_iff_tailSubshift_infinite` |
 | 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths` |
 | 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Stated; sufficient direction proved (library) | `problem1_iff_infinitely_many_prefixes_without_golden_power`; `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power` |
-| 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Stated; sufficient direction proved (library) | `problem1_iff_late_long_unbordered_factors`; `WordForms.problem1_of_late_long_unbordered_factors` |
+| 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Proved (library) | `WordForms.problem1_iff_late_long_unbordered_factors`, `Lyndon.eventuallyPeriodic_of_bordered` |
 | 19 | simple-transforms | words | ¬c, the shifts of c, the XOR derivative and the running parity are not EP | Proved (library) | `Symmetry.problem1_iff_complement`, `TransformsSeeds.problem1_iff_xor_derivative` |
 | 20 | decimations | words | for each k some decimation c(kn+r) is not EP; every modulus has a non-constant residue class | Proved (library) | `TransformsSeeds.problem1_iff_decimation`, `TransformsSeeds.problem1_iff_nonconstant_class` |
 | 6 | symmetric-rules | cellular automata | the center columns of rule 86 (black seed) and of rules 135 and 149 (white seed) are not EP | Proved (library) | `Symmetry.problem1_iff_rule86`, `Symmetry.problem1_iff_rule135`, `Symmetry.problem1_iff_rule149` |
@@ -201,10 +201,10 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 54 equivalent forms, 42 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 43 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 15 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
-[Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
+[Realization](Rule30Equivalents/Realization.lean), [24], [29] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
 [Expansions](Rule30Equivalents/Expansions.lean), [31] in [Holonomic](Rule30Equivalents/Holonomic.lean)
 (the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] (the Büchi form) in
@@ -214,7 +214,8 @@ batch 2, and 14 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), and [54] in
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [36] the MSO
-form is stated. All four parts of [50] are proved, Lüroth included. 9 forms are stated, and for 4 of them, [38], [42], [47] and [51], the direction "the
+form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
+Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). 8 forms are stated, and for 3 of them, [38], [42] and [47], the direction "the
 form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -1364,9 +1365,15 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 
   The infinite-word corollary is the critic's own reasoning, built on these theorems.
   Ehrenfeucht and Silberger [ES79] started this line of work.
-- *Difficulty.* Hard: it needs a Duval-type theorem.
-- *Lean.* The sufficient direction is proved in the library:
-  `WordForms.problem1_of_late_long_unbordered_factors`. The equivalence is stated (critic).
+- *Difficulty.* Hard through Duval's theorem. For infinite words, a shorter route works (2026-10-18):
+  Lyndon words are unbordered, so if every long factor is bordered, every Lyndon factor is short.
+  Repeatedly cutting off the longest Lyndon prefix gives Lyndon words `l₀ ≥ l₁ ≥ ⋯`, since
+  `lₖ < lₖ₊₁` would make `lₖ lₖ₊₁` a longer Lyndon prefix. Finitely many words are that short, so
+  the factors are eventually constant and the tail is eventually periodic.
+- *Lean.* Proved in the library: `WordForms.problem1_iff_late_long_unbordered_factors`, from
+  `Lyndon.eventuallyPeriodic_of_bordered` (Ehrenfeucht–Silberger for infinite words),
+  `Lyndon.IsLyndon.not_bordered` and `Lyndon.IsLyndon.append`. The sufficient direction is
+  `WordForms.problem1_of_late_long_unbordered_factors`. The critic's statement was:
 
   ```lean
   def Bordered (w : List Bool) : Prop :=

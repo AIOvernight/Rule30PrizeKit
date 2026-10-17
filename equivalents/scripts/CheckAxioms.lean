@@ -119,6 +119,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.WordForms.problem1_iff_run_lengths
 #print axioms Rule30Equivalents.WordForms.problem1_of_infinitely_many_prefixes_without_golden_power
 #print axioms Rule30Equivalents.WordForms.problem1_of_late_long_unbordered_factors
+#print axioms Rule30Equivalents.WordForms.problem1_iff_late_long_unbordered_factors
 #print axioms Rule30Equivalents.WordForms.problem1_of_lz_unbounded
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_filter
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_frequently_ne

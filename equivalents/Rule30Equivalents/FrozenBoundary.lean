@@ -20,11 +20,11 @@ boundary: `Φ` (white, white), `b = PhiS 1` (white, black) and `a = PhiS 3` (bla
   FinConf in the frame of the right edge (`FinConfRows`: no column of a nonzero finite
   configuration is eventually periodic).
 
-The remaining five steps change the edge cells by rules that no rule-30 boundary produces. The
-research notes classify all 32 combinations of step and edge state. Steps `(0,0,1)`, `(0,1,0)` and
-`(0,1,1)` also reduce to finite seeds, by matching diagonal pairs. Step `(1,0,1)` reduces on 11/16
-of the residues. Step `(1,1,1)`, which is `Φ` followed by complementing the two edge cells, reduces
-nowhere. That is the content of the conjecture beyond FinConf.
+The remaining five steps change the edge cells by rules that no rule-30 boundary produces.
+`FrozenBoundaryCore` reduces three of them to `Φ` and `b`: the steps `(0,0,1)`, `(0,1,0)` and
+`(0,1,1)`, and also `(1,0,1)` on seeds whose bit `1` is black. It does so by dropping edge bits that
+the bulk sees only as a fixed pattern. What is left beyond FinConf is the white-blinking edge of
+`(1,0,1)` and the step `(1,1,1)`, which is `Φ` followed by complementing the two edge cells.
 
 **Period 1 for every step** (new partial results, including the irreducible core).
 * `readout_left`, `readout_right`: in the bulk, the readouts obey rule 30's column relations.

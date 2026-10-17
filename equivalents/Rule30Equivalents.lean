@@ -27,3 +27,4 @@ import Rule30Equivalents.DFinite
 import Rule30Equivalents.AutomatonGroup
 import Rule30Equivalents.FrozenBoundary
 import Rule30Equivalents.FrozenBoundaryPeriodTwo
+import Rule30Equivalents.FrozenBoundaryCore

@@ -11,9 +11,9 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 
 **Status:**
 - 38 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 114 theorems named `problem1_iff_*`.
-- For 5 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
+- For 6 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The nine later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase and Automatic) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The ten later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic and Transcendence) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -32,6 +32,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
 | [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) | no Büchi automaton accepts exactly the center column: {c} is not ω-regular | `problem1_iff_not_omega_regular`, `eventuallyPeriodic_iff_omegaRegular_singleton` |
 | [Holonomic](Rule30Equivalents/Holonomic.lean) | c satisfies no recurrence Σ pᵢ(n)·c(n + i) = 0, from any point on, with polynomial coefficients not all zero (c is not P-recursive) | `problem1_iff_not_pRecursive`, `eventuallyPeriodic_iff_pRecursive` |
+| [Transcendence](Rule30Equivalents/Transcendence.lean) | sufficient conditions only: Σ c(t)Xᵗ is transcendental over K(X) for some field K, such as ℚ (the converse is Fatou's theorem), or over F₂(X) or F₃(X) | `problem1_of_transcendental`, `problem1_of_transcendental_F2_or_F3` |
 | [Automatic](Rule30Equivalents/Automatic.lean) | sufficient conditions only: c is not k-automatic for some k ≥ 2, or not both 2- and 3-automatic (the converse is Cobham's theorem); the automatic complexity of the prefixes tends to ∞ | `problem1_of_not_two_three_automatic`, `problem1_of_automaticComplexity_tendsto_top` |
 | [PisotBase](Rule30Equivalents/PisotBase.lean) | the value Σ c(t)·β^−(t+1) in the Pisot base β = 1 + √2 is not of the form a + b√2 with a, b rational | `problem1_iff_not_mem_Q_sqrt_two`, `eventuallyPeriodic_iff_mem_qsqrt2` |
 | [Expansions](Rule30Equivalents/Expansions.lean) | the Engel expansion and the Sylvester (greedy Egyptian fraction) expansion of x₂ are infinite | `problem1_iff_engel_infinite`, `problem1_iff_sylvester_infinite`, `irrational_iff_engelRem_ne_zero` |

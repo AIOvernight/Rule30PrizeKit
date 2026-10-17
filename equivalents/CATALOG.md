@@ -120,15 +120,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
   [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
   [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean),
-  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean) and
-  [Automatic](Rule30Equivalents/Automatic.lean).
+  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
+  [Automatic](Rule30Equivalents/Automatic.lean) and [Transcendence](Rule30Equivalents/Transcendence.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 121 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 123 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -167,7 +167,7 @@ files. The rows follow the order of Section 3.
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Stated | `problem1_iff_not_LRS_zero_set` |
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library) for the recurrence form; Stated (D-finite) | `Holonomic.problem1_iff_not_pRecursive` |
-| 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Stated | `problem1_iff_transcendental_Q` |
+| 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Stated; sufficient direction proved (library) | `problem1_iff_transcendental_Q`; `Transcendence.problem1_of_transcendental` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
 | 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated | `problem1_iff_natural_boundary` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
@@ -208,8 +208,8 @@ batch 2, and 11 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [PisotBase](Rule30Equivalents/PisotBase.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
 factorial-base and Lüroth forms are sketches; for [31] the D-finite form and for [36] the MSO form
-are stated. 12 forms are stated, and for 5 of them, [37], [42], [47], [51] and [52], the direction "the form
-implies Problem 1" is proved. 2 forms are sketches.
+are stated. 12 forms are stated, and for 6 of them, [37], [38], [42], [47], [51] and [52], the direction "the
+form implies Problem 1" is proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -986,7 +986,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *The characteristic matters.* Over F_p(z), algebraic ⟺ p-automatic (Christol). So transcendence
   over F₂(z) is strictly stronger than Problem 1 (Section 4).
 - *Difficulty.* Hard: it needs Fatou's theorem, or "algebraic ⟹ D-finite".
-- *Lean.* Stated. It needs `open scoped RatFunc` for the algebra RatFunc ℚ → LaurentSeries ℚ.
+- *Lean.* The sufficient direction is proved in the library, over every field:
+  `Transcendence.problem1_of_transcendental`, from `isAlgebraic_of_eventuallyPeriodic` (a rational
+  series P/Q satisfies Q·s − P = 0 over K(X)). The equivalence is stated. It needs
+  `open scoped RatFunc` for the algebra RatFunc ℚ → LaurentSeries ℚ.
 
   ```lean
   open scoped RatFunc in
@@ -1734,7 +1737,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Lean.* The sufficient directions are proved in the library: `Automatic.problem1_of_not_automatic`
   (not k-automatic for some k ≥ 2) and `Automatic.problem1_of_not_two_three_automatic`, from
   `isAutomatic_of_eventuallyPeriodic` (an EP sequence has a finite k-kernel for every k ≥ 2), with the
-  definitions below. The equivalences are stated.
+  definitions below; and `Transcendence.problem1_of_transcendental_F2_or_F3` for the F₂/F₃ form.
+  The equivalences are stated.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=

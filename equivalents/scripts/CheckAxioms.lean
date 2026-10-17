@@ -72,6 +72,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_rule86
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_rule135
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_rule149
+#print axioms Rule30Equivalents.Transcendence.problem1_of_transcendental
+#print axioms Rule30Equivalents.Transcendence.problem1_of_transcendental_F2_or_F3
 #print axioms Rule30Equivalents.TransformsSeeds.problem1_iff_of_eventually_eq
 #print axioms Rule30Equivalents.TransformsSeeds.problem1_iff_shifted
 #print axioms Rule30Equivalents.TransformsSeeds.problem1_iff_prepend

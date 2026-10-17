@@ -38,6 +38,7 @@ import Ruliology.CellularAutomata.Rule30EtherThreeTrap
 import Ruliology.CellularAutomata.Rule30EtherThreeReach
 import Ruliology.CellularAutomata.Rule30EtherThreeLeft
 import Ruliology.CellularAutomata.Rule30EtherThreeSkeleton
+import Ruliology.CellularAutomata.Rule30WhiteRunEight
 
 /-!
 # Rule 30 Prize: Lean snapshot
@@ -46,8 +47,13 @@ This is a snapshot of the `ruliology-lean` catalog taken on 2026-10-15.
 
 It imports the catalog's 40 `Rule30*` modules, in the order of the catalog root. Their import
 closure is 54 modules: these 40, the 13 data modules in `Rule30Certificates/`, and
-`BusyBeaverLifetimes`, which `Rule30Blocks` imports. All 54 are copied byte for byte from the
-catalog, and `SHA256SUMS` holds their SHA-256 hashes. This root file is the only new Lean file.
+`BusyBeaverLifetimes`, which `Rule30Blocks` imports. All 54 are copied from the catalog, byte for
+byte except one docstring sentence in `Rule30ZeroBoundaryWidth52`, and `SHA256SUMS` holds their
+SHA-256 hashes.
+
+It then imports the modules added in the kit since; `README.md` lists them under "Added in the
+kit". `Rule30ZeroBoundaryWidth56` and its 16 data modules are added too, but not imported here:
+they take about 6 minutes of kernel time.
 
 Core Lean 4.30.0, no dependencies. `README.md` maps the modules, names the headline theorems and
 says how to build.

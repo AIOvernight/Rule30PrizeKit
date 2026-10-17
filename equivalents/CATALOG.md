@@ -109,20 +109,26 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
 
 **Lean status labels.**
 
-- **Proved (library)**: proved in this folder's Lake project, in two batches. Batch 1:
+- **Proved (library)**: proved in this folder's Lake project. Batch 1:
   [BinaryIrrational](Rule30Equivalents/BinaryIrrational.lean),
   [PowerSeriesF2](Rule30Equivalents/PowerSeriesF2.lean),
   [ShiftOrbit](Rule30Equivalents/ShiftOrbit.lean) and [Symmetry](Rule30Equivalents/Symmetry.lean).
   Batch 2: [NumberTheory](Rule30Equivalents/NumberTheory.lean), [TwoAdic](Rule30Equivalents/TwoAdic.lean),
   [LinearRelations](Rule30Equivalents/LinearRelations.lean),
   [WordsAutomata](Rule30Equivalents/WordsAutomata.lean) and
-  [TransformsSeeds](Rule30Equivalents/TransformsSeeds.lean).
-  Each compiles with no `sorry`, `admit` or `native_decide`. For each module an independent verifier
-  recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
+  [TransformsSeeds](Rule30Equivalents/TransformsSeeds.lean). Later (2026-10-17):
+  [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
+  [Realization](Rule30Equivalents/Realization.lean) and [WordForms](Rule30Equivalents/WordForms.lean).
+  Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
+  independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
-  sentence were corrected. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean) prints the axioms of
-  all 105 library theorems whose names begin with `problem1_iff`.
+  sentence were corrected. The later modules were compiled and axiom-checked by their author; no
+  independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
+  prints the axioms of all 113 library theorems whose names begin with `problem1_iff` or
+  `problem1_of`.
+- **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
+  (`problem1_of_*`); the equivalence is only stated.
 - **Proved (core catalog)**: proved in the core-Lean catalog [`../lean`](../lean).
 - **Stated**: a Lean statement typechecks with `sorry` in a scratch statement file of the original
   survey, which is not part of this kit. The entry quotes it.
@@ -165,12 +171,12 @@ files. The rows follow the order of Section 3.
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
 | 23 | special-factors | words | c has a right-special factor of every length | Proved (library) | `WordsAutomata.problem1_iff_right_special` |
-| 24 | finite-certificates | words, computation | for every N, some prefix has more than N distinct factors of one length | Stated | `problem1_iff_prefix_certificates` |
+| 24 | finite-certificates | words, computation | for every N, some prefix has more than N distinct factors of one length | Proved (library) | `WordForms.problem1_iff_prefix_certificates` |
 | 34 | omega-limit | topological dynamics | the ω-limit set of c under the shift is infinite | Proved (library) | `WordsAutomata.problem1_iff_omegaLimit_infinite` |
 | 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library) for this form; the subshift and Rauzy forms are stated | `WordsAutomata.problem1_iff_tail_complexity` |
-| 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Stated | `problem1_iff_black_gaps`, `problem1_iff_run_lengths` |
-| 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Stated | `problem1_iff_infinitely_many_prefixes_without_golden_power` |
-| 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Stated | `problem1_iff_late_long_unbordered_factors` |
+| 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths` |
+| 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Stated; sufficient direction proved (library) | `problem1_iff_infinitely_many_prefixes_without_golden_power`; `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power` |
+| 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Stated; sufficient direction proved (library) | `problem1_iff_late_long_unbordered_factors`; `WordForms.problem1_of_late_long_unbordered_factors` |
 | 19 | simple-transforms | words | ¬c, the shifts of c, the XOR derivative and the running parity are not EP | Proved (library) | `Symmetry.problem1_iff_complement`, `TransformsSeeds.problem1_iff_xor_derivative` |
 | 20 | decimations | words | for each k some decimation c(kn+r) is not EP; every modulus has a non-constant residue class | Proved (library) | `TransformsSeeds.problem1_iff_decimation`, `TransformsSeeds.problem1_iff_nonconstant_class` |
 | 6 | symmetric-rules | cellular automata | the center columns of rule 86 (black seed) and of rules 135 and 149 (white seed) are not EP | Proved (library) | `Symmetry.problem1_iff_rule86`, `Symmetry.problem1_iff_rule135`, `Symmetry.problem1_iff_rule149` |
@@ -182,18 +188,20 @@ files. The rows follow the order of Section 3.
 | 40 | context-free | automata | the same two languages are not context-free | Stated | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree` |
 | 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Stated (Büchi form) | `problem1_iff_not_omega_regular` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
-| 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Stated | `problem1_iff_lz_unbounded` |
+| 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Stated; sufficient direction proved (library) | `problem1_iff_lz_unbounded`; `WordForms.problem1_of_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Stated | `problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Stated | `problem1_iff_not_two_three_automatic`, `problem1_iff_transcendental_F2_or_F3` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 32 are proved in the library: 6 in batch 1, 21 in
-batch 2, [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), and [9], [18] and
-[22] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean) and
-[Realization](Rule30Equivalents/Realization.lean). One more, [7], is proved in the core catalog
-and also has a library proof. For [14] only the Diophantine part is merely stated. 18 forms are
-stated and 2 are sketches; no scratch-only proofs remain.
+**Summary.** Of the 53 equivalent forms, 34 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 7 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+[18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
+[Realization](Rule30Equivalents/Realization.lean), and [24] and [29] in
+[WordForms](Rule30Equivalents/WordForms.lean). One more, [7], is proved in the core catalog and
+also has a library proof. For [14] only the Diophantine part is merely stated. 16 forms are
+stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
+proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1136,7 +1144,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Proof route.* Apply [4], noting that every factor occurs in some finite prefix. For a concrete N
   the inner bound can be checked by `decide`.
 - *Difficulty.* Easy.
-- *Lean.* Stated.
+- *Lean.* Proved in the library: `WordForms.problem1_iff_prefix_certificates`, from
+  `ShiftOrbit.problem1_iff_ncard_factors_unbounded` and `WordForms.unbounded_iff_prefix_certificates`.
 
   ```lean
   theorem problem1_iff_prefix_certificates : Rule30Prize.Problem1 ↔
@@ -1209,7 +1218,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Difficulty.* Moderate.
 - *Data.* The longest runs in the first 10⁷ bits have length 22 (white) and 23 (black), close to
   log₂ 10⁷ ≈ 23.
-- *Lean.* Stated.
+- *Lean.* Proved in the library: `WordForms.problem1_iff_black_gaps`, `problem1_iff_white_gaps` and
+  `problem1_iff_run_lengths`, all from `WordForms.eventuallyPeriodic_iff_gap` (a sequence with
+  infinitely many `true` values is EP iff the gaps between them are). The return-word form is
+  stated.
 
   ```lean
   noncomputable def blackGap (n : ℕ) : ℕ :=
@@ -1240,7 +1252,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Data.* 2054 of the first 3000 prefixes of c have no suffix of exponent ≥ φ², including those of
   lengths 2989, 2990, 2996, 2997 and 2998 (critic, own computation). A random word behaves the same
   way.
-- *Lean.* Stated (critic).
+- *Lean.* The sufficient direction is proved in the library:
+  `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`. The equivalence is stated
+  (critic).
 
   ```lean
   def EndsWithGoldenPower (n : ℕ) : Prop :=
@@ -1271,7 +1285,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   The infinite-word corollary is the critic's own reasoning, built on these theorems.
   Ehrenfeucht and Silberger [ES79] started this line of work.
 - *Difficulty.* Hard: it needs a Duval-type theorem.
-- *Lean.* Stated (critic).
+- *Lean.* The sufficient direction is proved in the library:
+  `WordForms.problem1_of_late_long_unbordered_factors`. The equivalence is stated (critic).
 
   ```lean
   def Bordered (w : List Bool) : Prop :=
@@ -1622,7 +1637,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   optimality theorem, which the critic showed is unnecessary.
 - *Data* (logic survey). The complexity of the first 20000 bits is 1433, against 1437 for
   pseudorandom bits.
-- *Lean.* Stated.
+- *Lean.* The sufficient direction is proved in the library: `WordForms.problem1_of_lz_unbounded`,
+  through `lzComplexity_le_of_eventuallyPeriodic` (single letters, then one overlapping copy). The
+  equivalence is stated.
 
   ```lean
   def IsLZHistory (n : ℕ) (b : List ℕ) : Prop :=

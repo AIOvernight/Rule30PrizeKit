@@ -10,9 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 32 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 105 theorems named `problem1_iff_*`.
+- 34 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 109 theorems named `problem1_iff_*`.
+- For 3 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module, an independent verifier recompiled the file, checked its axioms and restated its main theorems.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The four later modules (IntegerRows, LogicAutomata, Realization and WordForms) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -29,6 +30,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [IntegerRows](Rule30Equivalents/IntegerRows.lean) | the integer recurrence a(0) = 1, a(t+1) = a(t) XOR (2a(t) OR 4a(t)) (OEIS A110240): bit t of a(t) is not eventually periodic. Equivalently, the main diagonal of the bit array (j, t) ↦ bit j of a(t) is not eventually periodic, although every row j of that array is periodic with period dividing 2^j | `problem1_iff_integer_rows`, `problem1_iff_diagArray`, `diagArray_row_periodic` |
 | [LogicAutomata](Rule30Equivalents/LogicAutomata.lean) | the black times are not definable in Presburger arithmetic (with any parameters) and do not form a semilinear set; the unary language {1ⁿ : c(n) = 1} and the language of prefixes of c are not regular | `problem1_iff_not_presburger`, `problem1_iff_not_semilinear`, `problem1_iff_unary_not_regular`, `problem1_iff_prefixes_not_regular` |
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
+| [WordForms](Rule30Equivalents/WordForms.lean) | for every N, some finite prefix has more than N distinct factors of one length (finite certificates); the gaps between black cells, the gaps between white cells and the run lengths are not eventually periodic. Sufficient conditions: infinitely many prefixes without a repetition of exponent φ²; unbordered factors of unbounded length in every tail; unbounded Lempel–Ziv complexity | `problem1_iff_prefix_certificates`, `problem1_iff_black_gaps`, `problem1_iff_run_lengths`, `problem1_of_lz_unbounded` |
 | [Symmetry](Rule30Equivalents/Symmetry.lean) | the same question for rule 86 (black seed), for rules 135 and 149 (white seed), and for the complemented column | `problem1_iff_rule86`, `problem1_iff_rule135`, `problem1_iff_rule149` |
 | [Basic](Rule30Equivalents/Basic.lean) | — (shared definitions: the center column `c` and `EventuallyPeriodic`) | `problem1_iff_not_eventuallyPeriodic` |
 
@@ -47,7 +49,7 @@ From the kit root, which shares one Mathlib with this folder:
 ```sh
 lake exe cache get        # prebuilt Mathlib (or sh setup.sh)
 lake build                # builds the kit, the catalog and this library; about 1 minute here
-lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_iff_* theorems
+lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_iff_* and problem1_of_* theorems
 ```
 
 ## Adding an equivalent form
@@ -58,7 +60,7 @@ lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_if
    - double expansions in base 2;
    - eventually constant sequences (`Rule30Prize.center_not_eventually_constant` handles them for c);
    - `0 < P`.
-4. Keep the file free of `sorry`, `native_decide` and new axioms. Add it to `Rule30Equivalents.lean`, and regenerate `scripts/CheckAxioms.lean`.
+4. Keep the file free of `sorry`, `native_decide` and new axioms. Add it to `Rule30Equivalents.lean`, and regenerate `scripts/CheckAxioms.lean` with `python3 equivalents/scripts/gen_check_axioms.py` from the kit root.
 5. Have someone other than the author restate the main theorem from scratch and check that it says what it claims.
 
 Next targets:

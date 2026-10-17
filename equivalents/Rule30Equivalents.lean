@@ -11,3 +11,4 @@ import Rule30Equivalents.TransformsSeeds
 import Rule30Equivalents.IntegerRows
 import Rule30Equivalents.LogicAutomata
 import Rule30Equivalents.Realization
+import Rule30Equivalents.WordForms

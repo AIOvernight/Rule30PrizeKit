@@ -1,7 +1,8 @@
 import Rule30Equivalents
 
-/-! Prints the axioms of every `problem1_iff_*` theorem in the library.
-Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`. -/
+/-! Prints the axioms of every `problem1_iff_*` and `problem1_of_*` theorem in the library.
+Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`.
+Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 
 #print axioms Rule30Equivalents.problem1_iff
 #print axioms Rule30Equivalents.problem1_iff_not_eventuallyPeriodic
@@ -24,6 +25,7 @@ Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`. -/
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_hankel_det_int
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_hankel_det_odd
 #print axioms Rule30Equivalents.LinearRelations.problem1_iff_not_zero_set
+#print axioms Rule30Equivalents.LinearRelations.problem1_of_not_zero_set
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_not_presburger
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_not_semilinear
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_unary_not_regular
@@ -89,6 +91,13 @@ Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`. -/
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_padic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity_odd
+#print axioms Rule30Equivalents.WordForms.problem1_iff_prefix_certificates
+#print axioms Rule30Equivalents.WordForms.problem1_iff_black_gaps
+#print axioms Rule30Equivalents.WordForms.problem1_iff_white_gaps
+#print axioms Rule30Equivalents.WordForms.problem1_iff_run_lengths
+#print axioms Rule30Equivalents.WordForms.problem1_of_infinitely_many_prefixes_without_golden_power
+#print axioms Rule30Equivalents.WordForms.problem1_of_late_long_unbordered_factors
+#print axioms Rule30Equivalents.WordForms.problem1_of_lz_unbounded
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_filter
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_frequently_ne
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_no_hasPeriod_tail

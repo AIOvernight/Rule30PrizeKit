@@ -44,6 +44,7 @@ import Ruliology.CellularAutomata.Rule30LightCone
 import Ruliology.CellularAutomata.Rule30FiniteConfigs
 import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
 import Ruliology.CellularAutomata.Rule30Coupled
+import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
 
 /-!
 # Rule 30 Prize: Lean snapshot

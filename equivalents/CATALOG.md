@@ -119,14 +119,15 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [TransformsSeeds](Rule30Equivalents/TransformsSeeds.lean). Later (2026-10-17):
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
   [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
-  [Expansions](Rule30Equivalents/Expansions.lean) and [Holonomic](Rule30Equivalents/Holonomic.lean).
+  [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean) and
+  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean).
   Each compiles with no `sorry`, `admit` or `native_decide`. For each module of the two batches an
   independent verifier recompiled it, checked that every theorem uses at most the axioms `propext`, `Classical.choice` and
   `Quot.sound`, and restated the main statements to confirm they say what they claim. The verifiers
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 116 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 117 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -187,7 +188,7 @@ files. The rows follow the order of Section 3.
 | 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Proved (library) | `LogicAutomata.problem1_iff_not_presburger`, `LogicAutomata.problem1_iff_not_semilinear` |
 | 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Proved (library) | `LogicAutomata.problem1_iff_unary_not_regular`, `LogicAutomata.problem1_iff_prefixes_not_regular` |
 | 40 | context-free | automata | the same two languages are not context-free | Stated | `problem1_iff_unary_not_contextFree`, `problem1_iff_prefixes_not_contextFree` |
-| 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Stated (Büchi form) | `problem1_iff_not_omega_regular` |
+| 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Proved (library) for the Büchi form; Stated (MSO) | `OmegaRegular.problem1_iff_not_omega_regular` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Stated; sufficient direction proved (library) | `problem1_iff_lz_unbounded`; `WordForms.problem1_of_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Stated | `problem1_iff_automaticComplexity_tendsto_top` |
@@ -195,16 +196,17 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
-**Summary.** Of the 53 equivalent forms, 36 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 9 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 53 equivalent forms, 37 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 10 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24] and [29] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
-[Expansions](Rule30Equivalents/Expansions.lean), and [31] (the recurrence form) in
-[Holonomic](Rule30Equivalents/Holonomic.lean). One more, [7], is proved in the core catalog and
+[Expansions](Rule30Equivalents/Expansions.lean), [31] (the recurrence form) in
+[Holonomic](Rule30Equivalents/Holonomic.lean), and [36] (the Büchi form) in
+[OmegaRegular](Rule30Equivalents/OmegaRegular.lean). One more, [7], is proved in the core catalog and
 also has a library proof. For [14] only the Diophantine part is merely stated, and for [50] the
-factorial-base and Lüroth forms are sketches; for [31] the D-finite form is stated. 14 forms are
-stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
+factorial-base and Lüroth forms are sketches; for [31] the D-finite form and for [36] the MSO form
+are stated. 13 forms are stated, and for 3 of them, [37], [47] and [51], the direction "the form implies Problem 1" is
 proved. 2 forms are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -1577,7 +1579,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   least 16359 states (logic survey). The reason: if the run is in the same state at times m < n,
   then c(0)…c(m − 1) followed by σⁿc is also accepted, so σᵐc = σⁿc.
 - *Difficulty.* Moderate for the Büchi form; hard for MSO, which needs Büchi's theorem.
-- *Lean.* Stated, with the definitions:
+- *Lean.* The Büchi form is proved in the library: `OmegaRegular.problem1_iff_not_omega_regular`,
+  from `eventuallyPeriodic_iff_omegaRegular_singleton` (`lasso_accepts_iff` and
+  `eventuallyPeriodic_of_accepts_iff`), with the definitions below. The MSO form needs Büchi's
+  theorem and is stated only in words.
 
   ```lean
   structure Buchi (α : Type) where

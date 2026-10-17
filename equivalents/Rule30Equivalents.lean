@@ -14,3 +14,4 @@ import Rule30Equivalents.Realization
 import Rule30Equivalents.WordForms
 import Rule30Equivalents.Expansions
 import Rule30Equivalents.Holonomic
+import Rule30Equivalents.OmegaRegular

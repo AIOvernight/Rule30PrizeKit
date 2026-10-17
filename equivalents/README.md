@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 36 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 112 theorems named `problem1_iff_*`.
+- 37 of the 53 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 113 theorems named `problem1_iff_*`.
 - For 3 more forms, the direction "the form implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The six later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions and Holonomic) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The seven later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic and OmegaRegular) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -30,6 +30,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [IntegerRows](Rule30Equivalents/IntegerRows.lean) | the integer recurrence a(0) = 1, a(t+1) = a(t) XOR (2a(t) OR 4a(t)) (OEIS A110240): bit t of a(t) is not eventually periodic. Equivalently, the main diagonal of the bit array (j, t) ↦ bit j of a(t) is not eventually periodic, although every row j of that array is periodic with period dividing 2^j | `problem1_iff_integer_rows`, `problem1_iff_diagArray`, `diagArray_row_periodic` |
 | [LogicAutomata](Rule30Equivalents/LogicAutomata.lean) | the black times are not definable in Presburger arithmetic (with any parameters) and do not form a semilinear set; the unary language {1ⁿ : c(n) = 1} and the language of prefixes of c are not regular | `problem1_iff_not_presburger`, `problem1_iff_not_semilinear`, `problem1_iff_unary_not_regular`, `problem1_iff_prefixes_not_regular` |
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
+| [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) | no Büchi automaton accepts exactly the center column: {c} is not ω-regular | `problem1_iff_not_omega_regular`, `eventuallyPeriodic_iff_omegaRegular_singleton` |
 | [Holonomic](Rule30Equivalents/Holonomic.lean) | c satisfies no recurrence Σ pᵢ(n)·c(n + i) = 0, from any point on, with polynomial coefficients not all zero (c is not P-recursive) | `problem1_iff_not_pRecursive`, `eventuallyPeriodic_iff_pRecursive` |
 | [Expansions](Rule30Equivalents/Expansions.lean) | the Engel expansion and the Sylvester (greedy Egyptian fraction) expansion of x₂ are infinite | `problem1_iff_engel_infinite`, `problem1_iff_sylvester_infinite`, `irrational_iff_engelRem_ne_zero` |
 | [WordForms](Rule30Equivalents/WordForms.lean) | for every N, some finite prefix has more than N distinct factors of one length (finite certificates); the gaps between black cells, the gaps between white cells and the run lengths are not eventually periodic. Sufficient conditions: infinitely many prefixes without a repetition of exponent φ²; unbordered factors of unbounded length in every tail; unbounded Lempel–Ziv complexity | `problem1_iff_prefix_certificates`, `problem1_iff_black_gaps`, `problem1_iff_run_lengths`, `problem1_of_lz_unbounded` |

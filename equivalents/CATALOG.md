@@ -2743,13 +2743,20 @@ with Turing machines reading n. Notes:
       (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
       `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`.
     - Mathlib lacks: an eventually-periodic predicate; the digits-rationality lemma for arbitrary
-      digits; Morse–Hedlund (now in this library); Kronecker's, Fatou's, Szegő's, Pólya–Carlson's,
-      Euler–Lagrange's and Skolem–Mahler–Lech's (both now in this library), Christol's and Cobham's
-      theorems; Strassmann's theorem (now in this library); automatic
-      sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping lemma (now in this
-      library); the gap
-      theorems; normal numbers; natural density; the pointwise ergodic theorem (Mathlib has
-      Birkhoff sums and the von Neumann mean ergodic theorem); and cellular automata.
+      digits; Morse–Hedlund; Kronecker's, Fatou's, Szegő's, Pólya–Carlson's, Euler–Lagrange's and
+      Skolem–Mahler–Lech's theorems; Christol's and Cobham's theorems; Strassmann's theorem;
+      automatic sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping
+      lemma; the gap theorems; normal numbers; natural density; Tauberian theorems; the pointwise
+      ergodic theorem (Mathlib has Birkhoff sums and the von Neumann mean ergodic theorem); and
+      cellular automata.
+    - This library now proves, in general form: Morse–Hedlund, Euler–Lagrange, Strassmann,
+      Skolem–Mahler–Lech over ℚ, Christol (both directions) and Cobham, Büchi–Bruyère (both
+      directions), automatic and k-regular sequences, Büchi automata and the MSO composition method,
+      the context-free pumping lemma, the time and space gap theorems (Hennie–Trakhtenbrot and
+      Stearns–Hartmanis–Lewis), meromorphic continuation of finite-valued power series (the disk
+      form of Fatou–Szegő), the Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's
+      normal number theorem for fair coins, and, for rule 30, Hedlund's measure preservation,
+      mixing and ergodicity. Szegő's and Pólya–Carlson's theorems are still missing.
 
 ---
 

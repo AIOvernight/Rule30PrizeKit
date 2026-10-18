@@ -1,5 +1,7 @@
 import Rule30Equivalents.Basic
 import Ruliology.CellularAutomata.Rule30WhiteSeed
+import Mathlib.Data.List.Basic
+import Mathlib.Tactic.Ring
 
 /-!
 # Problem 1 for rules 86, 135 and 149: the symmetries of rule 30
@@ -359,6 +361,53 @@ an all-black background is not eventually periodic. -/
 theorem problem1_iff_rule149 :
     Rule30Prize.Problem1 ↔ ¬ EventuallyPeriodic (fun t => evolve 149 whiteSeed t 0) :=
   problem1_iff_of_eq_not center_149
+
+/-! ### Problem 2 for the class of rule 30 -/
+
+/-- Black cells have density `1/2` in `b`, in the integer form of `Rule30Prize.Problem2`: for every
+`k > 0`, eventually `k · |2 · #{t < n : b t} − n| ≤ n`. -/
+def HalfDensity (b : Nat → Bool) : Prop :=
+  ∀ k : Nat, 0 < k → ∃ N, ∀ n, N ≤ n →
+    k * (2 * (((List.range n).filter b).length : Int) - n).natAbs ≤ n
+
+theorem problem2_iff_halfDensity : Rule30Prize.Problem2 ↔ HalfDensity c := Iff.rfl
+
+/-- **Complementing a sequence does not change whether its density is `1/2`.** -/
+theorem halfDensity_not_iff (b : Nat → Bool) :
+    HalfDensity (fun t => !b t) ↔ HalfDensity b := by
+  have key : ∀ n, (2 * (((List.range n).filter fun t => !b t).length : Int) - n).natAbs =
+      (2 * (((List.range n).filter b).length : Int) - n).natAbs := fun n => by
+    have h := List.length_eq_length_filter_add (l := List.range n) b
+    rw [List.length_range] at h
+    have h' : ((((List.range n).filter fun t => !b t).length : ℕ) : Int) =
+        n - (((List.range n).filter b).length : Int) := by omega
+    rw [h', ← Int.natAbs_neg]
+    congr 1
+    ring
+  unfold HalfDensity
+  simp only [key]
+
+theorem halfDensity_of_eq {b b' : Nat → Bool} (h : ∀ t, b t = b' t) :
+    HalfDensity b ↔ HalfDensity b' := by
+  rw [show b = b' from funext h]
+
+/-- **Rule 86.** Problem 2 holds iff black cells have density `1/2` in the center column of rule 86
+from a single black cell. -/
+theorem problem2_iff_rule86 :
+    Rule30Prize.Problem2 ↔ HalfDensity (fun t => evolve 86 blackSeed t 0) :=
+  (halfDensity_of_eq center_86).symm
+
+/-- **Rule 135.** Problem 2 holds iff black cells have density `1/2` in the center column of rule
+135 from a single white cell on an all-black background. -/
+theorem problem2_iff_rule135 :
+    Rule30Prize.Problem2 ↔ HalfDensity (fun t => evolve 135 whiteSeed t 0) :=
+  ((halfDensity_of_eq center_135).trans (halfDensity_not_iff c)).symm
+
+/-- **Rule 149.** Problem 2 holds iff black cells have density `1/2` in the center column of rule
+149 from a single white cell on an all-black background. -/
+theorem problem2_iff_rule149 :
+    Rule30Prize.Problem2 ↔ HalfDensity (fun t => evolve 149 whiteSeed t 0) :=
+  ((halfDensity_of_eq center_149).trans (halfDensity_not_iff c)).symm
 
 end Symmetry
 end Rule30Equivalents

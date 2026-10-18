@@ -2713,9 +2713,12 @@ with Turing machines reading n. Notes:
     (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
     Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). For μ-almost every
     configuration, and for a comeager set of them, the orbit enters every nonempty open set at
-    arbitrarily large times (`ae_frequently_mem`, `residual_frequently_mem`); and for μ-almost every
-    configuration every column of the space-time diagram is normal, and so is the right half of
-    every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
+    arbitrarily large times (`ae_frequently_mem`, `residual_frequently_mem`), so the right halves of
+    its rows have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed,
+    Kopra's theorem gives infinitely many); rule 30 is sensitive to initial conditions, and the
+    right front of a perturbation moves at speed one (`sensitive`, `evol_flip_front`); and for
+    μ-almost every configuration every column of the space-time diagram is normal, and so is the
+    right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

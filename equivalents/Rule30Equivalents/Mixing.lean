@@ -29,6 +29,11 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   comeager set of configurations, the orbit enters every nonempty open set at arbitrarily large
   times, so its omega-limit set is all of `{0,1}^ℤ` (by ergodicity, and by topological mixing and
   Baire).
+* `ae_rightHalves_frequently`: for almost every configuration, every pattern appears at the cells
+  `0, …, N - 1` at arbitrarily late times, so every sequence is a limit point of the right halves of
+  the rows (for the seed, Kopra's theorem gives infinitely many limit points).
+* `evol_flip_front`, `sensitive`: the right front of a perturbation moves at speed one, and rule 30
+  is sensitive to initial conditions.
 * `ae_isNormal_columns`, `ae_isNormal_rows`: for almost every configuration, every column of the
   space-time diagram is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`), and
   so is the right half of every row (every iterate preserves the measure).
@@ -457,5 +462,44 @@ theorem residual_frequently_mem :
   have := hw p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
   simp only [extend, dif_pos (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
   exact this
+
+/-! ### Perturbations -/
+
+/-- **The right front of a perturbation moves at speed one**: flipping the cell `q` flips the cell
+`(t, q + t)` and changes no cell right of it. -/
+theorem evol_flip_front (x : ℤ → Bool) (q : ℤ) (t : ℕ) :
+    evol (Function.update x q (!x q)) t (q + t) = !evol x t (q + t) ∧
+      ∀ p, q + t < p → evol (Function.update x q (!x q)) t p = evol x t p := by
+  refine ⟨?_, fun p hp => AlgebraicDegree.evol_update_of_far (Or.inl (by omega)) x _⟩
+  have h := evol_flip_at x t (q + t)
+  rwa [show q + t - t = q by ring] at h
+
+/-- **Rule 30 is sensitive to initial conditions**: every configuration has, in each of its
+neighbourhoods, a configuration whose center cell differs from its own at some time. -/
+theorem sensitive (x : ℤ → Bool) (n : ℕ) :
+    ∃ y : ℤ → Bool, (∀ p, -(n : ℤ) ≤ p → p ≤ n → y p = x p) ∧ ∃ t, evol y t 0 ≠ evol x t 0 := by
+  refine ⟨Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))), fun p hp _ =>
+    Function.update_of_ne (by omega) _ _, n + 1, ?_⟩
+  rw [evol_flip x (n + 1)]
+  cases evol x (n + 1) 0 <;> simp
+
+/-- **Right halves of almost every orbit come back to every pattern**: for almost every
+configuration, every pattern `v 0, …, v (N - 1)` appears at the cells `0, …, N - 1` at arbitrarily
+late times, so every sequence is a limit point of the right halves of the rows. For the single
+seed, Kopra's theorem gives infinitely many limit points (`LimitPoints`). -/
+theorem ae_rightHalves_frequently (v : ℕ → Bool) :
+    ∀ᵐ x ∂(coins ℤ), ∀ N T : ℕ, ∃ t ≥ T, ∀ n < N, evol x t n = v n := by
+  filter_upwards [ae_frequently_mem] with x hx
+  intro N T
+  have hU : IsOpen {y : ℤ → Bool | ∀ n < N, y n = v n} := by
+    have : {y : ℤ → Bool | ∀ n < N, y n = v n} =
+        ⋂ n ∈ Finset.range N, {y : ℤ → Bool | y n = v n} := by
+      ext y
+      simp
+    rw [this]
+    exact isOpen_biInter_finset fun n _ =>
+      (isOpen_discrete {v n}).preimage (continuous_apply (A := fun _ : ℤ => Bool) (n : ℤ))
+  obtain ⟨t, ht, hmem⟩ := hx _ hU ⟨fun p => v p.toNat, fun n _ => by simp⟩ T
+  exact ⟨t, ht, hmem⟩
 
 end Rule30Equivalents.Mixing

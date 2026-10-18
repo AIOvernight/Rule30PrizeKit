@@ -2284,13 +2284,15 @@ Each statement below is implied by Problem 1.
   Problem 1. Mathlib has `PadicInt.mahler`, `PadicInt.mahlerEquiv` and `PadicInt.hasSum_mahler`
   (number-theory and algebra surveys).
   - *Lean.* Both equivalences are proved in [TwoAdicPeriods](Rule30Equivalents/TwoAdicPeriods.lean),
-    for every bit sequence (`exists_continuous_extension_iff`, `exists_fwdDiff_eq_zero_iff`), and
-    for c (`noTwoPowPeriod_iff_not_continuous`, `noTwoPowPeriod_iff_fwdDiff`). A continuous
-    ℤ₂ → Bool is constant on all balls of some radius (Lebesgue's number lemma on the compact ℤ₂),
-    so it reads only α mod 2^k. The Mahler coefficients are Mathlib's forward differences
-    Δⁿu(0) = Σ_{j ≤ n} C(n, j)u(j); Lucas' theorem is not needed: in characteristic 2,
-    Δ^(2^k)u(t) = u(t + 2^k) − u(t), and Newton's forward formula writes Δ^(2^k)u(t) through the
-    coefficients Δ^(j + 2^k)u(0). The profinite form is proved in
+    for every prime p in place of 2: for every bit sequence (`exists_continuous_extension_iff`,
+    `exists_fwdDiff_eq_zero_iff`), and for c (`noPrimePowPeriod_iff_not_continuous`,
+    `noPrimePowPeriod_iff_fwdDiff`; for p = 2 `noTwoPowPeriod_iff_not_continuous`,
+    `noTwoPowPeriod_iff_fwdDiff`). A continuous ℤ_p → Bool is constant on all balls of some radius
+    (Lebesgue's number lemma on the compact ℤ_p), so it reads only α mod p^k. The Mahler
+    coefficients are Mathlib's forward differences Δⁿu(0); over F₂ they are Σ_{j ≤ n} C(n, j)u(j).
+    Lucas' theorem is not needed: in characteristic p the coefficients C(p, j) with 0 < j < p
+    vanish, so Δ^(p^k)u(t) = u(t + p^k) − u(t), and Newton's forward formula writes Δ^(p^k)u(t)
+    through the coefficients Δ^(j + p^k)u(0). The profinite form is proved in
     [ProfiniteIntegers](Rule30Equivalents/ProfiniteIntegers.lean):
     `problem1_iff_no_continuous_extension`, Problem 1 ⟺ no tail of c extends to a continuous
     function Ẑ → Bool. Mathlib has no Ẑ, so `Zhat` is the inverse limit of the rings ℤ/(k+1)!ℤ, a

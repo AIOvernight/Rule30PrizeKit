@@ -12,9 +12,11 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   agree on the cells from `p + 1` to `k + 1` (`eq_of_evol_one_eq_on`).
 * `eq_of_evol_one_eq_of_right`: so rule 30 is injective on configurations that agree far to the
   right, in particular pre-injective (as the Garden of Eden theorem requires of an onto map).
-* `card_le_four`: **every configuration has at most four preimages** (Hedlund's bound
-  `|A|^(2r)` for rule 30). Among five preimages, two agree on the cells `k`, `k + 1` for
-  infinitely many `k`, hence everywhere.
+* `card_le_three`: **every configuration has at most three preimages**, sharper than Hedlund's
+  bound `|A|^(2r) = 4` (`card_le_four`). Distinct preimages differ on the pair of cells `N, N + 1`
+  far enough to the right, and at each position one of the four pairs is impossible. Three is
+  attained: the all-black configuration has the three shifts of `(100)^∞` as preimages
+  (`exists_card_eq_three`).
 * `evol_one_eq_iff_of_eventually_white`: **a configuration that is white from some cell on has
   exactly two preimages**, one white and one black from that cell on (`extendLeft`): there the
   preimage satisfies `x_{q-1} = x_q ∨ x_{q+1}`, which forces it to be constant
@@ -85,42 +87,93 @@ theorem eq_of_evol_one_eq_of_right {x y : ℤ → Bool} (h : evol x 1 = evol y 1
   · exact eq_of_evol_one_eq h (hr k le_rfl) (hr (k + 1) (by omega)) q hq
   · exact hr q (by omega)
 
-/-- **Every configuration has at most four preimages.** -/
-theorem card_le_four (y : ℤ → Bool) (s : Finset (ℤ → Bool)) (hs : ∀ x ∈ s, evol x 1 = y) :
-    s.card ≤ 4 := by
+/-- **Every configuration has at most three preimages**, sharper than Hedlund's general bound
+`|A|^(2r) = 4`. Distinct preimages have distinct pairs of cells `x_N, x_{N+1}` far enough to the
+right (left determinism), but at every position one of the four pairs is impossible: `(0, 1)` if
+the image is white at `N + 1`, `(1, 1)` if it is black there. -/
+theorem card_le_three (y : ℤ → Bool) (s : Finset (ℤ → Bool)) (hs : ∀ x ∈ s, evol x 1 = y) :
+    s.card ≤ 3 := by
   by_contra hcard
   push Not at hcard
-  -- five distinct preimages
-  obtain ⟨t, hts, htc⟩ := Finset.exists_subset_card_eq (show 5 ≤ s.card by omega)
-  let e : Fin 5 ≃ t := (Fintype.equivFinOfCardEq (by simp [htc])).symm
-  let x : Fin 5 → ℤ → Bool := fun j => (e j).1
+  -- four distinct preimages
+  obtain ⟨t, hts, htc⟩ := Finset.exists_subset_card_eq (show 4 ≤ s.card by omega)
+  let e : Fin 4 ≃ t := (Fintype.equivFinOfCardEq (by simp [htc])).symm
+  let x : Fin 4 → ℤ → Bool := fun j => (e j).1
   have hx : ∀ j, evol (x j) 1 = y := fun j => hs _ (hts (e j).2)
   have hinj : Function.Injective x := fun j j' h => e.injective (Subtype.ext h)
-  -- at every `k ≥ 0`, two of them agree on `k` and `k + 1`
-  have hpair : ∀ k : ℕ, ∃ p : Fin 5 × Fin 5, p.1 ≠ p.2 ∧
-      x p.1 k = x p.2 k ∧ x p.1 (k + 1) = x p.2 (k + 1) := by
-    intro k
-    obtain ⟨j, j', hne, hjj⟩ := Fintype.exists_ne_map_eq_of_card_lt
-      (fun j => (x j k, x j (k + 1))) (by simp)
-    exact ⟨(j, j'), hne, (Prod.ext_iff.1 hjj).1, (Prod.ext_iff.1 hjj).2⟩
-  choose p hp using hpair
-  -- one pair occurs for infinitely many `k`
-  obtain ⟨p₀, hp₀⟩ := Finite.exists_infinite_fiber p
-  have hinf : (p ⁻¹' {p₀}).Infinite := Set.infinite_coe_iff.1 hp₀
-  have heq : x p₀.1 = x p₀.2 := by
-    funext q
-    obtain ⟨k, hk, hkq⟩ := hinf.exists_gt q.toNat
-    have hpk : p k = p₀ := hk
-    have := hp k
-    rw [hpk] at this
-    exact eq_of_evol_one_eq ((hx _).trans (hx _).symm) this.2.1 this.2.2 q (by omega)
-  obtain ⟨hne, -⟩ : p₀.1 ≠ p₀.2 ∧ True := by
-    obtain ⟨k, hk⟩ := hinf.nonempty
-    have hpk : p k = p₀ := hk
-    have := (hp k).1
-    rw [hpk] at this
-    exact ⟨this, trivial⟩
-  exact hne (hinj heq)
+  -- a position right of a difference of every two of them
+  have hdiff : ∀ j j' : Fin 4, ∃ m : ℤ, j ≠ j' → x j m ≠ x j' m := fun j j' => by
+    by_cases h : j = j'
+    · exact ⟨0, fun h' => absurd h h'⟩
+    · by_contra hall
+      push Not at hall
+      exact h (hinj (funext fun q => (hall q).2))
+  choose m hm using hdiff
+  let N : ℤ := ∑ j, ∑ j', |m j j'|
+  have hN : ∀ j j', m j j' ≤ N := fun j j' => by
+    have h1 : |m j j'| ≤ ∑ j'', |m j j''| :=
+      Finset.single_le_sum (f := fun j'' => |m j j''|) (fun _ _ => abs_nonneg _)
+        (Finset.mem_univ j')
+    have h2 : ∑ j'', |m j j''| ≤ N :=
+      Finset.single_le_sum (f := fun j => ∑ j'', |m j j''|)
+        (fun _ _ => Finset.sum_nonneg fun _ _ => abs_nonneg _) (Finset.mem_univ j)
+    exact (le_abs_self _).trans (h1.trans h2)
+  -- there the pairs `(x_N, x_{N+1})` are pairwise different
+  have hpair : Function.Injective fun j => (x j N, x j (N + 1)) := by
+    intro j j' hjj
+    by_contra hne
+    have := eq_of_evol_one_eq ((hx j).trans (hx j').symm) (Prod.ext_iff.1 hjj).1
+      (Prod.ext_iff.1 hjj).2 (m j j') (by have := hN j j'; omega)
+    exact hm j j' hne this
+  -- but one pair is impossible
+  obtain ⟨p, hp⟩ : ∃ p : Bool × Bool, ∀ j, (x j N, x j (N + 1)) ≠ p := by
+    cases hy : y (N + 1)
+    · refine ⟨(false, true), fun j h => ?_⟩
+      simp only [Prod.mk.injEq] at h
+      have e1 := congrFun (hx j) (N + 1)
+      rw [evol_one, show N + 1 - 1 = N by ring, hy, h.1, h.2] at e1
+      simp at e1
+    · refine ⟨(true, true), fun j h => ?_⟩
+      simp only [Prod.mk.injEq] at h
+      have e1 := congrFun (hx j) (N + 1)
+      rw [evol_one, show N + 1 - 1 = N by ring, hy, h.1, h.2] at e1
+      simp at e1
+  have hcardle := Fintype.card_le_of_injective
+    (fun j => (⟨(x j N, x j (N + 1)), hp j⟩ : {q : Bool × Bool // q ≠ p}))
+    fun j j' h => hpair (congrArg Subtype.val h)
+  simp [Fintype.card_subtype_compl] at hcardle
+
+/-- The configuration that is black exactly at the cells `p ≡ r (mod 3)`. -/
+def third (r p : ℤ) : Bool := decide (p % 3 = r % 3)
+
+/-- Each shift of `(100)^∞` maps to the all-black configuration: exactly one of the cells
+`q - 1, q, q + 1` is black. -/
+theorem evol_third (r : ℤ) : evol (third r) 1 = fun _ => true := by
+  funext q
+  rw [evol_one]
+  simp only [third]
+  rcases (by omega : (q - 1) % 3 = r % 3 ∨ q % 3 = r % 3 ∨ (q + 1) % 3 = r % 3) with h | h | h
+  · simp [h, show ¬ q % 3 = r % 3 by omega, show ¬ (q + 1) % 3 = r % 3 by omega]
+  · simp [h, show ¬ (q - 1) % 3 = r % 3 by omega]
+  · simp [h, show ¬ (q - 1) % 3 = r % 3 by omega]
+
+/-- **Three is sharp**: the all-black configuration has the three preimages `(100)^∞`, shifted. -/
+theorem exists_card_eq_three : ∃ s : Finset (ℤ → Bool), s.card = 3 ∧
+    ∀ x ∈ s, evol x 1 = fun _ => true := by
+  classical
+  have h01 : third 0 ≠ third 1 := fun h => by simpa [third] using congrFun h 0
+  have h02 : third 0 ≠ third 2 := fun h => by simpa [third] using congrFun h 0
+  have h12 : third 1 ≠ third 2 := fun h => by simpa [third] using congrFun h 1
+  refine ⟨{third 0, third 1, third 2}, ?_, ?_⟩
+  · rw [Finset.card_insert_of_notMem (by simp [h01, h02]), Finset.card_pair h12]
+  · intro x hx
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | rfl | rfl <;> exact evol_third _
+
+/-- Hedlund's bound for rule 30: at most four preimages. -/
+theorem card_le_four (y : ℤ → Bool) (s : Finset (ℤ → Bool)) (hs : ∀ x ∈ s, evol x 1 = y) :
+    s.card ≤ 4 :=
+  (card_le_three y s hs).trans (by norm_num)
 
 /-! ### Configurations that are eventually white -/
 

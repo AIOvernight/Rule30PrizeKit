@@ -2802,25 +2802,28 @@ with Turing machines reading n. Notes:
     those whose trace has density 1/2 a meager set (`isMeagre_halfDensity_trace`, so a fortiori
     those with a normal trace), which has full measure
     (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Rule 30 itself is onto
-    (`surjective_evol_one`); every configuration has at most four preimages, configurations with the
-    same image that agree right of some cell are equal, and every configuration that is white from
-    some cell on (the white configuration, every finite configuration, every row of the seed
-    pattern) has exactly two preimages, one white and one black from that cell on
-    ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`, `eq_of_evol_one_eq_of_right`,
-    `evol_one_eq_iff_of_eventually_white`, `preimage_white`); but two different configurations that
-    agree left of a cell can have the same image, so rule 30 is not positively expansive
-    (`exists_ne_left_eq`, `not_positivelyExpansive`). Still, rule 30 is invertible almost everywhere
-    and generically: an image showing 010 at the cells q, q + 1, q + 2 forces the preimage to be
-    black at q − 1 (`eq_true_of_window`), so the cell p of a preimage is determined by the image on
-    the cells p + 1, …, q + 2 for any such q > p (`eq_of_evol_one_eq_on_of_window`), and a
-    configuration that shows 010 arbitrarily far to the right has exactly one preimage
-    (`eq_of_evol_one_eq_of_frequently`). Almost every configuration does, and so does a comeager set
-    of them, so rule 30 is injective on a set of full measure, and every row of the space-time
-    diagram of almost every configuration determines it (`Mixing.ae_existsUnique_preimage`,
-    `Mixing.exists_injOn_ae`, `Mixing.residual_existsUnique_preimage`,
-    `Mixing.ae_injective_iterate`). Likewise, ergodicity of the doubling map
-    (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
-    version said that the trace is normal for a comeager set of configurations; that is false.
+    (`surjective_evol_one`); every configuration has at most three preimages, which the black
+    configuration attains (sharper than Hedlund's bound 4: distinct preimages differ on a pair of
+    cells far right, and one of the four pairs is always impossible), configurations with the same
+    image that agree right of some cell are equal, and every configuration that is white from some
+    cell on (the white configuration, every finite configuration, every row of the seed pattern) has
+    exactly two preimages, one white and one black from that cell on
+    ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_three`, `exists_card_eq_three`,
+    `eq_of_evol_one_eq_of_right`, `evol_one_eq_iff_of_eventually_white`, `preimage_white`); but two
+    different configurations that agree left of a cell can have the same image, so rule 30 is not
+    positively expansive (`exists_ne_left_eq`, `not_positivelyExpansive`). Still, rule 30 is
+    invertible almost everywhere and generically: an image showing 010 at the cells q, q + 1, q + 2
+    forces the preimage to be black at q − 1 (`eq_true_of_window`), so the cell p of a preimage is
+    determined by the image on the cells p + 1, …, q + 2 for any such q > p
+    (`eq_of_evol_one_eq_on_of_window`), and a configuration that shows 010 arbitrarily far to the
+    right has exactly one preimage (`eq_of_evol_one_eq_of_frequently`). Almost every configuration
+    does, and so does a comeager set of them, so rule 30 is injective on a set of full measure, and
+    every row of the space-time diagram of almost every configuration determines it
+    (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
+    `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). Likewise, ergodicity of
+    the doubling map (`AddCircle.ergodic_nsmul`) says nothing about one specific number.
+    *Correction:* an earlier version said that the trace is normal for a comeager set of
+    configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
     neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof
     mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the defect

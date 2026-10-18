@@ -12,7 +12,8 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
 * `problem1_of_unbounded_remainder`: **if the number of black cells among the first `n` cells of
   the center column is not `α n + O(1)` for any real `α`, Problem 1 holds.** This is strictly
   stronger than Problem 1: Sturmian sequences are not eventually periodic and have bounded
-  remainder.
+  remainder. The same holds for the occurrences of any word `w`
+  (`problem1_of_unbounded_word_remainder`).
 * `unbounded_remainder_of_disjunctive`: a disjunctive sequence (every word occurs) has unbounded
   remainder for every `α`: a run of `m` black cells raises `N(n) - α n` by `(1 - α) m`, and a run
   of `m` white cells lowers it by `α m`. So the new statement sits between "c is disjunctive" and
@@ -116,6 +117,29 @@ theorem problem1_of_unbounded_remainder
     (h : ∀ α C : ℝ, ∃ n, C < |(ones Rule30Prize.center n : ℝ) - α * n|) :
     Rule30Prize.Problem1 := fun hep => by
   obtain ⟨α, C, hC⟩ := exists_abs_ones_sub_le_of_eventuallyPeriodic hep
+  obtain ⟨n, hn⟩ := h α C
+  exact absurd (hC n) (not_le.2 hn)
+
+/-- The occurrences of a word `w` in an eventually periodic sequence form an eventually periodic
+sequence. -/
+theorem eventuallyPeriodic_occurs {b : ℕ → Bool} (h : EventuallyPeriodic b) {m : ℕ}
+    (w : Fin m → Bool) : EventuallyPeriodic fun i => decide (∀ j : Fin m, b (i + j) = w j) := by
+  obtain ⟨T, P, hP, hper⟩ := h
+  refine ⟨T, P, hP, fun i hi => ?_⟩
+  have : ∀ j : Fin m, b (i + P + j) = b (i + j) := fun j => by
+    rw [show i + P + j = i + j + P by ring]
+    exact hper (i + j) (by omega)
+  simp only [this]
+
+/-- **Problem 1 from an unbounded word count**: if for some word `w` the number of its occurrences
+among the first `n` positions of the center column is not `α n + O(1)` for any real `α`,
+Problem 1 holds. The case of the one-letter word `1` is `problem1_of_unbounded_remainder`. -/
+theorem problem1_of_unbounded_word_remainder {m : ℕ} (w : Fin m → Bool)
+    (h : ∀ α C : ℝ, ∃ n, C < |(ones (fun i => decide (∀ j : Fin m, Rule30Prize.center (i + j) =
+      w j)) n : ℝ) - α * n|) :
+    Rule30Prize.Problem1 := fun hep => by
+  obtain ⟨α, C, hC⟩ :=
+    exists_abs_ones_sub_le_of_eventuallyPeriodic (eventuallyPeriodic_occurs hep w)
   obtain ⟨n, hn⟩ := h α C
   exact absurd (hC n) (not_le.2 hn)
 

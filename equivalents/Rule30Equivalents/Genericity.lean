@@ -20,6 +20,9 @@ a configuration `x : ℤ → Bool`.
 
 The single black cell is one point of the meager, countable set of finite configurations, so
 neither statement says anything about the center column `c` itself.
+
+Rule 30 itself is onto (`surjective_evol_one`: on each window a preimage is solved from right to
+left, and compactness gives a global one) and not one-to-one (`not_injective_evol_one`).
 -/
 
 namespace Rule30Equivalents.Genericity
@@ -241,5 +244,66 @@ theorem residual_disjunctive_trace :
 theorem isMeagre_halfDensity_trace :
     IsMeagre {x : ℤ → Bool | Symmetry.HalfDensity (trace x)} :=
   isMeagre_halfDensity.preimage_of_isOpenMap continuous_trace isOpenMap_trace
+
+/-! ### Rule 30 is onto, not one-to-one -/
+
+/-- A preimage of `y` on the window `[-n, n]`, solved from right to left:
+`k ↦ (x(n+1-k), x(n+2-k))`, with white cells right of `n`. -/
+def preimPair (y : ℤ → Bool) (n : ℕ) : ℕ → Bool × Bool
+  | 0 => (false, false)
+  | k + 1 => (xor (y ((n : ℤ) + 1 - k)) ((preimPair y n k).1 || (preimPair y n k).2),
+      (preimPair y n k).1)
+
+/-- The configuration of `preimPair`. -/
+def preimWin (y : ℤ → Bool) (n : ℕ) (p : ℤ) : Bool :=
+  if p ≤ (n : ℤ) + 1 then (preimPair y n ((n : ℤ) + 1 - p).toNat).1 else false
+
+theorem preimWin_eq (y : ℤ → Bool) (n : ℕ) (k : ℕ) :
+    preimWin y n ((n : ℤ) + 1 - k) = (preimPair y n k).1 := by
+  unfold preimWin
+  rw [if_pos (by omega), show ((n : ℤ) + 1 - ((n : ℤ) + 1 - k)).toNat = k by omega]
+
+theorem preimWin_succ (y : ℤ → Bool) (n : ℕ) (k : ℕ) :
+    preimWin y n ((n : ℤ) + 1 - (k + 1 : ℕ) + 1) = (preimPair y n (k + 1)).2 := by
+  rw [show ((n : ℤ) + 1 - (k + 1 : ℕ) + 1) = (n : ℤ) + 1 - k by push_cast; ring, preimWin_eq]
+  rfl
+
+/-- `preimWin y n` is a preimage of `y` at every cell `p ≤ n`. -/
+theorem evol_preimWin (y : ℤ → Bool) (n : ℕ) (p : ℤ) (hp : p ≤ n) :
+    evol (preimWin y n) 1 p = y p := by
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, p = (n : ℤ) + 1 - (k + 1 : ℕ) := ⟨(n - p).toNat, by omega⟩
+  have e0 : preimWin y n p = (preimPair y n (k + 1)).1 := by rw [hk, preimWin_eq]
+  have e1 : preimWin y n (p + 1) = (preimPair y n (k + 1)).2 := by rw [hk, preimWin_succ]
+  have e2 : preimWin y n (p - 1) = (preimPair y n (k + 2)).1 := by
+    rw [hk, show (n : ℤ) + 1 - (k + 1 : ℕ) - 1 = (n : ℤ) + 1 - (k + 2 : ℕ) by push_cast; ring,
+      preimWin_eq]
+  show xor (preimWin y n (p - 1)) (preimWin y n p || preimWin y n (p + 1)) = y p
+  rw [e0, e1, e2]
+  simp only [preimPair]
+  rw [show (n : ℤ) + 1 - ((k + 1 : ℕ) : ℤ) = p by omega]
+  cases y p <;> cases (preimPair y n k).1 <;> cases (preimPair y n k).2 <;> simp
+
+/-- **Rule 30 is onto**: every configuration has a preimage. On each window `[-n, n]` a preimage
+is solved from right to left (left-permutivity), and compactness of `{0,1}^ℤ` gives a global one. -/
+theorem surjective_evol_one : Function.Surjective fun x : ℤ → Bool => evol x 1 := by
+  intro y
+  let F : ℕ → Set (ℤ → Bool) := fun n => {x | ∀ p, -(n : ℤ) ≤ p → p ≤ n → evol x 1 p = y p}
+  have hclosed : ∀ n, IsClosed (F n) := fun n => by
+    simp only [F, Set.setOf_forall]
+    refine isClosed_iInter fun p => isClosed_iInter fun _ => isClosed_iInter fun _ => ?_
+    exact (isClosed_discrete {y p}).preimage (continuous_evol 1 p)
+  have hne : ∀ n, (F n).Nonempty := fun n => ⟨preimWin y n, fun p _ hp => evol_preimWin y n p hp⟩
+  have hmono : ∀ n, F (n + 1) ⊆ F n := fun n x hx p _ _ => hx p (by omega) (by omega)
+  obtain ⟨x, hx⟩ := IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed F hmono hne
+    (hclosed 0).isCompact hclosed
+  refine ⟨x, funext fun p => ?_⟩
+  exact (Set.mem_iInter.1 hx p.natAbs) p (by omega) (by omega)
+
+/-- **Rule 30 is not one-to-one**: the all-black configuration and the all-white one both turn
+all white. -/
+theorem not_injective_evol_one : ¬ Function.Injective fun x : ℤ → Bool => evol x 1 := by
+  intro h
+  have := congrFun (@h (fun _ => true) (fun _ => false) (funext fun p => rfl)) 0
+  exact absurd this (by decide)
 
 end Rule30Equivalents.Genericity

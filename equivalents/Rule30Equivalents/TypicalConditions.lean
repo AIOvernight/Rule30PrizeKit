@@ -21,7 +21,8 @@ those is vacuous.
   (`Automatic.countable_setOf_isAutomatic`), so almost every center column is not `k`-automatic for
   any `k ≥ 2`, not `k`-regular over any field (`ae_not_isRegularSeq_trace`), and its generating
   function is transcendental over `𝔽_p(X)` for every prime `p` (Christol's theorem,
-  `ae_transcendental_series_trace`). In a real base `β > 2` the value is one-to-one
+  `ae_transcendental_series_trace`) and over `ℚ(X)` (`ae_transcendental_rat`: a nonzero polynomial
+  over `ℚ(X)` has finitely many roots in `ℚ⸨X⸩`). In a real base `β > 2` the value is one-to-one
   (`BinaryIrrational.value_injective`) and `ℚ(β)` is countable (`countable_adjoin`), so
   `x_β ∉ ℚ(β)` almost surely (`ae_value_not_mem_adjoin_trace`).
 * **Automatic complexity.** A word with automatic complexity at most `K` is the only word of its
@@ -84,6 +85,53 @@ theorem ae_transcendental_series_trace : ∀ᵐ x ∂(coins ℤ), ∀ (p : ℕ) 
       ((LinearRelations.series (ZMod p) (trace x) : PowerSeries (ZMod p)) : (ZMod p)⸨X⸩) :=
   ae_not_isAutomatic_trace.mono fun x hx p hp halg =>
     hx p hp.out.two_le ((Christol.isAutomatic_iff_isAlgebraic (trace x)).2 halg)
+
+/-- `ℚ(X)` is countable: `x = num x / denom x`. -/
+instance : Countable (RatFunc ℚ) := by
+  haveI : Countable (AddMonoidAlgebra ℚ ℕ) := inferInstanceAs (Countable (ℕ →₀ ℚ))
+  haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
+  refine Function.Injective.countable (f := fun x : RatFunc ℚ => (x.num, x.denom)) fun x y h => ?_
+  simp only [Prod.mk.injEq] at h
+  rw [← RatFunc.num_div_denom x, ← RatFunc.num_div_denom y, h.1, h.2]
+
+/-- **Almost every generating function is transcendental over `ℚ(X)`**: an algebraic one is a root
+of a nonzero polynomial over `ℚ(X)`, which has finitely many roots in the field `ℚ⸨X⸩`, and there
+are countably many such polynomials. -/
+theorem ae_transcendental_rat : ∀ᵐ v ∂(coins ℕ), Transcendental (RatFunc ℚ)
+    ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) := by
+  classical
+  haveI : Countable (AddMonoidAlgebra (RatFunc ℚ) ℕ) :=
+    inferInstanceAs (Countable (ℕ →₀ RatFunc ℚ))
+  haveI : Countable (Polynomial (RatFunc ℚ)) := Polynomial.toFinsupp_injective.countable
+  have hinj : Function.Injective fun v : ℕ → Bool =>
+      ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) :=
+    (HahnSeries.ofPowerSeries_injective).comp (Typicality.injective_series ℚ)
+  -- the roots of one polynomial
+  have hfin : ∀ q : Polynomial (RatFunc ℚ), q ≠ 0 → {v : ℕ → Bool |
+      Polynomial.aeval ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) q = 0}.Finite := by
+    intro q hq
+    set Q := q.map (algebraMap (RatFunc ℚ) ℚ⸨X⸩) with hQdef
+    have hQ : Q ≠ 0 := (Polynomial.map_ne_zero_iff (algebraMap (RatFunc ℚ) ℚ⸨X⸩).injective).2 hq
+    refine (Q.roots.toFinset.finite_toSet.preimage hinj.injOn).subset fun v hv => ?_
+    simp only [Set.mem_setOf_eq] at hv
+    simp only [Set.mem_preimage, Finset.mem_coe, Multiset.mem_toFinset]
+    rw [Polynomial.mem_roots hQ, Polynomial.IsRoot, hQdef, Polynomial.eval_map,
+      ← Polynomial.aeval_def]
+    exact hv
+  have hcount : {v : ℕ → Bool | IsAlgebraic (RatFunc ℚ)
+      ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩)}.Countable := by
+    refine (Set.countable_iUnion fun q : Polynomial (RatFunc ℚ) =>
+      (if hq : q = 0 then Set.countable_empty.mono (fun _ h => (h.1 hq).elim)
+        else ((hfin q hq).countable.mono fun _ h => h.2) :
+          {v : ℕ → Bool | q ≠ 0 ∧ Polynomial.aeval
+            ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) q = 0}.Countable)).mono ?_
+    rintro v ⟨q, hq, hroot⟩
+    exact Set.mem_iUnion.2 ⟨q, hq, hroot⟩
+  exact ae_notMem_of_countable hcount
+
+theorem ae_transcendental_rat_trace : ∀ᵐ x ∂(coins ℤ), Transcendental (RatFunc ℚ)
+    ((LinearRelations.series ℚ (trace x) : PowerSeries ℚ) : ℚ⸨X⸩) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae ae_transcendental_rat
 
 /-! ### Automatic complexity -/
 
@@ -413,7 +461,8 @@ hypotheses of `BoundedRemainder.problem1_of_unbounded_remainder`,
 `EmpiricalMeasures.problem1_of_nonatomic_mapClusterPt`, `Automatic.problem1_of_not_automatic`,
 `problem1_of_not_two_three_automatic`, `problem1_of_automaticComplexity_tendsto_top`,
 `PresburgerExpansion.problem1_of_mul_definable`, `ProblemTwo.problem1_of_density_on_progressions`,
-`Transcendence.problem1_of_transcendental_F2_or_F3`,
+`Transcendence.problem1_of_transcendental_F2_or_F3`, `Transcendence.problem1_of_transcendental`
+over `ℚ`,
 `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`,
 `problem1_of_late_long_unbordered_factors`, `problem1_of_lz_unbounded` and
 `LinearRelations.problem1_of_not_zero_set` over `ℚ`. -/
@@ -436,6 +485,7 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
         (𝓝 (1 / 2))) ∧
     (∀ (p : ℕ) [Fact p.Prime], Transcendental (RatFunc (ZMod p))
       ((LinearRelations.series (ZMod p) (trace x) : PowerSeries (ZMod p)) : (ZMod p)⸨X⸩)) ∧
+    Transcendental (RatFunc ℚ) ((LinearRelations.series ℚ (trace x) : PowerSeries ℚ) : ℚ⸨X⸩) ∧
     (∀ N, ∃ n, N ≤ n ∧ ¬ WordForms.EndsWithGoldenPower (trace x) n) ∧
     (∀ n L : ℕ, ∃ i ℓ : ℕ, n ≤ i ∧ L ≤ ℓ ∧
       ¬ Lyndon.Bordered ((List.range ℓ).map fun j => trace x (i + j))) ∧
@@ -448,9 +498,10 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     ae_nonatomic_mapClusterPt_trace, ae_not_isAutomatic_trace,
     measurePreserving_trace.quasiMeasurePreserving.ae ae_autComplexity_tendsto,
     ae_mul_definable_trace, ae_density_progressions_trace, ae_transcendental_series_trace,
+    ae_transcendental_rat_trace,
     ae_golden_trace, ae_disjunctive_trace, ae_lz_unbounded_trace, ae_not_zero_set_rat_trace]
-    with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 hd h13 hz
-  exact ⟨h1, hw, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11,
+    with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 hq h11 hd h13 hz
+  exact ⟨h1, hw, h2, h3, h4, h5, h6, h7, h8, h9, h10, hq, h11,
     late_long_unbordered_of_disjunctive hd, h13, hz⟩
 
 end Rule30Equivalents.TypicalConditions

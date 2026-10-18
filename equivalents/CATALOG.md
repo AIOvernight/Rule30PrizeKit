@@ -2297,14 +2297,16 @@ FinConf through Jen's theorem, the frozen-boundary conjecture
 (`Automatic.problem1_of_not_automatic`), the zero sets in any characteristic
 (`LinearRelations.problem1_of_not_zero_set`), and Problem 3 ([ProblemThree](Rule30Equivalents/ProblemThree.lean)).
 
-*Almost surely.* For almost every configuration the center column satisfies seventeen of these
+*Almost surely.* For almost every configuration the center column satisfies eighteen of these
 statements ([Typicality](Rule30Equivalents/Typicality.lean), `ae_strongerStatements_trace`): the
 effective boundary, every line, unbounded runs in both colors, anti-Toeplitz, disagreements, the
 Besicovitch distance, the uncountable orbit closure, positive entropy, disjunctive and normal, x₂
 transcendental, μ(x₂) ≥ 2, unbounded abelian complexity, not morphic, recurrent but not purely
 periodic, Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplexity.lean)), and not
 k-Mahler for every k ≥ 2 (a solution of a Mahler equation is determined by finitely many
-coefficients, `StrongerStatements.countable_setOf_isMahler`; every series is 1-Mahler). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
+coefficients, `StrongerStatements.countable_setOf_isMahler`; every series is 1-Mahler), and
+unbounded expansion complexity (a nonzero g(X, Y) over 𝔽₂ has finitely many roots in 𝔽₂⟦X⟧,
+`finite_roots_series`). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal
@@ -2314,7 +2316,7 @@ surely too ([TypicalConditions](Rule30Equivalents/TypicalConditions.lean),
 w (for α = 2^-|w| the block w^L raises the remainder), an oscillating discrepancy, unpredictability, a non-atomic limit of the empirical measures, not k-automatic (the
 k-automatic sequences are countably many, `Automatic.countable_setOf_isAutomatic`), automatic
 complexity → ∞, multiplication definable in (ℕ, +, S), density 1/2 along every progression, a
-transcendental generating function over 𝔽_p(X) (Christol), the golden-power, unbordered-factor and
+transcendental generating function over 𝔽_p(X) (Christol) and over ℚ(X), the golden-power, unbordered-factor and
 Lempel–Ziv forms, black times that are not the zero set of a linear recurrence over ℚ
 (Skolem–Mahler–Lech) or a finite field, and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`).

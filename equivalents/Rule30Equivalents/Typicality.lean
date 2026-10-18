@@ -6,7 +6,7 @@ import Rule30Equivalents.LinearComplexity
 # The stronger statements hold for almost every configuration
 
 Problem 1 follows from many stronger statements about the center column
-(`StrongerStatements.problem1_of_*`). Seventeen of them hold for almost every configuration, with
+(`StrongerStatements.problem1_of_*`). Eighteen of them hold for almost every configuration, with
 the seed replaced by the configuration (`ae_strongerStatements_trace`); in particular none of them
 is vacuous.
 
@@ -29,6 +29,10 @@ is vacuous.
   almost every sequence is not morphic (`ae_not_isMorphic`); so are the `k`-Mahler series with
   `0/1` coefficients for `k ≥ 2` (`StrongerStatements.countable_setOf_isMahler`), so almost every
   generating function is not `k`-Mahler (`ae_not_isMahler`).
+* **Expansion complexity.** A nonzero `g(X, Y)` over `𝔽₂` vanishes at finitely many generating
+  functions (`finite_roots_series`, its roots over the domain `𝔽₂⟦X⟧`), and the `g` of degree at
+  most `D` in each variable are finitely many, so the expansion complexity is unbounded almost
+  surely (`ae_expansionComplexity_unbounded`).
 * No line inside the light cone is eventually periodic (`Mixing.ae_every_line`), and the linear
   complexity satisfies `Lₙ/n → 1/2` (`LinearComplexity.ae_tendsto_linComplexity_trace`).
 
@@ -276,6 +280,99 @@ theorem ae_not_isMahler_trace : ∀ᵐ x ∂(coins ℤ), ∀ k (hk : k ≠ 0), 2
     ¬ IsMahler k hk (LinearRelations.series ℚ (trace x)) :=
   measurePreserving_trace.quasiMeasurePreserving.ae ae_not_isMahler
 
+/-! ### Algebraic relations over `𝔽₂[X]` -/
+
+/-- Different bit sequences have different generating functions, over a nontrivial ring. -/
+theorem injective_series (K : Type*) [CommRing K] [Nontrivial K] :
+    Function.Injective (LinearRelations.series K) := by
+  intro b b' h
+  funext t
+  have := congrArg (PowerSeries.coeff t) h
+  simp only [LinearRelations.coeff_series, LinearRelations.toK] at this
+  cases hb : b t <;> cases hb' : b' t <;> simp_all
+
+/-- **A nonzero `g(X, Y)` over `𝔽₂` vanishes at finitely many generating functions**: they are
+roots of `g` over the domain `𝔽₂⟦X⟧`. -/
+theorem finite_roots_series {g : Polynomial (Polynomial (ZMod 2))} (hg : g ≠ 0) :
+    {b : ℕ → Bool | g.eval₂ Polynomial.coeToPowerSeries.ringHom
+      (LinearRelations.series (ZMod 2) b) = 0}.Finite := by
+  classical
+  set G := g.map Polynomial.coeToPowerSeries.ringHom with hGdef
+  have hG : G ≠ 0 := (Polynomial.map_ne_zero_iff (Polynomial.coe_injective (ZMod 2))).2 hg
+  refine (G.roots.toFinset.finite_toSet.preimage (injective_series (ZMod 2)).injOn).subset
+    fun b hb => ?_
+  simp only [Set.mem_setOf_eq] at hb
+  simp only [Set.mem_preimage, Finset.mem_coe, Multiset.mem_toFinset]
+  rw [Polynomial.mem_roots hG, Polynomial.IsRoot, hGdef, Polynomial.eval_map]
+  exact hb
+
+/-- **Almost every generating function over `𝔽₂` is a root of no nonzero `g(X, Y)`**. -/
+theorem ae_not_root_series : ∀ᵐ v ∂(coins ℕ), ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 →
+    g.eval₂ Polynomial.coeToPowerSeries.ringHom (LinearRelations.series (ZMod 2) v) ≠ 0 := by
+  haveI : Countable (AddMonoidAlgebra (ZMod 2) ℕ) := inferInstanceAs (Countable (ℕ →₀ ZMod 2))
+  haveI : Countable (Polynomial (ZMod 2)) := Polynomial.toFinsupp_injective.countable
+  haveI : Countable (AddMonoidAlgebra (Polynomial (ZMod 2)) ℕ) :=
+    inferInstanceAs (Countable (ℕ →₀ Polynomial (ZMod 2)))
+  haveI : Countable (Polynomial (Polynomial (ZMod 2))) :=
+    Polynomial.toFinsupp_injective.countable
+  refine ae_all_iff.2 fun g => ?_
+  by_cases hg : g = 0
+  · exact Eventually.of_forall fun _ h => absurd hg h
+  · exact (measure_eq_zero_iff_ae_notMem.1 ((finite_roots_series hg).countable.measure_zero _)).mono
+      fun _ hv _ => hv
+
+/-- The polynomials over `𝔽₂` of degree at most `D` in each variable are finitely many. -/
+theorem finite_bounded_polys (D : ℕ) : {g : Polynomial (Polynomial (ZMod 2)) |
+    g.natDegree ≤ D ∧ ∀ i, (g.coeff i).natDegree ≤ D}.Finite := by
+  refine Set.Finite.of_finite_image (f := fun g (i j : Fin (D + 1)) => (g.coeff i).coeff j)
+    (Set.toFinite _) fun g hg g' hg' h => ?_
+  ext i j
+  by_cases hi : i ≤ D
+  · by_cases hj : j ≤ D
+    · exact congrFun (congrFun h ⟨i, by omega⟩) ⟨j, by omega⟩
+    · rw [Polynomial.coeff_eq_zero_of_natDegree_lt (by have := hg.2 i; omega),
+        Polynomial.coeff_eq_zero_of_natDegree_lt (by have := hg'.2 i; omega)]
+  · rw [Polynomial.coeff_eq_zero_of_natDegree_lt (p := g) (n := i) (by have := hg.1; omega),
+      Polynomial.coeff_eq_zero_of_natDegree_lt (p := g') (n := i) (by have := hg'.1; omega)]
+
+/-- **The expansion complexity of almost every generating function over `𝔽₂` is unbounded**: no
+nonzero `g` vanishes at it, and the `g` of degree at most `D` in each variable are finitely many,
+so one precision `n` sees all of them. -/
+theorem ae_expansionComplexity_unbounded : ∀ᵐ v ∂(coins ℕ), ∀ D : ℕ, ∃ n : ℕ,
+    ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 → g.natDegree ≤ D →
+      (∀ i, (g.coeff i).natDegree ≤ D) →
+        PowerSeries.trunc n (g.eval₂ Polynomial.coeToPowerSeries.ringHom
+          (LinearRelations.series (ZMod 2) v)) ≠ 0 := by
+  filter_upwards [ae_not_root_series] with v hv D
+  classical
+  set F := (finite_bounded_polys D).toFinset
+  -- a nonzero coefficient of each `g(X, v)`
+  have hk : ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 → ∃ k, PowerSeries.coeff k
+      (g.eval₂ Polynomial.coeToPowerSeries.ringHom (LinearRelations.series (ZMod 2) v)) ≠ 0 :=
+    fun g hg => by
+      by_contra h
+      push Not at h
+      exact hv g hg (PowerSeries.ext fun k => by simpa using h k)
+  let k : Polynomial (Polynomial (ZMod 2)) → ℕ := fun g =>
+    if hg : g = 0 then 0 else (hk g hg).choose
+  refine ⟨F.sup k + 1, fun g hg hdeg hcoeff => ?_⟩
+  have hgF : g ∈ F := (Set.Finite.mem_toFinset _).2 ⟨hdeg, hcoeff⟩
+  have hkg : k g ≤ F.sup k := Finset.le_sup hgF
+  intro htrunc
+  have := congrArg (Polynomial.coeff · (k g)) htrunc
+  simp only [PowerSeries.coeff_trunc, Polynomial.coeff_zero] at this
+  rw [if_pos (by omega)] at this
+  have hspec := (hk g hg).choose_spec
+  simp only [k, dif_neg hg] at this
+  exact hspec this
+
+theorem ae_expansionComplexity_unbounded_trace : ∀ᵐ x ∂(coins ℤ), ∀ D : ℕ, ∃ n : ℕ,
+    ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 → g.natDegree ≤ D →
+      (∀ i, (g.coeff i).natDegree ≤ D) →
+        PowerSeries.trunc n (g.eval₂ Polynomial.coeToPowerSeries.ringHom
+          (LinearRelations.series (ZMod 2) (trace x))) ≠ 0 :=
+  measurePreserving_trace.quasiMeasurePreserving.ae ae_expansionComplexity_unbounded
+
 /-! ### The stronger statements, almost surely -/
 
 /-- **The stronger statements hold for almost every configuration.** For almost every
@@ -286,8 +383,8 @@ hypotheses of `StrongerStatements.problem1_of_effective_boundary`, `problem1_of_
 `problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity`,
 `problem1_of_disjunctive`, `problem1_of_isNormal`, `problem1_of_transcendental_binary`,
 `problem1_of_irrExponentGE`, `problem1_of_unbounded_abelianComplexity`, `problem1_of_not_isMorphic`,
-`problem1_of_recurrent_not_purelyPeriodic`, `problem1_of_linComplexity_tendsto` and
-`problem1_of_not_isMahler` (for every `k ≥ 2`). -/
+`problem1_of_recurrent_not_purelyPeriodic`, `problem1_of_linComplexity_tendsto`,
+`problem1_of_not_isMahler` (for every `k ≥ 2`) and `problem1_of_expansionComplexity_unbounded`. -/
 theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     (¬ EventuallyPeriodic fun t => trace x t && trace x (t + 1)) ∧
     (∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
@@ -306,10 +403,14 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     ¬ IsMorphic (trace x) ∧
     IsRecurrent (trace x) ∧ (¬ ∃ P, 0 < P ∧ ∀ t, trace x (t + P) = trace x t) ∧
     Tendsto (fun n : ℕ => (linComplexity (trace x) n : ℝ) / n) atTop (𝓝 (1 / 2)) ∧
-    ∀ k (hk : k ≠ 0), 2 ≤ k → ¬ IsMahler k hk (LinearRelations.series ℚ (trace x)) := by
+    (∀ k (hk : k ≠ 0), 2 ≤ k → ¬ IsMahler k hk (LinearRelations.series ℚ (trace x))) ∧
+    ∀ D : ℕ, ∃ n : ℕ, ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 → g.natDegree ≤ D →
+      (∀ i, (g.coeff i).natDegree ≤ D) →
+        PowerSeries.trunc n (g.eval₂ Polynomial.coeToPowerSeries.ringHom
+          (LinearRelations.series (ZMod 2) (trace x))) ≠ 0 := by
   filter_upwards [ae_isNormal_trace, Mixing.ae_every_line, ae_transcendental_trace,
-    ae_not_isMorphic_trace, LinearComplexity.ae_tendsto_linComplexity_trace, ae_not_isMahler_trace]
-    with x hn hline htr hmor hlin hmah
+    ae_not_isMorphic_trace, LinearComplexity.ae_tendsto_linComplexity_trace, ae_not_isMahler_trace,
+    ae_expansionComplexity_unbounded_trace] with x hn hline htr hmor hlin hmah hexp
   have hd : Disjunctive (trace x) := fun n w => disjunctive_of_isNormal hn n w
   refine ⟨not_eventuallyPeriodic_and_of_disjunctive hd, hline, fun β n => ?_,
     fun P hP r => antiToeplitz_of_disjunctive hd hP r,
@@ -320,7 +421,7 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
       ((BinaryIrrational.irrational_iff_not_eventuallyPeriodic le_rfl (trace x)).2
         (not_eventuallyPeriodic_of_disjunctive hd)),
     fun C => ⟨C, by rw [abelianComplexity_of_disjunctive hd]; omega⟩, hmor,
-    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd, hlin, hmah⟩
+    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd, hlin, hmah, hexp⟩
   · obtain ⟨t, ht⟩ := hd n fun _ => β
     exact ⟨t, fun i hi => ht ⟨i, hi⟩⟩
   · rw [closure_shifts_of_disjunctive hd]

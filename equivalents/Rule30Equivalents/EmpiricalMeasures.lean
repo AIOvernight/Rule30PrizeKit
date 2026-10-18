@@ -272,11 +272,7 @@ theorem isClopen_cyl {n : ℕ} (w : Fin n → Bool) : IsClopen (cyl w) := by
 theorem measurableSet_cyl {n : ℕ} (w : Fin n → Bool) : MeasurableSet (cyl w) :=
   (isClopen_cyl w).isClosed.measurableSet
 
-/-- The fair-coin measure as a point of the space of probability measures. -/
-noncomputable def coinsPM : ProbabilityMeasure (ℕ → Bool) :=
-  ⟨RandomConfigurations.coins ℕ, inferInstance⟩
-
-theorem coinsPM_cyl {n : ℕ} (w : Fin n → Bool) : (coinsPM (cyl w) : ℝ) = (2 : ℝ)⁻¹ ^ n := by
+theorem coinsPM_cyl {n : ℕ} (w : Fin n → Bool) : (RandomConfigurations.coinsPM ℕ (cyl w) : ℝ) = (2 : ℝ)⁻¹ ^ n := by
   have hset : cyl w = Set.pi (Finset.range n : Set ℕ)
       (fun j => {if h : j < n then w ⟨j, h⟩ else false}) := by
     ext v
@@ -300,7 +296,7 @@ iff its empirical measures converge weakly to the fair-coin measure on `{0,1}^�
 clopen (portmanteau), and they form a π-system of arbitrarily small neighbourhoods (Mathlib's
 `IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem`). -/
 theorem isNormal_iff_tendsto_empirical (b : ℕ → Bool) :
-    StrongerStatements.IsNormal b ↔ Tendsto (empirical b) atTop (𝓝 coinsPM) := by
+    StrongerStatements.IsNormal b ↔ Tendsto (empirical b) atTop (𝓝 (RandomConfigurations.coinsPM ℕ)) := by
   have hfreq : ∀ {n : ℕ} (w : Fin n → Bool) (N : ℕ), ((empirical b N) (cyl w) : ℝ) =
       (#{i ∈ range (N + 1) | ∀ j : Fin n, b (i + j) = w j} : ℝ) / ((N + 1 : ℕ) : ℝ) := by
     intro n w N
@@ -354,7 +350,7 @@ theorem isNormal_iff_tendsto_empirical (b : ℕ → Bool) :
 empirical measures of its center trace converge weakly to the fair-coin measure. -/
 theorem ae_tendsto_empirical_trace :
     ∀ᵐ x ∂(RandomConfigurations.coins ℤ),
-      Tendsto (empirical (Genericity.trace x)) atTop (𝓝 coinsPM) :=
+      Tendsto (empirical (Genericity.trace x)) atTop (𝓝 (RandomConfigurations.coinsPM ℕ)) :=
   RandomConfigurations.ae_isNormal_trace.mono fun _ h =>
     (isNormal_iff_tendsto_empirical _).1 h
 

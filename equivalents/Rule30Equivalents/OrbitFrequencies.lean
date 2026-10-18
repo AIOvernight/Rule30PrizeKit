@@ -175,11 +175,8 @@ theorem ae_orbit_frequency :
 def windowSet (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) : Set (ℤ → Bool) :=
   {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, y i = extend v i}
 
-/-- The fair-coin measure on configurations, as a point of the space of probability measures. -/
-noncomputable def coinsPM : ProbabilityMeasure (ℤ → Bool) := ⟨coins ℤ, inferInstance⟩
-
 theorem coinsPM_windowSet (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) :
-    (coinsPM (windowSet n v) : ℝ) = (2 : ℝ)⁻¹ ^ (2 * n + 1) := by
+    (coinsPM ℤ (windowSet n v) : ℝ) = (2 : ℝ)⁻¹ ^ (2 * n + 1) := by
   have hcard : (Finset.Icc (-(n : ℤ)) n).card = 2 * n + 1 := by
     rw [Int.card_Icc]
     omega
@@ -192,7 +189,7 @@ empirical measures `(δ_x + δ_{Fx} + ⋯ + δ_{F^T x}) / (T + 1)` of its orbit 
 fair-coin measure. -/
 theorem ae_tendsto_orbit_empirical :
     ∀ᵐ x ∂(coins ℤ), Tendsto (fun T => EmpiricalMeasures.empiricalOf (fun t => evol x t) T)
-      atTop (𝓝 coinsPM) := by
+      atTop (𝓝 (coinsPM ℤ)) := by
   filter_upwards [ae_orbit_frequency] with x hx
   refine IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem
     (S := {s | ∃ n v, s = windowSet n v}) ?_ ?_ ?_ ?_

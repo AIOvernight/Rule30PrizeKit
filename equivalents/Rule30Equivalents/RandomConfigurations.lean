@@ -67,6 +67,9 @@ theorem coin_singleton (b : Bool) : coin {b} = 2⁻¹ := by
 noncomputable abbrev coins (ι : Type*) : Measure (ι → Bool) :=
   Measure.infinitePi fun _ : ι => coin
 
+/-- The fair-coin measure as a point of the space of probability measures. -/
+noncomputable def coinsPM (ι : Type*) : ProbabilityMeasure (ι → Bool) := ⟨coins ι, inferInstance⟩
+
 theorem coins_map_eval {ι : Type*} (i : ι) : (coins ι).map (fun x => x i) = coin :=
   Measure.infinitePi_map_eval _ i
 

@@ -183,15 +183,15 @@ theorem problem1_of_transcendental_binary
   rintro ⟨q, hq⟩
   exact h (hq ▸ isAlgebraic_algebraMap q)
 
-/-- The linear complexity of the prefix of length `n` over `𝔽₂`: the shortest linear feedback
-shift register that generates it. -/
-noncomputable def linComplexity (n : ℕ) : ℕ :=
+/-- The linear complexity of the prefix of length `n` of `b` over `𝔽₂`: the length of the shortest
+linear feedback shift register that generates it. -/
+noncomputable def linComplexity (b : ℕ → Bool) (n : ℕ) : ℕ :=
   sInf {d | ∃ a : Fin d → ZMod 2, ∀ t, t + d < n →
-    (if c (t + d) then 1 else 0 : ZMod 2) = ∑ i, a i * (if c (t + i) then 1 else 0)}
+    (if b (t + d) then 1 else 0 : ZMod 2) = ∑ i, a i * (if b (t + i) then 1 else 0)}
 
 /-- **`Lₙ/n → 1/2`**: then `Lₙ → ∞`. -/
 theorem problem1_of_linComplexity_tendsto
-    (h : Tendsto (fun n : ℕ => (linComplexity n : ℝ) / n) atTop (𝓝 (1 / 2))) :
+    (h : Tendsto (fun n : ℕ => (linComplexity c n : ℝ) / n) atTop (𝓝 (1 / 2))) :
     Rule30Prize.Problem1 := by
   rw [PowerSeriesF2.problem1_iff_linear_complexity_unbounded]
   intro d
@@ -199,13 +199,13 @@ theorem problem1_of_linComplexity_tendsto
     eventually_atTop.1 (h.eventually (lt_mem_nhds (by norm_num : (1 / 4 : ℝ) < 1 / 2)))
   obtain ⟨M, hM⟩ : ∃ M, M = max N (4 * d + 4) := ⟨_, rfl⟩
   refine ⟨M, fun ⟨a, ha⟩ => ?_⟩
-  have hle : linComplexity M ≤ d := Nat.sInf_le ⟨a, ha⟩
+  have hle : linComplexity c M ≤ d := Nat.sInf_le ⟨a, ha⟩
   have h1 := hN M (hM ▸ le_max_left _ _)
   have hM4 : 4 * d + 4 ≤ M := hM ▸ le_max_right _ _
   have h2 : ((4 * d + 4 : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM4
   have hpos : (0 : ℝ) < (M : ℝ) := by exact_mod_cast (by omega : 0 < M)
   rw [lt_div_iff₀ hpos] at h1
-  have h3 : (linComplexity M : ℝ) ≤ d := by exact_mod_cast hle
+  have h3 : (linComplexity c M : ℝ) ≤ d := by exact_mod_cast hle
   push_cast at h2
   linarith
 

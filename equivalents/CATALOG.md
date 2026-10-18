@@ -2197,7 +2197,7 @@ so they are strictly stronger.
 | **x₂ is transcendental** (likewise x_B) | transcendental ⟹ irrational | Conditional only: if c were automatic, [AB07] would apply. | [AB07] |
 | **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. | [Bug11], [BHWY16]; number-theory survey (data) |
 | **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not k-regular, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
-| **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. | [Nie88], [MeWi17]; algebra survey (data) |
+| **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. For almost every sequence abs(2L_n − n) ≤ 2⌊log₂ n⌋ + 2 from some n on, by two first-moment bounds and Borel–Cantelli (`LinearComplexity.ae_eventually_linComplexity`), so the statement holds almost surely (`ae_tendsto_linComplexity_trace`). | [Nie88], [MeWi17]; algebra survey (data) |
 | **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). | algebra survey, [WM86] |
 | **Hypertranscendence** (new): C(z) satisfies no algebraic differential equation P(z, C, C′, …, C⁽ⁿ⁾) = 0 with P ≠ 0 over ℚ | if c is EP, C is rational, hence differentially algebraic | Strictly stronger: Σ z^(n²) is built on the non-EP set of squares, is a theta function, and satisfies an algebraic differential equation [Jac48]. A Mahler function is either rational or hypertranscendental [ADH21], so a non-EP automatic c would give a hypertranscendental C. In general neither "not automatic" nor "hypertranscendental" implies the other. | [ADH21], [Jac48] |
 | **Not a zero set in characteristic p** (new): S is not the zero set of a linear recurrence sequence over an infinite field of characteristic p, such as F_p(x) | if c is EP, S is the zero set of 1 − c, which is EP and so linear-recurrent | Strictly stronger: over F_p(x), u(n) = (x + 1)ⁿ − xⁿ − 1 has the non-EP zero set {pᵏ : k ≥ 0}. Derksen showed that such zero sets are p-automatic of a special form, so "c is not p-automatic" implies this statement. | [Der07] |
@@ -2295,12 +2295,12 @@ FinConf through Jen's theorem, the frozen-boundary conjecture
 (`Automatic.problem1_of_not_automatic`), the zero sets in any characteristic
 (`LinearRelations.problem1_of_not_zero_set`), and Problem 3 ([ProblemThree](Rule30Equivalents/ProblemThree.lean)).
 
-*Almost surely.* For almost every configuration the center column satisfies fifteen of these
+*Almost surely.* For almost every configuration the center column satisfies sixteen of these
 statements ([Typicality](Rule30Equivalents/Typicality.lean), `ae_strongerStatements_trace`): the
 effective boundary, every line, unbounded runs in both colors, anti-Toeplitz, disagreements, the
 Besicovitch distance, the uncountable orbit closure, positive entropy, disjunctive and normal, x₂
-transcendental, μ(x₂) ≥ 2, unbounded abelian complexity, not morphic, and recurrent but not purely
-periodic. Most follow from disjunctivity alone. Transcendence uses that the binary value separates
+transcendental, μ(x₂) ≥ 2, unbounded abelian complexity, not morphic, recurrent but not purely
+periodic, and Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplexity.lean)). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal

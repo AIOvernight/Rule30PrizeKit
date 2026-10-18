@@ -11,8 +11,8 @@ import Mathlib.Probability.ConditionalProbability
 /-!
 # Random configurations
 
-The measure-theoretic counterpart of `Genericity`. Start rule 30 from independent fair coins on `ℤ` (`coins ℤ`, the
-uniform Bernoulli product measure).
+The measure-theoretic counterpart of `Genericity`. Start rule 30 from independent fair coins on
+`ℤ` (`coins ℤ`, the uniform Bernoulli product measure).
 
 * `measurePreserving_trace`: the center trace `x ↦ (evol x t 0)ₜ` pushes `coins ℤ` to `coins ℕ`,
   so the trace of a random configuration is a sequence of independent fair coins. Flipping the coin
@@ -101,21 +101,23 @@ theorem measurable_evol (t : ℕ) (p : ℤ) : Measurable fun x : ℤ → Bool =>
 theorem measurable_trace : Measurable trace := continuous_trace.measurable
 
 /-- Flipping the coin at `j`, coordinatewise. -/
-theorem flip_eq (j : ℤ) : (fun x : ℤ → Bool => Function.update x j (!x j)) =
-    fun x i => (if i = j then (fun b : Bool => !b) else id) (x i) := by
+theorem flip_eq {ι : Type*} [DecidableEq ι] (j : ι) :
+    (fun x : ι → Bool => Function.update x j (!x j)) =
+      fun x i => (if i = j then (fun b : Bool => !b) else id) (x i) := by
   funext x i
   by_cases hi : i = j
   · subst hi
     simp
   · simp [hi]
 
-theorem measurable_flip (j : ℤ) : Measurable fun x : ℤ → Bool => Function.update x j (!x j) := by
+theorem measurable_flip {ι : Type*} [DecidableEq ι] (j : ι) :
+    Measurable fun x : ι → Bool => Function.update x j (!x j) := by
   rw [flip_eq]
   exact measurable_pi_lambda _ fun i => Measurable.of_discrete.comp (measurable_pi_apply i)
 
 /-- Flipping one coin preserves the fair-coin measure. -/
-theorem map_flip (j : ℤ) :
-    (coins ℤ).map (fun x => Function.update x j (!x j)) = coins ℤ := by
+theorem map_flip {ι : Type*} [DecidableEq ι] (j : ι) :
+    (coins ι).map (fun x => Function.update x j (!x j)) = coins ι := by
   rw [flip_eq, coins, Measure.infinitePi_map_pi _ fun i => Measurable.of_discrete]
   refine congrArg Measure.infinitePi (funext fun i => ?_)
   split_ifs
@@ -140,11 +142,11 @@ theorem measurableSet_prefix {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measu
 
 /-- **Flip halving**: if flipping the coin at `j` preserves `A` and flips `f` on `A`, then `f`
 takes each value on half of `A`. -/
-theorem two_mul_measure_flip {A : Set (ℤ → Bool)} (hA : MeasurableSet A)
-    {f : (ℤ → Bool) → Bool} (hf : Measurable f) (j : ℤ)
+theorem two_mul_measure_flip {ι : Type*} [DecidableEq ι] {A : Set (ι → Bool)}
+    (hA : MeasurableSet A) {f : (ι → Bool) → Bool} (hf : Measurable f) (j : ι)
     (hAj : ∀ x, Function.update x j (!x j) ∈ A ↔ x ∈ A)
     (hfj : ∀ x ∈ A, f (Function.update x j (!x j)) = !f x) (b : Bool) :
-    2 * coins ℤ (A ∩ {x | f x = b}) = coins ℤ A := by
+    2 * coins ι (A ∩ {x | f x = b}) = coins ι A := by
   have hB : ∀ b, MeasurableSet (A ∩ {x | f x = b}) := fun b =>
     hA.inter (hf (measurableSet_singleton b))
   have hφ : ∀ b, (fun x => Function.update x j (!x j)) ⁻¹' (A ∩ {x | f x = b}) =
@@ -159,9 +161,9 @@ theorem two_mul_measure_flip {A : Set (ℤ → Bool)} (hA : MeasurableSet A)
     · rintro ⟨hx, h⟩
       refine ⟨hx, ?_⟩
       rw [hfj x hx, h, Bool.not_not]
-  have heq : coins ℤ (A ∩ {x | f x = b}) = coins ℤ (A ∩ {x | f x = !b}) := by
+  have heq : coins ι (A ∩ {x | f x = b}) = coins ι (A ∩ {x | f x = !b}) := by
     rw [← hφ b, ← Measure.map_apply (measurable_flip j) (hB b), map_flip]
-  have hsum : coins ℤ (A ∩ {x | f x = b}) + coins ℤ (A ∩ {x | f x = !b}) = coins ℤ A := by
+  have hsum : coins ι (A ∩ {x | f x = b}) + coins ι (A ∩ {x | f x = !b}) = coins ι A := by
     rw [← measure_union _ (hB _)]
     · congr 1
       ext x

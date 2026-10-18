@@ -1,11 +1,12 @@
 import Rule30Equivalents.Autocorrelation
 import Rule30Equivalents.Mixing
+import Rule30Equivalents.LinearComplexity
 
 /-!
 # The stronger statements hold for almost every configuration
 
 Problem 1 follows from many stronger statements about the center column
-(`StrongerStatements.problem1_of_*`). Fifteen of them hold for almost every configuration, with the
+(`StrongerStatements.problem1_of_*`). Sixteen of them hold for almost every configuration, with the
 seed replaced by the configuration (`ae_strongerStatements_trace`); in particular none of them is
 vacuous.
 
@@ -26,7 +27,8 @@ vacuous.
   least `2` by Dirichlet's theorem (`StrongerStatements.irrExponentGE_two_of_irrational`).
 * **Morphic sequences** are countably many (`StrongerStatements.countable_setOf_isMorphic`), so
   almost every sequence is not morphic (`ae_not_isMorphic`).
-* No line inside the light cone is eventually periodic (`Mixing.ae_every_line`).
+* No line inside the light cone is eventually periodic (`Mixing.ae_every_line`), and the linear
+  complexity satisfies `Lₙ/n → 1/2` (`LinearComplexity.ae_tendsto_linComplexity_trace`).
 
 Not every stronger statement is typical: the defect bound fails with probability at least `1/32`,
 when the first five cells of the column agree (`measure_not_defectBound_trace`).
@@ -268,8 +270,8 @@ hypotheses of `StrongerStatements.problem1_of_effective_boundary`, `problem1_of_
 `problem1_of_infinite_disagreements`, `problem1_of_far_from_periodic`,
 `problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity`,
 `problem1_of_disjunctive`, `problem1_of_isNormal`, `problem1_of_transcendental_binary`,
-`problem1_of_irrExponentGE`, `problem1_of_unbounded_abelianComplexity`, `problem1_of_not_isMorphic`
-and `problem1_of_recurrent_not_purelyPeriodic`. -/
+`problem1_of_irrExponentGE`, `problem1_of_unbounded_abelianComplexity`, `problem1_of_not_isMorphic`,
+`problem1_of_recurrent_not_purelyPeriodic` and `problem1_of_linComplexity_tendsto`. -/
 theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     (¬ EventuallyPeriodic fun t => trace x t && trace x (t + 1)) ∧
     (∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
@@ -286,9 +288,11 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     IrrExponentGE (BinaryIrrational.baseValue 2 (trace x)) 2 ∧
     (∀ C, ∃ n, C < abelianComplexity (trace x) n) ∧
     ¬ IsMorphic (trace x) ∧
-    IsRecurrent (trace x) ∧ ¬ ∃ P, 0 < P ∧ ∀ t, trace x (t + P) = trace x t := by
+    IsRecurrent (trace x) ∧ (¬ ∃ P, 0 < P ∧ ∀ t, trace x (t + P) = trace x t) ∧
+    Tendsto (fun n : ℕ => (linComplexity (trace x) n : ℝ) / n) atTop (𝓝 (1 / 2)) := by
   filter_upwards [ae_isNormal_trace, Mixing.ae_every_line, ae_transcendental_trace,
-    ae_not_isMorphic_trace] with x hn hline htr hmor
+    ae_not_isMorphic_trace, LinearComplexity.ae_tendsto_linComplexity_trace]
+    with x hn hline htr hmor hlin
   have hd : Disjunctive (trace x) := fun n w => disjunctive_of_isNormal hn n w
   refine ⟨not_eventuallyPeriodic_and_of_disjunctive hd, hline, fun β n => ?_,
     fun P hP r => antiToeplitz_of_disjunctive hd hP r,
@@ -299,7 +303,7 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
       ((BinaryIrrational.irrational_iff_not_eventuallyPeriodic le_rfl (trace x)).2
         (not_eventuallyPeriodic_of_disjunctive hd)),
     fun C => ⟨C, by rw [abelianComplexity_of_disjunctive hd]; omega⟩, hmor,
-    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd⟩
+    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd, hlin⟩
   · obtain ⟨t, ht⟩ := hd n fun _ => β
     exact ⟨t, fun i hi => ht ⟨i, hi⟩⟩
   · rw [closure_shifts_of_disjunctive hd]

@@ -751,7 +751,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Lean.* Proved in the library (2026-10-18): `Minkowski.problem1_iff_minkowski_not_quadratic`.
   `yMink` is the reciprocal of `Lagrange.cfValue (1, r₁, r₂, …)`, so it is quadratic iff that number
   is. By Euler–Lagrange this holds iff the run lengths are eventually periodic, which is [29]. The
-  identity y = ?⁻¹(x₂) is Denjoy's formula; it is not formalized, since Mathlib has no `?`.
+  identity y = ?⁻¹(x₂) is proved as `Minkowski.questionMark_yMink : ?(y) = x₂`. Mathlib has no
+  `?`, so `questionMark` defines it on the irrationals of (0, 1) by the Denjoy–Salem series over
+  the Gauss-map digits; summing x₂ run by run gives the same alternating series
+  Σ (−1)^k 2^−(r₁ + ⋯ + r_k).
   The critic's statement was (`runLen` from `Nat.nth` of the change points):
 
   ```lean

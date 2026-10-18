@@ -1,5 +1,6 @@
 import Rule30Equivalents.RandomConfigurations
 import Rule30Equivalents.Preimages
+import Rule30Equivalents.RightHalfReturns
 import Mathlib.MeasureTheory.Measure.MeasuredSets
 import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
 import Mathlib.Dynamics.Ergodic.Ergodic
@@ -56,9 +57,14 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
 * `log_two_le_coverEntropy`: **rule 30 has topological entropy at least `log 2`** (Mathlib's
   `coverEntropy`): the center trace is a uniformly continuous factor map onto the full shift on
   `{0,1}^ℕ`, whose entropy is at least `log 2` (`log_two_le_coverEntropy_shift`). And
-  `coverEntropy_le_two_mul_log_two`: **at most `2 log 2`**, since every entourage contains
-  agreement on a window `[-N, N]` (`exists_windowRel_subset`) and one configuration per pattern on
-  `[-(N + n), N + n]` covers `n` steps (`coverMincard_le`).
+  `coverEntropy_le_log_three`: **at most `log 3`**. Every entourage contains agreement on a window
+  `[-N, N]` (`exists_windowRel_subset`). By left permutivity the columns `N, N + 1` over
+  `n + 2N + 1` steps determine the window for `n` steps (`RightHalfReturns.eq_left_of_eq_columns`),
+  and their words obey a local rule: a black cell in column `N + 1` is followed by the complement
+  of its left neighbor, since `u ⊕ (1 ∨ w) = ¬u` (`compat_evol_one`). So each word extends backward
+  in time by at most three of the four letters, at most `4 · 3^L` words of length `L + 1` occur
+  (`card_pairWords_le`), and they cover `n` steps (`coverMincard_le`). The light-cone count gives
+  only `2 log 2`.
 * `measurePreserving_path`: along any path that never moves right, `p (t + 1) ≤ p t`, the cells
   `F^t(x)_{p t}` are independent fair coins (`measure_prefix_path`); so for almost every
   configuration they form a normal sequence (`ae_isNormal_path`). Columns are the constant paths
@@ -1031,57 +1037,138 @@ theorem iterate_evol_one (k : ℕ) (x : ℤ → Bool) :
     funext p
     rw [Rule30ZeroBoundaryBarriers.evol_restart x 1 k p, Nat.add_comm]
 
+/-! The two columns `a, a + 1` determine the columns to their left
+(`RightHalfReturns.eq_left_of_eq_columns`), and their words obey one local rule: a black cell in
+column `a + 1` is followed by the complement of the cell to its left, since `u ⊕ (1 ∨ w) = ¬u`. -/
+
+/-- The cells `a` and `a + 1` at the times `0, …, L - 1`. -/
+def pairWord (a : ℤ) (L : ℕ) (x : ℤ → Bool) : Fin L → Bool × Bool :=
+  fun s => (evol x s a, evol x s (a + 1))
+
+open Classical in
+/-- The pair words of length `L` that occur. -/
+noncomputable def pairWords (a : ℤ) (L : ℕ) : Finset (Fin L → Bool × Bool) :=
+  Finset.univ.filter fun w => ∃ x, pairWord a L x = w
+
+theorem mem_pairWords {a : ℤ} {L : ℕ} {w : Fin L → Bool × Bool} :
+    w ∈ pairWords a L ↔ ∃ x, pairWord a L x = w := by
+  simp [pairWords]
+
+/-- A pair word is its first letter followed by the pair word of the next row. -/
+theorem pairWord_succ (a : ℤ) (L : ℕ) (x : ℤ → Bool) :
+    pairWord a (L + 1) x = Fin.cons (x a, x (a + 1)) (pairWord a L (evol x 1)) := by
+  funext s
+  refine Fin.cases ?_ (fun i => ?_) s
+  · rw [Fin.cons_zero]
+    rfl
+  · rw [Fin.cons_succ]
+    simp only [pairWord, Fin.val_succ]
+    rw [Rule30ZeroBoundaryBarriers.evol_restart x 1 i a,
+      Rule30ZeroBoundaryBarriers.evol_restart x 1 i (a + 1), Nat.add_comm]
+
+/-- The letters `ℓ` that can precede a letter `p`: a black right cell is followed by the
+complement of its left neighbor. -/
+abbrev Compat (ℓ p : Bool × Bool) : Prop := ℓ.2 = true → p.2 = !ℓ.1
+
+theorem compat_evol_one (a : ℤ) (x : ℤ → Bool) :
+    Compat (x a, x (a + 1)) (evol x 1 a, evol x 1 (a + 1)) := by
+  intro h
+  have h' : x (a + 1) = true := h
+  show xor (x (a + 1 - 1)) (x (a + 1) || x (a + 1 + 1)) = !x a
+  rw [h', add_sub_cancel_right]
+  cases x a <;> rfl
+
+/-- **At most `4 · 3^L` pair words of length `L + 1` occur**: each one extends backward in time by
+at most three of the four letters. -/
+theorem card_pairWords_le (a : ℤ) (L : ℕ) : (pairWords a (L + 1)).card ≤ 4 * 3 ^ L := by
+  induction L with
+  | zero =>
+    refine (Finset.card_le_univ _).trans_eq ?_
+    rw [Fintype.card_fun, Fintype.card_prod, Fintype.card_bool, Fintype.card_fin]
+    norm_num
+  | succ L ih =>
+    have hsub : pairWords a (L + 1 + 1) ⊆ (pairWords a (L + 1)).biUnion fun w =>
+        (Finset.univ.filter fun ℓ => Compat ℓ (w 0)).image fun ℓ => Fin.cons ℓ w := by
+      intro w' hw'
+      obtain ⟨x, rfl⟩ := mem_pairWords.1 hw'
+      rw [pairWord_succ]
+      refine Finset.mem_biUnion.2 ⟨pairWord a (L + 1) (evol x 1), mem_pairWords.2 ⟨_, rfl⟩,
+        Finset.mem_image.2 ⟨(x a, x (a + 1)), Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩, rfl⟩⟩
+      exact compat_evol_one a x
+    -- the letter `(p.2, true)` cannot precede `p`
+    have hthree : ∀ p : Bool × Bool, (Finset.univ.filter fun ℓ => Compat ℓ p).card ≤ 3 := by
+      intro p
+      have hsub' : (Finset.univ.filter fun ℓ => Compat ℓ p) ⊆ Finset.univ.erase (p.2, true) := by
+        intro ℓ hℓ
+        refine Finset.mem_erase.2 ⟨fun he => ?_, Finset.mem_univ _⟩
+        have h := (Finset.mem_filter.1 hℓ).2
+        rw [he] at h
+        cases hp : p.2 <;> simp [hp] at h
+      refine (Finset.card_le_card hsub').trans_eq ?_
+      rw [Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ, Fintype.card_prod,
+        Fintype.card_bool]
+    refine (Finset.card_le_card hsub).trans (Finset.card_biUnion_le.trans ?_)
+    refine (Finset.sum_le_sum fun w _ => Finset.card_image_le.trans (hthree (w 0))).trans ?_
+    rw [Finset.sum_const, smul_eq_mul, pow_succ, ← mul_assoc]
+    exact Nat.mul_le_mul_right 3 ih
+
 /-- **A dynamical cover**: agreement on `[-N, N]` for `n` steps of rule 30 needs at most one
-configuration per pattern on `[-(N + n), N + n]`, by the light cone. -/
+configuration per pair word of the columns `N, N + 1` over `n + 2N + 1` steps. -/
 theorem coverMincard_le (N n : ℕ) :
-    coverMincard (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n ≤
-      2 ^ (2 * (N + n) + 1) := by
+    coverMincard (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n ≤ 4 * 3 ^ (n + 2 * N) := by
   classical
-  let W : Finset ℤ := Finset.Icc (-((N + n : ℕ) : ℤ)) (N + n : ℕ)
-  let s : Finset (ℤ → Bool) := Finset.univ.image fun v : W → Bool => extend v
-  have hcov : IsDynCoverOf (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n s := by
+  let L := n + 2 * N + 1
+  -- a configuration with each pair word that occurs
+  let rep : (Fin L → Bool × Bool) → (ℤ → Bool) := fun w =>
+    if h : ∃ x, pairWord N L x = w then h.choose else fun _ => false
+  have hcov : IsDynCoverOf (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n
+      ((pairWords N L).image rep) := by
     intro x _
-    refine ⟨extend (W.restrict x), Finset.mem_coe.2 (Finset.mem_image_of_mem _
-      (Finset.mem_univ _)), ?_⟩
+    have hw : ∃ y, pairWord N L y = pairWord N L x := ⟨x, rfl⟩
+    refine ⟨rep (pairWord N L x),
+      Finset.mem_coe.2 (Finset.mem_image_of_mem _ (mem_pairWords.2 hw)), ?_⟩
+    have hrep : pairWord N L (rep (pairWord N L x)) = pairWord N L x := by
+      simp only [rep, dif_pos hw]
+      exact hw.choose_spec
+    have hcol : ∀ s ≤ n + 2 * N, evol x s N = evol (rep (pairWord N L x)) s N ∧
+        evol x s (N + 1) = evol (rep (pairWord N L x)) s (N + 1) := fun s hs => by
+      have := congrFun hrep ⟨s, by omega⟩
+      simp only [pairWord, Prod.mk.injEq] at this
+      exact ⟨this.1.symm, this.2.symm⟩
     simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
       Prod.map_apply, windowRel, Set.mem_setOf_eq]
     intro k hk i hi1 hi2
     rw [iterate_evol_one, iterate_evol_one]
-    refine AlgebraicDegree.evol_congr k i fun j hj1 hj2 => ?_
-    have hj : j ∈ W := Finset.mem_Icc.2 ⟨by push_cast; omega, by push_cast; omega⟩
-    simp only [extend, dif_pos hj, Finset.restrict]
+    -- the column `i` lies `N - i ≤ 2N` cells left of the column `N`
+    have h := (RightHalfReturns.eq_left_of_eq_columns hcol (N - i).toNat (by omega) k
+      (by omega)).1
+    rw [show (N : ℤ) - ((N - i).toNat : ℕ) = i by omega] at h
+    exact h
   refine hcov.coverMincard_le_card.trans ?_
-  have hcard : s.card ≤ 2 ^ (2 * (N + n) + 1) := by
-    refine Finset.card_image_le.trans ?_
-    simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_bool, Fintype.card_coe, W,
-      Int.card_Icc]
-    rw [show ((N + n : ℕ) : ℤ) + 1 - -((N + n : ℕ) : ℤ) = ((2 * (N + n) + 1 : ℕ) : ℤ) by
-      push_cast; ring, Int.toNat_natCast]
-  exact_mod_cast hcard
+  exact_mod_cast Finset.card_image_le.trans (card_pairWords_le N (n + 2 * N))
 
-/-- **Rule 30 has topological entropy at most `2 log 2`** (Mathlib's `coverEntropy`), so
-`log 2 ≤ h(rule 30) ≤ 2 log 2` with `log_two_le_coverEntropy`: every entourage contains agreement
-on a window `[-N, N]`, and the dynamical covers `coverMincard_le` grow like `4^n`. -/
-theorem coverEntropy_le_two_mul_log_two :
-    coverEntropy (fun x : ℤ → Bool => evol x 1) Set.univ ≤ 2 * ENNReal.log 2 := by
+/-- **Rule 30 has topological entropy at most `log 3`** (Mathlib's `coverEntropy`), so
+`log 2 ≤ h(rule 30) ≤ log 3` with `log_two_le_coverEntropy`: every entourage contains agreement on
+a window `[-N, N]`, and the dynamical covers `coverMincard_le` grow like `3^n`. -/
+theorem coverEntropy_le_log_three :
+    coverEntropy (fun x : ℤ → Bool => evol x 1) Set.univ ≤ ENNReal.log 3 := by
   refine iSup₂_le fun U hU => ?_
   obtain ⟨N, hN⟩ := exists_windowRel_subset hU
   refine (coverEntropyEntourage_antitone _ _ hN).trans ?_
   have hle : ∀ n : ℕ, ((coverMincard (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n :
-      ℕ∞) : ENNReal) ≤ 2 ^ (2 * N + 1) * 4 ^ n := fun n => by
+      ℕ∞) : ENNReal) ≤ 4 * 9 ^ N * 3 ^ n := fun n => by
     have h := ENat.toENNReal_le.2 (coverMincard_le N n)
     refine h.trans_eq ?_
-    rw [show 2 * (N + n) + 1 = (2 * N + 1) + 2 * n by ring, pow_add, pow_mul]
     push_cast
+    rw [pow_add, pow_mul]
     norm_num
+    ring
   calc coverEntropyEntourage (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N)
-      ≤ ExpGrowth.expGrowthSup fun n : ℕ => (4 : ENNReal) ^ n :=
-        ExpGrowth.expGrowthSup_le_of_eventually_le (b := 2 ^ (2 * N + 1)) (by simp)
+      ≤ ExpGrowth.expGrowthSup fun n : ℕ => (3 : ENNReal) ^ n :=
+        ExpGrowth.expGrowthSup_le_of_eventually_le (b := 4 * 9 ^ N)
+          (ENNReal.mul_ne_top (by norm_num) (ENNReal.pow_ne_top (by norm_num)))
           (Eventually.of_forall hle)
-    _ = ENNReal.log 4 := ExpGrowth.expGrowthSup_pow
-    _ = 2 * ENNReal.log 2 := by
-      rw [show (4 : ENNReal) = 2 ^ 2 by norm_num, ENNReal.log_pow]
-      norm_cast
+    _ = ENNReal.log 3 := ExpGrowth.expGrowthSup_pow
 
 end Entropy
 

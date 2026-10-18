@@ -30,12 +30,6 @@ open Ruliology.CellularAutomata Rule30Jen Rule30Realization Rule30ZeroBoundaryBa
 
 variable {x : ℤ → Bool}
 
-/-- Left-permutivity: the cell left of `p` from the cells `p, p + 1` and the cell below `p`. -/
-theorem evol_left (x : ℤ → Bool) (s : ℕ) (p : ℤ) :
-    evol x s (p - 1) = xor (evol x (s + 1) p) (evol x s p || evol x s (p + 1)) := by
-  rw [evol_succ]
-  exact rule_left _ _ _
-
 /-- After a return at time `t`, row `t + j` agrees with row `j` from cell `j` on. -/
 theorem evol_add_of_return {t : ℕ} (hr : ∀ p : ℤ, 0 ≤ p → evol x t p = x p) (j : ℕ) {q : ℤ}
     (hq : (j : ℤ) ≤ q) : evol x (t + j) q = evol x j q := by
@@ -56,19 +50,20 @@ theorem evol_mod_of_return {t : ℕ} (hr : ∀ p : ℤ, 0 ≤ p → evol x t p =
     · obtain ⟨k, rfl⟩ : ∃ k, n = t + k := ⟨n - t, by omega⟩
       rw [evol_add_of_return hr k (by omega), Nat.add_mod_left, ih k (by omega) q (by omega)]
 
-/-- Rule 30 is left-permutive: if the columns `i, i + 1` and `i', i' + 1` agree at times
-`0, …, n`, then so do the columns `k` cells to their left at times `0, …, n − k`. -/
-theorem eq_left_of_eq_columns {i i' : ℤ} {n : ℕ}
-    (h : ∀ s ≤ n, evol x s i = evol x s i' ∧ evol x s (i + 1) = evol x s (i' + 1)) :
-    ∀ k ≤ n, ∀ s ≤ n - k, evol x s (i - k) = evol x s (i' - k) ∧
-      evol x s (i - k + 1) = evol x s (i' - k + 1)
+/-- Rule 30 is left-permutive (`Rule30FiniteConfigs.evol_left`): if the columns `i, i + 1` of
+`evol x` and `i', i' + 1` of `evol x'` agree at times `0, …, n`, then so do the columns `k` cells to
+their left at times `0, …, n − k`. -/
+theorem eq_left_of_eq_columns {x' : ℤ → Bool} {i i' : ℤ} {n : ℕ}
+    (h : ∀ s ≤ n, evol x s i = evol x' s i' ∧ evol x s (i + 1) = evol x' s (i' + 1)) :
+    ∀ k ≤ n, ∀ s ≤ n - k, evol x s (i - k) = evol x' s (i' - k) ∧
+      evol x s (i - k + 1) = evol x' s (i' - k + 1)
   | 0 => fun _ s hs => by simpa using h s (by omega)
   | k + 1 => fun hk s hs => by
     have ih := eq_left_of_eq_columns h k (by omega)
     have e : ∀ j : ℤ, j - ((k + 1 : ℕ) : ℤ) = j - k - 1 := fun j => by push_cast; omega
     have e' : ∀ j : ℤ, j - ((k + 1 : ℕ) : ℤ) + 1 = j - k := fun j => by push_cast; omega
-    rw [e', e', e, e, evol_left, evol_left, (ih (s + 1) (by omega)).1, (ih s (by omega)).1,
-      (ih s (by omega)).2]
+    rw [e', e', e, e, Rule30FiniteConfigs.evol_left x, Rule30FiniteConfigs.evol_left x',
+      (ih (s + 1) (by omega)).1, (ih s (by omega)).1, (ih s (by omega)).2]
     exact ⟨rfl, rfl⟩
 
 /-- **Kopra's Lemma 4.3 for rule 30.** A return of the right half at a time `t ≥ 1` makes the
@@ -134,8 +129,8 @@ theorem periodic_rows {t P : ℕ} {c : ℤ} (h0 : ∀ q, c ≤ q → x (q + P) =
       by_cases hjt : j = t
       · subst hjt
         exact ht q hc
-      · have e1 := evol_left x j (q + 1)
-        have e2 := evol_left x j (q + 1 + P)
+      · have e1 := Rule30FiniteConfigs.evol_left x j (q + 1)
+        have e2 := Rule30FiniteConfigs.evol_left x j (q + 1 + P)
         rw [show q + 1 - 1 = q by omega] at e1
         rw [show q + 1 + (P : ℤ) - 1 = q + P by omega] at e2
         rw [e1, e2, ih (j + 1) (by omega) (q + 1) (by omega) (by omega),

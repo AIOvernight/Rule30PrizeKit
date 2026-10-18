@@ -54,6 +54,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_not_semilinear
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_unary_not_regular
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_prefixes_not_regular
+#print axioms Rule30Equivalents.MeromorphicExtension.problem1_iff_no_meromorphicOn
 #print axioms Rule30Equivalents.MeromorphicExtension.problem1_iff_no_meromorphic_extension
 #print axioms Rule30Equivalents.Minkowski.problem1_iff_minkowski_not_quadratic
 #print axioms Rule30Equivalents.MonadicLogic.problem1_iff_not_msoDefinable

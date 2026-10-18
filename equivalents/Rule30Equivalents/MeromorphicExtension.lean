@@ -2,6 +2,8 @@ import Rule30Equivalents.LinearRelations
 import Rule30Equivalents.NaturalBoundary
 import Mathlib.Analysis.Analytic.OfScalars
 import Mathlib.Analysis.Normed.Ring.InfiniteSum
+import Mathlib.Analysis.Meromorphic.Basic
+import Mathlib.Analysis.Calculus.Deriv.Polynomial
 
 /-!
 # No meromorphic extension beyond the unit disk
@@ -24,6 +26,10 @@ sequence `b` (`eventuallyPeriodic_of_meromorphicExtension`):
 
 Conversely, an eventually periodic `b` with period `P` gives `(1 - z^P) f(z)`, a polynomial
 (`NaturalBoundary.mul_genFun_eq`).
+
+The same holds with Mathlib's `MeromorphicOn` (`problem1_iff_no_meromorphicOn`): a function
+meromorphic on a disk of radius `R > 1` has, on the closed disk of radius `(1 + R)/2`, finitely many
+poles, which a polynomial clears (`hasMeromorphicExtension_of_meromorphicOn`).
 
 Sources: P. Fatou, *Séries trigonométriques et séries de Taylor*, Acta Math. 30 (1906) 335–400;
 G. Szegő, *Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten*, Sitzungsber. Preuss.
@@ -172,6 +178,74 @@ theorem hasMeromorphicExtension_of_eventuallyPeriodic {b : ℕ → Bool} (h : Ev
     norm_num at this
   · exact Differentiable.differentiableOn (by fun_prop)
   · rw [eval_sub, eval_one, eval_pow, eval_X, mul_genFun_eq hTP hz]
+
+/-- **Meromorphic in Mathlib's sense.** If `∑ b(t) zᵗ` agrees on the unit disk with a function `g`
+that is meromorphic on a disk of radius `R > 1`, then a polynomial clears its poles in the smaller
+disk of radius `(1 + R) / 2`: at each point `x` of the closed disk, `(z - x)ⁿ g(z)` is analytic on
+a ball around `x`, finitely many of these balls cover the closed disk, and `Q = ∏ (X - x)ⁿ`. -/
+theorem hasMeromorphicExtension_of_meromorphicOn {b : ℕ → Bool} {R : ℝ} (hR : 1 < R) {g : ℂ → ℂ}
+    (hg : MeromorphicOn g (Metric.ball 0 R)) (hgb : ∀ z : ℂ, ‖z‖ < 1 → g z = genFun b z) :
+    HasMeromorphicExtension b ((1 + R) / 2) := by
+  classical
+  set ρ := (1 + R) / 2
+  have hloc : ∀ x ∈ Metric.closedBall (0 : ℂ) ρ, ∃ n : ℕ, ∃ r > 0,
+      AnalyticOnNhd ℂ (fun z => (z - x) ^ n * g z) (Metric.ball x r) := by
+    intro x hx
+    obtain ⟨n, hn⟩ := hg x (Metric.closedBall_subset_ball (by simp only [ρ]; linarith) hx)
+    obtain ⟨r, hr, han⟩ := hn.exists_ball_analyticOnNhd
+    exact ⟨n, r, hr, by simpa only [smul_eq_mul] using han⟩
+  choose! n r hr han using hloc
+  obtain ⟨t, hts, hcover⟩ := (isCompact_closedBall (0 : ℂ) ρ).elim_nhds_subcover
+    (fun x => Metric.ball x (r x)) (fun x hx => Metric.ball_mem_nhds x (hr x hx))
+  set Q : ℂ[X] := ∏ x ∈ t, (X - C x) ^ n x
+  have hQ : Q ≠ 0 := Finset.prod_ne_zero_iff.2 fun x _ => pow_ne_zero _ (X_sub_C_ne_zero x)
+  refine ⟨Q, hQ, fun z => Q.eval z * g z, fun z hz => ?_, fun z hz => ?_⟩
+  · obtain ⟨x, hxt, hzx⟩ := Set.mem_iUnion₂.1 (hcover (Metric.ball_subset_closedBall hz))
+    have hQfac : Q = (∏ y ∈ t.erase x, (X - C y) ^ n y) * (X - C x) ^ n x :=
+      (Finset.prod_erase_mul t _ hxt).symm
+    have hfac : (fun w => Q.eval w * g w) =
+        fun w => (∏ y ∈ t.erase x, (X - C y) ^ n y).eval w * ((w - x) ^ n x * g w) := by
+      funext w
+      rw [hQfac, eval_mul, eval_pow, eval_sub, eval_X, eval_C]
+      ring
+    have hanz : AnalyticAt ℂ (fun w => Q.eval w * g w) z := by
+      rw [hfac]
+      exact ((Polynomial.differentiable _).analyticAt z).mul (han x (hts x hxt) z hzx)
+    exact hanz.differentiableAt.differentiableWithinAt
+  · show Q.eval z * g z = Q.eval z * genFun b z
+    rw [hgb z hz]
+
+/-- An eventually periodic sequence has a generating function that agrees on the unit disk with a
+rational function, meromorphic on all of `ℂ`. -/
+theorem exists_meromorphicOn_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriodic b) :
+    ∃ g : ℂ → ℂ, MeromorphicOn g Set.univ ∧ ∀ z : ℂ, ‖z‖ < 1 → g z = genFun b z := by
+  obtain ⟨T, P, hP, hTP⟩ := h
+  refine ⟨fun z => (∑ t ∈ Finset.range (T + P),
+    (coef b t - if P ≤ t then coef b (t - P) else 0) * z ^ t) / (1 - z ^ P),
+    fun x _ => ?_, fun z hz => ?_⟩
+  · exact ((Differentiable.analyticAt (by fun_prop) x).meromorphicAt).fun_div
+      ((Differentiable.analyticAt (by fun_prop) x).meromorphicAt)
+  · have hne : 1 - z ^ P ≠ 0 := by
+      intro h0
+      have h1 : ‖z ^ P‖ < 1 := by
+        rw [norm_pow]
+        exact pow_lt_one₀ (norm_nonneg z) hz hP.ne'
+      rw [← sub_eq_zero.1 h0, norm_one] at h1
+      exact lt_irrefl _ h1
+    show _ / _ = _
+    rw [div_eq_iff hne, mul_comm, mul_genFun_eq hTP hz]
+
+/-- **[41], disk form, with Mathlib's `MeromorphicOn`.** Problem 1 holds iff the generating function
+of the center column agrees on the unit disk with no function that is meromorphic on a disk of
+radius `R > 1`. -/
+theorem problem1_iff_no_meromorphicOn : Rule30Prize.Problem1 ↔
+    ∀ R : ℝ, 1 < R → ¬ ∃ g : ℂ → ℂ, MeromorphicOn g (Metric.ball 0 R) ∧
+      ∀ z : ℂ, ‖z‖ < 1 → g z = genFun c z := by
+  refine ⟨fun h1 R hR ⟨g, hg, hgb⟩ => h1 (eventuallyPeriodic_of_meromorphicExtension
+    (show 1 < (1 + R) / 2 by linarith) (hasMeromorphicExtension_of_meromorphicOn hR hg hgb)),
+    fun h hep => ?_⟩
+  obtain ⟨g, hg, hgb⟩ := exists_meromorphicOn_of_eventuallyPeriodic hep
+  exact h 2 one_lt_two ⟨g, fun x _ => hg x (Set.mem_univ x), hgb⟩
 
 /-- **[41], disk form.** Problem 1 holds iff the generating function of the center column extends
 meromorphically to no disk of radius `R > 1`. -/

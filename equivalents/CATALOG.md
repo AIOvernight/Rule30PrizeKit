@@ -2681,11 +2681,12 @@ with Turing machines reading n. Notes:
     ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure
     preserving from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ
     (`measurePreserving_trace`; flipping x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1),
-    so every prefix has probability 2^−(n+1), `measure_prefix`). By the strong law of large
-    numbers the trace has density 1/2 for μ-almost every configuration (`ae_halfDensity_trace`).
-    The eventually periodic sequences are countably many and μ has no atoms, so for μ-almost every
-    configuration the trace is not eventually periodic (`ae_not_eventuallyPeriodic_trace`).
-    Normality almost everywhere (Borel's theorem) is not formalized.
+    so every prefix has probability 2^−(n+1), `measure_prefix`). With Borel's normal number
+    theorem for fair coins (`ae_isNormal`: along each residue class modulo m the blocks of length
+    m are independent fair words, and the strong law of large numbers applies), the trace is
+    normal for μ-almost every configuration (`ae_isNormal_trace`), so it has density 1/2, is
+    disjunctive and is not eventually periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`,
+    `ae_not_eventuallyPeriodic_trace`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

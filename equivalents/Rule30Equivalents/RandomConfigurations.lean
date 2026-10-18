@@ -17,13 +17,17 @@ uniform Bernoulli product measure).
   at `-(n+1)` preserves the measure (`map_flip`), fixes the trace up to time `n` and flips it at
   time `n + 1` (left-permutivity), so every prefix of length `n + 1` has probability `2^-(n+1)`
   (`measure_prefix`); cylinders over initial segments then determine the measure.
-* `ae_halfDensity_trace`: by the strong law of large numbers, for almost every configuration the
-  trace has density `1/2`. The same set of configurations is meager
-  (`Genericity.isMeagre_halfDensity_trace`), so it is a full-measure meager set
+* `ae_isNormal`: **Borel's normal number theorem** for fair coins. For a word `u` of length `m`
+  and a residue `r`, the blocks `v(r + k m), …, v(r + k m + m - 1)` are independent fair words
+  (`map_blocks`, by reindexing and currying the product measure), so by the strong law of large
+  numbers `u` occurs with frequency `2⁻ᵐ` along the residue class `r`
+  (`ae_tendsto_residue_frequency`); averaging over the `m` classes gives frequency `2⁻ᵐ`
+  (`tendsto_average_of_residues`).
+* `ae_isNormal_trace`: for almost every configuration the trace is normal; hence it has density
+  `1/2` (`ae_halfDensity_trace`), is disjunctive (`ae_disjunctive_trace`) and is not eventually
+  periodic (`ae_not_eventuallyPeriodic_trace`). The configurations whose trace has density `1/2`
+  form a meager set (`Genericity.isMeagre_halfDensity_trace`) of full measure
   (`isMeagre_and_ae_halfDensity_trace`).
-* `ae_not_eventuallyPeriodic_trace`: the eventually periodic sequences are countably many
-  (`countable_eventuallyPeriodic`) and `coins ℕ` has no atoms (`coins_singleton`), so for almost
-  every configuration the trace is not eventually periodic.
 
 So the analogues of Problems 1 and 2 hold for almost every initial configuration. The single black
 cell is one configuration, a null set, so neither statement says anything about `c` itself.
@@ -217,105 +221,213 @@ theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ
   rw [hset, measure_prefix, Finset.prod_congr rfl fun i _ => coin_singleton (v i),
     Finset.prod_const, Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
 
-/-! ### Density `1/2` almost surely -/
+/-! ### Normality almost surely (Borel) -/
 
-/-- **Density `1/2` for a random sequence**: almost every fair-coin sequence has density `1/2`
-(the strong law of large numbers). -/
-theorem ae_halfDensity : ∀ᵐ v ∂(coins ℕ), Symmetry.HalfDensity v := by
-  let g : Bool → ℝ := fun b => if b then 1 else 0
-  let X : ℕ → (ℕ → Bool) → ℝ := fun i v => g (v i)
+/-- Summing over `[0, m q)` by residues modulo `m`. -/
+theorem sum_range_mul (a : ℕ → ℝ) (m q : ℕ) :
+    ∑ i ∈ Finset.range (m * q), a i =
+      ∑ r ∈ Finset.range m, ∑ k ∈ Finset.range q, a (r + k * m) := by
+  induction q with
+  | zero => simp
+  | succ q ih =>
+    rw [mul_add_one, Finset.sum_range_add, ih, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun r _ => ?_
+    rw [Finset.sum_range_succ, Nat.add_comm (m * q) r, Nat.mul_comm m q]
+
+/-- **Averages from residue classes**: a `[0, 1]`-valued sequence whose averages along every
+residue class modulo `m` tend to `L` has averages tending to `L`. -/
+theorem tendsto_average_of_residues {a : ℕ → ℝ} {m : ℕ} (hm : 0 < m) {L : ℝ}
+    (ha0 : ∀ i, 0 ≤ a i) (ha1 : ∀ i, a i ≤ 1)
+    (h : ∀ r < m, Tendsto (fun K : ℕ => (∑ k ∈ Finset.range K, a (r + k * m)) / K) atTop
+      (𝓝 L)) :
+    Tendsto (fun N : ℕ => (∑ i ∈ Finset.range N, a i) / N) atTop (𝓝 L) := by
+  have hm' : (0 : ℝ) < m := by exact_mod_cast hm
+  have hq : Tendsto (fun N : ℕ => N / m) atTop atTop :=
+    tendsto_atTop_atTop.2 fun b => ⟨b * m, fun N hN => (Nat.le_div_iff_mul_le hm).2 hN⟩
+  -- the averages over `[0, m q)`
+  have hA : Tendsto (fun q : ℕ => (∑ i ∈ Finset.range (m * q), a i) / (m * q : ℕ)) atTop
+      (𝓝 L) := by
+    have hsum := (tendsto_finsetSum (Finset.range m) fun r hr =>
+      h r (Finset.mem_range.1 hr)).const_mul (m : ℝ)⁻¹
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, ← mul_assoc,
+      inv_mul_cancel₀ hm'.ne', one_mul] at hsum
+    refine hsum.congr' ?_
+    filter_upwards [eventually_ge_atTop 1] with q hq1
+    have hq' : (0 : ℝ) < q := by exact_mod_cast hq1
+    rw [sum_range_mul, Finset.sum_div, Finset.mul_sum, Nat.cast_mul]
+    refine Finset.sum_congr rfl fun r _ => ?_
+    field_simp
+  -- `m ⌊N / m⌋ / N → 1`
+  have hB : Tendsto (fun N : ℕ => ((m * (N / m) : ℕ) : ℝ) / N) atTop (𝓝 1) := by
+    have hlow : Tendsto (fun N : ℕ => 1 - (m : ℝ) / N) atTop (𝓝 1) := by
+      simpa using tendsto_const_nhds.sub (tendsto_const_div_atTop_nhds_zero_nat (m : ℝ))
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le' hlow tendsto_const_nhds ?_ ?_
+    · filter_upwards [eventually_ge_atTop 1] with N hN
+      have hN' : (0 : ℝ) < N := by exact_mod_cast hN
+      have h1 : N ≤ m * (N / m) + m := by
+        have := Nat.div_add_mod N m
+        have := Nat.mod_lt N hm
+        omega
+      have h2 : (N : ℝ) ≤ ((m * (N / m) : ℕ) : ℝ) + m := by exact_mod_cast h1
+      rw [sub_le_iff_le_add, ← add_div, le_div_iff₀ hN', one_mul]
+      linarith
+    · filter_upwards [eventually_ge_atTop 1] with N hN
+      have hN' : (0 : ℝ) < N := by exact_mod_cast hN
+      rw [div_le_one hN']
+      exact_mod_cast Nat.mul_div_le N m
+  -- the remainder over `[m ⌊N / m⌋, N)`
+  have hsplit : ∀ N, ∑ i ∈ Finset.range N, a i = ∑ i ∈ Finset.range (m * (N / m)), a i +
+      ∑ x ∈ Finset.range (N % m), a (m * (N / m) + x) := fun N => by
+    rw [← Finset.sum_range_add, Nat.div_add_mod]
+  have hC : Tendsto (fun N : ℕ => ((∑ i ∈ Finset.range N, a i) -
+      ∑ i ∈ Finset.range (m * (N / m)), a i) / N) atTop (𝓝 0) := by
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds
+      (tendsto_const_div_atTop_nhds_zero_nat (m : ℝ)) (Eventually.of_forall fun N => ?_)
+      (Eventually.of_forall fun N => ?_)
+    · rw [hsplit, add_sub_cancel_left]
+      exact div_nonneg (Finset.sum_nonneg fun x _ => ha0 _) (Nat.cast_nonneg _)
+    · rw [hsplit, add_sub_cancel_left]
+      refine div_le_div_of_nonneg_right ?_ (Nat.cast_nonneg _)
+      calc ∑ x ∈ Finset.range (N % m), a (m * (N / m) + x)
+          ≤ ∑ x ∈ Finset.range (N % m), (1 : ℝ) := Finset.sum_le_sum fun x _ => ha1 _
+        _ ≤ m := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one]
+          exact_mod_cast (Nat.mod_lt N hm).le
+  have hlim := ((hA.comp hq).mul hB).add hC
+  rw [mul_one, add_zero] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [eventually_ge_atTop m] with N hN
+  have hq1 : 0 < N / m := Nat.div_pos hN hm
+  have hmq : (0 : ℝ) < ((m * (N / m) : ℕ) : ℝ) := by positivity
+  have hN' : (0 : ℝ) < N := by exact_mod_cast lt_of_lt_of_le hm hN
+  simp only [Function.comp]
+  field_simp
+  ring
+
+/-- The blocks `v(r + k m), …, v(r + k m + m - 1)`, `k = 0, 1, …`, of a fair-coin sequence are
+independent fair words. -/
+theorem map_blocks {m : ℕ} (hm : 0 < m) (r : ℕ) :
+    (coins ℕ).map (fun v k (j : Fin m) => v (r + k * m + j)) =
+      Measure.infinitePi fun _ : ℕ => coins (Fin m) := by
+  have hinj : Function.Injective fun p : ℕ × Fin m => r + p.1 * m + p.2 := by
+    rintro ⟨k, j⟩ ⟨k', j'⟩ h
+    have h' : (j : ℕ) + k * m = j' + k' * m := by simp only at h; omega
+    have hj : (j : ℕ) = j' := by
+      have := congrArg (· % m) h'
+      simpa only [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt j.2, Nat.mod_eq_of_lt j'.2]
+        using this
+    have hk : k = k' := by
+      have := congrArg (· / m) h'
+      simpa only [Nat.add_mul_div_right _ _ hm, Nat.div_eq_of_lt j.2, Nat.div_eq_of_lt j'.2,
+        zero_add] using this
+    rw [hk, Fin.ext hj]
+  have h1 : (coins ℕ).map (fun v (p : ℕ × Fin m) => v (r + p.1 * m + p.2)) =
+      Measure.infinitePi fun _ : ℕ × Fin m => coin :=
+    Measure.map_infinitePi_infinitePi_of_inj hinj
+  have h2 : (Measure.infinitePi fun _ : ℕ × Fin m => coin).map
+      (MeasurableEquiv.curry ℕ (Fin m) Bool) =
+        Measure.infinitePi fun _ : ℕ => coins (Fin m) :=
+    Measure.infinitePi_map_curry fun _ _ => coin
+  rw [← h2, ← h1, Measure.map_map (MeasurableEquiv.curry ℕ (Fin m) Bool).measurable
+    (by fun_prop)]
+  rfl
+
+/-- **Borel's theorem for one word along one residue class**: the strong law of large numbers
+for the independent blocks. -/
+theorem ae_tendsto_block_frequency {m : ℕ} (u : Fin m → Bool) :
+    ∀ᵐ ω ∂(Measure.infinitePi fun _ : ℕ => coins (Fin m)),
+      Tendsto (fun K : ℕ => (∑ k ∈ Finset.range K, if ω k = u then (1 : ℝ) else 0) / K) atTop
+        (𝓝 ((2 : ℝ)⁻¹ ^ m)) := by
+  let ρ : Measure (ℕ → Fin m → Bool) := Measure.infinitePi fun _ : ℕ => coins (Fin m)
+  let g : (Fin m → Bool) → ℝ := fun b => if b = u then 1 else 0
+  let X : ℕ → (ℕ → Fin m → Bool) → ℝ := fun k ω => g (ω k)
   have hg : Measurable g := Measurable.of_discrete
-  have hX : ∀ i, Measurable (X i) := fun i => hg.comp (measurable_pi_apply i)
-  have hmap : ∀ i, (coins ℕ).map (X i) = coin.map g := fun i => by
-    rw [show X i = g ∘ fun v => v i from rfl, ← Measure.map_map hg (measurable_pi_apply i),
-      coins_map_eval]
-  have hind : iIndepFun X (coins ℕ) := iIndepFun_infinitePi (X := fun _ => g) fun _ => hg
-  have hident : ∀ i, IdentDistrib (X i) (X 0) (coins ℕ) (coins ℕ) := fun i =>
-    ⟨(hX i).aemeasurable, (hX 0).aemeasurable, by rw [hmap, hmap]⟩
-  have hint : Integrable (X 0) (coins ℕ) := by
-    have : Integrable g ((coins ℕ).map fun v => v 0) := by
-      rw [coins_map_eval]
+  have hX : ∀ k, Measurable (X k) := fun k => hg.comp (measurable_pi_apply k)
+  have hmap : ∀ k, ρ.map (X k) = (coins (Fin m)).map g := fun k => by
+    rw [show X k = g ∘ fun ω => ω k from rfl, ← Measure.map_map hg (measurable_pi_apply k),
+      Measure.infinitePi_map_eval]
+  have hind : iIndepFun X ρ := iIndepFun_infinitePi (X := fun _ => g) fun _ => hg
+  have hident : ∀ k, IdentDistrib (X k) (X 0) ρ ρ := fun k =>
+    ⟨(hX k).aemeasurable, (hX 0).aemeasurable, by rw [hmap, hmap]⟩
+  have hint : Integrable (X 0) ρ := by
+    have : Integrable g (ρ.map fun ω => ω 0) := by
+      rw [Measure.infinitePi_map_eval]
       exact Integrable.of_finite
     exact this.comp_measurable (measurable_pi_apply 0)
-  have hmean : (coins ℕ)[X 0] = 1 / 2 := by
-    show ∫ v, g (v 0) ∂(coins ℕ) = 1 / 2
+  have hmean : ρ[X 0] = (2 : ℝ)⁻¹ ^ m := by
+    show ∫ ω, g (ω 0) ∂ρ = _
     rw [← integral_map (measurable_pi_apply 0).aemeasurable hg.aestronglyMeasurable,
-      coins_map_eval, integral_fintype Integrable.of_finite]
+      Measure.infinitePi_map_eval, integral_fintype Integrable.of_finite]
     simp [g, measureReal_def, coin_singleton]
-  filter_upwards [strong_law_ae X hint (fun i j hij => hind.indepFun hij) hident] with v hv
-  rw [ProblemTwo.halfDensity_iff_tendsto]
-  rw [hmean] at hv
-  refine hv.congr fun n => ?_
-  rw [smul_eq_mul, ProblemTwo.count_eq_sum, inv_mul_eq_div]
+  filter_upwards [strong_law_ae X hint (fun i j hij => hind.indepFun hij) hident] with ω hω
+  rw [hmean] at hω
+  refine hω.congr fun K => ?_
+  rw [smul_eq_mul, inv_mul_eq_div]
 
-/-- **Density `1/2` for almost every configuration**: for almost every configuration, the rule 30
-trace has density `1/2`. -/
+/-- The same, read in the fair-coin sequence: along the residue class `r` modulo `m`, the word
+`u` occurs with frequency `2⁻ᵐ`. -/
+theorem ae_tendsto_residue_frequency {m : ℕ} (hm : 0 < m) (u : Fin m → Bool) (r : ℕ) :
+    ∀ᵐ v ∂(coins ℕ), Tendsto (fun K : ℕ => (∑ k ∈ Finset.range K,
+      if ∀ j : Fin m, v (r + k * m + j) = u j then (1 : ℝ) else 0) / K) atTop
+        (𝓝 ((2 : ℝ)⁻¹ ^ m)) := by
+  have hmp : MeasurePreserving (fun v k (j : Fin m) => v (r + k * m + j)) (coins ℕ)
+      (Measure.infinitePi fun _ : ℕ => coins (Fin m)) := ⟨by fun_prop, map_blocks hm r⟩
+  filter_upwards [hmp.quasiMeasurePreserving.ae (ae_tendsto_block_frequency u)] with v hv
+  refine hv.congr fun K => ?_
+  congr 1
+  refine Finset.sum_congr rfl fun k _ => ?_
+  simp only [funext_iff]
+
+/-- **Borel's normal number theorem** for fair coins: almost every fair-coin sequence is
+normal. -/
+theorem ae_isNormal : ∀ᵐ v ∂(coins ℕ), StrongerStatements.IsNormal v := by
+  unfold StrongerStatements.IsNormal
+  refine ae_all_iff.2 fun n => ae_all_iff.2 fun w => ?_
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · -- the empty word occurs everywhere
+    refine Eventually.of_forall fun v => ?_
+    rw [pow_zero]
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [eventually_ge_atTop 1] with N hN
+    rw [Finset.filter_true_of_mem fun i _ j => j.elim0, Finset.card_range,
+      div_self (Nat.cast_ne_zero.2 (by omega))]
+  · filter_upwards [ae_all_iff.2 fun r : Fin n => ae_tendsto_residue_frequency hn w r]
+      with v hv
+    have := tendsto_average_of_residues hn
+      (a := fun i => if ∀ j : Fin n, v (i + j) = w j then (1 : ℝ) else 0)
+      (fun i => by dsimp only; split_ifs <;> norm_num)
+      (fun i => by dsimp only; split_ifs <;> norm_num)
+      fun r hr => hv ⟨r, hr⟩
+    refine this.congr fun N => ?_
+    rw [Finset.sum_boole]
+
+/-- **Normal traces almost surely**: for almost every configuration, the rule 30 trace is
+normal. -/
+theorem ae_isNormal_trace : ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal (trace x) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae ae_isNormal
+
+/-! ### Consequences: category versus measure -/
+
+/-- For almost every configuration, the trace has density `1/2`. -/
 theorem ae_halfDensity_trace : ∀ᵐ x ∂(coins ℤ), Symmetry.HalfDensity (trace x) :=
-  measurePreserving_trace.quasiMeasurePreserving.ae ae_halfDensity
+  ae_isNormal_trace.mono fun _ h => ProblemTwo.halfDensity_of_isNormal h
 
-/-- **Meager but of full measure**: the configurations whose trace has density `1/2` form a meager
-set of full measure. -/
+/-- For almost every configuration, the trace is disjunctive. -/
+theorem ae_disjunctive_trace : ∀ᵐ x ∂(coins ℤ), Disjunctive (trace x) :=
+  ae_isNormal_trace.mono fun _ h => StrongerStatements.disjunctive_of_isNormal h
+
+/-- For almost every configuration, the trace is not eventually periodic. -/
+theorem ae_not_eventuallyPeriodic_trace :
+    ∀ᵐ x ∂(coins ℤ), ¬ EventuallyPeriodic (trace x) :=
+  ae_isNormal_trace.mono fun _ h =>
+    StrongerStatements.not_eventuallyPeriodic_of_disjunctive
+      (StrongerStatements.disjunctive_of_isNormal h)
+
+/-- **Meager but of full measure**: the configurations whose trace has density `1/2` (a fortiori
+those with a normal trace) form a meager set of full measure. -/
 theorem isMeagre_and_ae_halfDensity_trace :
     IsMeagre {x : ℤ → Bool | Symmetry.HalfDensity (trace x)} ∧
       ∀ᵐ x ∂(coins ℤ), Symmetry.HalfDensity (trace x) :=
   ⟨isMeagre_halfDensity_trace, ae_halfDensity_trace⟩
-
-/-! ### No eventual period almost surely -/
-
-/-- Two sequences with the same eventual period `P` from `T` on are equal once they agree below
-`T + P`. -/
-theorem eq_of_periodic {u v : ℕ → Bool} {T P : ℕ} (hP : 0 < P)
-    (hu : ∀ t, T ≤ t → u (t + P) = u t) (hv : ∀ t, T ≤ t → v (t + P) = v t)
-    (h : ∀ t < T + P, u t = v t) : u = v := by
-  funext t
-  induction t using Nat.strong_induction_on with
-  | _ t ih =>
-    rcases Nat.lt_or_ge t (T + P) with ht | ht
-    · exact h t ht
-    · obtain ⟨s, rfl⟩ : ∃ s, t = s + P := ⟨t - P, by omega⟩
-      rw [hu s (by omega), hv s (by omega)]
-      exact ih s (by omega)
-
-/-- The eventually periodic sequences are countably many. -/
-theorem countable_eventuallyPeriodic : {v : ℕ → Bool | EventuallyPeriodic v}.Countable := by
-  have hsub : {v : ℕ → Bool | EventuallyPeriodic v} ⊆ ⋃ (T : ℕ) (P : ℕ) (u : Fin (T + P) → Bool),
-      {v | 0 < P ∧ (∀ t, T ≤ t → v (t + P) = v t) ∧ ∀ i : Fin (T + P), v i = u i} := by
-    rintro v ⟨T, P, hP, hv⟩
-    simp only [Set.mem_iUnion, Set.mem_setOf_eq]
-    exact ⟨T, P, fun i => v i, hP, hv, fun i => rfl⟩
-  refine Set.Countable.mono hsub (Set.countable_iUnion fun T => Set.countable_iUnion fun P =>
-    Set.countable_iUnion fun u => Set.Subsingleton.countable ?_)
-  rintro v ⟨hP, hv, hvu⟩ v' ⟨-, hv', hvu'⟩
-  exact eq_of_periodic hP hv hv' fun t ht => (hvu ⟨t, ht⟩).trans (hvu' ⟨t, ht⟩).symm
-
-/-- A fair-coin sequence has no atoms. -/
-theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
-  have hle : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
-    calc coins ℕ {v} ≤ coins ℕ (Set.pi (Finset.range (n + 1) : Set ℕ) fun t => {v t}) :=
-          measure_mono fun u hu => by
-            rw [Set.mem_singleton_iff] at hu
-            subst hu
-            exact fun t _ => rfl
-      _ = 2⁻¹ ^ (n + 1) := by
-          rw [coins_pi]
-          simp [coin_singleton]
-  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
-    (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (ENNReal.inv_lt_one.2 ENNReal.one_lt_two)).comp
-      (tendsto_add_atTop_nat 1)
-  exact le_antisymm (ge_of_tendsto' hlim hle) zero_le
-
-/-- **No eventual period for a random sequence**: almost every fair-coin sequence is not
-eventually periodic. -/
-theorem ae_not_eventuallyPeriodic : ∀ᵐ v ∂(coins ℕ), ¬ EventuallyPeriodic v := by
-  have : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
-  rw [ae_iff]
-  simp only [not_not]
-  exact countable_eventuallyPeriodic.measure_zero _
-
-/-- **No eventual period for almost every configuration**: for almost every configuration, the
-rule 30 trace is not eventually periodic. -/
-theorem ae_not_eventuallyPeriodic_trace :
-    ∀ᵐ x ∂(coins ℤ), ¬ EventuallyPeriodic (trace x) :=
-  measurePreserving_trace.quasiMeasurePreserving.ae ae_not_eventuallyPeriodic
 
 end Rule30Equivalents.RandomConfigurations

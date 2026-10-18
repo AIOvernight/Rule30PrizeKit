@@ -20,7 +20,8 @@ center column, stated with integers: for every `k > 0`, eventually `k |2 b(n) - 
 * `problem2_iff_simplyNormal`: `x₂ = 0.c(0) c(1) …₂` is simply normal in base `2`. Its binary digits
   are the center column, since `c` has infinitely many `0`s (`binDigit_centerBinary`).
 
-Also `problem2_of_isNormal` (normality of `x₂` gives Problem 2) and
+Also `problem2_of_isNormal` (normality of `x₂` gives Problem 2, from `halfDensity_of_isNormal` for
+every bit sequence) and
 `problem1_of_density_on_progressions`: density `1/2` along every arithmetic progression rules out
 an eventually constant residue class, hence gives Problem 1 (anti-Toeplitz, catalog Section 4).
 -/
@@ -181,17 +182,22 @@ theorem problem2_iff_simplyNormal :
     cases h : Rule30Prize.center t <;> simp [c, h]
   simp only [this]
 
-/-- **Normality gives Problem 2**: if every word of length `n` occurs in `c` with frequency
-`2⁻ⁿ`, then in particular the black cells have density `1/2`. -/
-theorem problem2_of_isNormal (h : StrongerStatements.IsNormal c) : Rule30Prize.Problem2 := by
-  rw [problem2_iff_tendsto]
+/-- A normal sequence has density `1/2`: the word `1` has frequency `1/2`. -/
+theorem halfDensity_of_isNormal {b : ℕ → Bool} (h : StrongerStatements.IsNormal b) :
+    Symmetry.HalfDensity b := by
+  rw [halfDensity_iff_tendsto]
   have h1 := h 1 fun _ => true
   rw [pow_one, ← one_div] at h1
   refine h1.congr fun n => ?_
-  rw [blackCount_eq_sum, Finset.sum_boole]
+  rw [count_eq_sum, Finset.sum_boole]
   congr 3
   refine Finset.filter_congr fun t _ => ?_
   simp
+
+/-- **Normality gives Problem 2**: if every word of length `n` occurs in `c` with frequency
+`2⁻ⁿ`, then in particular the black cells have density `1/2`. -/
+theorem problem2_of_isNormal (h : StrongerStatements.IsNormal c) : Rule30Prize.Problem2 :=
+  halfDensity_of_isNormal h
 
 /-- **Density on progressions gives Problem 1**: if `c` has density `1/2` along every
 arithmetic progression, no residue class is eventually constant (anti-Toeplitz). -/

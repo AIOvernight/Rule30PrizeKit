@@ -27,7 +27,9 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
   particular if it has positive Besicovitch distance from all of them).
 * `problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity` (positive
   entropy): the orbit closure is uncountable, or the factor complexity grows exponentially.
-* `problem1_of_disjunctive`, `problem1_of_isNormal`: every word occurs in `c`; `c` is normal.
+* `problem1_of_disjunctive`, `problem1_of_isNormal`: every word occurs in `c`; `c` is normal. They
+  come from `not_eventuallyPeriodic_of_disjunctive` and `disjunctive_of_isNormal`, which hold for
+  every bit sequence.
 * `problem1_of_transcendental_binary`: `x₂ = 0.c(0)c(1)…₂` is transcendental.
 * `problem1_of_linComplexity_tendsto`: the linear complexity `Lₙ` of the prefixes over `𝔽₂`
   satisfies `Lₙ/n → 1/2`.
@@ -128,16 +130,22 @@ theorem problem1_of_exponential_complexity
   obtain ⟨n, hC⟩ := pow_unbounded_of_one_lt (C : ℝ) ha
   exact ⟨n, by exact_mod_cast hC.trans_le (hn n)⟩
 
+/-- A disjunctive sequence (every word occurs) is not eventually periodic: an eventually periodic
+sequence has at most `T + P` factors of each length. -/
+theorem not_eventuallyPeriodic_of_disjunctive {b : ℕ → Bool}
+    (h : ∀ n (w : Fin n → Bool), ∃ i, ∀ j : Fin n, b (i + j) = w j) : ¬ EventuallyPeriodic b := by
+  rintro ⟨T, P, hP, hper⟩
+  have hle := ShiftOrbit.ncard_factors_le_of_periodic hP hper (T + P)
+  have : ShiftOrbit.factors b (T + P) = Set.univ :=
+    Set.eq_univ_of_forall fun w => let ⟨i, hi⟩ := h _ w; ⟨i, funext hi⟩
+  rw [this, Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fun, Fintype.card_bool,
+    Fintype.card_fin] at hle
+  exact absurd hle (not_le.2 Nat.lt_two_pow_self)
+
 /-- **Disjunctive**: every word occurs in `c`. -/
 theorem problem1_of_disjunctive (h : ∀ n (w : Fin n → Bool), ∃ i, ∀ j : Fin n, c (i + j) = w j) :
-    Rule30Prize.Problem1 := by
-  rw [ShiftOrbit.problem1_iff_ncard_factors]
-  intro n
-  have : ShiftOrbit.factors c n = Set.univ :=
-    Set.eq_univ_of_forall fun w => let ⟨i, hi⟩ := h n w; ⟨i, funext hi⟩
-  rw [this, Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fun, Fintype.card_bool,
-    Fintype.card_fin]
-  exact Nat.lt_two_pow_self
+    Rule30Prize.Problem1 :=
+  not_eventuallyPeriodic_of_disjunctive h
 
 /-- `b` is normal in base `2`: every word of length `n` occurs with frequency `2⁻ⁿ`. -/
 def IsNormal (b : ℕ → Bool) : Prop :=
@@ -145,13 +153,13 @@ def IsNormal (b : ℕ → Bool) : Prop :=
     (((Finset.range N).filter fun i => ∀ j : Fin n, b (i + j) = w j).card : ℝ) / N) atTop
       (𝓝 ((2 : ℝ)⁻¹ ^ n))
 
-/-- **Normality** (of `x₂` in base `2`): a normal sequence is disjunctive. -/
-theorem problem1_of_isNormal (h : IsNormal c) : Rule30Prize.Problem1 := by
-  refine problem1_of_disjunctive fun n w => ?_
+/-- A normal sequence is disjunctive: a word of frequency `2⁻ⁿ > 0` occurs. -/
+theorem disjunctive_of_isNormal {b : ℕ → Bool} (h : IsNormal b) (n : ℕ) (w : Fin n → Bool) :
+    ∃ i, ∀ j : Fin n, b (i + j) = w j := by
   obtain ⟨N, hN⟩ := ((h n w).eventually (lt_mem_nhds (by positivity : (0 : ℝ) < 2⁻¹ ^ n))).exists
   by_contra hne
   push Not at hne
-  have : ((Finset.range N).filter fun i => ∀ j : Fin n, c (i + j) = w j) = ∅ := by
+  have : ((Finset.range N).filter fun i => ∀ j : Fin n, b (i + j) = w j) = ∅ := by
     ext i
     simp only [Finset.mem_filter, Finset.notMem_empty, iff_false, not_and]
     intro _ hi
@@ -159,6 +167,10 @@ theorem problem1_of_isNormal (h : IsNormal c) : Rule30Prize.Problem1 := by
     exact hj (hi j)
   rw [this] at hN
   simp at hN
+
+/-- **Normality** (of `x₂` in base `2`): a normal sequence is disjunctive. -/
+theorem problem1_of_isNormal (h : IsNormal c) : Rule30Prize.Problem1 :=
+  problem1_of_disjunctive (disjunctive_of_isNormal h)
 
 /-- **`x₂` transcendental.** -/
 theorem problem1_of_transcendental_binary

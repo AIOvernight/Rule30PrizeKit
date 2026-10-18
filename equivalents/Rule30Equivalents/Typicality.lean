@@ -187,10 +187,33 @@ theorem isRecurrent_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) : IsR
     obtain ⟨s, hs, hw⟩ := Mixing.exists_ge_of_disjunctive hb (fun j : Fin n => b j) 1
     exact ⟨s, hs, fun i hi => hw ⟨i, hi⟩⟩
 
+/-- **A disjunctive sequence is not uniformly recurrent**: the factor `1` misses the long white
+blocks. -/
+theorem not_uniformlyRecurrent_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
+    ¬ IsUniformlyRecurrent b := by
+  intro hur
+  obtain ⟨i, hi⟩ := hb 1 fun _ => true
+  obtain ⟨L, hL⟩ := hur 1 i
+  obtain ⟨s, hs⟩ := hb (L + 1) fun _ => false
+  obtain ⟨k, hk, hkj⟩ := hL s
+  have h1 := hkj 0 one_pos
+  have h2 := hs ⟨k, by omega⟩
+  have h3 := hi 0
+  simp only [Fin.val_zero, add_zero] at h1 h2 h3
+  rw [h2, h3] at h1
+  exact Bool.false_ne_true h1
+
 /-- A disjunctive sequence is not purely periodic. -/
 theorem not_purelyPeriodic_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
     ¬ ∃ P, 0 < P ∧ ∀ t, b (t + P) = b t :=
   fun ⟨P, hP, h⟩ => not_eventuallyPeriodic_of_disjunctive hb ⟨0, P, hP, fun t _ => h t⟩
+
+/-- **The center column of almost every configuration is recurrent but not uniformly
+recurrent**: every prefix occurs again, but not within bounded gaps. -/
+theorem ae_recurrent_not_uniformlyRecurrent_trace : ∀ᵐ x ∂(coins ℤ),
+    IsRecurrent (trace x) ∧ ¬ IsUniformlyRecurrent (trace x) :=
+  ae_disjunctive_trace.mono fun _ hd =>
+    ⟨isRecurrent_of_disjunctive hd, not_uniformlyRecurrent_of_disjunctive hd⟩
 
 /-! ### Numbers -/
 

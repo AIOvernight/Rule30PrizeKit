@@ -815,6 +815,10 @@ theorem problem1_of_not_isMorphic (h : ¬ IsMorphic c) : Rule30Prize.Problem1 :=
 /-- `b` is recurrent: every prefix occurs again at a positive position. -/
 def IsRecurrent (b : ℕ → Bool) : Prop := ∀ n, ∃ s, 0 < s ∧ ∀ i < n, b (s + i) = b i
 
+/-- `b` is uniformly recurrent: each of its factors occurs in every long enough window. -/
+def IsUniformlyRecurrent (b : ℕ → Bool) : Prop :=
+  ∀ n i, ∃ L, ∀ s, ∃ k ≤ L, ∀ j < n, b (s + k + j) = b (i + j)
+
 /-- In a recurrent sequence every prefix occurs arbitrarily far out. -/
 theorem IsRecurrent.exists_ge {b : ℕ → Bool} (h : IsRecurrent b) (n : ℕ) :
     ∀ k, ∃ s, k ≤ s ∧ ∀ i < n, b (s + i) = b i

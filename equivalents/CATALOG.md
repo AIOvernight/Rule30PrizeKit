@@ -2643,7 +2643,10 @@ with Turing machines reading n. Notes:
   about the equidistribution of y_{Pk+r} [W19]. For the single seed this is open; at the level of
   digits it holds for almost every configuration (`OrbitFrequencies.ae_orbit_frequency_progression`).
 - **Recurrence and uniform recurrence of c.** As properties of sequences, these are independent of
-  Problem 1. A normal sequence is recurrent but not uniformly recurrent. A recurrent EP sequence is
+  Problem 1. A normal sequence is recurrent but not uniformly recurrent
+  (`Typicality.isRecurrent_of_disjunctive`, `not_uniformlyRecurrent_of_disjunctive`, already for
+  every disjunctive sequence; so for almost every configuration,
+  `ae_recurrent_not_uniformlyRecurrent_trace`). A recurrent EP sequence is
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).
 - **Kolmogorov complexity.** K(c↾n) = K(n) + O(1), as for every computable sequence, so it cannot
   see Problem 1 [LV19]. The resource-bounded measures of [5], [27], [28], [37] and [52] can.

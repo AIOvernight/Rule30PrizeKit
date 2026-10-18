@@ -8,6 +8,8 @@ import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.Algebra.MvPolynomial.Basic
 import Mathlib.RingTheory.PowerSeries.Expand
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.NumberTheory.DiophantineApproximation.Basic
+import Mathlib.Algebra.AlgebraicCard
 
 /-!
 # Stronger statements that imply Problem 1
@@ -39,12 +41,14 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_of_hypertranscendental`: `∑ c(t) zᵗ` satisfies no algebraic differential equation
   over `ℚ`.
 * `problem1_of_unbounded_abelianComplexity`: the abelian complexity of `c` is unbounded.
-* `problem1_of_irrExponentGE`: the irrationality exponent of `x₂` is at least some `μ > 1`, for
-  example `μ(x₂) = 2`.
+* `problem1_iff_irrExponentGE`: the irrationality exponent of `x₂` is at least `2`. By
+  Dirichlet's theorem this holds for every irrational number (`irrExponentGE_two_of_irrational`),
+  so it is equivalent to Problem 1; the conjecture is `μ(x₂) = 2`.
 * `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function.
 * `problem1_of_expansionComplexity_unbounded`: the expansion complexity of `∑ c(t) Xᵗ` over `𝔽₂`
   is unbounded.
-* `problem1_of_not_isMorphic`: `c` is not morphic.
+* `problem1_of_not_isMorphic`: `c` is not morphic. A morphic sequence is determined by finitely
+  many data (`IsFixedPoint.eq`), so there are countably many (`countable_setOf_isMorphic`).
 * `problem1_of_recurrent_not_purelyPeriodic`: `c` is recurrent and not purely periodic; a
   recurrent eventually periodic sequence is purely periodic (`IsRecurrent.purelyPeriodic`), so for
   a recurrent `c` Problem 1 is the case `T = 0` (`problem1_iff_not_purelyPeriodic_of_recurrent`).
@@ -357,7 +361,8 @@ theorem finite_approx (r : ℚ) :
   have hnum' : |q.num| ≤ ((B * D ^ 2 : ℕ) : ℤ) := by exact_mod_cast hnum
   exact ⟨by linarith [neg_abs_le q.num], by linarith [le_abs_self q.num]⟩
 
-/-- **The irrationality exponent.** If `μ(x₂) ≥ 2` (the conjecture is `μ(x₂) = 2`), Problem 1 holds. -/
+/-- **The irrationality exponent.** If `μ(x₂) ≥ 2`, Problem 1 holds: a rational number has
+irrationality exponent `1` (`finite_approx`). -/
 theorem problem1_of_irrExponentGE (h : IrrExponentGE BinaryIrrational.centerBinary 2) :
     Rule30Prize.Problem1 := by
   rw [BinaryIrrational.problem1_iff_irrational_binary]
@@ -365,6 +370,23 @@ theorem problem1_of_irrExponentGE (h : IrrExponentGE BinaryIrrational.centerBina
   apply h (3 / 2) (by norm_num)
   rw [← hr]
   exact finite_approx r
+
+/-- **Dirichlet's approximation theorem**: every irrational number has irrationality exponent at
+least `2`. -/
+theorem irrExponentGE_two_of_irrational {x : ℝ} (hx : Irrational x) : IrrExponentGE x 2 := by
+  intro ν hν
+  refine (Real.infinite_rat_abs_sub_lt_one_div_den_sq_of_irrational hx).mono fun q hq => ?_
+  have hden : (1 : ℝ) ≤ q.den := by exact_mod_cast q.den_pos
+  refine ⟨abs_pos.2 (sub_ne_zero.2 (hx.ne_rat q)), lt_of_lt_of_le hq ?_⟩
+  rw [one_div, ← Real.rpow_natCast, ← Real.rpow_neg (by positivity)]
+  exact Real.rpow_le_rpow_of_exponent_le hden (by push_cast; linarith)
+
+/-- **Problem 1, irrationality exponent**: Problem 1 holds iff `x₂ = 0.c(0)c(1)…₂` has
+irrationality exponent at least `2` (Dirichlet's theorem, `irrExponentGE_two_of_irrational`). -/
+theorem problem1_iff_irrExponentGE :
+    Rule30Prize.Problem1 ↔ IrrExponentGE BinaryIrrational.centerBinary 2 :=
+  ⟨fun h => irrExponentGE_two_of_irrational (BinaryIrrational.problem1_iff_irrational_binary.1 h),
+    problem1_of_irrExponentGE⟩
 
 /-- `F` is `k`-Mahler over `ℚ`: `∑_{i ≤ d} pᵢ(z) F(z^(kⁱ)) = 0` for polynomials `pᵢ`, not all
 `0`. -/
@@ -447,15 +469,20 @@ theorem problem1_of_expansionComplexity_unbounded
       Polynomial.eval₂_X, Polynomial.coeToPowerSeries.ringHom_apply, hPQ, sub_self,
       map_zero]
 
+/-- `x` is a fixed point of the non-erasing morphism `σ`, generated from its first letter: reading
+`σ(x 0) σ(x 1) σ(x 2) …` gives `x` back, so the block `σ(x n)` sits at the position
+`∑_{i < n} |σ(x i)|`; and `σ(x 0)` has at least two letters, so that `x = σ^ω(x 0)`. -/
+def IsFixedPoint {A : Type*} (σ : A → List A) (x : ℕ → A) : Prop :=
+  (∀ a, σ a ≠ []) ∧ 2 ≤ (σ (x 0)).length ∧
+    ∀ n (j : ℕ) (hj : j < (σ (x n)).length),
+      x (∑ i ∈ Finset.range n, (σ (x i)).length + j) = (σ (x n))[j]
+
 /-- `b` is morphic: a coding `τ` of a fixed point `x` of a non-erasing morphism `σ` of a finite
-alphabet. `x` is a fixed point: reading `σ(x 0) σ(x 1) σ(x 2) …` gives `x` back, so the block
-`σ(x n)` sits at the position `∑_{i < n} |σ(x i)|`. -/
+alphabet, generated from its first letter (`IsFixedPoint`). Without the condition `|σ(x 0)| ≥ 2`
+every sequence would be morphic, since the identity morphism fixes every sequence. -/
 def IsMorphic (b : ℕ → Bool) : Prop :=
   ∃ (A : Type) (_ : Fintype A) (σ : A → List A) (x : ℕ → A) (τ : A → Bool),
-    (∀ a, σ a ≠ []) ∧
-    (∀ n (j : ℕ) (hj : j < (σ (x n)).length),
-      x (∑ i ∈ Finset.range n, (σ (x i)).length + j) = (σ (x n))[j]) ∧
-    ∀ n, b n = τ (x n)
+    IsFixedPoint σ x ∧ ∀ n, b n = τ (x n)
 
 /-- The position of time `n` in a transient of length `T` followed by a period `Q`. -/
 def posOf (T Q n : ℕ) : ℕ := if n < T + Q then n else T + (n - T) % Q
@@ -525,14 +552,15 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
         · rw [if_neg (fun h => hn ((hpos0 n).1 h)), if_neg hn]; rfl
       rw [this]
       split_ifs <;> omega
-  refine ⟨Fin N, inferInstance, σ, x, fun i => b i, fun a => ?_, fun n j hj => ?_, fun n => ?_⟩
+  have hx0 : (x 0 : ℕ) = 0 := (hpos0 0).2 rfl
+  have hσ : σ (x 0) = [⟨0, by omega⟩, ⟨1, by omega⟩] := by simp only [σ, if_pos hx0]
+  refine ⟨Fin N, inferInstance, σ, x, fun i => b i,
+    ⟨fun a => ?_, by rw [hσ]; simp, fun n j hj => ?_⟩, fun n => ?_⟩
   · simp only [σ]
     split_ifs <;> simp
   · rw [hlen]
     by_cases hn : n = 0
     · subst hn
-      have hx0 : (x 0 : ℕ) = 0 := (hpos0 0).2 rfl
-      have hσ : σ (x 0) = [⟨0, by omega⟩, ⟨1, by omega⟩] := by simp only [σ, if_pos hx0]
       rw [if_pos rfl, Nat.zero_add]
       simp only [hσ, List.length_cons, List.length_nil] at hj
       apply Fin.ext
@@ -567,6 +595,95 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
       congr 1
       rw [mul_comm]
       omega
+
+/-- In a fixed point generated from its first letter, every position `p` lies in a block `σ(x n)`
+with `n = 0` or `n < p`: the first block has at least two letters and the others at least one. -/
+theorem IsFixedPoint.exists_block {A : Type*} {σ : A → List A} {x : ℕ → A}
+    (hx : IsFixedPoint σ x) (p : ℕ) : ∃ n j, ∃ _ : j < (σ (x n)).length,
+      p = ∑ i ∈ Finset.range n, (σ (x i)).length + j ∧ (n = 0 ∨ n < p) := by
+  set s : ℕ → ℕ := fun n => ∑ i ∈ Finset.range n, (σ (x i)).length with hs
+  have hsucc : ∀ n, s (n + 1) = s n + (σ (x n)).length := fun n => Finset.sum_range_succ _ _
+  have hlen : ∀ i, 1 ≤ (σ (x i)).length := fun i => List.length_pos_iff.2 (hx.1 _)
+  -- the blocks after the first start late: `s n ≥ n + 1` for `n ≥ 1`
+  have hsn : ∀ n, 1 ≤ n → n + 1 ≤ s n := by
+    intro n hn
+    induction n with
+    | zero => omega
+    | succ n ih =>
+      rw [hsucc]
+      rcases Nat.eq_zero_or_pos n with rfl | hn'
+      · have : s 0 = 0 := Finset.sum_range_zero _
+        have := hx.2.1
+        omega
+      · have := ih hn'
+        have := hlen n
+        omega
+  -- the last block that starts at or before `p`
+  set n := Nat.findGreatest (fun n => s n ≤ p) p with hndef
+  have hn : s n ≤ p :=
+    Nat.findGreatest_spec (P := fun n => s n ≤ p) (Nat.zero_le p) (by simp [hs])
+  have hn1 : p < s (n + 1) := by
+    by_contra h
+    push Not at h
+    have hle : n + 1 ≤ p := by
+      have := hsn (n + 1) (by omega)
+      omega
+    exact Nat.findGreatest_is_greatest (Nat.lt_succ_self n) hle h
+  have hsn' : s n = ∑ i ∈ Finset.range n, (σ (x i)).length := rfl
+  refine ⟨n, p - s n, by rw [hsucc] at hn1; omega, by omega, ?_⟩
+  rcases Nat.eq_zero_or_pos n with h | h
+  · exact Or.inl h
+  · have := hsn n h
+    exact Or.inr (by omega)
+
+/-- **A fixed point generated from its first letter is determined by it**: by strong induction,
+the block containing the position `p` comes from an earlier letter. -/
+theorem IsFixedPoint.eq {A : Type*} {σ : A → List A} {x y : ℕ → A} (hx : IsFixedPoint σ x)
+    (hy : IsFixedPoint σ y) (h0 : x 0 = y 0) : x = y := by
+  funext p
+  induction p using Nat.strong_induction_on with
+  | _ p ih =>
+    obtain ⟨n, j, hj, hp, hn⟩ := hx.exists_block p
+    -- the letters up to the block agree
+    have hxy : ∀ i ≤ n, x i = y i := fun i hi => by
+      rcases hn with rfl | hn
+      · obtain rfl : i = 0 := by omega
+        exact h0
+      · exact ih i (by omega)
+    have hsum : ∑ i ∈ Finset.range n, (σ (y i)).length =
+        ∑ i ∈ Finset.range n, (σ (x i)).length :=
+      Finset.sum_congr rfl fun i hi => by rw [hxy i (by simp at hi; omega)]
+    have hjy : j < (σ (y n)).length := by rwa [← hxy n le_rfl]
+    have h1 := hx.2.2 n j hj
+    have h2 := hy.2.2 n j hjy
+    rw [← hp] at h1
+    rw [hsum, ← hp] at h2
+    rw [h1, h2]
+    have key : ∀ (a : A) (_ : a = x n) (h : j < (σ a).length), (σ a)[j] = (σ (x n))[j] := by
+      rintro a rfl _
+      rfl
+    exact (key _ (hxy n le_rfl).symm hjy).symm
+
+/-- **Morphic sequences are countably many**: a morphic sequence is determined by the size of its
+alphabet, the morphism, the first letter of the fixed point and the coding (`IsFixedPoint.eq`). -/
+theorem countable_setOf_isMorphic : {b : ℕ → Bool | IsMorphic b}.Countable := by
+  let S : (Σ k : ℕ, (Fin k → List (Fin k)) × Fin k × (Fin k → Bool)) → Set (ℕ → Bool) :=
+    fun d => {b | ∃ x : ℕ → Fin d.1, IsFixedPoint d.2.1 x ∧ x 0 = d.2.2.1 ∧
+      ∀ n, b n = d.2.2.2 (x n)}
+  have hS : ∀ d, (S d).Subsingleton := by
+    rintro d b ⟨x, hx, hx0, hb⟩ b' ⟨y, hy, hy0, hb'⟩
+    have hxy := hx.eq hy (hx0.trans hy0.symm)
+    funext n
+    rw [hb, hb', hxy]
+  refine (Set.countable_iUnion fun d => (hS d).countable).mono ?_
+  rintro b ⟨A, hA, σ, x, τ, hx, hb⟩
+  -- transport the alphabet to `Fin k`
+  let e := Fintype.equivFin A
+  refine Set.mem_iUnion.2 ⟨⟨Fintype.card A, fun i => (σ (e.symm i)).map e, e (x 0), τ ∘ e.symm⟩,
+    fun n => e (x n), ⟨fun a => by simpa using hx.1 (e.symm a), by simpa using hx.2.1,
+      fun n j hj => ?_⟩, rfl, fun n => by simp [hb n]⟩
+  simp only [Equiv.symm_apply_apply, List.length_map, List.getElem_map] at hj ⊢
+  rw [hx.2.2 n j hj]
 
 /-- **Not morphic.** If `c` is not morphic, Problem 1 holds. -/
 theorem problem1_of_not_isMorphic (h : ¬ IsMorphic c) : Rule30Prize.Problem1 :=

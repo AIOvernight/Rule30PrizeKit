@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 220 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 221 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2279,11 +2279,14 @@ boundary, every line, unbounded runs, anti-Toeplitz, disagreements, the Besicovi
 the orbit closure and positive entropy, disjunctive and normal, x₂ transcendental, Lₙ/n → 1/2,
 the Hankel determinants, the defect bound, hypertranscendence, unbounded abelian complexity, the
 irrationality exponent μ(x₂) ≥ 2 (`problem1_of_irrExponentGE`: a rational has only finitely many
-approximations of order 3/2) and "not a k-Mahler function" (`problem1_of_not_isMahler`: P/Q
+approximations of order 3/2; by Dirichlet's theorem it is in fact equivalent to Problem 1,
+`problem1_iff_irrExponentGE`) and "not a k-Mahler function" (`problem1_of_not_isMahler`: P/Q
 satisfies P(z^k)Q(z)F(z) − P(z)Q(z^k)F(z^k) = 0) and unbounded expansion complexity
 (`problem1_of_expansionComplexity_unbounded`: Q(X)Y − P(X) vanishes at C exactly), and "not
 morphic" (`problem1_of_not_isMorphic`: an EP sequence is a coding of the fixed point of σ(0) = 0 1,
-σ(i) = i + 1 on its positions), "not k-regular over some field"
+σ(i) = i + 1 on its positions; the fixed point must be generated from its first letter,
+abs(σ(x(0))) ≥ 2, since otherwise the identity morphism makes every sequence morphic, and then
+morphic sequences are countably many, `countable_setOf_isMorphic`), "not k-regular over some field"
 (`RegularSequences.problem1_of_not_regularSeq`), and "x_β ∉ ℚ(β) for some real β > 2", for
 example a Salem number (`PisotNumbers.problem1_of_not_mem_adjoin`). For a density or a distance the
 hypothesis used is the weaker "infinitely many". The others are proved elsewhere: no column EP and

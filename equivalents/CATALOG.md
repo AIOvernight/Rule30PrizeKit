@@ -2491,6 +2491,13 @@ with Turing machines reading n. Notes:
   `problem1_of_problem3` hold: the chain above, formally.
 - Its circuit-complexity strengthenings are beyond current lower-bound techniques [LY22], [FGHK16],
   and natural proofs are a barrier [RR97].
+- In the query model the t-step map is provably linear. A decision tree that reads cells of the
+  initial row one at a time and computes the center cell after t ≥ 2 steps has depth at least
+  2t − 1, since a tree of depth d computes a function of algebraic degree at most d over 𝔽₂ and
+  the t-step map has degree 2t − 1 (Section 6.3). Lean:
+  [QueryComplexity](Rule30Equivalents/QueryComplexity.lean), `le_depth_of_eval_eq`, from
+  `coef_eval_eq_zero` and `AlgebraicDegree.coef_center_top`. This concerns arbitrary initial rows;
+  for the single seed there is nothing to query, and Problem 3 asks about the input n.
 - Problem 3 transfers to rules 86, 135 and 149 and to the stripe seeds, since their columns are
   identical or complemented (an O(1) difference).
 

@@ -19,7 +19,9 @@ The measure-theoretic counterpart of `Genericity`. Start rule 30 from independen
   at `-(n+1)` preserves the measure (`map_flip`), fixes the trace up to time `n` and flips it at
   time `n + 1` (left-permutivity), so it halves the prefix event (`two_mul_measure_flip`) and
   every prefix of length `n + 1` has probability `2^-(n+1)` (`measure_prefix`); cylinders over
-  initial segments then determine the measure.
+  initial segments then determine the measure. The same halving gives `measure_triangular`: if
+  flipping the coin at `p j` flips the event `g j` and no earlier one, the events `g 0, …, g (m-1)`
+  take any given values with probability `2^-m`, over any index set.
 * `ae_isNormal`: **Borel's normal number theorem** for fair coins. For a word `u` of length `m`
   and a residue `r`, the blocks `v(r + k m), …, v(r + k m + m - 1)` are independent fair words
   (`map_blocks`, by reindexing and currying the product measure), so by the strong law of large
@@ -181,6 +183,49 @@ theorem two_mul_measure_flip {ι : Type*} [DecidableEq ι] {A : Set (ι → Bool
 theorem eq_mul_inv_of_two_mul {X Y : ENNReal} (h : 2 * X = Y) : X = Y * 2⁻¹ := by
   rw [← h, mul_comm 2 X, mul_assoc, ENNReal.mul_inv_cancel two_ne_zero ENNReal.ofNat_ne_top,
     mul_one]
+
+/-- A Boolean function of the first `N` coins is measurable. -/
+theorem measurable_of_forall_lt {g : (ℕ → Bool) → Bool} (N : ℕ)
+    (hg : ∀ v w, (∀ i < N, v i = w i) → g v = g w) : Measurable g := by
+  have e : g = (fun r : Finset.range N → Bool =>
+      g fun i => if h : i ∈ Finset.range N then r ⟨i, h⟩ else false) ∘
+        (Finset.range N).restrict := by
+    funext v
+    exact hg _ _ fun i hi => by simp [Finset.mem_range.2 hi]
+  rw [e]
+  exact (measurable_of_finite _).comp (Finset.measurable_restrict _)
+
+/-- **Triangular events.** If flipping the coin at `p j` flips the event `g j` and changes no event
+`g i` with `i < j`, then `g 0, …, g (m - 1)` take the values `β 0, …, β (m - 1)` with
+probability `2^-m`. -/
+theorem measure_triangular {ι : Type*} [DecidableEq ι] (g : ℕ → (ι → Bool) → Bool)
+    (hg : ∀ j, Measurable (g j)) (p : ℕ → ι)
+    (hflip : ∀ j v, g j (Function.update v (p j) (!v (p j))) = !g j v)
+    (hfix : ∀ j v, ∀ i < j, g i (Function.update v (p j) (!v (p j))) = g i v) (β : ℕ → Bool) :
+    ∀ m, coins ι {v | ∀ j < m, g j v = β j} = 2⁻¹ ^ m
+  | 0 => by simp
+  | m + 1 => by
+    set E := {v : ι → Bool | ∀ j < m, g j v = β j} with hEdef
+    have hE : MeasurableSet E := by
+      simp only [hEdef, Set.setOf_forall]
+      exact MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ =>
+        hg j (measurableSet_singleton _)
+    have hinv : ∀ v, Function.update v (p m) (!v (p m)) ∈ E ↔ v ∈ E := fun v => by
+      simp only [hEdef, Set.mem_setOf_eq]
+      exact forall₂_congr fun j hj => by rw [hfix m v j hj]
+    have h := two_mul_measure_flip hE (hg m) (p m) hinv (fun v _ => hflip m v) (β m)
+    have hset : {v : ι → Bool | ∀ j < m + 1, g j v = β j} = E ∩ {v | g m v = β m} := by
+      ext v
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
+      constructor
+      · intro hv
+        exact ⟨fun j hj => hv j (by omega), hv m (by omega)⟩
+      · rintro ⟨h1, h2⟩ j hj
+        rcases Nat.lt_or_ge j m with h' | h'
+        · exact h1 j h'
+        · obtain rfl : j = m := by omega
+          exact h2
+    rw [hset, eq_mul_inv_of_two_mul h, measure_triangular g hg p hflip hfix β m, pow_succ]
 
 /-- A map `g` to `{0,1}^ℕ` is **adapted to the left coins** if flipping the coin at `-n` flips
 `g x n` and fixes `g x t` for `t < n`. The center trace is one (`adapted_trace_of_flipsLeft`, by

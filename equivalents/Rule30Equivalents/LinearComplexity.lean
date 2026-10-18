@@ -12,11 +12,9 @@ the shortest linear feedback shift register over `𝔽₂` that generates it
 (Niederreiter's theorem); here it follows from two first-moment bounds and the Borel–Cantelli
 lemma.
 
-* `measure_triangular`: if flipping the coin at `p j` flips the event `g j` and changes no event
-  `g i` with `i < j`, the events `g 0, …, g (m - 1)` take any given values with probability
-  `2^-m`.
 * `measure_generates`: a given register of length `d` generates the prefix of length `n` with
-  probability `2^-(n-d)`, since each later bit must match its prediction. Counting the registers,
+  probability `2^-(n-d)`, since each later bit must match its prediction
+  (`RandomConfigurations.measure_triangular`). Counting the registers,
   `Lₙ ≤ m` with probability at most `2^(m+1) 2^-(n-m)` (`measure_linComplexity_le`).
 * `linComplexity_le_of_rows`: if the rows `(v(t + i))_{i < ℓ}`, `t < n - ℓ`, of the Hankel matrix
   are linearly independent, a register of length `ℓ` generates the prefix, as a matrix with
@@ -35,51 +33,6 @@ namespace Rule30Equivalents.LinearComplexity
 
 open MeasureTheory Filter Topology Genericity RandomConfigurations StrongerStatements
 open scoped Matrix
-
-/-! ### Triangular events -/
-
-/-- A Boolean function of the first `N` coins is measurable. -/
-theorem measurable_of_forall_lt {g : (ℕ → Bool) → Bool} (N : ℕ)
-    (hg : ∀ v w, (∀ i < N, v i = w i) → g v = g w) : Measurable g := by
-  have e : g = (fun r : Finset.range N → Bool =>
-      g fun i => if h : i ∈ Finset.range N then r ⟨i, h⟩ else false) ∘
-        (Finset.range N).restrict := by
-    funext v
-    exact hg _ _ fun i hi => by simp [Finset.mem_range.2 hi]
-  rw [e]
-  exact (measurable_of_finite _).comp (Finset.measurable_restrict _)
-
-/-- **Triangular events.** If flipping the coin at `p j` flips the event `g j` and changes no event
-`g i` with `i < j`, then `g 0, …, g (m - 1)` take the values `β 0, …, β (m - 1)` with
-probability `2^-m`. -/
-theorem measure_triangular {ι : Type*} [DecidableEq ι] (g : ℕ → (ι → Bool) → Bool)
-    (hg : ∀ j, Measurable (g j)) (p : ℕ → ι)
-    (hflip : ∀ j v, g j (Function.update v (p j) (!v (p j))) = !g j v)
-    (hfix : ∀ j v, ∀ i < j, g i (Function.update v (p j) (!v (p j))) = g i v) (β : ℕ → Bool) :
-    ∀ m, coins ι {v | ∀ j < m, g j v = β j} = 2⁻¹ ^ m
-  | 0 => by simp
-  | m + 1 => by
-    set E := {v : ι → Bool | ∀ j < m, g j v = β j} with hEdef
-    have hE : MeasurableSet E := by
-      simp only [hEdef, Set.setOf_forall]
-      exact MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ =>
-        hg j (measurableSet_singleton _)
-    have hinv : ∀ v, Function.update v (p m) (!v (p m)) ∈ E ↔ v ∈ E := fun v => by
-      simp only [hEdef, Set.mem_setOf_eq]
-      exact forall₂_congr fun j hj => by rw [hfix m v j hj]
-    have h := two_mul_measure_flip hE (hg m) (p m) hinv (fun v _ => hflip m v) (β m)
-    have hset : {v : ι → Bool | ∀ j < m + 1, g j v = β j} = E ∩ {v | g m v = β m} := by
-      ext v
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
-      constructor
-      · intro hv
-        exact ⟨fun j hj => hv j (by omega), hv m (by omega)⟩
-      · rintro ⟨h1, h2⟩ j hj
-        rcases Nat.lt_or_ge j m with h' | h'
-        · exact h1 j h'
-        · obtain rfl : j = m := by omega
-          exact h2
-    rw [hset, eq_mul_inv_of_two_mul h, measure_triangular g hg p hflip hfix β m, pow_succ]
 
 /-! ### Short registers -/
 

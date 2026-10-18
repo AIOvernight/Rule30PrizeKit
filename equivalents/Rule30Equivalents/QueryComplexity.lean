@@ -14,7 +14,8 @@ queries on one run. This is the query model of computational effort.
 * `le_depth_of_eval_eq`: **every decision tree that computes the center cell after `t ≥ 2` steps
   from the initial cells has depth at least `2t − 1`**, because that function has degree `2t − 1`
   (`AlgebraicDegree.coef_center_top`). Of the `2t + 1` cells in the light cone, at most two can
-  be skipped on the worst run.
+  be skipped on the worst run. Querying all of them suffices (`exists_depth_eq`), so the query
+  complexity lies between `2t − 1` and `2t + 1`.
 
 This is a linear lower bound for computing `Φ_t` from an arbitrary initial row. It says nothing
 directly about Prize Problem 3, where the initial row is the single black cell and the only input
@@ -115,5 +116,55 @@ theorem le_depth_of_eval_eq {t : ℕ} (ht : 2 ≤ t) (T : DecisionTree ℤ)
   have he : (fun x => evol x t 0) = T.eval := funext fun x => (hT x).symm
   rw [he, coef_eval_eq_zero T (by rw [Int.card_Icc]; omega)] at h
   exact absurd h (by decide)
+
+/-- The tree that queries the cells of the list `l` in order and then answers `f` on the
+configuration read so far (white elsewhere). -/
+def full (f : (ℤ → Bool) → Bool) : List ℤ → (ℤ → Bool) → DecisionTree ℤ
+  | [], ρ => leaf (f ρ)
+  | i :: l, ρ =>
+    query i (full f l (Function.update ρ i false)) (full f l (Function.update ρ i true))
+
+theorem depth_full (f : (ℤ → Bool) → Bool) : ∀ (l : List ℤ) (ρ : ℤ → Bool),
+    (full f l ρ).depth = l.length
+  | [], _ => rfl
+  | i :: l, ρ => by
+    simp only [full, depth, depth_full f l, max_self, List.length_cons]
+
+/-- The full tree answers `f` on the configuration that agrees with `x` on the queried cells and
+with `ρ` elsewhere. -/
+theorem eval_full (f : (ℤ → Bool) → Bool) : ∀ (l : List ℤ) (ρ x : ℤ → Bool),
+    (full f l ρ).eval x = f fun j => if j ∈ l then x j else ρ j
+  | [], ρ, x => by simp [full, eval]
+  | i :: l, ρ, x => by
+    simp only [full, eval]
+    have key : ∀ b, x i = b → (fun j => if j ∈ l then x j else Function.update ρ i b j) =
+        fun j => if j ∈ i :: l then x j else ρ j := by
+      intro b hb
+      funext j
+      by_cases hj : j ∈ l
+      · simp [hj]
+      · by_cases hji : j = i
+        · subst hji
+          simp [hj, hb]
+        · simp [hj, hji]
+    cases hx : x i
+    · rw [if_neg (by simp), eval_full f l, key false hx]
+    · rw [if_pos rfl, eval_full f l, key true hx]
+
+/-- **The matching upper bound**: querying the `2t + 1` cells of the light cone computes the
+center cell after `t` steps, so its query complexity lies between `2t − 1` and `2t + 1`. -/
+theorem exists_depth_eq (t : ℕ) : ∃ T : DecisionTree ℤ,
+    (∀ x, T.eval x = evol x t 0) ∧ T.depth = 2 * t + 1 := by
+  classical
+  let l : List ℤ := (Finset.Icc (-(t : ℤ)) t).toList
+  refine ⟨full (fun x => evol x t 0) l fun _ => false, fun x => ?_, ?_⟩
+  · rw [eval_full]
+    refine evol_congr t 0 fun j hj1 hj2 => ?_
+    have : j ∈ l := by
+      simp only [l, Finset.mem_toList, Finset.mem_Icc]
+      omega
+    simp [this]
+  · rw [depth_full, Finset.length_toList, Int.card_Icc]
+    omega
 
 end Rule30Equivalents.QueryComplexity

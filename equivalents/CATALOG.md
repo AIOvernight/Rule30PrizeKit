@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 154 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 169 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2163,6 +2163,17 @@ periodic sequence has all three properties (the Jacobs–Keane definition [JK69]
 Toeplitz sequences). Without the clauses they only reduce Problem 1 to "c is not purely periodic",
 which is still open (Section 5). They also contradicted Section 6.3, which correctly treats
 recurrence as independent of Problem 1 (critic).
+
+*Lean.* The implications "statement ⟹ Problem 1" of the table are proved in
+[StrongerStatements](Rule30Equivalents/StrongerStatements.lean) (`problem1_of_*`) for the effective
+boundary, every line, unbounded runs, anti-Toeplitz, disagreements, the Besicovitch distance,
+the orbit closure and positive entropy, disjunctive and normal, x₂ transcendental, Lₙ/n → 1/2,
+the Hankel determinants, the defect bound and hypertranscendence. For a density or a distance the
+hypothesis used is the weaker "infinitely many". The others are proved elsewhere: no column EP and
+FinConf through Jen's theorem, the frozen-boundary conjecture
+(`AutomatonGroup.problem1_of_frozenBoundaryConjecture`), not 2-automatic
+(`Automatic.problem1_of_not_automatic`), the zero sets in any characteristic
+(`LinearRelations.problem1_of_not_zero_set`), and Problem 3 ([ProblemThree](Rule30Equivalents/ProblemThree.lean)).
 
 ---
 

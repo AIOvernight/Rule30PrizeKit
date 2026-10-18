@@ -28,6 +28,7 @@ import Rule30Equivalents.BuchiArithmetic
 import Rule30Equivalents.LimitPoints
 import Rule30Equivalents.OrderDefinable
 import Rule30Equivalents.ProblemThree
+import Rule30Equivalents.StrongerStatements
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

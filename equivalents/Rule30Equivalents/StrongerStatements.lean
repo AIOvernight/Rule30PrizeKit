@@ -1,0 +1,241 @@
+import Rule30Equivalents.ShiftOrbit
+import Rule30Equivalents.WordsAutomata
+import Rule30Equivalents.BinaryIrrational
+import Rule30Equivalents.LinearRelations
+import Rule30Equivalents.PowerSeriesF2
+import Rule30Equivalents.Automatic
+import Mathlib.RingTheory.PowerSeries.Derivative
+import Mathlib.Algebra.MvPolynomial.Basic
+
+/-!
+# Stronger statements that imply Problem 1
+
+Catalog Section 4 lists statements, mostly open, each of which implies Problem 1. This file proves
+those implications (`problem1_of_*`). Where a statement is about a density or a distance, the
+theorem uses the weaker consequence that some set is infinite, so it covers the stated form.
+
+* `problem1_of_effective_boundary`: `t ↦ c(t) ∧ c(t + 1)` is not eventually periodic.
+* `problem1_of_every_line`: no line of slope `p/q`, `|p| < q`, carries an eventually periodic
+  sequence.
+* `problem1_of_unbounded_runs`: `0ⁿ` (or `1ⁿ`) occurs in `c` for every `n`.
+* `problem1_of_anti_toeplitz`: no residue class `k ↦ c(r + kP)` is eventually constant.
+* `problem1_of_infinite_disagreements`: for every `τ ≥ 1`, `c(t) ≠ c(t + τ)` infinitely often (in
+  particular if the disagreements have positive upper density).
+* `problem1_of_far_from_periodic`: `c` differs infinitely often from every periodic sequence (in
+  particular if it has positive Besicovitch distance from all of them).
+* `problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity` (positive
+  entropy): the orbit closure is uncountable, or the factor complexity grows exponentially.
+* `problem1_of_disjunctive`, `problem1_of_isNormal`: every word occurs in `c`; `c` is normal.
+* `problem1_of_transcendental_binary`: `x₂ = 0.c(0)c(1)…₂` is transcendental.
+* `problem1_of_linComplexity_tendsto`: the linear complexity `Lₙ` of the prefixes over `𝔽₂`
+  satisfies `Lₙ/n → 1/2`.
+* `problem1_of_hankel_eventually_nonzero`: the integer Hankel determinants are nonzero from some
+  size on.
+* `problem1_of_defect_bound`: the Π⁰₁ defect bound.
+* `problem1_of_hypertranscendental`: `∑ c(t) zᵗ` satisfies no algebraic differential equation
+  over `ℚ`.
+-/
+
+namespace Rule30Equivalents.StrongerStatements
+
+open Filter Topology Ruliology.CellularAutomata
+
+/-- **Effective boundary.** -/
+theorem problem1_of_effective_boundary (h : ¬ EventuallyPeriodic fun t => c t && c (t + 1)) :
+    Rule30Prize.Problem1 := by
+  rintro ⟨T, P, hP, hper⟩
+  have hper' : ∀ t, T ≤ t → c (t + P) = c t := hper
+  refine h ⟨T, P, hP, fun t ht => ?_⟩
+  show (c (t + P) && c (t + P + 1)) = (c t && c (t + 1))
+  rw [show t + P + 1 = (t + 1) + P by omega, hper' t ht, hper' (t + 1) (by omega)]
+
+/-- **Every line.** The line of slope `p/q` through `(t₀, x₀)` is `t ↦ cell(qt + t₀, pt + x₀)`. -/
+theorem problem1_of_every_line
+    (h : ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
+      ¬ EventuallyPeriodic fun t => Rule30Jen.cell (q * t + t₀) (p * t + x₀)) :
+    Rule30Prize.Problem1 := by
+  have := h 0 1 0 0 one_pos (by simp)
+  simpa using this
+
+/-- **Unbounded runs.** -/
+theorem problem1_of_unbounded_runs (b : Bool) (h : ∀ n, ∃ t, ∀ i < n, c (t + i) = b) :
+    Rule30Prize.Problem1 := by
+  rintro ⟨T, P, hP, hper⟩
+  obtain ⟨t, ht⟩ := h (T + P)
+  apply Rule30Prize.center_not_eventually_constant
+  refine ⟨max t T, b, fun s hs => ?_⟩
+  set w := max t T + (s - max t T) % P with hw
+  have hwP : (s - max t T) % P < P := Nat.mod_lt _ hP
+  have hmod : w % P = s % P := by
+    rw [hw, Nat.add_mod, Nat.mod_mod, ← Nat.add_mod, Nat.add_sub_cancel' hs]
+  have hcw : c w = b := by
+    have := ht (w - t) (by omega)
+    rwa [Nat.add_sub_cancel' (by omega)] at this
+  rw [← hcw]
+  exact Automatic.eq_of_mod_eq hper (by omega) (by omega) hmod.symm
+
+/-- **Anti-Toeplitz.** -/
+theorem problem1_of_anti_toeplitz (h : ∀ P, 0 < P → ∀ r, ¬ ∃ K b, ∀ k, K ≤ k → c (r + k * P) = b) :
+    Rule30Prize.Problem1 := fun ⟨T, P, hP, hper⟩ =>
+  h P hP T ⟨0, c T, fun k _ => OmegaRegular.periodic_add_mul c T P hper le_rfl k⟩
+
+/-- **Disagreements.** If for every `τ ≥ 1` the times with `c(t) ≠ c(t + τ)` are infinitely many,
+for instance of positive upper density, Problem 1 holds. -/
+theorem problem1_of_infinite_disagreements (h : ∀ τ, 0 < τ → {t | c t ≠ c (t + τ)}.Infinite) :
+    Rule30Prize.Problem1 := fun ⟨T, P, hP, hper⟩ =>
+  h P hP ((Set.finite_lt_nat T).subset fun t ht => by
+    by_contra hT
+    exact ht (hper t (not_lt.1 hT)).symm)
+
+/-- **Far from periodic sequences.** If `c` differs infinitely often from every periodic sequence,
+for instance if its Besicovitch distance from each of them is positive, Problem 1 holds. -/
+theorem problem1_of_far_from_periodic
+    (h : ∀ (y : ℕ → Bool) (P : ℕ), 0 < P → (∀ t, y (t + P) = y t) → {t | c t ≠ y t}.Infinite) :
+    Rule30Prize.Problem1 := by
+  rintro ⟨T, P, hP, hper⟩
+  refine h (fun t => c (T * P + t % P)) P hP (fun t => by simp) ((Set.finite_lt_nat T).subset ?_)
+  intro t ht
+  by_contra hT
+  apply ht
+  exact Automatic.eq_of_mod_eq hper (not_lt.1 hT)
+    (le_trans (Nat.le_mul_of_pos_right T hP) (Nat.le_add_right _ _)) (by simp)
+
+/-- **Uncountable orbit closure.** -/
+theorem problem1_of_uncountable_orbit_closure
+    (h : ¬ (closure (Set.range fun n : ℕ => fun t => c (n + t))).Countable) :
+    Rule30Prize.Problem1 :=
+  WordsAutomata.problem1_iff_orbit_closure_infinite.2 fun hfin => h hfin.countable
+
+/-- **Positive entropy**: the factor complexity grows exponentially. -/
+theorem problem1_of_exponential_complexity
+    (h : ∃ a : ℝ, 1 < a ∧ ∀ n, a ^ n ≤ ((ShiftOrbit.factors c n).ncard : ℝ)) :
+    Rule30Prize.Problem1 := by
+  obtain ⟨a, ha, hn⟩ := h
+  rw [ShiftOrbit.problem1_iff_ncard_factors_unbounded]
+  intro C
+  obtain ⟨n, hC⟩ := pow_unbounded_of_one_lt (C : ℝ) ha
+  exact ⟨n, by exact_mod_cast hC.trans_le (hn n)⟩
+
+/-- **Disjunctive**: every word occurs in `c`. -/
+theorem problem1_of_disjunctive (h : ∀ n (w : Fin n → Bool), ∃ i, ∀ j : Fin n, c (i + j) = w j) :
+    Rule30Prize.Problem1 := by
+  rw [ShiftOrbit.problem1_iff_ncard_factors]
+  intro n
+  have : ShiftOrbit.factors c n = Set.univ :=
+    Set.eq_univ_of_forall fun w => let ⟨i, hi⟩ := h n w; ⟨i, funext hi⟩
+  rw [this, Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fun, Fintype.card_bool,
+    Fintype.card_fin]
+  exact Nat.lt_two_pow_self
+
+/-- `b` is normal in base `2`: every word of length `n` occurs with frequency `2⁻ⁿ`. -/
+def IsNormal (b : ℕ → Bool) : Prop :=
+  ∀ n (w : Fin n → Bool), Tendsto (fun N : ℕ =>
+    (((Finset.range N).filter fun i => ∀ j : Fin n, b (i + j) = w j).card : ℝ) / N) atTop
+      (𝓝 ((2 : ℝ)⁻¹ ^ n))
+
+/-- **Normality** (of `x₂` in base `2`): a normal sequence is disjunctive. -/
+theorem problem1_of_isNormal (h : IsNormal c) : Rule30Prize.Problem1 := by
+  refine problem1_of_disjunctive fun n w => ?_
+  obtain ⟨N, hN⟩ := ((h n w).eventually (lt_mem_nhds (by positivity : (0 : ℝ) < 2⁻¹ ^ n))).exists
+  by_contra hne
+  push Not at hne
+  have : ((Finset.range N).filter fun i => ∀ j : Fin n, c (i + j) = w j) = ∅ := by
+    ext i
+    simp only [Finset.mem_filter, Finset.notMem_empty, iff_false, not_and]
+    intro _ hi
+    obtain ⟨j, hj⟩ := hne i
+    exact hj (hi j)
+  rw [this] at hN
+  simp at hN
+
+/-- **`x₂` transcendental.** -/
+theorem problem1_of_transcendental_binary
+    (h : Transcendental ℚ BinaryIrrational.centerBinary) : Rule30Prize.Problem1 := by
+  rw [BinaryIrrational.problem1_iff_irrational_binary]
+  rintro ⟨q, hq⟩
+  exact h (hq ▸ isAlgebraic_algebraMap q)
+
+/-- The linear complexity of the prefix of length `n` over `𝔽₂`: the shortest linear feedback
+shift register that generates it. -/
+noncomputable def linComplexity (n : ℕ) : ℕ :=
+  sInf {d | ∃ a : Fin d → ZMod 2, ∀ t, t + d < n →
+    (if c (t + d) then 1 else 0 : ZMod 2) = ∑ i, a i * (if c (t + i) then 1 else 0)}
+
+/-- **`Lₙ/n → 1/2`**: then `Lₙ → ∞`. -/
+theorem problem1_of_linComplexity_tendsto
+    (h : Tendsto (fun n : ℕ => (linComplexity n : ℝ) / n) atTop (𝓝 (1 / 2))) :
+    Rule30Prize.Problem1 := by
+  rw [PowerSeriesF2.problem1_iff_linear_complexity_unbounded]
+  intro d
+  obtain ⟨N, hN⟩ :=
+    eventually_atTop.1 (h.eventually (lt_mem_nhds (by norm_num : (1 / 4 : ℝ) < 1 / 2)))
+  obtain ⟨M, hM⟩ : ∃ M, M = max N (4 * d + 4) := ⟨_, rfl⟩
+  refine ⟨M, fun ⟨a, ha⟩ => ?_⟩
+  have hle : linComplexity M ≤ d := Nat.sInf_le ⟨a, ha⟩
+  have h1 := hN M (hM ▸ le_max_left _ _)
+  have hM4 : 4 * d + 4 ≤ M := hM ▸ le_max_right _ _
+  have h2 : ((4 * d + 4 : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM4
+  have hpos : (0 : ℝ) < (M : ℝ) := by exact_mod_cast (by omega : 0 < M)
+  rw [lt_div_iff₀ hpos] at h1
+  have h3 : (linComplexity M : ℝ) ≤ d := by exact_mod_cast hle
+  push_cast at h2
+  linarith
+
+/-- **Hankel determinants nonzero from some size on.** -/
+theorem problem1_of_hankel_eventually_nonzero
+    (h : ∃ m₀, ∀ m, m₀ ≤ m →
+      (Matrix.of fun i j : Fin m => LinearRelations.cK ℤ ((i : ℕ) + (j : ℕ))).det ≠ 0) :
+    Rule30Prize.Problem1 :=
+  LinearRelations.problem1_iff_hankel_det_int.2 fun N =>
+    let ⟨m₀, hm⟩ := h; ⟨max N m₀, le_max_left _ _, hm _ (le_max_right _ _)⟩
+
+/-- **The Π⁰₁ defect bound.** -/
+theorem problem1_of_defect_bound
+    (h : ∀ T P, 0 < P → ∃ t, T ≤ t ∧ t ≤ T + 3 * Nat.log 2 (T + P + 1) ∧ c (t + P) ≠ c t) :
+    Rule30Prize.Problem1 := fun ⟨T, P, hP, hper⟩ =>
+  let ⟨t, ht, _, hne⟩ := h T P hP; hne (hper t ht)
+
+/-- `F` satisfies an algebraic differential equation over `ℚ`: `P(z, F, F′, …, F⁽ⁿ⁾) = 0` for a
+nonzero polynomial `P` in `n + 2` variables. -/
+def IsDifferentiallyAlgebraic (F : PowerSeries ℚ) : Prop :=
+  ∃ (n : ℕ) (P : MvPolynomial (Fin (n + 2)) ℚ), P ≠ 0 ∧
+    MvPolynomial.aeval (Fin.cons PowerSeries.X fun i : Fin (n + 1) =>
+      (⇑(PowerSeries.derivative ℚ))^[i] F) P = 0
+
+/-- **Hypertranscendence**: if `∑ c(t) zᵗ` satisfies no algebraic differential equation over `ℚ`,
+Problem 1 holds. An eventually periodic `c` gives `Q(z) C(z) − P(z) = 0`, an equation of order
+`0`. -/
+theorem problem1_of_hypertranscendental
+    (h : ¬ IsDifferentiallyAlgebraic (LinearRelations.series ℚ c)) : Rule30Prize.Problem1 := by
+  intro hep
+  obtain ⟨P, Q, hQ, hPQ⟩ :=
+    (LinearRelations.eventuallyPeriodic_iff_rational_coeff_zero (K := ℚ) c).1 hep
+  apply h
+  set E : MvPolynomial (Fin 2) ℚ :=
+    Polynomial.aeval (MvPolynomial.X 0) Q * MvPolynomial.X 1 - Polynomial.aeval (MvPolynomial.X 0) P
+  -- `E` under an evaluation: `Q(z) y − P(z)`
+  have key : ∀ {A : Type} [CommRing A] [Algebra ℚ A] (v : Fin 2 → A) (R : Polynomial ℚ),
+      MvPolynomial.aeval v (Polynomial.aeval (MvPolynomial.X 0 : MvPolynomial (Fin 2) ℚ) R) =
+        Polynomial.aeval (v 0) R := by
+    intro A _ _ v R
+    rw [← Polynomial.aeval_algHom_apply (MvPolynomial.aeval v)
+      (MvPolynomial.X 0 : MvPolynomial (Fin 2) ℚ) R, MvPolynomial.aeval_X]
+  have hE : ∀ {A : Type} [CommRing A] [Algebra ℚ A] (v : Fin 2 → A),
+      MvPolynomial.aeval v E = Polynomial.aeval (v 0) Q * v 1 - Polynomial.aeval (v 0) P := by
+    intro A _ _ v
+    simp only [E, map_sub, map_mul, key, MvPolynomial.aeval_X]
+  refine ⟨0, E, fun h0 => hQ ?_, ?_⟩
+  · have h1 := hE (A := ℚ) ![0, 1]
+    have h2 := hE (A := ℚ) ![0, 0]
+    rw [h0, map_zero] at h1 h2
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Polynomial.coe_aeval_eq_eval] at h1 h2
+    rw [Polynomial.coeff_zero_eq_eval_zero]
+    linarith
+  · rw [hE]
+    show Polynomial.aeval PowerSeries.X Q * LinearRelations.series ℚ c -
+      Polynomial.aeval PowerSeries.X P = 0
+    rw [Polynomial.aeval_def, Polynomial.aeval_def,
+      show algebraMap ℚ (PowerSeries ℚ) = PowerSeries.C from rfl,
+      Polynomial.eval₂_C_X_eq_coe, Polynomial.eval₂_C_X_eq_coe, hPQ, sub_self]
+
+end Rule30Equivalents.StrongerStatements

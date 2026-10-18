@@ -28,7 +28,8 @@ row `t` as a point of `{0,1}^ℕ`, the right half of the row. Then:
   periodic, which Jen's theorem rules out.
 * `half_cell_eq_zero_iff` (Kopra's Theorem 4.5 for the single black cell): the right half returns
   to that of the seed only at time `0`, since the right edge carries a black cell at `t`. For
-  configurations that are infinite to the right, Kopra's proof (Lemmas 4.2–4.4) is not formalized.
+  every configuration with a leftmost black cell, including those infinite to the right, it is
+  `RightHalfReturns.finite_returns`.
 
 In terms of `y_t = Σ_{p ≥ 0} cell(t, p) 2^-(p+1)`, this is the rule-30 analogue of the theorem of
 Pisot and Vijayaraghavan that `(p/q)ⁿ mod 1` has infinitely many limit points. It neither implies

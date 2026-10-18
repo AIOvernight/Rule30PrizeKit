@@ -30,6 +30,7 @@ import Rule30Equivalents.OrderDefinable
 import Rule30Equivalents.ProblemThree
 import Rule30Equivalents.StrongerStatements
 import Rule30Equivalents.AlgebraicDegree
+import Rule30Equivalents.RightHalfReturns
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

@@ -245,7 +245,8 @@ Hartmanis and Lewis, with the same splicing on the input tape of an offline mach
 
 - automatic complexity [52] (moderate);
 - Kopra's limit-point theorems, a proved related result (Section 6.3): done, in
-  [LimitPoints](Rule30Equivalents/LimitPoints.lean).
+  [LimitPoints](Rule30Equivalents/LimitPoints.lean) and
+  [RightHalfReturns](Rule30Equivalents/RightHalfReturns.lean).
 
 Candidates for upstreaming to Mathlib:
 
@@ -2387,8 +2388,15 @@ with Turing machines reading n. Notes:
   is eventually periodic. `infinite_limitPoints_cell` and `infinite_limitPoints_evol` are Thm 4.7
   for the single seed and for every configuration with a leftmost black cell, through
   `Rule30Jen.not_adjacent` and `Rule30FiniteConfigs.not_adjacent`. Thm 4.5 is
-  `half_cell_eq_zero_iff` for the single seed (the right edge rules out any return); for
-  configurations infinite to the right it is not formalized. Wolfram (2019) plots y_t and asks
+  `half_cell_eq_zero_iff` for the single seed (the right edge rules out any return), and
+  `RightHalfReturns.finite_returns` for every configuration with a leftmost black cell, also
+  infinite to the right ([RightHalfReturns](Rule30Equivalents/RightHalfReturns.lean)). Its
+  Lemma 4.3 (`eventuallyPeriodic_of_return`): one return at t ≥ 1 makes the right half of x
+  eventually periodic, since after it the column pairs far right repeat with period t, by
+  left-permutivity they determine the cells to their left, and Morse–Hedlund applies to the
+  at most 4ᵗ factors of length 4ᵗ. Its Lemma 4.4 (`periodic_rows`): rows between two P-periodic
+  rows are P-periodic. Infinitely many returns then make two adjacent columns periodic, against
+  Jen's theorem for such configurations. Wolfram (2019) plots y_t and asks
   about the equidistribution of y_{Pk+r} [W19].
 - **Recurrence and uniform recurrence of c.** As properties of sequences, these are independent of
   Problem 1. A normal sequence is recurrent but not uniformly recurrent. A recurrent EP sequence is

@@ -1871,7 +1871,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Stronger relative.* Finite-state unpredictability at error rate 1/2 implies both Problem 1 and
   Problem 2 (own reasoning: an EP column is predicted with error rate 0, and the two constant
   predictors measure the density; proved: `BoundedRemainder.problem1_of_unpredictable_half`,
-  `problem2_of_unpredictable_half`).
+  `problem2_of_unpredictable_half`). The hypothesis holds for almost every configuration: the errors
+  of a finite-state predictor on a random trace are fair coins
+  (`BoundedRemainder.ae_predictsAtHalf_trace`).
 - *Difficulty.* Easy.
 - *Lean.* Proved in the library (batch 2: `WordsAutomata.problem1_iff_unpredictable`,
   `problem1_iff_no_finite_generator` and `problem1_iff_no_regular_predictor`). Before batch 2 it was

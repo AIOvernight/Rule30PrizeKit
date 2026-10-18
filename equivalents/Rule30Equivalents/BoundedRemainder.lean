@@ -24,7 +24,10 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
 * `problem1_of_unpredictable_half`, `problem2_of_unpredictable_half`: **if every finite-state
   predictor errs on half of the center column, Problems 1 and 2 hold.** An eventually periodic
   column has a predictor that is eventually always right; the predictor that always guesses white
-  errs exactly on the black cells.
+  errs exactly on the black cells. The hypothesis holds for almost every configuration
+  (`ae_predictsAtHalf_trace`): the errors of a fixed predictor on a random trace are again fair
+  coins (`measurePreserving_errors`, since they are adapted to the left coins), and the predictors
+  are countably many up to relabeling the states.
 -/
 
 namespace Rule30Equivalents.BoundedRemainder
@@ -219,18 +222,18 @@ theorem problem1_of_problem2_of_unbounded_discrepancy (h2 : Rule30Prize.Problem2
 
 /-! ### Unpredictability at error rate `1/2` -/
 
-/-- The error rate of a finite-state predictor on the center column tends to `1/2`. -/
-def PredictsAtHalf (σ : Type) (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) : Prop :=
+/-- The error rate on `b` of the finite-state predictor that reads `b(0), …, b(n-1)` and then
+guesses `g` of its state for `b(n)` tends to `1/2`. -/
+def PredictsAtHalf (b : ℕ → Bool) (σ : Type) (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) : Prop :=
   Tendsto (fun N : ℕ => (((Finset.range N).filter fun n =>
-    g (WordsAutomata.readState Rule30Prize.center s₀ δ n) ≠ Rule30Prize.center n).card : ℝ) / N)
-    atTop (𝓝 (1 / 2))
+    g (WordsAutomata.readState b s₀ δ n) ≠ b n).card : ℝ) / N) atTop (𝓝 (1 / 2))
 
 /-- **Problem 1 from unpredictability at rate `1/2`**: if every finite-state predictor errs on
 half of the center column, Problem 1 holds. An eventually periodic column has a predictor that is
 eventually always right (`WordsAutomata.problem1_iff_unpredictable`), whose error rate is `0`. -/
 theorem problem1_of_unpredictable_half
     (h : ∀ (σ : Type) [Finite σ] (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool),
-      PredictsAtHalf σ s₀ δ g) : Rule30Prize.Problem1 := by
+      PredictsAtHalf Rule30Prize.center σ s₀ δ g) : Rule30Prize.Problem1 := by
   by_contra hP
   rw [WordsAutomata.problem1_iff_unpredictable] at hP
   push Not at hP
@@ -258,7 +261,7 @@ theorem problem1_of_unpredictable_half
 errs exactly on the black cells, so its error rate is the density of black cells. -/
 theorem problem2_of_unpredictable_half
     (h : ∀ (σ : Type) [Finite σ] (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool),
-      PredictsAtHalf σ s₀ δ g) : Rule30Prize.Problem2 := by
+      PredictsAtHalf Rule30Prize.center σ s₀ δ g) : Rule30Prize.Problem2 := by
   have h0 := h Unit () (fun _ _ => ()) fun _ => false
   rw [ProblemTwo.problem2_iff_tendsto]
   refine h0.congr fun N => ?_
@@ -269,6 +272,96 @@ theorem problem2_of_unpredictable_half
   refine Finset.filter_congr fun n _ => ?_
   simp only [c]
   cases Rule30Prize.center n <;> decide
+
+/-- The errors of a finite-state predictor on `b`: `true` at `n` when its guess for `b n`, made
+after reading `b(0), …, b(n-1)`, is wrong. -/
+def errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) (b : ℕ → Bool) (n : ℕ) : Bool :=
+  xor (g (WordsAutomata.readState b s₀ δ n)) (b n)
+
+/-- The state after `n` letters depends only on those letters. -/
+theorem readState_congr {σ : Type} {s₀ : σ} {δ : σ → Bool → σ} {b b' : ℕ → Bool} :
+    ∀ {n : ℕ}, (∀ i < n, b i = b' i) →
+      WordsAutomata.readState b s₀ δ n = WordsAutomata.readState b' s₀ δ n
+  | 0, _ => rfl
+  | n + 1, h => by
+    simp only [WordsAutomata.readState]
+    rw [readState_congr fun i hi => h i (by omega), h n (by omega)]
+
+/-- Relabeling the states does not change the run. -/
+theorem readState_equiv {σ τ : Type} (e : σ ≃ τ) (s₀ : σ) (δ : σ → Bool → σ) (b : ℕ → Bool) :
+    ∀ n, WordsAutomata.readState b (e s₀) (fun i c => e (δ (e.symm i) c)) n =
+      e (WordsAutomata.readState b s₀ δ n)
+  | 0 => rfl
+  | n + 1 => by
+    simp only [WordsAutomata.readState]
+    rw [readState_equiv e s₀ δ b n, Equiv.symm_apply_apply]
+
+theorem measurable_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) (n : ℕ) :
+    Measurable fun x : ℤ → Bool => errors s₀ δ g (trace x) n := by
+  have h : (fun x : ℤ → Bool => errors s₀ δ g (trace x) n) =
+      (fun v : Fin (n + 1) → Bool =>
+        errors s₀ δ g (fun i => if h : i < n + 1 then v ⟨i, h⟩ else false) n) ∘
+        fun x (i : Fin (n + 1)) => trace x i := by
+    funext x
+    show xor (g (WordsAutomata.readState (trace x) s₀ δ n)) (trace x n) =
+      xor (g (WordsAutomata.readState (fun i => if h : i < n + 1 then trace x i else false) s₀ δ n))
+        (if h : n < n + 1 then trace x n else false)
+    rw [dif_pos (Nat.lt_succ_self n),
+      readState_congr (b' := fun i => if h : i < n + 1 then trace x i else false)
+        fun i hi => by simp [show i < n + 1 by omega]]
+  rw [h]
+  exact (measurable_of_finite _).comp (measurable_pi_lambda _ fun i =>
+    RandomConfigurations.measurable_evol (i : ℕ) 0)
+
+/-- The errors of a predictor on the trace are adapted: flipping the coin at `-n` flips the trace
+at `n` and nothing before, so it leaves the state after `n` letters alone and flips the error at
+`n`. -/
+theorem adapted_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) :
+    RandomConfigurations.Adapted fun x n => errors s₀ δ g (trace x) n := fun x n => by
+  have ht := RandomConfigurations.adapted_trace_of_flipsLeft RandomConfigurations.flipsLeft_id x n
+  simp only [id] at ht
+  constructor
+  · simp only [errors]
+    rw [readState_congr fun i hi => ht.2 i hi, ht.1]
+    cases g (WordsAutomata.readState (trace x) s₀ δ n) <;> cases trace x n <;> rfl
+  · intro t htn
+    simp only [errors]
+    rw [readState_congr fun i hi => ht.2 i (by omega), ht.2 t htn]
+
+/-- **A predictor's errors on a random trace are fair coins**: for each finite-state predictor,
+`x ↦ errors (trace x)` carries `coins ℤ` to `coins ℕ`. -/
+theorem measurePreserving_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) :
+    MeasureTheory.MeasurePreserving (fun x : ℤ → Bool => errors s₀ δ g (trace x))
+      (RandomConfigurations.coins ℤ) (RandomConfigurations.coins ℕ) :=
+  RandomConfigurations.measurePreserving_of_measure_prefix
+    (measurable_pi_lambda _ (measurable_errors s₀ δ g))
+    (RandomConfigurations.measure_prefix_of_adapted (measurable_errors s₀ δ g)
+      (adapted_errors s₀ δ g))
+
+/-- **Random center columns are unpredictable**: for almost every configuration, every
+finite-state predictor errs on half of the center trace in the limit. For each predictor the
+errors are fair coins (`measurePreserving_errors`), so they have density `1/2` almost surely;
+the predictors are countably many up to relabeling the states. -/
+theorem ae_predictsAtHalf_trace : ∀ᵐ x ∂(RandomConfigurations.coins ℤ),
+    ∀ (σ : Type) [Finite σ] (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool),
+      PredictsAtHalf (trace x) σ s₀ δ g := by
+  have hall : ∀ᵐ x ∂(RandomConfigurations.coins ℤ),
+      ∀ p : (Σ k : ℕ, Fin k × (Fin k → Bool → Fin k) × (Fin k → Bool)),
+        Symmetry.HalfDensity (errors p.2.1 p.2.2.1 p.2.2.2 (trace x)) :=
+    MeasureTheory.ae_all_iff.2 fun p =>
+      (measurePreserving_errors p.2.1 p.2.2.1 p.2.2.2).quasiMeasurePreserving.ae
+        (RandomConfigurations.ae_isNormal.mono fun v hv => ProblemTwo.halfDensity_of_isNormal hv)
+  filter_upwards [hall] with x hx σ _ s₀ δ g
+  obtain ⟨k, ⟨e⟩⟩ := Finite.exists_equiv_fin σ
+  have h := hx ⟨k, e s₀, fun i c => e (δ (e.symm i) c), fun i => g (e.symm i)⟩
+  rw [ProblemTwo.halfDensity_iff_tendsto] at h
+  refine h.congr fun N => ?_
+  congr 2
+  rw [BlackTimes.length_filter_eq_count, Nat.count_eq_card_filter_range]
+  congr 1
+  refine Finset.filter_congr fun n _ => ?_
+  simp only [errors, readState_equiv, Equiv.symm_apply_apply]
+  cases g (WordsAutomata.readState (trace x) s₀ δ n) <;> cases trace x n <;> decide
 
 /-- **Random configurations have unbounded remainder**: for almost every configuration, the
 number of black cells among the first `n` cells of the center trace is not `α n + O(1)` for any

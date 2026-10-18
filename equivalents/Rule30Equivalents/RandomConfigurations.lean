@@ -40,8 +40,10 @@ uniform Bernoulli product measure).
 * `ae_isNormal_trace_glue`: **the right half does not matter**. The same holds for the map
   `x ↦ glue R x` that keeps the cells `p ≤ 0` of `x` and puts a fixed right half `R` beside them
   (white, say, as for the single seed): the prefix argument only flips cells left of `1`
-  (`FlipsLeft`, `measure_prefix_of_flipsLeft`, `measurePreserving_trace_of_flipsLeft`). It runs
-  inside any event about the right half (`measure_inter_prefix_of_flipsLeft`), so
+  (`FlipsLeft`, `measure_prefix_of_flipsLeft`, `measurePreserving_trace_of_flipsLeft`). The
+  argument works for every map adapted to the left coins (`Adapted`,
+  `measure_inter_prefix_of_adapted`) and inside any event about the right half
+  (`measure_inter_prefix_of_flipsLeft`), so
   `indepFun_trace_rightHalf`: **the trace is independent of the cells `x_1, x_2, …`**.
 * `ae_isNormal_trace`: for almost every configuration the trace is normal; hence it has density
   `1/2` (`ae_halfDensity_trace`), is disjunctive (`ae_disjunctive_trace`) and is not eventually
@@ -175,48 +177,52 @@ theorem eq_mul_inv_of_two_mul {X Y : ENNReal} (h : 2 * X = Y) : X = Y * 2⁻¹ :
   rw [← h, mul_comm 2 X, mul_assoc, ENNReal.mul_inv_cancel two_ne_zero ENNReal.ofNat_ne_top,
     mul_one]
 
-/-- **Every prefix of the trace has probability `2^-(n+1)`, also inside an event that ignores the
-left half**: for `G` commuting with the flips of the cells `p ≤ 0`, and an event `A` that does not
-depend on those cells, `μ(A ∩ {the trace of G x starts with w}) = μ(A) 2^-(n+1)`. Flipping the
-coin at `-(n+1)` preserves the measure and `A`, fixes the trace up to time `n` and flips it at time
-`n + 1`. -/
-theorem measure_inter_prefix_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
-    (hflip : FlipsLeft G) {A : Set (ℤ → Bool)} (hA : MeasurableSet A)
-    (hAm : ∀ x (p : ℤ), p ≤ 0 → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (w : ℕ → Bool) :
-    ∀ n : ℕ, coins ℤ (A ∩ {x | ∀ t ≤ n, trace (G x) t = w t}) = coins ℤ A * 2⁻¹ ^ (n + 1)
+/-- A map `g` to `{0,1}^ℕ` is **adapted to the left coins** if flipping the coin at `-n` flips
+`g x n` and fixes `g x t` for `t < n`. The center trace is one (`adapted_trace_of_flipsLeft`, by
+left-permutivity and the light cone), and so is everything computed from the trace causally with
+the new bit entering by `xor` (`BoundedRemainder.adapted_errors`). -/
+def Adapted (g : (ℤ → Bool) → ℕ → Bool) : Prop :=
+  ∀ x (n : ℕ), g (Function.update x (-(n : ℤ)) (!x (-(n : ℤ)))) n = !g x n ∧
+    ∀ t < n, g (Function.update x (-(n : ℤ)) (!x (-(n : ℤ)))) t = g x t
+
+/-- **Every prefix of an adapted map has probability `2^-(n+1)`, also inside an event that ignores
+the left half**: `μ(A ∩ {g x starts with w}) = μ(A) 2^-(n+1)`. Flipping the coin at `-(n+1)`
+preserves the measure and `A`, fixes `g x` up to time `n` and flips it at time `n + 1`. -/
+theorem measure_inter_prefix_of_adapted {g : (ℤ → Bool) → ℕ → Bool}
+    (hg : ∀ t, Measurable fun x => g x t) (hadapt : Adapted g) {A : Set (ℤ → Bool)}
+    (hA : MeasurableSet A) (hAm : ∀ x (p : ℤ), p ≤ 0 → (Function.update x p (!x p) ∈ A ↔ x ∈ A))
+    (w : ℕ → Bool) :
+    ∀ n : ℕ, coins ℤ (A ∩ {x | ∀ t ≤ n, g x t = w t}) = coins ℤ A * 2⁻¹ ^ (n + 1)
   | 0 => by
-    have hset : A ∩ {x : ℤ → Bool | ∀ t ≤ 0, trace (G x) t = w t} = A ∩ {x | G x 0 = w 0} := by
+    have hset : A ∩ {x : ℤ → Bool | ∀ t ≤ 0, g x t = w t} = A ∩ {x | g x 0 = w 0} := by
       ext x
       simp only [Set.mem_inter_iff, Set.mem_setOf_eq]
       refine and_congr_right fun _ => ⟨fun h => h 0 le_rfl, fun h t ht => ?_⟩
       obtain rfl : t = 0 := by omega
       exact h
-    have h : 2 * coins ℤ (A ∩ {x | G x 0 = w 0}) = coins ℤ A :=
-      two_mul_measure_flip hA ((measurable_pi_apply 0).comp hG) 0 (fun x => hAm x 0 le_rfl)
-        (fun x _ => by
-          show G (Function.update x 0 (!x 0)) 0 = !G x 0
-          rw [hflip x 0 le_rfl, Function.update_self]) (w 0)
+    have h : 2 * coins ℤ (A ∩ {x | g x 0 = w 0}) = coins ℤ A :=
+      two_mul_measure_flip hA (hg 0) 0 (fun x => hAm x 0 le_rfl)
+        (fun x _ => by simpa using (hadapt x 0).1) (w 0)
     rw [hset, eq_mul_inv_of_two_mul h, zero_add, pow_one]
   | n + 1 => by
-    set E := A ∩ {x : ℤ → Bool | ∀ t ≤ n, trace (G x) t = w t} with hEdef
+    set E := A ∩ {x : ℤ → Bool | ∀ t ≤ n, g x t = w t} with hEdef
+    have hEm : MeasurableSet E := by
+      refine hA.inter ?_
+      simp only [Set.setOf_forall]
+      exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
+        hg t (measurableSet_singleton (w t))
     -- the prefix up to time `n` and `A` do not see the coin at `-(n+1)`
     have hinv : ∀ x, Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))) ∈ E ↔
         x ∈ E := by
       intro x
       simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
-      rw [hAm x _ (by omega), hflip x (-((n + 1 : ℕ) : ℤ)) (by omega)]
+      rw [hAm x _ (by omega)]
       refine and_congr_right fun _ => forall_congr' fun t => imp_congr_right fun ht => ?_
-      rw [show trace (Function.update (G x) (-((n + 1 : ℕ) : ℤ)) (!G x (-((n + 1 : ℕ) : ℤ)))) t =
-        trace (G x) t from AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by
-          rw [Function.update_of_ne (by omega)]]
-    have h : 2 * coins ℤ (E ∩ {x | evol (G x) (n + 1) 0 = w (n + 1)}) = coins ℤ E :=
-      two_mul_measure_flip (hA.inter (measurableSet_prefix hG w n))
-        ((measurable_evol (n + 1) 0).comp hG) _ hinv (fun x _ => by
-          show evol (G (Function.update x _ _)) (n + 1) 0 = !evol (G x) (n + 1) 0
-          rw [hflip x (-((n + 1 : ℕ) : ℤ)) (by omega)]
-          exact evol_flip (G x) (n + 1)) (w (n + 1))
-    have htarget : A ∩ {x : ℤ → Bool | ∀ t ≤ n + 1, trace (G x) t = w t} =
-        E ∩ {x | evol (G x) (n + 1) 0 = w (n + 1)} := by
+      rw [(hadapt x (n + 1)).2 t (by omega)]
+    have h : 2 * coins ℤ (E ∩ {x | g x (n + 1) = w (n + 1)}) = coins ℤ E :=
+      two_mul_measure_flip hEm (hg (n + 1)) _ hinv (fun x _ => (hadapt x (n + 1)).1) (w (n + 1))
+    have htarget : A ∩ {x : ℤ → Bool | ∀ t ≤ n + 1, g x t = w t} =
+        E ∩ {x | g x (n + 1) = w (n + 1)} := by
       ext x
       simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
       constructor
@@ -229,7 +235,35 @@ theorem measure_inter_prefix_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)
         · obtain rfl : t = n + 1 := by omega
           exact h2
     rw [htarget, eq_mul_inv_of_two_mul h, hEdef,
-      measure_inter_prefix_of_flipsLeft hG hflip hA hAm w n, mul_assoc, ← pow_succ]
+      measure_inter_prefix_of_adapted hg hadapt hA hAm w n, mul_assoc, ← pow_succ]
+
+/-- Every prefix of an adapted map has probability `2^-(n+1)`. -/
+theorem measure_prefix_of_adapted {g : (ℤ → Bool) → ℕ → Bool}
+    (hg : ∀ t, Measurable fun x => g x t) (hadapt : Adapted g) (w : ℕ → Bool) (n : ℕ) :
+    coins ℤ {x | ∀ t ≤ n, g x t = w t} = 2⁻¹ ^ (n + 1) := by
+  have h := measure_inter_prefix_of_adapted hg hadapt MeasurableSet.univ
+    (fun _ _ _ => Iff.rfl) w n
+  rwa [Set.univ_inter, measure_univ, one_mul] at h
+
+/-- The trace of `G x` is adapted, for `G` commuting with the flips of the cells `p ≤ 0`: flipping
+the coin at `-n` flips the center at time `n` (left-permutivity) and nothing before it (the light
+cone). -/
+theorem adapted_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hflip : FlipsLeft G) :
+    Adapted fun x t => trace (G x) t := fun x n => by
+  dsimp only
+  rw [hflip x (-(n : ℤ)) (by omega)]
+  refine ⟨evol_flip (G x) n, fun t ht => ?_⟩
+  exact AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by rw [Function.update_of_ne (by omega)]
+
+/-- **Every prefix of the trace has probability `2^-(n+1)`, also inside an event that ignores the
+left half**, for `G` commuting with the flips of the cells `p ≤ 0`. -/
+theorem measure_inter_prefix_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
+    (hflip : FlipsLeft G) {A : Set (ℤ → Bool)} (hA : MeasurableSet A)
+    (hAm : ∀ x (p : ℤ), p ≤ 0 → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (w : ℕ → Bool)
+    (n : ℕ) :
+    coins ℤ (A ∩ {x | ∀ t ≤ n, trace (G x) t = w t}) = coins ℤ A * 2⁻¹ ^ (n + 1) :=
+  measure_inter_prefix_of_adapted (fun t => (measurable_evol t 0).comp hG)
+    (adapted_trace_of_flipsLeft hflip) hA hAm w n
 
 /-- **Every prefix of the trace has probability `2^-(n+1)`**, for the configuration `G x` with `G`
 commuting with the flips of the cells `p ≤ 0`. -/

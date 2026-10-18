@@ -35,6 +35,7 @@ import Rule30Equivalents.Tauberian
 import Rule30Equivalents.ProblemTwo
 import Rule30Equivalents.BuchiConverse
 import Rule30Equivalents.Odometer
+import Rule30Equivalents.CenterFormulas
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

@@ -2424,6 +2424,19 @@ with Turing machines reading n. Notes:
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).
 - **Kolmogorov complexity.** K(c↾n) = K(n) + O(1), as for every computable sequence, so it cannot
   see Problem 1 [LV19]. The resource-bounded measures of [5], [27], [28], [37] and [52] can.
+- **Two exact formulas for the center** (proved, [CenterFormulas](Rule30Equivalents/CenterFormulas.lean);
+  round-1 research claims). Over 𝔽₂:
+  - *From the right half* (`toF_center_eq_sum`): for t ≥ 1 and every period K ≥ t of the diagonal
+    t, for example K = 2ᵗ, c(t) = Σ_{t ≤ s < K} [cell(s, s−t+1) ∨ cell(s, s−t+2)]. The cells summed
+    lie in the columns ≥ 1, so c is determined by the right half: each step down the diagonal adds
+    one of them, and the diagonal is back at 0 at time K.
+  - *Duhamel's formula* (`duhamel`, `center_duhamel`): rule 30 is rule 150 plus the product of the
+    center and right cells, x′ = Lx + N(x) with (Lx)_p = x_{p−1} + x_p + x_{p+1} and
+    N(x)_p = x_p x_{p+1}. So x(t) = Lᵗx(0) + Σ_{s<t} L^(t−1−s) N(x(s)), and for the single seed
+    c(t) = 1 + Σ_{s<t} Σ_{|p| ≤ t−1−s} T(t−1−s, p)·cell(s, p)·cell(s, p+1), where T(m, ·) is rule
+    150 from a single seed (trinomial coefficients mod 2; its center is 1). The nonlinear term is
+    all that separates c from rule 150's constant center column.
+
 - **The algebraic degree of the t-step map** (proved). For t ≥ 2, the center cell after t steps, as
   a Boolean function of the 2t + 1 initial cells, has algebraic normal form of degree 2t − 1, and
   for t ≥ 3 its only monomial of that degree is x_{2−t} ⋯ x_t. The formula fails at t = 1: the

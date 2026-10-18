@@ -12,6 +12,9 @@ Khinchin's law of the iterated logarithm pins down its fluctuations:
 
 * `ae_limsup_liminf_walk_trace`: **for almost every configuration, the center column has
   `limsup W(n)/√(2 n log log n) = 1` and `liminf W(n)/√(2 n log log n) = -1`.**
+* `ae_clusterPt_walk_trace`: the limit points of `W(n)/√(2 n log log n)` form exactly `[-1, 1]`.
+  The walk moves by `±1` while the scale grows, so the ratio cannot jump over a level between its
+  visits near `-1` and near `1` (`mapClusterPt_div`).
 
 The upper half, `ae_eventually_two_mul_imbalance_lt`, sharpens
 `Fluctuations.ae_eventually_imbalance_lt` from the constant `2` to every constant `c > 1`: along
@@ -814,15 +817,21 @@ theorem ae_frequently_lt_two_mul_imbalance {c : ℝ} (hc : c < 1) :
 
 /-! ### The law of the iterated logarithm -/
 
-/-- **Khinchin's law of the iterated logarithm** for fair coins: for almost every fair-coin
-sequence, the walk `W(n)`, black minus white among the first `n` coins, has
-`limsup W(n)/√(2 n log log n) = 1` and `liminf W(n)/√(2 n log log n) = -1`. The bounds `1 ± ε`
-come from `ae_eventually_two_mul_imbalance_lt` and `ae_frequently_lt_two_mul_imbalance`, applied
-to the sequence and to its complement (`Fluctuations.measurePreserving_not`). -/
-theorem ae_limsup_liminf_walk :
-    ∀ᵐ v ∂(coins ℕ),
-      limsup (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = 1 ∧
-      liminf (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = -1 := by
+/-- **The bounds behind the law**: for almost every fair-coin sequence and every `k`, the ratio
+`W(n)/√(2 n log log n)` lies between `-(1 + 1/(k + 1))` and `1 + 1/(k + 1)` from some `n` on, and
+it is at least `1 - 1/(k + 1)` and at most `-(1 - 1/(k + 1))` for infinitely many `n`. These come
+from `ae_eventually_two_mul_imbalance_lt` and `ae_frequently_lt_two_mul_imbalance`, applied to the
+sequence and to its complement (`Fluctuations.measurePreserving_not`). -/
+theorem ae_walk_div_bounds :
+    ∀ᵐ v ∂(coins ℕ), ∀ k : ℕ,
+      (∀ᶠ n : ℕ in atTop, (walk v n : ℝ) / √(2 * n * Real.log (Real.log n)) ≤
+        1 + 1 / ((k : ℝ) + 1)) ∧
+      (∀ᶠ n : ℕ in atTop, -(1 + 1 / ((k : ℝ) + 1)) ≤
+        (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) ∧
+      (∃ᶠ n : ℕ in atTop, 1 - 1 / ((k : ℝ) + 1) ≤
+        (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) ∧
+      (∃ᶠ n : ℕ in atTop, (walk v n : ℝ) / √(2 * n * Real.log (Real.log n)) ≤
+        -(1 - 1 / ((k : ℝ) + 1))) := by
   have hk : ∀ k : ℕ, (0 : ℝ) < 1 / ((k : ℝ) + 1) := fun k => by positivity
   have hup : ∀ᵐ v ∂(coins ℕ), ∀ k : ℕ, ∀ᶠ n : ℕ in atTop,
       2 * imbalance v n < (1 + 1 / ((k : ℝ) + 1)) * √(2 * n * Real.log (Real.log n)) :=
@@ -842,46 +851,55 @@ theorem ae_limsup_liminf_walk :
     rw [hg]
     exact Real.sqrt_pos.2 (by have := Real.log_pos hl; positivity)
   have hwalk : ∀ n, (walk v n : ℝ) = 2 * imbalance v n := fun n => (two_mul_imbalance v n).symm
-  have hle : ∀ k : ℕ, ∀ᶠ n in atTop, (walk v n : ℝ) / g n ≤ 1 + 1 / ((k : ℝ) + 1) := fun k => by
-    filter_upwards [h1 k, hgpos] with n hn hgn
+  intro k
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · filter_upwards [h1 k, hgpos] with n hn hgn
     rw [hwalk, div_le_iff₀ hgn]
     exact hn.le
-  have hge : ∀ k : ℕ, ∀ᶠ n in atTop, -(1 + 1 / ((k : ℝ) + 1)) ≤ (walk v n : ℝ) / g n :=
-    fun k => by
-      filter_upwards [h3 k, hgpos] with n hn hgn
-      rw [hwalk, le_div_iff₀ hgn]
-      linarith
-  have hfr : ∀ k : ℕ, ∃ᶠ n in atTop, 1 - 1 / ((k : ℝ) + 1) ≤ (walk v n : ℝ) / g n := fun k =>
-    ((h2 k).and_eventually hgpos).mono fun n hn => by
+  · filter_upwards [h3 k, hgpos] with n hn hgn
+    rw [hwalk, le_div_iff₀ hgn]
+    linarith
+  · exact ((h2 k).and_eventually hgpos).mono fun n hn => by
       rw [hwalk, le_div_iff₀ hn.2]
       exact hn.1.le
-  have hfr' : ∀ k : ℕ, ∃ᶠ n in atTop, (walk v n : ℝ) / g n ≤ -(1 - 1 / ((k : ℝ) + 1)) :=
-    fun k => ((h4 k).and_eventually hgpos).mono fun n hn => by
+  · exact ((h4 k).and_eventually hgpos).mono fun n hn => by
       rw [hwalk, div_le_iff₀ hn.2]
       linarith [hn.1]
-  have hbdd : IsBoundedUnder (· ≤ ·) atTop fun n => (walk v n : ℝ) / g n :=
-    isBoundedUnder_of_eventually_le (hle 0)
-  have hbdd' : IsBoundedUnder (· ≥ ·) atTop fun n => (walk v n : ℝ) / g n :=
-    isBoundedUnder_of_eventually_ge (hge 0)
-  have hcob : IsCoboundedUnder (· ≤ ·) atTop fun n => (walk v n : ℝ) / g n :=
-    isCoboundedUnder_le_of_eventually_le atTop (hge 0)
-  have hcob' : IsCoboundedUnder (· ≥ ·) atTop fun n => (walk v n : ℝ) / g n :=
-    isCoboundedUnder_ge_of_eventually_le atTop (hle 0)
+
+/-- **Khinchin's law of the iterated logarithm** for fair coins: for almost every fair-coin
+sequence, the walk `W(n)`, black minus white among the first `n` coins, has
+`limsup W(n)/√(2 n log log n) = 1` and `liminf W(n)/√(2 n log log n) = -1`
+(`ae_walk_div_bounds`). -/
+theorem ae_limsup_liminf_walk :
+    ∀ᵐ v ∂(coins ℕ),
+      limsup (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = 1 ∧
+      liminf (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = -1 := by
+  filter_upwards [ae_walk_div_bounds] with v h
+  obtain ⟨u, hu⟩ : ∃ u : ℕ → ℝ, ∀ n, u n = (walk v n : ℝ) / √(2 * n * Real.log (Real.log n)) :=
+    ⟨_, fun _ => rfl⟩
+  simp only [← hu] at h ⊢
+  rw [show (fun n => u n) = u from rfl]
+  have hbdd : IsBoundedUnder (· ≤ ·) atTop u := isBoundedUnder_of_eventually_le (h 0).1
+  have hbdd' : IsBoundedUnder (· ≥ ·) atTop u := isBoundedUnder_of_eventually_ge (h 0).2.1
+  have hcob : IsCoboundedUnder (· ≤ ·) atTop u :=
+    isCoboundedUnder_le_of_eventually_le atTop (h 0).2.1
+  have hcob' : IsCoboundedUnder (· ≥ ·) atTop u :=
+    isCoboundedUnder_ge_of_eventually_le atTop (h 0).1
   refine ⟨le_antisymm ?_ ?_, le_antisymm ?_ ?_⟩
   · refine le_of_forall_pos_le_add fun ε hε => ?_
     obtain ⟨k, hk'⟩ := exists_nat_one_div_lt hε
-    exact (limsup_le_of_le hcob (hle k)).trans (by linarith)
+    exact (limsup_le_of_le hcob (h k).1).trans (by linarith)
   · refine le_of_forall_pos_le_add fun ε hε => ?_
     obtain ⟨k, hk'⟩ := exists_nat_one_div_lt hε
-    have := le_limsup_of_frequently_le (hfr k) hbdd
+    have := le_limsup_of_frequently_le (h k).2.2.1 hbdd
     linarith
   · refine le_of_forall_pos_le_add fun ε hε => ?_
     obtain ⟨k, hk'⟩ := exists_nat_one_div_lt hε
-    have := liminf_le_of_frequently_le (hfr' k) hbdd'
+    have := liminf_le_of_frequently_le (h k).2.2.2 hbdd'
     linarith
   · refine le_of_forall_pos_le_add fun ε hε => ?_
     obtain ⟨k, hk'⟩ := exists_nat_one_div_lt hε
-    have := le_liminf_of_le hcob' (hge k)
+    have := le_liminf_of_le hcob' (h k).2.1
     linarith
 
 /-- **The law of the iterated logarithm for the center column**: for almost every configuration,
@@ -897,5 +915,165 @@ theorem ae_limsup_liminf_walk_trace :
     limsup (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = 1 ∧
     liminf (fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))) atTop = -1)
     ae_limsup_liminf_walk
+
+/-- **Crossings of a growing scale**: if `W` rises by at most `1` per step, `g` is eventually
+positive and nondecreasing and tends to `∞`, `x ≥ 0`, and both `W n < x g n` and `x g n ≤ W n`
+happen infinitely often, then `x` is a limit point of `W n / g n`. At the first time `m` after a
+time below `x g` with `x g m ≤ W m`, `x ≤ W m / g m < x + 1/g m`. -/
+theorem mapClusterPt_div {W g : ℕ → ℝ} {x : ℝ} (hx : 0 ≤ x) (hW : ∀ n, W (n + 1) ≤ W n + 1)
+    (hg : ∀ᶠ n in atTop, 0 < g n ∧ g n ≤ g (n + 1)) (hgtop : Tendsto g atTop atTop)
+    (hlo : ∃ᶠ n in atTop, W n < x * g n) (hhi : ∃ᶠ n in atTop, x * g n ≤ W n) :
+    MapClusterPt x atTop fun n => W n / g n := by
+  classical
+  rw [mapClusterPt_iff_frequently]
+  intro s hs
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.1 hs
+  rw [frequently_atTop]
+  intro N
+  obtain ⟨N', hN'⟩ := eventually_atTop.1 (hg.and (hgtop.eventually_gt_atTop (1 / ε)))
+  obtain ⟨n₁, hn₁, hu₁⟩ := frequently_atTop.1 hlo (max N N')
+  obtain ⟨n₂, hn₂, hu₂⟩ := frequently_atTop.1 hhi (n₁ + 1)
+  have hex : ∃ m, x * g (n₁ + 1 + m) ≤ W (n₁ + 1 + m) :=
+    ⟨n₂ - (n₁ + 1), by rwa [Nat.add_sub_cancel' hn₂]⟩
+  have hm := Nat.find_spec hex
+  have hprev : W (n₁ + Nat.find hex) < x * g (n₁ + Nat.find hex) := by
+    rcases Nat.eq_zero_or_pos (Nat.find hex) with h0 | hpos
+    · rw [h0, add_zero]
+      exact hu₁
+    · have := Nat.find_min hex (Nat.sub_lt hpos one_pos)
+      rw [show n₁ + 1 + (Nat.find hex - 1) = n₁ + Nat.find hex by omega] at this
+      exact not_le.1 this
+  set m := n₁ + Nat.find hex with hmdef
+  rw [show n₁ + 1 + Nat.find hex = m + 1 by omega] at hm
+  obtain ⟨⟨-, hgmono⟩, -⟩ := hN' m (by omega)
+  obtain ⟨⟨hG, -⟩, hgbig⟩ := hN' (m + 1) (by omega)
+  refine ⟨m + 1, by omega, hball ?_⟩
+  show W (m + 1) / g (m + 1) ∈ Metric.ball x ε
+  have h2 : W (m + 1) < x * g (m + 1) + 1 := by
+    have := mul_le_mul_of_nonneg_left hgmono hx
+    linarith [hW m]
+  have hxW : x ≤ W (m + 1) / g (m + 1) := (le_div_iff₀ hG).2 hm
+  have hWx : W (m + 1) / g (m + 1) < x + 1 / g (m + 1) := by
+    rw [div_lt_iff₀ hG, add_mul, one_div, inv_mul_cancel₀ hG.ne']
+    exact h2
+  have hGε : 1 / g (m + 1) < ε := (div_lt_iff₀ hG).2 ((div_lt_iff₀' hε).1 hgbig)
+  rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+  constructor <;> linarith
+
+/-- **The limit points of the walk**: for almost every fair-coin sequence the limit points of
+`W(n)/√(2 n log log n)` form exactly the interval `[-1, 1]`. The ratio oscillates between
+`-1` and `1` (`ae_walk_div_bounds`), and the walk moves by `±1` while the scale grows, so the
+ratio passes close to every point in between (`mapClusterPt_div`). -/
+theorem ae_clusterPt_walk :
+    ∀ᵐ v ∂(coins ℕ), {y | MapClusterPt y atTop fun n : ℕ =>
+      (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))} = Set.Icc (-1) 1 := by
+  filter_upwards [ae_walk_div_bounds] with v h
+  obtain ⟨g, hg⟩ : ∃ g : ℕ → ℝ, ∀ n, g n = √(2 * n * Real.log (Real.log n)) := ⟨_, fun _ => rfl⟩
+  simp only [← hg] at h ⊢
+  -- the scale is eventually positive and nondecreasing, and tends to `∞`
+  have hgmono : ∀ᶠ n : ℕ in atTop, 0 < g n ∧ g n ≤ g (n + 1) := by
+    filter_upwards [eventually_ge_atTop 4] with n hn
+    have h4 : (4 : ℝ) ≤ n := by exact_mod_cast hn
+    have hl : 1 < Real.log n := one_lt_log_of_four_le h4
+    have hl' : Real.log n ≤ Real.log ((n : ℝ) + 1) := Real.log_le_log (by linarith) (by linarith)
+    have hll : 0 < Real.log (Real.log n) := Real.log_pos hl
+    have hll' : Real.log (Real.log n) ≤ Real.log (Real.log ((n : ℝ) + 1)) :=
+      Real.log_le_log (by linarith) hl'
+    refine ⟨by rw [hg]; exact Real.sqrt_pos.2 (by positivity), ?_⟩
+    rw [hg, hg]
+    push_cast
+    apply Real.sqrt_le_sqrt
+    have : (n : ℝ) * Real.log (Real.log n) ≤ ((n : ℝ) + 1) * Real.log (Real.log ((n : ℝ) + 1)) :=
+      mul_le_mul (by linarith) hll' hll.le (by linarith)
+    linarith
+  have hgtop : Tendsto g atTop atTop := by
+    have h1 : Tendsto (fun n : ℕ => 2 * (n : ℝ)) atTop atTop :=
+      tendsto_natCast_atTop_atTop.const_mul_atTop two_pos
+    have h2 : Tendsto (fun n : ℕ => Real.log (Real.log n)) atTop atTop :=
+      Real.tendsto_log_atTop.comp (Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop)
+    rw [show g = fun n : ℕ => √(2 * n * Real.log (Real.log n)) from funext hg]
+    exact Real.tendsto_sqrt_atTop.comp (h1.atTop_mul_atTop₀ h2)
+  have hgpos : ∀ᶠ n : ℕ in atTop, 0 < g n := hgmono.mono fun n hn => hn.1
+  have hstep : ∀ n, (walk v (n + 1) : ℝ) = walk v n + if v n then 1 else -1 := fun n => by
+    rw [walk, walk, Finset.sum_range_succ]
+    push_cast
+    rfl
+  -- the points of `[0, 1)` are limit points
+  have hpos : ∀ x : ℝ, 0 ≤ x → x < 1 → MapClusterPt x atTop fun n => (walk v n : ℝ) / g n := by
+    intro x hx0 hx1
+    obtain ⟨k, hk⟩ := exists_nat_one_div_lt (sub_pos.2 hx1)
+    refine mapClusterPt_div (W := fun n => (walk v n : ℝ)) hx0 (fun n => by
+      show (walk v (n + 1) : ℝ) ≤ walk v n + 1
+      rw [hstep]
+      split_ifs <;> linarith) hgmono hgtop ?_ ?_
+    · refine ((h 1).2.2.2.and_eventually hgpos).mono fun n hn => ?_
+      have h1 := (div_le_iff₀ hn.2).1 hn.1
+      have e : -(1 - 1 / (((1 : ℕ) : ℝ) + 1)) = -(1 / 2 : ℝ) := by norm_num
+      rw [e] at h1
+      have : 0 ≤ x * g n := mul_nonneg hx0 hn.2.le
+      linarith [hn.2]
+    · refine ((h k).2.2.1.and_eventually hgpos).mono fun n hn => ?_
+      have h1 := (le_div_iff₀ hn.2).1 hn.1
+      have h2 : x * g n ≤ (1 - 1 / ((k : ℝ) + 1)) * g n :=
+        mul_le_mul_of_nonneg_right (by linarith) hn.2.le
+      linarith
+  have hsub : Set.Ioo (-1 : ℝ) 1 ⊆ {y | MapClusterPt y atTop fun n => (walk v n : ℝ) / g n} := by
+    intro x hx
+    rcases le_or_gt 0 x with hx0 | hx0
+    · exact hpos x hx0 hx.2
+    · -- the reflection `W ↦ -W`
+      have hx' : 0 ≤ -x := by linarith
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (show (0 : ℝ) < 1 + x by linarith [hx.1])
+      have hlo' : ∃ᶠ n in atTop, -(walk v n : ℝ) < -x * g n :=
+        ((h 1).2.2.1.and_eventually hgpos).mono fun n hn => by
+          have h1 := (le_div_iff₀ hn.2).1 hn.1
+          have e : 1 - 1 / (((1 : ℕ) : ℝ) + 1) = 1 / 2 := by norm_num
+          rw [e] at h1
+          have : 0 < -x * g n := mul_pos (by linarith) hn.2
+          linarith [hn.2]
+      have hhi' : ∃ᶠ n in atTop, -x * g n ≤ -(walk v n : ℝ) :=
+        ((h k).2.2.2.and_eventually hgpos).mono fun n hn => by
+          have h1 := (div_le_iff₀ hn.2).1 hn.1
+          have h2 : -(1 - 1 / ((k : ℝ) + 1)) * g n ≤ x * g n :=
+            mul_le_mul_of_nonneg_right (by linarith) hn.2.le
+          linarith
+      have hc := mapClusterPt_div (W := fun n => -(walk v n : ℝ)) hx' (fun n => by
+        show -(walk v (n + 1) : ℝ) ≤ -(walk v n : ℝ) + 1
+        rw [hstep]
+        split_ifs <;> linarith) hgmono hgtop hlo' hhi'
+      have := hc.continuousAt_comp continuous_neg.continuousAt
+      simpa [Function.comp_def, neg_div] using this
+  have hclosed : IsClosed {y | MapClusterPt y atTop fun n => (walk v n : ℝ) / g n} :=
+    isClosed_setOf_clusterPt
+  refine Set.Subset.antisymm ?_ ?_
+  · intro y hy
+    simp only [Set.mem_setOf_eq] at hy
+    rw [Set.mem_Icc]
+    by_contra hy'
+    rcases not_and_or.1 hy' with hy1 | hy1
+    · replace hy1 := not_le.1 hy1
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (show (0 : ℝ) < (-1 - y) / 2 by linarith)
+      have hfr := hy.frequently (Iio_mem_nhds (show y < -(1 + 1 / ((k : ℝ) + 1)) by linarith))
+      obtain ⟨n, hn1, hn2⟩ := (hfr.and_eventually (h k).2.1).exists
+      have hn1' : (walk v n : ℝ) / g n < -(1 + 1 / ((k : ℝ) + 1)) := hn1
+      linarith
+    · replace hy1 := not_le.1 hy1
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (show (0 : ℝ) < (y - 1) / 2 by linarith)
+      have hfr := hy.frequently (Ioi_mem_nhds (show 1 + 1 / ((k : ℝ) + 1) < y by linarith))
+      obtain ⟨n, hn1, hn2⟩ := (hfr.and_eventually (h k).1).exists
+      have hn1' : 1 + 1 / ((k : ℝ) + 1) < (walk v n : ℝ) / g n := hn1
+      linarith
+  · rw [← closure_Ioo (by norm_num : (-1 : ℝ) ≠ 1)]
+    exact hclosed.closure_subset_iff.2 hsub
+
+/-- **The limit points for the center column**: for almost every configuration the limit points
+of `W(n)/√(2 n log log n)`, for the walk of the center column, form exactly the interval
+`[-1, 1]`. -/
+theorem ae_clusterPt_walk_trace :
+    ∀ᵐ x ∂(coins ℤ), {y | MapClusterPt y atTop fun n : ℕ =>
+      (walk (trace x) n : ℝ) / √(2 * n * Real.log (Real.log n))} = Set.Icc (-1) 1 :=
+  measurePreserving_trace.quasiMeasurePreserving.ae (p := fun v => {y | MapClusterPt y atTop
+    fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))} = Set.Icc (-1) 1)
+    ae_clusterPt_walk
 
 end Rule30Equivalents.IteratedLogarithm

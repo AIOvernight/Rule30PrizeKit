@@ -2828,7 +2828,8 @@ with Turing machines reading n. Notes:
     law of the iterated logarithm: the limsup and liminf of W(n)/√(2n log log n) are 1 and −1
     ([IteratedLogarithm](Rule30Equivalents/IteratedLogarithm.lean), `ae_limsup_liminf_walk_trace`;
     the lower half bounds the fair binomial tail from below at moderate deviations and applies the
-    second Borel–Cantelli lemma to the windows [2bᵏ, 2bᵏ⁺¹)). The configurations with an eventually
+    second Borel–Cantelli lemma to the windows [2bᵏ, 2bᵏ⁺¹)), and its limit points form exactly
+    [−1, 1] (`ae_clusterPt_walk_trace`). The configurations with an eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
     ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,

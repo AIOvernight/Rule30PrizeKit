@@ -39,7 +39,9 @@ those is vacuous.
   of `L`). The empirical measures converge to the fair-coin measure, which has no atoms.
 * **Zero sets.** The black times are not the zero set of a linear recurrence sequence over `ℚ` (the
   Skolem–Mahler–Lech theorem) or over a finite field (`ae_not_zero_set_rat_trace`,
-  `ae_not_zero_set_finite_trace`).
+  `ae_not_zero_set_finite_trace`), nor over any countable field, such as `𝔽_p(X)`
+  (`ae_not_zero_set_countable_trace`, `ae_not_zero_set_ratFunc_trace`): such zero sets are
+  countably many (`countable_zero_sets`).
 * **Prize Problem 3.** A one-tape Turing machine computes at most one sequence (halting states stay
   put, `eq_of_decidesBinInTime`), and relabeling states and symbols by `Fin`
   (`decidesBinInTime_relabel`) leaves countably many machines, so no machine computes the center
@@ -97,11 +99,11 @@ theorem ae_transcendental_series_trace : ∀ᵐ x ∂(coins ℤ), ∀ (p : ℕ) 
   ae_not_isAutomatic_trace.mono fun x hx p hp halg =>
     hx p hp.out.two_le ((Christol.isAutomatic_iff_isAlgebraic (trace x)).2 halg)
 
-/-- `ℚ(X)` is countable: `x = num x / denom x`. -/
-instance : Countable (RatFunc ℚ) := by
-  haveI : Countable (AddMonoidAlgebra ℚ ℕ) := inferInstanceAs (Countable (ℕ →₀ ℚ))
-  haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
-  refine Function.Injective.countable (f := fun x : RatFunc ℚ => (x.num, x.denom)) fun x y h => ?_
+/-- `K(X)` is countable for a countable field `K`: `x = num x / denom x`. -/
+instance {K : Type*} [Field K] [Countable K] : Countable (RatFunc K) := by
+  haveI : Countable (AddMonoidAlgebra K ℕ) := inferInstanceAs (Countable (ℕ →₀ K))
+  haveI : Countable (Polynomial K) := Polynomial.toFinsupp_injective.countable
+  refine Function.Injective.countable (f := fun x : RatFunc K => (x.num, x.denom)) fun x y h => ?_
   simp only [Prod.mk.injEq] at h
   rw [← RatFunc.num_div_denom x, ← RatFunc.num_div_denom y, h.1, h.2]
 
@@ -437,6 +439,56 @@ theorem ae_not_zero_set_finite_trace (K : Type*) [Field K] [Finite K] :
       E.IsSolution u → {t | u t = 0} ≠ {t | trace x t = true} :=
   ae_not_eventuallyPeriodic_trace.mono fun _ hx _ _ hu hS =>
     hx (LinearRelations.eventuallyPeriodic_of_zero_set hu hS)
+
+/-- Linear recurrences over a countable semiring are countably many. -/
+instance {K : Type*} [CommSemiring K] [Countable K] : Countable (LinearRecurrence K) := by
+  refine Function.Injective.countable
+    (f := fun E : LinearRecurrence K => (⟨E.order, E.coeffs⟩ : (n : ℕ) × (Fin n → K))) ?_
+  rintro ⟨n, a⟩ ⟨n', a'⟩ h
+  simp only [Sigma.mk.injEq] at h
+  obtain ⟨rfl, h2⟩ := h
+  rw [heq_eq_eq] at h2
+  rw [h2]
+
+/-- **Zero sets over a countable field are countably many**: a solution of a linear recurrence is
+determined by the recurrence and its first values
+(`LinearRecurrence.eq_mk_of_is_sol_of_eq_init`). -/
+theorem countable_zero_sets (K : Type*) [Field K] [Countable K] :
+    {S : Set ℕ | ∃ (E : LinearRecurrence K) (u : ℕ → K), E.IsSolution u ∧
+      S = {t | u t = 0}}.Countable := by
+  refine (Set.countable_range fun p : (E : LinearRecurrence K) × (Fin E.order → K) =>
+    {t | p.1.mkSol p.2 t = 0}).mono ?_
+  rintro S ⟨E, u, hu, rfl⟩
+  refine ⟨⟨E, fun i => u i⟩, ?_⟩
+  ext t
+  simp only [Set.mem_setOf_eq]
+  rw [← E.eq_mk_of_is_sol_of_eq_init hu fun _ => rfl]
+
+/-- **The same over every countable field**: for almost every configuration the black times of the
+center column are not the zero set of a linear recurrence sequence over a countable field, since
+such zero sets are countably many and the black times determine the column. In characteristic
+`p` this covers `𝔽_p(X)` (`ae_not_zero_set_ratFunc_trace`). -/
+theorem ae_not_zero_set_countable_trace (K : Type*) [Field K] [Countable K] :
+    ∀ᵐ x ∂(coins ℤ), ∀ (E : LinearRecurrence K) (u : ℕ → K),
+      E.IsSolution u → {t | u t = 0} ≠ {t | trace x t = true} := by
+  have hinj : Function.Injective fun v : ℕ → Bool => {t | v t = true} := fun v w h =>
+    funext fun t => by
+      have := congrArg (t ∈ ·) h
+      simp only [Set.mem_setOf_eq, eq_iff_iff] at this
+      cases hv : v t <;> cases hw : w t <;> simp_all
+  have hcount := (countable_zero_sets K).preimage hinj
+  have hae : ∀ᵐ v ∂(coins ℕ), ∀ (E : LinearRecurrence K) (u : ℕ → K),
+      E.IsSolution u → {t | u t = 0} ≠ {t | v t = true} :=
+    (measure_eq_zero_iff_ae_notMem.1 (hcount.measure_zero (coins ℕ))).mono
+      fun v hv E u hu hS => hv ⟨E, u, hu, hS.symm⟩
+  exact measurePreserving_trace.quasiMeasurePreserving.ae hae
+
+/-- **Not a zero set in characteristic `p`**: for almost every configuration the black times of
+the center column are not the zero set of a linear recurrence sequence over `𝔽_p(X)`. -/
+theorem ae_not_zero_set_ratFunc_trace (p : ℕ) [Fact p.Prime] :
+    ∀ᵐ x ∂(coins ℤ), ∀ (E : LinearRecurrence (RatFunc (ZMod p))) (u : ℕ → RatFunc (ZMod p)),
+      E.IsSolution u → {t | u t = 0} ≠ {t | trace x t = true} :=
+  ae_not_zero_set_countable_trace _
 
 /-! ### Values in a real base -/
 

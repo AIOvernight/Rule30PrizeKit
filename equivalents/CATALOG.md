@@ -2201,9 +2201,9 @@ so they are strictly stronger.
 | **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. Holds for almost every configuration (`IrrationalityExponent.ae_exponentTwo_trace`). | [Bug11], [BHWY16]; number-theory survey (data) |
 | **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not k-regular, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
 | **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. For almost every sequence abs(2L_n − n) ≤ 2⌊log₂ n⌋ + 2 from some n on, by two first-moment bounds and Borel–Cantelli (`LinearComplexity.ae_eventually_linComplexity`), so the statement holds almost surely (`ae_tendsto_linComplexity_trace`). | [Nie88], [MeWi17]; algebra survey (data) |
-| **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). | algebra survey, [WM86] |
+| **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). Not typical: it fails with probability at least 2⁻⁹ for a random configuration (`Typicality.measure_hankel_det_eq_zero_trace`). | algebra survey, [WM86] |
 | **Hypertranscendence** (new): C(z) satisfies no algebraic differential equation P(z, C, C′, …, C⁽ⁿ⁾) = 0 with P ≠ 0 over ℚ | if c is EP, C is rational, hence differentially algebraic | Strictly stronger: Σ z^(n²) is built on the non-EP set of squares, is a theta function, and satisfies an algebraic differential equation [Jac48]. A Mahler function is either rational or hypertranscendental [ADH21], so a non-EP automatic c would give a hypertranscendental C. In general neither "not automatic" nor "hypertranscendental" implies the other. | [ADH21], [Jac48] |
-| **Not a zero set in characteristic p** (new): S is not the zero set of a linear recurrence sequence over an infinite field of characteristic p, such as F_p(x) | if c is EP, S is the zero set of 1 − c, which is EP and so linear-recurrent | Strictly stronger: over F_p(x), u(n) = (x + 1)ⁿ − xⁿ − 1 has the non-EP zero set {pᵏ : k ≥ 0}. Derksen showed that such zero sets are p-automatic of a special form, so "c is not p-automatic" implies this statement. | [Der07] |
+| **Not a zero set in characteristic p** (new): S is not the zero set of a linear recurrence sequence over an infinite field of characteristic p, such as F_p(x) | if c is EP, S is the zero set of 1 − c, which is EP and so linear-recurrent | Strictly stronger: over F_p(x), u(n) = (x + 1)ⁿ − xⁿ − 1 has the non-EP zero set {pᵏ : k ≥ 0}. Derksen showed that such zero sets are p-automatic of a special form, so "c is not p-automatic" implies this statement. Over F_p(x), and over every countable field, it holds for almost every configuration, since such zero sets are countably many (`TypicalConditions.ae_not_zero_set_ratFunc_trace`). | [Der07] |
 | **Π⁰₁ defect bound**: for all T and P ≥ 1, some t ∈ [T, T + 3·log₂(T + P + 1)] has c(t + P) ≠ c(t) | an EP c has arbitrarily long stretches without a defect | Holds for T + P ≤ 65536, with maximum defect distance 29 (own computation, logic survey). | logic survey |
 | **Th(ℕ, +, S) is undecidable** | if c is EP, S is Presburger-definable and the theory is decidable | It would follow from disjunctiveness (own reasoning, below). In definable form: if multiplication is definable in (ℕ, 0, 1, +, S), with any parameters, Problem 1 holds (`PresburgerExpansion.problem1_of_mul_definable`): for an EP c every set definable in (ℕ, +, S) is semilinear, and the graph of multiplication is not. | logic survey, critic; [KNO26] |
 | **Problem 3 and its relatives**: no polylog-time digit extraction; circuit lower bounds for n ↦ c(n) | EP or automatic ⟹ O(log n) time | Beyond current techniques: the best general-circuit lower bound for any explicit function is about 3.1n. | [W19], [LY22], [FGHK16] |
@@ -2315,7 +2315,10 @@ summable probabilities (Borel–Cantelli). Transcendence uses that the binary va
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`RandomConfigurations.coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal
-cells (`measure_not_defectBound_trace`). The sufficient conditions proved in other files hold almost
+cells (`measure_not_defectBound_trace`). Neither is H_m ≠ 0 for all m ≥ 9: it fails with
+probability at least 2⁻⁹, whenever the column starts with nine white cells, since then the first
+row of H_9 vanishes (`measure_hankel_det_eq_zero_trace`). The sufficient conditions proved in other
+files hold almost
 surely too ([TypicalConditions](Rule30Equivalents/TypicalConditions.lean),
 `ae_sufficientConditions_trace`): unbounded remainders N(n) − αn for every α, also for every word
 w (for α = 2^-|w| the block w^L raises the remainder), an oscillating discrepancy, unpredictability, a non-atomic limit of the empirical measures, not k-automatic (the
@@ -2323,7 +2326,8 @@ k-automatic sequences are countably many, `Automatic.countable_setOf_isAutomatic
 complexity → ∞, multiplication definable in (ℕ, +, S), density 1/2 along every progression, a
 transcendental generating function over 𝔽_p(X) (Christol) and over ℚ(X), the golden-power, unbordered-factor and
 Lempel–Ziv forms, black times that are not the zero set of a linear recurrence over ℚ
-(Skolem–Mahler–Lech) or a finite field, Prize Problem 3 in both readings (no one-tape machine
+(Skolem–Mahler–Lech), a finite field or any countable field such as 𝔽_p(X) (such zero sets are
+countably many, `ae_not_zero_set_countable_trace`), Prize Problem 3 in both readings (no one-tape machine
 computes the column at all: a machine computes at most one sequence, and machines are countably
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration

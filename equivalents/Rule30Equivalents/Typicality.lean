@@ -38,7 +38,9 @@ is vacuous.
   complexity satisfies `Lₙ/n → 1/2` (`LinearComplexity.ae_tendsto_linComplexity_trace`).
 
 Not every stronger statement is typical: the defect bound fails with probability at least `1/32`,
-when the first five cells of the column agree (`measure_not_defectBound_trace`).
+when the first five cells of the column agree (`measure_not_defectBound_trace`), and `H_m ≠ 0` for
+all `m ≥ 9` fails with probability at least `2^-9`, when the first nine cells are white
+(`measure_hankel_det_eq_zero_trace`).
 -/
 
 namespace Rule30Equivalents.Typicality
@@ -444,5 +446,16 @@ theorem measure_not_defectBound_trace :
   have hlog : Nat.log 2 (0 + 1 + 1) = 1 := by decide
   rw [hlog] at ht
   exact hne (by rw [hx (t + 1) (by omega), hx t (by omega)])
+
+/-- **Nonvanishing Hankel determinants are not typical**: `H_m ≠ 0` for every `m ≥ 9` fails for
+every configuration whose center column starts with nine white cells, since then the first row of
+`H_9` vanishes, so it fails with probability at least `2^-9`. -/
+theorem measure_hankel_det_eq_zero_trace : (2⁻¹ : ENNReal) ^ 9 ≤
+    coins ℤ {x | ¬ ∀ m, 9 ≤ m → (LinearRelations.hankel ℤ (trace x) m).det ≠ 0} := by
+  rw [← measure_prefix (fun _ => false) 8]
+  refine measure_mono fun x hx h => h 9 le_rfl (Matrix.det_eq_zero_of_row_eq_zero 0 fun j => ?_)
+  simp only [LinearRelations.hankel, Matrix.of_apply, LinearRelations.toK, Fin.val_zero, zero_add]
+  rw [hx j (by omega)]
+  rfl
 
 end Rule30Equivalents.Typicality

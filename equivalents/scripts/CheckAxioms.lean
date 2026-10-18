@@ -8,6 +8,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.problem1_iff
 #print axioms Rule30Equivalents.problem1_iff_not_eventuallyPeriodic
 #print axioms Rule30Equivalents.AlgebraicDFinite.problem1_iff_transcendental
+#print axioms Rule30Equivalents.AlgebraicDegree.problem1_iff_no_feedback_degreeLE
 #print axioms Rule30Equivalents.Automatic.problem1_of_not_automatic
 #print axioms Rule30Equivalents.Automatic.problem1_of_not_two_three_automatic
 #print axioms Rule30Equivalents.Automatic.problem1_of_automaticComplexity_tendsto_top

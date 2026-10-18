@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 201 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 202 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -1186,8 +1186,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   `problem1_iff_no_feedback_from_zero` (an eventually periodic sequence is generated from position 0
   by a register of length T + P) and `problem1_iff_maxOrderComplexity_tendsto`, with
   `maxOrderComplexity b n` the least m at which equal windows of length m inside the prefix of
-  length n have equal successors (consistency is upward closed, `PrefixConsistent.mono`). A k-th
-  order version, if formalized, must quantify k ≥ 1.
+  length n have equal successors (consistency is upward closed, `PrefixConsistent.mono`). The
+  k-th order version, for every k ≥ 1, is `AlgebraicDegree.problem1_iff_no_feedback_degreeLE`:
+  an EP column is generated from position 0 by the linear feedback c(i + T + P) = c(i + T), whose
+  algebraic normal form has degree 1 (`DegreeLE`, through the ANF coefficients `coef`).
 
   ```lean
   theorem problem1_iff_no_nlfsr : Rule30Prize.Problem1 ↔

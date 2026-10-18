@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 190 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 192 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2214,7 +2214,8 @@ fails for c, because a normal (or merely disjunctive) sequence fails it:
   which Büchi proved decidable. If c is disjunctive, the theory is decidable by Semenov's criterion
   (logic survey, own reading of [Sem84]).
 - *c is uniformly recurrent and not purely periodic.* A recurrent EP sequence is purely periodic, so
-  this implies Problem 1. A normal sequence is not uniformly recurrent.
+  this implies Problem 1 (`StrongerStatements.problem1_of_recurrent_not_purelyPeriodic`, with
+  recurrence alone). A normal sequence is not uniformly recurrent.
 - *Ω(c) is minimal and infinite* (Ω(c) as in [35]). A normal c has Ω(c) equal to the full shift,
   which is not minimal.
 - *c is a non-periodic Toeplitz sequence.* Toeplitz sequences are uniformly recurrent, so this fails
@@ -2277,7 +2278,8 @@ Each statement below is implied by Problem 1.
   - Problem 1 is the conjunction of NoPer(k!) over all k ([14]).
 - **Not purely periodic** (the case T = 0). The kernel gives P ≥ 16359. This statement would be
   equivalent to Problem 1 if c were known to be recurrent, since a recurrent EP sequence is purely
-  periodic.
+  periodic (`StrongerStatements.IsRecurrent.purelyPeriodic`,
+  `problem1_iff_not_purelyPeriodic_of_recurrent`).
 - **No eventual period 2^k.** Equivalent forms: no tail extends to a continuous function ℤ₂ → F₂;
   the F₂ Mahler (binomial) coefficients of every tail are not eventually 0 (via Lucas' theorem).
   This is open, since it includes periods 2 and 4. Replacing ℤ₂ by the profinite integers gives back

@@ -43,6 +43,9 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_of_expansionComplexity_unbounded`: the expansion complexity of `∑ c(t) Xᵗ` over `𝔽₂`
   is unbounded.
 * `problem1_of_not_isMorphic`: `c` is not morphic.
+* `problem1_of_recurrent_not_purelyPeriodic`: `c` is recurrent and not purely periodic; a
+  recurrent eventually periodic sequence is purely periodic (`IsRecurrent.purelyPeriodic`), so for
+  a recurrent `c` Problem 1 is the case `T = 0` (`problem1_iff_not_purelyPeriodic_of_recurrent`).
 -/
 
 namespace Rule30Equivalents.StrongerStatements
@@ -556,5 +559,44 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
 /-- **Not morphic.** If `c` is not morphic, Problem 1 holds. -/
 theorem problem1_of_not_isMorphic (h : ¬ IsMorphic c) : Rule30Prize.Problem1 :=
   fun hep => h (isMorphic_of_eventuallyPeriodic hep)
+
+/-! ### Recurrence -/
+
+/-- `b` is recurrent: every prefix occurs again at a positive position. -/
+def IsRecurrent (b : ℕ → Bool) : Prop := ∀ n, ∃ s, 0 < s ∧ ∀ i < n, b (s + i) = b i
+
+/-- In a recurrent sequence every prefix occurs arbitrarily far out. -/
+theorem IsRecurrent.exists_ge {b : ℕ → Bool} (h : IsRecurrent b) (n : ℕ) :
+    ∀ k, ∃ s, k ≤ s ∧ ∀ i < n, b (s + i) = b i
+  | 0 => ⟨0, le_rfl, fun i _ => by rw [Nat.zero_add]⟩
+  | k + 1 => by
+    obtain ⟨s, hks, hs⟩ := h.exists_ge n k
+    obtain ⟨s', hs'0, hs'⟩ := h (s + n)
+    refine ⟨s' + s, by omega, fun i hi => ?_⟩
+    rw [add_assoc, hs' (s + i) (by omega), hs i hi]
+
+/-- **A recurrent eventually periodic sequence is purely periodic.** -/
+theorem IsRecurrent.purelyPeriodic {b : ℕ → Bool} (h : IsRecurrent b) (hep : EventuallyPeriodic b) :
+    ∃ P, 0 < P ∧ ∀ t, b (t + P) = b t := by
+  obtain ⟨T, P, hP, hper⟩ := hep
+  obtain ⟨s, hTs, hs⟩ := h.exists_ge (T + P) T
+  refine ⟨P, hP, fun t => ?_⟩
+  rcases le_or_gt T t with ht | ht
+  · exact hper t ht
+  · rw [← hs (t + P) (by omega), ← hs t (by omega), ← add_assoc]
+    exact hper _ (by omega)
+
+/-- **Recurrent and not purely periodic.** If `c` is recurrent and not purely periodic, Problem 1
+holds. -/
+theorem problem1_of_recurrent_not_purelyPeriodic (hrec : IsRecurrent c)
+    (h : ¬ ∃ P, 0 < P ∧ ∀ t, c (t + P) = c t) : Rule30Prize.Problem1 :=
+  fun hep => h (hrec.purelyPeriodic hep)
+
+/-- **If `c` is recurrent, Problem 1 is the case `T = 0`**: it holds iff `c` is not purely
+periodic. -/
+theorem problem1_iff_not_purelyPeriodic_of_recurrent (hrec : IsRecurrent c) :
+    Rule30Prize.Problem1 ↔ ¬ ∃ P, 0 < P ∧ ∀ t, c (t + P) = c t :=
+  ⟨fun h1 ⟨P, hP, hper⟩ => h1 ⟨0, P, hP, fun t _ => hper t⟩,
+    problem1_of_recurrent_not_purelyPeriodic hrec⟩
 
 end Rule30Equivalents.StrongerStatements

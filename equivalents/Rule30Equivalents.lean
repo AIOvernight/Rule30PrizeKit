@@ -44,6 +44,7 @@ import Rule30Equivalents.RegularSequences
 import Rule30Equivalents.ProfiniteIntegers
 import Rule30Equivalents.PresburgerExpansion
 import Rule30Equivalents.Genericity
+import Rule30Equivalents.RandomConfigurations
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

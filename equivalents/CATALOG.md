@@ -2677,7 +2677,15 @@ with Turing machines reading n. Notes:
     measure, the center trace is normal. The trace map Tr₀ pushes μ forward to μ, because
     c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the cell x_{−t} is used by no earlier c(s). In finite
     form this is proved (`AlgebraicDegree.card_trace`): each word w(0), …, w(n) is the center trace
-    of exactly 2ⁿ of the 2^(2n+1) configurations on [−n, n].
+    of exactly 2ⁿ of the 2^(2n+1) configurations on [−n, n]. In measure form it is proved too
+    ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure
+    preserving from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ
+    (`measurePreserving_trace`; flipping x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1),
+    so every prefix has probability 2^−(n+1), `measure_prefix`). By the strong law of large
+    numbers the trace has density 1/2 for μ-almost every configuration (`ae_halfDensity_trace`).
+    The eventually periodic sequences are countably many and μ has no atoms, so for μ-almost every
+    configuration the trace is not eventually periodic (`ae_not_eventuallyPeriodic_trace`).
+    Normality almost everywhere (Borel's theorem) is not formalized.
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);
@@ -2692,7 +2700,8 @@ with Turing machines reading n. Notes:
     (`continuous_trace`, `isOpenMap_trace`, `surjective_trace`; flipping x_{−m} flips c(m) and
     nothing before, `exists_extend`); the configurations with a disjunctive trace form a comeager
     set (`residual_disjunctive_trace`), and those whose trace has density 1/2 a meager set
-    (`isMeagre_halfDensity_trace`, so a fortiori those with a normal trace). Likewise, ergodicity of the doubling map
+    (`isMeagre_halfDensity_trace`, so a fortiori those with a normal trace), which has full
+    measure (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
     version said that the trace is normal for a comeager set of configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles

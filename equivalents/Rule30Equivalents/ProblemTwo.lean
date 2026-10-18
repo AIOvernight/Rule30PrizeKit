@@ -2,6 +2,7 @@ import Rule30Equivalents.Basic
 import Rule30Equivalents.Tauberian
 import Rule30Equivalents.BinaryIrrational
 import Rule30Equivalents.StrongerStatements
+import Rule30Equivalents.Symmetry
 
 /-!
 # Prize Problem 2: density 1/2
@@ -10,7 +11,8 @@ Catalog Section 6.1. `Rule30Prize.Problem2` says that the black cells have densi
 center column, stated with integers: for every `k > 0`, eventually `k |2 b(n) - n| ≤ n`, where
 `b(n)` counts the black cells among `c(0), …, c(n - 1)`. Two equivalent forms:
 
-* `problem2_iff_tendsto`: `b(n) / n → 1/2`;
+* `problem2_iff_tendsto`: `b(n) / n → 1/2`, from `halfDensity_iff_tendsto`, which holds for every
+  bit sequence;
 * `problem2_iff_abel`: the Abel mean `(1 - x) ∑ c(t) xᵗ` tends to `1/2` as `x → 1⁻`. The forward
   direction is Abelian (`Tauberian.tendsto_abel_of_tendsto_cesaro`); the converse is the
   Hardy–Littlewood–Karamata Tauberian theorem (`Tauberian.tendsto_cesaro_of_tendsto_abel`), which
@@ -27,39 +29,46 @@ namespace Rule30Equivalents.ProblemTwo
 
 open Filter Topology Ruliology.CellularAutomata
 
+/-- The number of `true` values among `b(0), …, b(n - 1)`, as a sum. -/
+theorem count_eq_sum (b : ℕ → Bool) (n : ℕ) :
+    (((List.range n).filter b).length : ℝ) =
+      ∑ t ∈ Finset.range n, if b t then (1 : ℝ) else 0 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ← ih]
+    simp only [List.range_succ, List.filter_append, List.length_append]
+    push_cast
+    cases h : b n <;> simp [List.filter, h]
+
 /-- `b(n)` is the sum of the center column over `0, …, n - 1`. -/
 theorem blackCount_eq_sum (n : ℕ) :
     (Rule30Prize.blackCount n : ℝ) =
-      ∑ t ∈ Finset.range n, if Rule30Prize.center t then (1 : ℝ) else 0 := by
-  induction n with
-  | zero => simp [Rule30Prize.blackCount]
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ← ih]
-    simp only [Rule30Prize.blackCount, List.range_succ, List.filter_append, List.length_append]
-    push_cast
-    cases h : Rule30Prize.center n <;> simp [List.filter, h]
+      ∑ t ∈ Finset.range n, if Rule30Prize.center t then (1 : ℝ) else 0 :=
+  count_eq_sum _ n
 
-theorem le_iff_real (k n : ℕ) :
-    k * (2 * (Rule30Prize.blackCount n : ℤ) - n).natAbs ≤ n ↔
-      (k : ℝ) * |2 * (Rule30Prize.blackCount n : ℝ) - n| ≤ n := by
-  have : ((((2 * (Rule30Prize.blackCount n : ℤ) - n).natAbs : ℕ)) : ℝ) =
-      |2 * (Rule30Prize.blackCount n : ℝ) - n| := by
+theorem le_iff_real (b : ℕ → Bool) (k n : ℕ) :
+    k * (2 * (((List.range n).filter b).length : ℤ) - n).natAbs ≤ n ↔
+      (k : ℝ) * |2 * (((List.range n).filter b).length : ℝ) - n| ≤ n := by
+  have : ((((2 * (((List.range n).filter b).length : ℤ) - n).natAbs : ℕ)) : ℝ) =
+      |2 * (((List.range n).filter b).length : ℝ) - n| := by
     rw [Nat.cast_natAbs, Int.cast_abs]
     push_cast
     ring_nf
   rw [← this, ← Nat.cast_mul, Nat.cast_le]
 
-theorem abs_sub_half {n : ℕ} (hn : 0 < n) :
-    |(Rule30Prize.blackCount n : ℝ) / n - 1 / 2| =
-      |2 * (Rule30Prize.blackCount n : ℝ) - n| / (2 * n) := by
+theorem abs_sub_half (b : ℕ → Bool) {n : ℕ} (hn : 0 < n) :
+    |(((List.range n).filter b).length : ℝ) / n - 1 / 2| =
+      |2 * (((List.range n).filter b).length : ℝ) - n| / (2 * n) := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
-  rw [show (Rule30Prize.blackCount n : ℝ) / n - 1 / 2 =
-      (2 * Rule30Prize.blackCount n - n) / (2 * n) by field_simp, abs_div,
+  rw [show (((List.range n).filter b).length : ℝ) / n - 1 / 2 =
+      (2 * ((List.range n).filter b).length - n) / (2 * n) by field_simp, abs_div,
     abs_of_pos (by positivity : (0 : ℝ) < 2 * n)]
 
-/-- **Problem 2 as a limit**: the proportion of black cells tends to `1/2`. -/
-theorem problem2_iff_tendsto : Rule30Prize.Problem2 ↔
-    Tendsto (fun n : ℕ => (Rule30Prize.blackCount n : ℝ) / n) atTop (𝓝 (1 / 2)) := by
+/-- **Density `1/2` as a limit**, for every bit sequence: the proportion of `true` values among
+the first `n` tends to `1/2`. -/
+theorem halfDensity_iff_tendsto (b : ℕ → Bool) : Symmetry.HalfDensity b ↔
+    Tendsto (fun n : ℕ => (((List.range n).filter b).length : ℝ) / n) atTop (𝓝 (1 / 2)) := by
   constructor
   · intro h2
     rw [Metric.tendsto_atTop]
@@ -70,10 +79,10 @@ theorem problem2_iff_tendsto : Rule30Prize.Problem2 ↔
     refine ⟨N + 1, fun n hn => ?_⟩
     have hn0 : 0 < n := by omega
     have hn' : (0 : ℝ) < n := by exact_mod_cast hn0
-    have h1 := (le_iff_real k n).1 (hN n (by omega))
-    rw [Real.dist_eq, abs_sub_half hn0, div_lt_iff₀ (by positivity)]
+    have h1 := (le_iff_real b k n).1 (hN n (by omega))
+    rw [Real.dist_eq, abs_sub_half b hn0, div_lt_iff₀ (by positivity)]
     have hεk : 1 < ε * k := by rwa [div_lt_iff₀ hε, mul_comm] at hk
-    nlinarith [abs_nonneg (2 * (Rule30Prize.blackCount n : ℝ) - n)]
+    nlinarith [abs_nonneg (2 * (((List.range n).filter b).length : ℝ) - n)]
   · intro h k hk
     have hk' : (0 : ℝ) < k := by exact_mod_cast hk
     obtain ⟨N, hN⟩ := Metric.tendsto_atTop.1 h (1 / (2 * k)) (by positivity)
@@ -82,9 +91,14 @@ theorem problem2_iff_tendsto : Rule30Prize.Problem2 ↔
     · simp
     have hn' : (0 : ℝ) < n := by exact_mod_cast hn0
     have h1 := hN n hn
-    rw [Real.dist_eq, abs_sub_half hn0, div_lt_div_iff₀ (by positivity) (by positivity)] at h1
+    rw [Real.dist_eq, abs_sub_half b hn0, div_lt_div_iff₀ (by positivity) (by positivity)] at h1
     rw [le_iff_real]
     nlinarith
+
+/-- **Problem 2 as a limit**: the proportion of black cells tends to `1/2`. -/
+theorem problem2_iff_tendsto : Rule30Prize.Problem2 ↔
+    Tendsto (fun n : ℕ => (Rule30Prize.blackCount n : ℝ) / n) atTop (𝓝 (1 / 2)) :=
+  halfDensity_iff_tendsto c
 
 /-- **Problem 2 as an Abel limit**: `(1 - x) ∑ c(t) xᵗ → 1/2` as `x → 1⁻`. -/
 theorem problem2_iff_abel : Rule30Prize.Problem2 ↔

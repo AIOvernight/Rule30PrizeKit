@@ -167,7 +167,7 @@ files. The rows follow the order of Section 3.
 | 15 | two-adic | p-adic numbers | Σ c(t)2ᵗ ∈ ℤ₂ is not rational; an integer congruence form for every prime p | Proved (library) | `TwoAdic.problem1_iff_padic_irrational`, `TwoAdic.problem1_iff_padic_int` |
 | 30 | fcsr-complexity | coding theory | the 2-adic (FCSR) complexity of c is unbounded | Proved (library) | `TwoAdic.problem1_iff_two_adic_complexity` |
 | 5 | series-f2-lfsr | algebra, coding theory | Σ c(t)Xᵗ ∉ F₂(X); no eventual linear recurrence or LFSR over F₂ generates c; its linear complexity is unbounded | Proved (library) | `PowerSeriesF2.problem1_iff_series_not_rational` and five more |
-| 17 | rational-any-field | algebra | Σ c(t)Xᵗ ∉ K(X) for any field K; c satisfies no `LinearRecurrence` over K | Proved (library) | `LinearRelations.problem1_iff_series_not_rational`, `LinearRelations.problem1_iff_no_linearRecurrence` |
+| 17 | rational-any-field | algebra | Σ c(t)Xᵗ ∉ K(X) for any field K (rationality: any nontrivial commutative ring); c satisfies no `LinearRecurrence` over K | Proved (library) | `LinearRelations.problem1_iff_series_not_rational`, `LinearRelations.problem1_iff_no_linearRecurrence` |
 | 44 | linear-relations | linear algebra | the shifts σⁿc are linearly independent over any field; their span is infinite-dimensional; no polynomial in σ kills c | Proved (library) | `LinearRelations.problem1_iff_shifts_linearIndependent`, `LinearRelations.problem1_iff_not_torsion` |
 | 32 | hankel | linear algebra | the Hankel matrix (c(i+j)) has unbounded rank; det H_n ≠ 0 for infinitely many n (over ℤ or F₂) | Proved (library) | `LinearRelations.problem1_iff_hankel_rank_unbounded`, `LinearRelations.problem1_iff_hankel_det_int` |
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Proved (library) | `SkolemMahlerLech.problem1_iff_not_LRS_zero_set`, `SkolemMahlerLech.skolem_mahler_lech`, `Strassmann.strassmann` |
@@ -952,11 +952,15 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   (Mathlib's `LinearRecurrence`, valid from n = 0).
 - *Proof route.* The F₂ argument works verbatim. The lowest nonzero coefficient of Q is invertible,
   so the recurrence gives c(m) from the preceding window. The values lie in {0, 1} and 0 ≠ 1 in K,
-  so the window takes finitely many states. Fatou's theorem is not needed.
+  so the window takes finitely many states. Fatou's theorem is not needed. Invertibility is not
+  needed either: for the lowest nonzero coefficient q, q·0 = 0 ≠ q·1, so the same argument works
+  over every nontrivial commutative ring, such as ℤ or ℤ/4ℤ.
 - *Difficulty.* Easy.
 - *Data.* Over ℚ the Hankel rank of c is at least 44,999 ([32]; algebra survey).
 - *Lean.* Proved in the library (batch 2: `LinearRelations.problem1_iff_series_not_rational`,
-  `problem1_iff_no_linearRecurrence` and `problem1_iff_no_eventual_linearRecurrence`). Before
+  `problem1_iff_no_linearRecurrence` and `problem1_iff_no_eventual_linearRecurrence`). The
+  rational form now holds over every nontrivial commutative ring (`eventuallyPeriodic_of_mul_eq`
+  through the window lemma `eventuallyPeriodic_of_window`). Before
   batch 2 the recurrence form had a scratch proof (logic survey, any field) and the power-series
   form was stated. Here `series K` is the scratch definition above, not the library's
   `PowerSeriesF2.series`.

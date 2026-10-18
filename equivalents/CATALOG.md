@@ -2718,7 +2718,11 @@ with Turing machines reading n. Notes:
     nothing before, `exists_extend`); the configurations with a disjunctive trace form a comeager
     set (`residual_disjunctive_trace`), and those whose trace has density 1/2 a meager set
     (`isMeagre_halfDensity_trace`, so a fortiori those with a normal trace), which has full
-    measure (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Likewise, ergodicity of the doubling map
+    measure (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Rule 30 itself is onto
+    (`surjective_evol_one`); every configuration has at most four preimages, configurations with
+    the same image that agree right of some cell are equal, and the white configuration has
+    exactly two preimages ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`,
+    `eq_of_evol_one_eq_of_right`, `preimage_white`). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
     version said that the trace is normal for a comeager set of configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles

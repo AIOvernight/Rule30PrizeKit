@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 215 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 216 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -1364,7 +1364,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   and ω_σ(c) = Tr₀(ω_F(δ₀)), where δ₀ is the single seed (own reasoning, words survey; proved:
   `Genericity.image_trace_omegaLimit_seed`, from `image_omegaLimit_eq` for continuous
   semiconjugacies of compact spaces). So Problem 1 holds iff Tr₀(ω_F(δ₀)) is infinite
-  (`Genericity.problem1_iff_trace_omegaLimit_seed_infinite`).
+  (`Genericity.problem1_iff_trace_omegaLimit_seed_infinite`), iff some configuration in ω_F(δ₀) has
+  a center column that is not periodic
+  (`Genericity.problem1_iff_exists_omegaLimit_seed_not_periodic`).
 - *Proof route.* If c is EP, ω(c) is one periodic orbit. Conversely, a finite ω(c) is invariant, so
   it consists of periodic points. Choose L so that the length-(L − 1) prefixes separate those
   points. Eventually σᵗc shares its length-L prefix with some z_t ∈ ω(c), and this forces

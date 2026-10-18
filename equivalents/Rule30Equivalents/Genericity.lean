@@ -28,7 +28,8 @@ The trace carries the omega-limit set of the single black cell under rule 30 ont
 omega-limit set `ω(c)` of the center column under the shift (`image_trace_omegaLimit_seed`, from
 `image_omegaLimit_eq` for continuous semiconjugacies of compact spaces), so **Problem 1 holds iff
 the trace of the seed's omega-limit set is infinite**
-(`problem1_iff_trace_omegaLimit_seed_infinite`).
+(`problem1_iff_trace_omegaLimit_seed_infinite`), iff some configuration in it has a center
+column that is not periodic (`problem1_iff_exists_omegaLimit_seed_not_periodic`).
 -/
 
 namespace Rule30Equivalents.Genericity
@@ -368,5 +369,18 @@ theorem problem1_iff_trace_omegaLimit_seed_infinite : Rule30Prize.Problem1 ↔
     (trace '' omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed}).Infinite := by
   rw [image_trace_omegaLimit_seed]
   exact WordsAutomata.problem1_iff_omegaLimit_infinite
+
+/-- **Problem 1 through a limit configuration of the seed**: Problem 1 holds iff some
+configuration in the omega-limit set of the single black cell under rule 30 has a center column
+that is not periodic. -/
+theorem problem1_iff_exists_omegaLimit_seed_not_periodic : Rule30Prize.Problem1 ↔
+    ∃ y ∈ omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed},
+      trace y ∉ Function.periodicPts ShiftOrbit.shift := by
+  rw [WordsAutomata.problem1_iff_omegaLimit_not_periodic, ← image_trace_omegaLimit_seed]
+  constructor
+  · rintro ⟨z, ⟨y, hy, rfl⟩, hz⟩
+    exact ⟨y, hy, hz⟩
+  · rintro ⟨y, hy, hz⟩
+    exact ⟨trace y, ⟨y, hy, rfl⟩, hz⟩
 
 end Rule30Equivalents.Genericity

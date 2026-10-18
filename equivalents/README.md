@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 50 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 137 theorems named `problem1_iff_*`.
+- 51 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 138 theorems named `problem1_iff_*`.
 - For one more form, [41], and for the frozen-boundary conjecture, the direction "the statement implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The thirty-two later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree, AlgebraicDFinite, Strassmann, SkolemMahlerLech, DiophantineGraph, NaturalBoundary, Cobham and Christol) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The thirty-three later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree, AlgebraicDFinite, Strassmann, SkolemMahlerLech, DiophantineGraph, NaturalBoundary, Cobham, Christol and OneTapeGap) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -59,6 +59,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [NaturalBoundary](Rule30Equivalents/NaturalBoundary.lean) | sufficient condition only ([41]): if Σ c(t)zᵗ continues analytically across no arc of the unit circle, Problem 1 holds. An eventually periodic column gives a rational function Q(z)/(1 − z^P) that continues across the circle at e^(iπ/P); the converse is Szegő's theorem | `problem1_of_natural_boundary`, `exists_continuation`, `mul_genFun_eq` |
 | [Cobham](Rule30Equivalents/Cobham.lean) | c is not both 2-automatic and 3-automatic, and c is not k-automatic for some k ≥ 2 ([42]). The library proves Cobham's theorem for any multiplicatively independent bases, following Krebs' short proof: kernel signatures, close powers aᵐ ≈ bⁿ by pigeonhole, and local periods glued along overlapping intervals | `problem1_iff_not_two_three_automatic`, `problem1_iff_exists_not_automatic`, `eventuallyPeriodic_of_isAutomatic` |
 | [Christol](Rule30Equivalents/Christol.lean) | Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) ([42]). The library proves Christol's theorem in the direction "algebraic over F_p(X) ⟹ p-automatic" for every prime p: Ore's relation with nonzero constant term, and a finite set of combinations Σ hᵢF^(pⁱ) closed under the Cartier operators | `problem1_iff_transcendental_F2_or_F3`, `isAutomatic_of_isAlgebraic`, `exists_ore_relation`, `cartier_pow_mul` |
+| [OneTapeGap](Rule30Equivalents/OneTapeGap.lean) | no one-tape Turing machine decides {1ⁿ : c(n) = 1} in time o(n log n) ([43], time form). The library proves Hennie's theorem for unary input: equal crossing sequences let two runs be spliced, a shortest input with a long crossing sequence has distinct crossing sequences on each side of it, which costs time (n/4)·log(n/4), and bounded crossing sequences give eventual periodicity | `problem1_iff_no_fast_one_tape_decider`, `eventuallyPeriodic_iff_exists_fast_decider`, `splice`, `DecidesInTime.bounded` |
 | [Symmetry](Rule30Equivalents/Symmetry.lean) | the same question for rule 86 (black seed), for rules 135 and 149 (white seed), and for the complemented column | `problem1_iff_rule86`, `problem1_iff_rule135`, `problem1_iff_rule149` |
 | [Basic](Rule30Equivalents/Basic.lean) | — (shared definitions: the center column `c` and `EventuallyPeriodic`) | `problem1_iff_not_eventuallyPeriodic` |
 
@@ -94,4 +95,4 @@ lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_if
 Next targets:
 - Büchi's theorem for the MSO form of [36].
 
-The hard classical ones are Szegő and Pólya–Carlson (natural boundary, [41]), Durand ([46]) and the one-tape time gap ([43]).
+The hard classical ones are Szegő and Pólya–Carlson (natural boundary, [41]), Durand ([46]) and the space gap of [43] (Stearns, Hartmanis and Lewis).

@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 148 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 149 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -199,10 +199,10 @@ files. The rows follow the order of Section 3.
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Proved (library) | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
-| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
+| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library) for the time form; Sketch (space) | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeGap.eventuallyPeriodic_iff_exists_fast_decider` |
 
-**Summary.** Of the 54 equivalent forms, 50 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 23 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -216,8 +216,9 @@ batch 2, and 23 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [49] in [Minkowski](Rule30Equivalents/Minkowski.lean), [40] in
 [ContextFree](Rule30Equivalents/ContextFree.lean), [38] in
 [AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean), [45] in
-[SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean), and [42] in
-[Cobham](Rule30Equivalents/Cobham.lean). One more, [7], is proved in the core catalog and
+[SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean), [42] in
+[Cobham](Rule30Equivalents/Cobham.lean), and [43] (the time form) in
+[OneTapeGap](Rule30Equivalents/OneTapeGap.lean). One more, [7], is proved in the core catalog and
 also has a library proof. All three parts of [14] are proved, the Diophantine graph included
 ([DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean)), and for [36] the MSO form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
@@ -231,8 +232,11 @@ proved through the Skolem–Mahler–Lech theorem, which the library proves in t
 Strassmann's theorem ([Strassmann](Rule30Equivalents/Strassmann.lean),
 [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean)). [42] is proved through Cobham's theorem,
 in Krebs' short proof ([Cobham](Rule30Equivalents/Cobham.lean)), and its F₂/F₃ form also through
-Christol's theorem ([Christol](Rule30Equivalents/Christol.lean)). 1 form is stated, [41], and its direction "the form implies Problem 1" is proved. 2 forms
-are sketches.
+Christol's theorem ([Christol](Rule30Equivalents/Christol.lean)). [43] is proved through Hennie's
+theorem: a one-tape machine that runs in time o(n log n) on unary input has bounded crossing
+sequences, so it decides an eventually periodic language
+([OneTapeGap](Rule30Equivalents/OneTapeGap.lean)); its space form is a sketch. 1 form is stated,
+[41], and its direction "the form implies Problem 1" is proved. 1 form is a sketch, [46].
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1983,19 +1987,37 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Proof route.* Apply [18] together with two gap theorems: one-tape time o(n log n) decides only
   regular languages [Tra64], [Hen65], [Har68], and space o(log log n) decides only regular
   languages [SHL65]. Regular languages are decided in real time.
-- *Difficulty.* Hard: it needs the gap theorems and a machine model.
-- *Lean.* Sketch. Mathlib has `Turing.TM0`, `TM1`, `TM2` and `Turing.TM2ComputableInTime`, but no
-  predicate for time-bounded acceptance on one tape and no crossing-sequence theory. The critic
-  recommends defining `OneTapeDecidesInTime` on the single-tape `Turing.TM0` (`Turing.TM0.step`,
-  `Turing.TM0.Cfg`), counting steps on the input `List.replicate n ()`.
-  `Turing.TM2ComputableInTime` is the wrong model here: it is multi-stack and measures time in the
-  input length.
+- *Difficulty.* Hard: it needs the gap theorems and a machine model. The time form is proved here.
+- *Lean.* The time form is proved in [OneTapeGap](Rule30Equivalents/OneTapeGap.lean):
+  `problem1_iff_no_fast_one_tape_decider`, from `eventuallyPeriodic_iff_exists_fast_decider`.
+  The machine model is the textbook one: finitely many states, a finite tape alphabet, a two-way
+  infinite tape, and a transition that writes a symbol and moves the head one cell left or right.
+  `DecidesInTime M f T` says that on input 1ⁿ the machine has halted by step T(n), in an accepting
+  state iff f(n). Mathlib's `Turing.TM0` is not used: a step of it either moves or writes, and its
+  tape moves with the head, which makes crossing sequences awkward.
+  - `cs X b T` is the crossing sequence of a run at the boundary b, the states just after each
+    crossing.
+  - `splice`: two halting runs with equal crossing sequences at b₁ and b₂ can be cut there and
+    joined. The joined run halts, keeps the crossing sequences on both sides, and ends in the final
+    state of the left run if the crossing sequence has even length, of the right run otherwise.
+    The proof is a simulation invariant (`SpliceInv`) that follows one time in each run.
+  - `eventuallyPeriodic_of_bounded`: bounded crossing sequences give eventual periodicity. By
+    splicing, f(a + r) is determined by a finite type of the left length a (the crossing sequences
+    at a, and the answer for the even ones), so two left lengths of the same type give a period.
+  - `time_lower_bound` and `bounded` (Hennie's argument): take a shortest input 1ⁿ with a crossing
+    sequence longer than K. On each side of it, the boundaries 1, …, n have distinct crossing
+    sequences, or cutting would give a shorter input. At most (q + 1)^ℓ of them are shorter than ℓ,
+    so T(n) ≥ (n/4)·log_{q+1}(n/4), which time o(n log n) rules out for large K.
+  - The converse: `periodicTM` decides an eventually periodic f in n + 1 steps.
+
+  The space form needs a machine with a read-only input tape and a work tape, and the argument of
+  [SHL65]; it is not formalized.
 
   ```lean
-  -- sketch: `OneTapeDecidesInTime : Language Unit → (ℕ → ℕ) → Prop` does not exist yet
-  theorem problem1_iff_no_fast_unary_decider : Rule30Prize.Problem1 ↔
-      ¬ ∃ f : ℕ → ℕ, (fun n => (f n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n) ∧
-        OneTapeDecidesInTime unaryLang f
+  theorem problem1_iff_no_fast_one_tape_decider : Rule30Prize.Problem1 ↔
+      ¬ ∃ (M : TM) (T : ℕ → ℕ),
+        (fun n => (T n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n) ∧
+        DecidesInTime M c T
   ```
 
 - *Sources.* [Tra64]; [Hen65]; [Har68]; [SHL65]; [TYL03].

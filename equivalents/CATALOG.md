@@ -2318,7 +2318,9 @@ k-automatic sequences are countably many, `Automatic.countable_setOf_isAutomatic
 complexity → ∞, multiplication definable in (ℕ, +, S), density 1/2 along every progression, a
 transcendental generating function over 𝔽_p(X) (Christol) and over ℚ(X), the golden-power, unbordered-factor and
 Lempel–Ziv forms, black times that are not the zero set of a linear recurrence over ℚ
-(Skolem–Mahler–Lech) or a finite field, and x_β ∉ ℚ(β) for every real β > 2
+(Skolem–Mahler–Lech) or a finite field, Prize Problem 3 in both readings (no one-tape machine
+computes the column at all: a machine computes at most one sequence, and machines are countably
+many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`).
 
 ---

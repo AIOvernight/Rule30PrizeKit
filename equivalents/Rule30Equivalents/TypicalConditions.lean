@@ -7,6 +7,7 @@ import Rule30Equivalents.Christol
 import Rule30Equivalents.RegularSequences
 import Rule30Equivalents.PisotNumbers
 import Rule30Equivalents.SkolemMahlerLech
+import Rule30Equivalents.ProblemThree
 import Mathlib.Data.Finsupp.Encodable
 
 /-!
@@ -39,6 +40,11 @@ those is vacuous.
 * **Zero sets.** The black times are not the zero set of a linear recurrence sequence over `ℚ` (the
   Skolem–Mahler–Lech theorem) or over a finite field (`ae_not_zero_set_rat_trace`,
   `ae_not_zero_set_finite_trace`).
+* **Prize Problem 3.** A one-tape Turing machine computes at most one sequence (halting states stay
+  put, `eq_of_decidesBinInTime`), and relabeling states and symbols by `Fin`
+  (`decidesBinInTime_relabel`) leaves countably many machines, so no machine computes the center
+  column of almost every configuration, in any time (`ae_not_decidesBin_trace`): Problem 3 holds
+  for it in both readings.
 * **Words.** For every disjunctive sequence, multiplication is definable in `(ℕ, +, S)`
   (`PresburgerExpansion.mul_definable_of_disjunctive`), and the unbordered words `1 0^L` occur
   arbitrarily late (`not_bordered_one_zeros`). For every sequence that is not eventually periodic,
@@ -450,6 +456,120 @@ theorem ae_value_not_mem_adjoin_trace {β : ℝ} (hβ : 2 < β) :
       (BinaryIrrational.value_injective hβ).injOn (countable_adjoin β)
   exact measurePreserving_trace.quasiMeasurePreserving.ae (ae_notMem_of_countable hcount)
 
+/-! ### Prize Problem 3 -/
+
+section ProblemThree
+
+open OneTapeGap ProblemThree
+
+/-- Relabel the states and symbols of a machine along equivalences. -/
+def relabel (M : Machine) {Q Γ : Type} (eQ : M.Q ≃ Q) (eΓ : M.Γ ≃ Γ) : Machine where
+  Q := Q
+  Γ := Γ
+  blank := eΓ M.blank
+  one := eΓ M.one
+  start := eQ M.start
+  halt := fun q => M.halt (eQ.symm q)
+  accept := fun q => M.accept (eQ.symm q)
+  δ := fun q γ => (eQ (M.δ (eQ.symm q) (eΓ.symm γ)).1, eΓ (M.δ (eQ.symm q) (eΓ.symm γ)).2.1,
+    (M.δ (eQ.symm q) (eΓ.symm γ)).2.2)
+
+variable {M : Machine} {Q Γ : Type} (eQ : M.Q ≃ Q) (eΓ : M.Γ ≃ Γ)
+
+/-- A configuration, relabeled. -/
+def relabelCfg (c : Cfg M) : Cfg (relabel M eQ eΓ) := ⟨eQ c.q, c.h, fun i => eΓ (c.tape i)⟩
+
+theorem step_relabelCfg (c : Cfg M) :
+    step (relabelCfg eQ eΓ c) = relabelCfg eQ eΓ (step c) := by
+  cases hc : M.halt c.q
+  · have h' : (relabel M eQ eΓ).halt (relabelCfg eQ eΓ c).q = false := by
+      simp [relabel, relabelCfg, hc]
+    rw [step_eq h', step_eq hc]
+    refine Cfg.ext' ?_ ?_ ?_
+    · simp [relabelCfg, relabel]
+    · simp [relabelCfg, relabel]
+    · funext i
+      by_cases hi : i = c.h
+      · subst hi
+        simp [relabelCfg, relabel]
+      · simp [relabelCfg, relabel, Function.update_of_ne hi]
+  · have h' : (relabel M eQ eΓ).halt (relabelCfg eQ eΓ c).q = true := by
+      simp [relabel, relabelCfg, hc]
+    rw [step_of_halt h', step_of_halt hc]
+
+theorem runW_relabel (w : List M.Γ) (t : ℕ) :
+    runW (relabel M eQ eΓ) (id : (relabel M eQ eΓ).Γ → (relabel M eQ eΓ).Γ)
+      (w.map eΓ : List (relabel M eQ eΓ).Γ) t = relabelCfg eQ eΓ (runW M id w t) := by
+  induction t with
+  | zero =>
+    simp only [runW, Function.iterate_zero, id]
+    refine Cfg.ext' rfl rfl ?_
+    funext i
+    simp only [initW, relabelCfg, relabel, List.length_map, id]
+    split_ifs <;> simp
+  | succ t ih =>
+    rw [isRun_runW (M := relabel M eQ eΓ) id (w.map eΓ : List (relabel M eQ eΓ).Γ) t, ih,
+      isRun_runW (M := M) id w t, step_relabelCfg]
+
+theorem binWord_relabel (zero : M.Γ) (n : ℕ) :
+    binWord (relabel M eQ eΓ) (eΓ zero) n =
+      ((binWord M zero n).map eΓ : List (relabel M eQ eΓ).Γ) := by
+  simp only [binWord, List.map_map]
+  congr 1
+  funext i
+  simp only [Function.comp_apply, relabel]
+  split_ifs <;> rfl
+
+theorem decidesBinInTime_relabel {zero : M.Γ} {f : ℕ → Bool} {T : ℕ → ℕ}
+    (h : DecidesBinInTime M zero f T) : DecidesBinInTime (relabel M eQ eΓ) (eΓ zero) f T := by
+  intro n
+  rw [binWord_relabel, runW_relabel]
+  simpa [relabelCfg, relabel] using h n
+
+/-- **A machine computes at most one sequence**: halting states stay put, so the answer does not
+depend on the time at which it is read. -/
+theorem eq_of_decidesBinInTime {zero : M.Γ} {f f' : ℕ → Bool} {T T' : ℕ → ℕ}
+    (h : DecidesBinInTime M zero f T) (h' : DecidesBinInTime M zero f' T') : f = f' := by
+  funext n
+  obtain ⟨hh, ha⟩ := h n
+  obtain ⟨hh', ha'⟩ := h' n
+  have hX := isRun_runW (M := M) id (binWord M zero n)
+  rcases le_total (T n) (T' n) with hle | hle
+  · rw [← ha, ← ha', eq_of_halt hX hh hle]
+  · rw [← ha, ← ha', eq_of_halt hX hh' hle]
+
+end ProblemThree
+
+/-- **The sequences computed by one-tape Turing machines are countably many**: a machine computes
+at most one sequence (`eq_of_decidesBinInTime`), and after relabeling its states and symbols by
+`Fin` there are countably many machines (`decidesBinInTime_relabel`). -/
+theorem countable_setOf_decidesBin : {f : ℕ → Bool | ∃ (M : OneTapeGap.TM) (zero : M.Γ)
+    (T : ℕ → ℕ), ProblemThree.DecidesBinInTime M.toMachine zero f T}.Countable := by
+  haveI : Countable OneTapeGap.Move := Function.Injective.countable (f := OneTapeGap.Move.shift)
+    (by intro a b h; cases a <;> cases b <;> simp_all [OneTapeGap.Move.shift])
+  let canon : (Σ q g : ℕ, (Fin g × Fin g × Fin q × (Fin q → Bool) × (Fin q → Bool) ×
+      (Fin q → Fin g → Fin q × Fin g × OneTapeGap.Move)) × Fin g) → OneTapeGap.Machine :=
+    fun d => ⟨Fin d.1, Fin d.2.1, d.2.2.1.1, d.2.2.1.2.1, d.2.2.1.2.2.1, d.2.2.1.2.2.2.1,
+      d.2.2.1.2.2.2.2.1, d.2.2.1.2.2.2.2.2⟩
+  let S := fun d => {f : ℕ → Bool | ∃ T, ProblemThree.DecidesBinInTime (canon d) d.2.2.2 f T}
+  have hS : ∀ d, (S d).Subsingleton := fun d f ⟨T, hT⟩ f' ⟨T', hT'⟩ =>
+    eq_of_decidesBinInTime hT hT'
+  refine (Set.countable_iUnion fun d => (hS d).countable).mono ?_
+  rintro f ⟨M, zero, T, h⟩
+  let eQ := Fintype.equivFin M.Q
+  let eΓ := Fintype.equivFin M.Γ
+  exact Set.mem_iUnion.2 ⟨⟨Fintype.card M.Q, Fintype.card M.Γ, (eΓ M.blank, eΓ M.one, eQ M.start,
+    fun q => M.halt (eQ.symm q), fun q => M.accept (eQ.symm q),
+    fun q γ => (eQ (M.δ (eQ.symm q) (eΓ.symm γ)).1, eΓ (M.δ (eQ.symm q) (eΓ.symm γ)).2.1,
+      (M.δ (eQ.symm q) (eΓ.symm γ)).2.2)), eΓ zero⟩, T, decidesBinInTime_relabel eQ eΓ h⟩
+
+/-- **Prize Problem 3 holds for almost every configuration**, in a strong form: no one-tape Turing
+machine computes the center column from the binary digits of `n`, in any time. -/
+theorem ae_not_decidesBin_trace : ∀ᵐ x ∂(coins ℤ), ¬ ∃ (M : OneTapeGap.TM) (zero : M.Γ)
+    (T : ℕ → ℕ), ProblemThree.DecidesBinInTime M.toMachine zero (trace x) T :=
+  measurePreserving_trace.quasiMeasurePreserving.ae
+    (ae_notMem_of_countable countable_setOf_decidesBin)
+
 /-! ### The sufficient conditions, almost surely -/
 
 /-- **The other sufficient conditions hold for almost every configuration.** For almost every
@@ -464,8 +584,9 @@ hypotheses of `BoundedRemainder.problem1_of_unbounded_remainder`,
 `Transcendence.problem1_of_transcendental_F2_or_F3`, `Transcendence.problem1_of_transcendental`
 over `ℚ`,
 `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`,
-`problem1_of_late_long_unbordered_factors`, `problem1_of_lz_unbounded` and
-`LinearRelations.problem1_of_not_zero_set` over `ℚ`. -/
+`problem1_of_late_long_unbordered_factors`, `problem1_of_lz_unbounded`,
+`LinearRelations.problem1_of_not_zero_set` over `ℚ`, and `ProblemThree.problem1_of_problem3` and
+`problem1_of_problem3Verbal` (no machine computes the column at all). -/
 theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     (∀ α C : ℝ, ∃ n, C < |(BoundedRemainder.ones (trace x) n : ℝ) - α * n|) ∧
     (∀ (m : ℕ), 0 < m → ∀ (w : Fin m → Bool) (α C : ℝ), ∃ n, C < |(BoundedRemainder.ones
@@ -491,7 +612,9 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
       ¬ Lyndon.Bordered ((List.range ℓ).map fun j => trace x (i + j))) ∧
     (∀ K, ∃ n, K < WordForms.lzComplexity (trace x) n) ∧
     (∀ (E : LinearRecurrence ℚ) (u : ℕ → ℚ), E.IsSolution u →
-      {t | u t = 0} ≠ {t | trace x t = true}) := by
+      {t | u t = 0} ≠ {t | trace x t = true}) ∧
+    ¬ ∃ (M : OneTapeGap.TM) (zero : M.Γ) (T : ℕ → ℕ),
+      ProblemThree.DecidesBinInTime M.toMachine zero (trace x) T := by
   filter_upwards [ae_unbounded_remainder_trace, ae_unbounded_word_remainder_trace,
     ae_halfDensity_trace,
     Fluctuations.ae_oscillating_discrepancy_trace, BoundedRemainder.ae_predictsAtHalf_trace,
@@ -499,9 +622,9 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     measurePreserving_trace.quasiMeasurePreserving.ae ae_autComplexity_tendsto,
     ae_mul_definable_trace, ae_density_progressions_trace, ae_transcendental_series_trace,
     ae_transcendental_rat_trace,
-    ae_golden_trace, ae_disjunctive_trace, ae_lz_unbounded_trace, ae_not_zero_set_rat_trace]
-    with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 hq h11 hd h13 hz
+    ae_golden_trace, ae_disjunctive_trace, ae_lz_unbounded_trace, ae_not_zero_set_rat_trace,
+    ae_not_decidesBin_trace] with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 hq h11 hd h13 hz hp3
   exact ⟨h1, hw, h2, h3, h4, h5, h6, h7, h8, h9, h10, hq, h11,
-    late_long_unbordered_of_disjunctive hd, h13, hz⟩
+    late_long_unbordered_of_disjunctive hd, h13, hz, hp3⟩
 
 end Rule30Equivalents.TypicalConditions

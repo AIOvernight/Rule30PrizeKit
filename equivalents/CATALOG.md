@@ -2857,8 +2857,12 @@ with Turing machines reading n. Notes:
     does, and so does a comeager set of them, so rule 30 is injective on a set of full measure, and
     every row of the space-time diagram of almost every configuration determines it
     (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
-    `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). So rule 30 is an
-    automorphism of μ modulo null sets, with a measurable, measure-preserving inverse G
+    `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). Its periodic points are
+    all spatially periodic: F^k x = x forces period (4^k)!, at most 4^k configurations satisfy it,
+    and F itself has exactly three fixed points, all white and the two phases of …0101…
+    ([PeriodicPoints](Rule30Equivalents/PeriodicPoints.lean): `evol_add_factorial`,
+    `ncard_fixedPoints_le`, `evol_one_eq_self_iff`). So rule 30 is an automorphism of μ modulo null
+    sets, with a measurable, measure-preserving inverse G
     ([Invertibility](Rule30Equivalents/Invertibility.lean): `exists_measurePreserving_inverse`), and
     the center column of a random configuration, run forward with rule 30 and backward with G, is a
     two-sided sequence of independent fair coins (`measurePreserving_twoSidedTrace`): the two-sided

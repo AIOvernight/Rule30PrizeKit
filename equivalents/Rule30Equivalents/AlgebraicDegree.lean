@@ -1,5 +1,5 @@
 import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30Realization
+import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
 import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.ZMod.Basic
@@ -127,14 +127,9 @@ theorem evol_succ (x : ℤ → Bool) (t : ℕ) (p : ℤ) :
     evol x (t + 1) p = xor (evol x t (p - 1)) (evol x t p || evol x t (p + 1)) := rfl
 
 /-- The light cone: the cell `(t, p)` depends only on the cells `p - t, …, p + t`. -/
-theorem evol_congr {x y : ℤ → Bool} :
-    ∀ (t : ℕ) (p : ℤ), (∀ j, p - t ≤ j → j ≤ p + t → x j = y j) → evol x t p = evol y t p
-  | 0, p, h => h p (by simp) (by simp)
-  | t + 1, p, h => by
-    rw [evol_succ, evol_succ,
-      evol_congr t (p - 1) fun j h1 h2 => h j (by push_cast; omega) (by push_cast; omega),
-      evol_congr t p fun j h1 h2 => h j (by push_cast; omega) (by push_cast; omega),
-      evol_congr t (p + 1) fun j h1 h2 => h j (by push_cast; omega) (by push_cast; omega)]
+theorem evol_congr {x y : ℤ → Bool} (t : ℕ) (p : ℤ)
+    (h : ∀ j, p - t ≤ j → j ≤ p + t → x j = y j) : evol x t p = evol y t p :=
+  Rule30ZeroBoundaryBarriers.evol_local (x := y) (x' := x) h t p (by omega) (by omega)
 
 theorem evol_update_of_far {t : ℕ} {p i : ℤ} (hi : i < p - t ∨ p + t < i) (x : ℤ → Bool)
     (b : Bool) : evol (Function.update x i b) t p = evol x t p :=

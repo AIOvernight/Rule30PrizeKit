@@ -2771,53 +2771,57 @@ with Turing machines reading n. Notes:
       a comeager set, while those whose trace is even simply normal form a meager set.
 
     The single seed lies in the countable, null, meager set of finite configurations, so neither
-    statement says anything about it. *Lean*
-    ([Genericity](Rule30Equivalents/Genericity.lean)): the trace map is continuous, open and onto
-    (`continuous_trace`, `isOpenMap_trace`, `surjective_trace`; flipping x_{−m} flips c(m) and
-    nothing before, `exists_extend`); the configurations with a disjunctive trace form a comeager
-    set (`residual_disjunctive_trace`), and those whose trace has density 1/2 a meager set
-    (`isMeagre_halfDensity_trace`, so a fortiori those with a normal trace), which has full
-    measure (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Rule 30 itself is onto
-    (`surjective_evol_one`); every configuration has at most four preimages, configurations with
-    the same image that agree right of some cell are equal, and the white configuration has
-    exactly two preimages ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`,
+    statement says anything about it. *Lean* ([Genericity](Rule30Equivalents/Genericity.lean)): the
+    trace map is continuous, open and onto (`continuous_trace`, `isOpenMap_trace`,
+    `surjective_trace`; flipping x_{−m} flips c(m) and nothing before, `exists_extend`); the
+    configurations with a disjunctive trace form a comeager set (`residual_disjunctive_trace`), and
+    those whose trace has density 1/2 a meager set (`isMeagre_halfDensity_trace`, so a fortiori
+    those with a normal trace), which has full measure
+    (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Rule 30 itself is onto
+    (`surjective_evol_one`); every configuration has at most four preimages, configurations with the
+    same image that agree right of some cell are equal, and the white configuration has exactly two
+    preimages ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`,
     `eq_of_evol_one_eq_of_right`, `preimage_white`); but two different configurations that agree
     left of a cell can have the same image, so rule 30 is not positively expansive
-    (`exists_ne_left_eq`, `not_positivelyExpansive`). Likewise, ergodicity of the doubling map
+    (`exists_ne_left_eq`, `not_positivelyExpansive`). Still, rule 30 is invertible almost everywhere
+    and generically: an image showing 010 at the cells q, q + 1, q + 2 forces the preimage to be
+    black at q − 1 (`eq_true_of_window`), so a configuration that shows 010 arbitrarily far to the
+    right has exactly one preimage (`eq_of_evol_one_eq_of_frequently`). Almost every configuration
+    does, and so does a comeager set of them, so rule 30 is injective on a set of full measure
+    (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
+    `Mixing.residual_existsUnique_preimage`). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
-    version said that the trace is normal for a comeager set of configurations; that is false.
-12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
+    version said that the trace is normal for a comeager set of configurations; that is false. 12.
+    **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
     neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof
     mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the defect
-    bound of Section 4 (own reasoning, logic survey).
-13. **Complexity profiles from cryptography.** For each finite-register model, "profile bounded ⟺
-    EP" holds: LFSR linear complexity, FCSR 2-adic complexity, maximum-order and k-th order
-    complexity (k ≥ 1), finite-state generation, and automatic complexity ([52]). For c, every
-    profile computed so far looks random. As numeric certificates they are weaker per bit than the
-    kernel's factor count: about n/2 for T + P from n bits, against about n (algebra survey).
-14. **Mathlib infrastructure.**
-    - Mathlib already has: Presburger definability; Myhill–Nerode; `LinearRecurrence`; AddCircle
-      torsion and density; continued fractions over ordered fields; p-adic numbers and the Mahler
-      basis; `PowerSeries`, `RatFunc`, `LaurentSeries` and `PowerSeries.derivative`; `omegaLimit`;
-      `SymbolicDynamics`; König's lemma; `Dioph` with `Dioph.pow_dioph`; Lucas' theorem
-      (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
-      (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
-      `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`.
-    - Mathlib lacks: an eventually-periodic predicate; the digits-rationality lemma for arbitrary
-      digits; Morse–Hedlund; Kronecker's, Fatou's, Szegő's, Pólya–Carlson's, Euler–Lagrange's and
-      Skolem–Mahler–Lech's theorems; Christol's and Cobham's theorems; Strassmann's theorem;
-      automatic sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping
-      lemma; the gap theorems; normal numbers; natural density; Tauberian theorems; the pointwise
-      ergodic theorem (Mathlib has Birkhoff sums and the von Neumann mean ergodic theorem); and
-      cellular automata.
-    - This library now proves, in general form: Morse–Hedlund, Euler–Lagrange, Strassmann,
-      Skolem–Mahler–Lech over ℚ, Christol (both directions) and Cobham, Büchi–Bruyère (both
-      directions), automatic and k-regular sequences, Büchi automata and the MSO composition method,
-      the context-free pumping lemma, the time and space gap theorems (Hennie–Trakhtenbrot and
-      Stearns–Hartmanis–Lewis), meromorphic continuation of finite-valued power series (the disk
-      form of Fatou–Szegő), the Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's
-      normal number theorem for fair coins, and, for rule 30, Hedlund's measure preservation,
-      mixing and ergodicity. Szegő's and Pólya–Carlson's theorems are still missing.
+    bound of Section 4 (own reasoning, logic survey). 13. **Complexity profiles from cryptography.**
+    For each finite-register model, "profile bounded ⟺ EP" holds: LFSR linear complexity, FCSR
+    2-adic complexity, maximum-order and k-th order complexity (k ≥ 1), finite-state generation, and
+    automatic complexity ([52]). For c, every profile computed so far looks random. As numeric
+    certificates they are weaker per bit than the kernel's factor count: about n/2 for T + P from n
+    bits, against about n (algebra survey). 14. **Mathlib infrastructure.** - Mathlib already has:
+    Presburger definability; Myhill–Nerode; `LinearRecurrence`; AddCircle torsion and density;
+    continued fractions over ordered fields; p-adic numbers and the Mahler basis; `PowerSeries`,
+    `RatFunc`, `LaurentSeries` and `PowerSeries.derivative`; `omegaLimit`; `SymbolicDynamics`;
+    König's lemma; `Dioph` with `Dioph.pow_dioph`; Lucas' theorem
+    (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
+    (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
+    `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`. - Mathlib lacks: an
+    eventually-periodic predicate; the digits-rationality lemma for arbitrary digits; Morse–Hedlund;
+    Kronecker's, Fatou's, Szegő's, Pólya–Carlson's, Euler–Lagrange's and Skolem–Mahler–Lech's
+    theorems; Christol's and Cobham's theorems; Strassmann's theorem; automatic sequences; Büchi
+    automata and MSO; Parikh's theorem; the context-free pumping lemma; the gap theorems; normal
+    numbers; natural density; Tauberian theorems; the pointwise ergodic theorem (Mathlib has
+    Birkhoff sums and the von Neumann mean ergodic theorem); and cellular automata. - This library
+    now proves, in general form: Morse–Hedlund, Euler–Lagrange, Strassmann, Skolem–Mahler–Lech over
+    ℚ, Christol (both directions) and Cobham, Büchi–Bruyère (both directions), automatic and
+    k-regular sequences, Büchi automata and the MSO composition method, the context-free pumping
+    lemma, the time and space gap theorems (Hennie–Trakhtenbrot and Stearns–Hartmanis–Lewis),
+    meromorphic continuation of finite-valued power series (the disk form of Fatou–Szegő), the
+    Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's normal number theorem for fair
+    coins, and, for rule 30, Hedlund's measure preservation, mixing and ergodicity. Szegő's and
+    Pólya–Carlson's theorems are still missing.
 
 ---
 

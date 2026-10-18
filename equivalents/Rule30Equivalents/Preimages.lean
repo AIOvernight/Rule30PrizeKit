@@ -16,6 +16,11 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   infinitely many `k`, hence everywhere.
 * `preimage_white`: the all-white configuration has exactly two preimages, all white and all
   black.
+* `eq_of_evol_one_eq_of_frequently`: **a configuration that shows `010` arbitrarily far to the
+  right has exactly one preimage**. An image showing `010` at `q, q + 1, q + 2` forces the
+  preimage to be black at `q - 1` (`eq_true_of_window`), and then the image at `q - 1` fixes the
+  cell `q - 2`. Almost every configuration, and a comeager set of them, show `010` so
+  (`Mixing.ae_existsUnique_preimage`, `Mixing.residual_existsUnique_preimage`).
 * `exists_ne_left_eq`: rule 30 is not injective on left-asymptotic configurations. Black only at
   `0` on the left, then `(0110)^∞` against `(1000)^∞` from the cell `1` on, have the same
   image. A preimage can branch only after a black cell, and these two branches run around a cycle
@@ -153,6 +158,45 @@ theorem preimage_white (x : ℤ → Bool) :
       rfl
     · funext q
       rfl
+
+/-! ### Configurations with a unique preimage -/
+
+/-- **The word `010` pins its left neighbour**: if the image of `x` shows `0, 1, 0` at the cells
+`q, q + 1, q + 2`, then `x` is black at `q - 1`. Were it white, `F(x)_q = 0` would make `x_q` and
+`x_{q+1}` white, then `F(x)_{q+1} = 1` would make `x_{q+2}` black and `F(x)_{q+2} = 1`. -/
+theorem eq_true_of_window {x : ℤ → Bool} {q : ℤ} (h0 : evol x 1 q = false)
+    (h1 : evol x 1 (q + 1) = true) (h2 : evol x 1 (q + 2) = false) : x (q - 1) = true := by
+  rw [evol_one] at h0
+  rw [evol_one, show q + 1 - 1 = q by ring, show q + 1 + 1 = q + 2 by ring] at h1
+  rw [evol_one, show q + 2 - 1 = q + 1 by ring] at h2
+  revert h0 h1 h2
+  cases x (q - 1) <;> cases x q <;> cases x (q + 1) <;> cases x (q + 2) <;>
+    cases x (q + 2 + 1) <;> decide
+
+/-- Two preimages of a configuration agree at every cell left of an occurrence of `010` in it:
+both are black at `q - 1`, so the image at `q - 1` fixes the cell `q - 2`, and left determinism
+(`eq_of_evol_one_eq`) does the rest. -/
+theorem eq_of_evol_one_eq_of_window {x y : ℤ → Bool} (h : evol x 1 = evol y 1) {q : ℤ}
+    (h0 : evol x 1 q = false) (h1 : evol x 1 (q + 1) = true) (h2 : evol x 1 (q + 2) = false) :
+    ∀ p, p ≤ q - 1 → x p = y p := by
+  have hx := eq_true_of_window h0 h1 h2
+  have hy := eq_true_of_window (h ▸ h0) (h ▸ h1) (h ▸ h2)
+  have h2' : x (q - 2) = y (q - 2) := by
+    have e := congrFun h (q - 1)
+    rw [evol_one, evol_one, show q - 1 - 1 = q - 2 by ring, hx, hy] at e
+    simpa using e
+  intro p hp
+  exact eq_of_evol_one_eq h h2' (by rw [show q - 2 + 1 = q - 1 by ring, hx, hy]) p (by omega)
+
+/-- **Unique preimages**: a configuration that shows `010` arbitrarily far to the right has
+exactly one preimage. -/
+theorem eq_of_evol_one_eq_of_frequently {x y : ℤ → Bool} (h : evol x 1 = evol y 1)
+    (hw : ∀ n : ℤ, ∃ q ≥ n,
+      evol x 1 q = false ∧ evol x 1 (q + 1) = true ∧ evol x 1 (q + 2) = false) :
+    x = y := by
+  funext p
+  obtain ⟨q, hq, h0, h1, h2⟩ := hw (p + 1)
+  exact eq_of_evol_one_eq_of_window h h0 h1 h2 p (by omega)
 
 /-! ### Left-asymptotic pairs -/
 

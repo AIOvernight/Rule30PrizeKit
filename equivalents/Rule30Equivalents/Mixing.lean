@@ -1,4 +1,5 @@
 import Rule30Equivalents.RandomConfigurations
+import Rule30Equivalents.Preimages
 import Mathlib.MeasureTheory.Measure.MeasuredSets
 import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
 import Mathlib.Dynamics.Ergodic.Ergodic
@@ -26,6 +27,11 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   their windows (`measure_inter_preimage_cylinder`), and every measurable set is close to a
   cylinder (`exists_cylinder_approx`, from Mathlib's approximation by a generating ring of sets).
   Hence `ergodic_evol_one`: rule 30 is ergodic, in Mathlib's sense of `Ergodic`.
+* `ae_existsUnique_preimage`, `residual_existsUnique_preimage`: **rule 30 is invertible almost
+  everywhere and generically**: almost every configuration, and a comeager set of them, show `010`
+  arbitrarily far to the right and so have exactly one preimage
+  (`Preimages.eq_of_evol_one_eq_of_frequently`). Hence rule 30 is injective on a set of full
+  measure (`exists_injOn_ae`), though not injective (`Preimages.exists_ne_left_eq`).
 * `mixing_all_orders`: **rule 30 is mixing of all orders**: cylinders at times whose gaps exceed
   the width of their windows are independent (`measure_biInter_preimage_cylinder`), so
   `μ(F^{-t₀} A₀ ∩ ⋯ ∩ F^{-tₙ₋₁} Aₙ₋₁) → μ(A₀) ⋯ μ(Aₙ₋₁)` as the gaps between the times grow.
@@ -207,6 +213,86 @@ theorem ae_isNormal_rows :
     ⟨by fun_prop, Measure.map_infinitePi_infinitePi_of_inj (Nat.cast_injective (R := ℤ))⟩
   refine ae_all_iff.2 fun t => ?_
   exact ((hright.comp (measurePreserving_evol t)).quasiMeasurePreserving.ae ae_isNormal)
+
+/-! ### Rule 30 is invertible almost everywhere -/
+
+/-- A disjunctive sequence shows every word beyond every position. -/
+theorem exists_ge_of_disjunctive {v : ℕ → Bool} (hv : Disjunctive v) {n : ℕ} (w : Fin n → Bool)
+    (N : ℕ) : ∃ i ≥ N, ∀ j : Fin n, v (i + j) = w j := by
+  obtain ⟨i, hi⟩ := hv (N + n) fun j => if h : N ≤ j.1 then w ⟨j.1 - N, by omega⟩ else false
+  refine ⟨i + N, Nat.le_add_left N i, fun j => ?_⟩
+  have := hi ⟨N + j.1, by omega⟩
+  simp only [Nat.le_add_right, dif_pos, Nat.add_sub_cancel_left] at this
+  rw [show i + N + j.1 = i + (N + j.1) by ring]
+  exact this
+
+/-- **Rule 30 is invertible almost everywhere**: almost every configuration has exactly one
+preimage. Its right half is normal (`ae_isNormal_rows`), so it shows `010` arbitrarily far to the
+right, and such a configuration has only one preimage
+(`Preimages.eq_of_evol_one_eq_of_frequently`); it has one by `surjective_evol_one`. -/
+theorem ae_existsUnique_preimage : ∀ᵐ y ∂(coins ℤ), ∃! x : ℤ → Bool, evol x 1 = y := by
+  filter_upwards [ae_isNormal_rows] with y hy
+  have hd : Disjunctive fun n : ℕ => evol y 0 n := fun n w =>
+    StrongerStatements.disjunctive_of_isNormal (hy 0) n w
+  obtain ⟨x, hx⟩ := surjective_evol_one y
+  refine ⟨x, hx, fun x' hx' =>
+    Preimages.eq_of_evol_one_eq_of_frequently (hx'.trans hx.symm) fun n => ?_⟩
+  obtain ⟨i, hi, hw⟩ := exists_ge_of_disjunctive hd ![false, true, false] n.toNat
+  refine ⟨i, by omega, ?_⟩
+  have h0 := hw 0
+  have h1 := hw 1
+  have h2 := hw 2
+  simp only [Fin.isValue, Fin.val_zero, Fin.val_one, Fin.val_two, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
+    add_zero] at h0 h1 h2
+  push_cast at h0 h1 h2
+  rw [hx']
+  exact ⟨h0, h1, h2⟩
+
+/-- **Rule 30 is injective on a set of full measure**, though not injective. -/
+theorem exists_injOn_ae :
+    ∃ E : Set (ℤ → Bool), coins ℤ Eᶜ = 0 ∧ Set.InjOn (fun x : ℤ → Bool => evol x 1) E := by
+  have h := (measurePreserving_evol 1).quasiMeasurePreserving.ae ae_existsUnique_preimage
+  refine ⟨{x | ∃! x' : ℤ → Bool, evol x' 1 = evol x 1}, ae_iff.1 h, fun x hx x'' _ hxx => ?_⟩
+  obtain ⟨z, -, hz⟩ := hx
+  exact (hz x rfl).trans (hz x'' hxx.symm).symm
+
+/-- The configurations that show `010` arbitrarily far to the right form a comeager set. -/
+theorem residual_frequently_window :
+    {y : ℤ → Bool | ∀ n : ℤ, ∃ q ≥ n, y q = false ∧ y (q + 1) = true ∧ y (q + 2) = false} ∈
+      residual (ℤ → Bool) := by
+  have hU : ∀ N : ℕ, {y : ℤ → Bool | ∃ q ≥ (N : ℤ),
+      y q = false ∧ y (q + 1) = true ∧ y (q + 2) = false} ∈ residual (ℤ → Bool) := by
+    intro N
+    refine residual_of_dense_open ?_ ?_
+    · have hev : ∀ (q : ℤ) (b : Bool), IsOpen {y : ℤ → Bool | y q = b} := fun q b =>
+        (isOpen_discrete ({b} : Set Bool)).preimage (continuous_apply (A := fun _ : ℤ => Bool) q)
+      simp only [Set.setOf_exists, Set.setOf_and]
+      exact isOpen_iUnion fun q => isOpen_const.inter
+        ((hev q false).inter ((hev (q + 1) true).inter (hev (q + 2) false)))
+    · rw [dense_iff_inter_open]
+      rintro V hV ⟨v, hv⟩
+      obtain ⟨n, hn⟩ := exists_window_subset (hV.mem_nhds hv)
+      -- put `010` at `q = n + N + 1`, beyond the window
+      set q : ℤ := n + N + 1
+      refine ⟨fun p => if p = q then false else if p = q + 1 then true else if p = q + 2 then false
+        else v p, hn fun p _ hp => ?_, q, by omega, by simp, by simp, by simp⟩
+      simp only [show p ≠ q by omega, show p ≠ q + 1 by omega, show p ≠ q + 2 by omega, if_false]
+  refine Filter.mem_of_superset (countable_iInter_mem.2 hU) fun y hy n => ?_
+  simp only [Set.mem_iInter, Set.mem_setOf_eq] at hy
+  obtain ⟨q, hq, h⟩ := hy n.toNat
+  exact ⟨q, by omega, h⟩
+
+/-- **Rule 30 is invertible on a comeager set**: a comeager set of configurations has exactly
+one preimage. -/
+theorem residual_existsUnique_preimage :
+    {y : ℤ → Bool | ∃! x : ℤ → Bool, evol x 1 = y} ∈ residual (ℤ → Bool) := by
+  refine Filter.mem_of_superset residual_frequently_window fun y hy => ?_
+  obtain ⟨x, hx⟩ := surjective_evol_one y
+  refine ⟨x, hx, fun x' hx' =>
+    Preimages.eq_of_evol_one_eq_of_frequently (hx'.trans hx.symm) fun n => ?_⟩
+  rw [hx']
+  exact hy n
 
 /-! ### Mixing for all measurable sets, and ergodicity -/
 

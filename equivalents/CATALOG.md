@@ -433,7 +433,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Checks.* A Lean `#eval` reproduces 60 bits of A051023. Python reproduces 400 bits against a
   direct simulation (own computation, repeated by the critic).
 - *Difficulty.* Easy.
-- *Lean.* Stated. The `let` avoids exponential evaluation.
+- *Lean.* Proved in the library: `IntegerRows.problem1_iff_integer_rows`, and in the T-function
+  language `TFunction.problem1_iff_orbit`. The original scratch statement was the following; the
+  `let` avoids exponential evaluation.
 
   ```lean
   def nksRow : ℕ → ℕ

@@ -24,10 +24,18 @@ with steps `±1/2` (`imbalance`).
 * `ae_oscillating_discrepancy_trace`: the discrepancy is unbounded above and below, which for the
   center column of the single seed would prove Problem 1
   (`BoundedRemainder.problem1_of_oscillating_discrepancy`).
+* `ae_eventually_abs_discrepancy_lt_trace`: **the discrepancy stays within `√(2 n log log n)`** from
+  some `n` on. `measure_exists_le_imbalance_le` is Lévy's maximal inequality: on the event that `k`
+  is the first time the imbalance reaches `x`, flipping the coins `k, …, n - 1`
+  (`measurePreserving_flipIco`) preserves the event and negates the later gain, so the imbalance at
+  time `n` is still at least `x` on at least half of it. With Hoeffding's inequality, the
+  probability of reaching `√(2^(j+1) log log 2^j)` before time `2^(j+1)` is at most
+  `2 / (j log 2)²`, a summable sequence (`ae_eventually_imbalance_lt`).
 
-With `RandomConfigurations.ae_eventually_abs_count_trace_lt` this pins the fluctuations of a random
-center column between `K √n`, for every `K`, and `√(n log n)`. At the density `1/2` it strengthens
-`BoundedRemainder.ae_unbounded_remainder_trace`: the remainder is not even `O(√n)`.
+So the fluctuations of a random center column lie between `K √n`, for every `K`, and
+`√(2 n log log n)`; the law of the iterated logarithm puts them at `√(n log log n / 2)`. At the
+density `1/2` this strengthens `BoundedRemainder.ae_unbounded_remainder_trace`: the remainder is not
+even `O(√n)`.
 -/
 
 namespace Rule30Equivalents.Fluctuations
@@ -335,6 +343,261 @@ theorem ae_frequently_imbalance_eq_zero :
   obtain ⟨n, h1, -, h3⟩ := exists_imbalance_eq_zero hb (by simpa using ha') (by simpa using hb')
   exact ⟨n, ha.trans h1, h3⟩
 
+/-! ### The envelope `√(n log log n)` -/
+
+/-- Flip the coins `m, …, n - 1`. -/
+def flipIco (m n : ℕ) (v : ℕ → Bool) : ℕ → Bool := fun k => if k ∈ Finset.Ico m n then !v k else v k
+
+/-- Flipping a block of coins preserves the fair-coin measure. -/
+theorem measurePreserving_flipIco (m n : ℕ) :
+    MeasurePreserving (flipIco m n) (coins ℕ) (coins ℕ) := by
+  refine ⟨measurable_pi_lambda _ fun k => ?_, ?_⟩
+  · by_cases hk : k ∈ Finset.Ico m n
+    · simp only [flipIco, hk, if_true]
+      exact (Measurable.of_discrete (f := fun b : Bool => !b)).comp (measurable_pi_apply k)
+    · simp only [flipIco, hk, if_false]
+      exact measurable_pi_apply k
+  · let f : ℕ → Bool → Bool := fun k => if k ∈ Finset.Ico m n then (fun b => !b) else id
+    have hf : flipIco m n = fun v k => f k (v k) := by
+      funext v k
+      simp only [flipIco, f]
+      split_ifs <;> rfl
+    have h := Measure.infinitePi_map_pi (μ := fun _ : ℕ => coin) (f := f)
+      fun _ => Measurable.of_discrete
+    have hc : ∀ k, coin.map (f k) = coin := by
+      intro k
+      simp only [f]
+      split_ifs
+      · exact coin_map_not
+      · exact Measure.map_id
+    simp only [hc] at h
+    rw [hf]
+    exact h
+
+theorem imbalance_flipIco_of_le (v : ℕ → Bool) {m n j : ℕ} (hj : j ≤ m) :
+    imbalance (flipIco m n v) j = imbalance v j := by
+  unfold imbalance
+  refine Finset.sum_congr rfl fun i hi => ?_
+  rw [Finset.mem_range] at hi
+  simp only [flipIco, Finset.mem_Ico]
+  rw [if_neg (by omega)]
+
+theorem tailImbalance_flipIco (v : ℕ → Bool) (m n : ℕ) :
+    tailImbalance (flipIco m n v) m n = -tailImbalance v m n := by
+  unfold tailImbalance
+  rw [← Finset.sum_neg_distrib]
+  refine Finset.sum_congr rfl fun i hi => ?_
+  simp only [flipIco, if_pos hi]
+  cases v i <;> norm_num [black]
+
+/-- **Lévy's maximal inequality**: the imbalance reaches `x` at some time `k ≤ n` with probability
+at most twice the probability that it is at least `x` at time `n`. On the event that `k` is the
+first such time, flipping the coins `k, …, n - 1` preserves the event and negates the imbalance
+gained after `k`, so at least half of the event ends at `x` or above. -/
+theorem measure_exists_le_imbalance_le (n : ℕ) (x : ℝ) :
+    coins ℕ {v | ∃ k ≤ n, x ≤ imbalance v k} ≤ 2 * coins ℕ {v | x ≤ imbalance v n} := by
+  classical
+  let A : ℕ → Set (ℕ → Bool) := fun k => {v | x ≤ imbalance v k ∧ ∀ j < k, imbalance v j < x}
+  have hAm : ∀ k, MeasurableSet (A k) := fun k => by
+    have h2 : MeasurableSet {v : ℕ → Bool | ∀ j < k, imbalance v j < x} := by
+      simp only [Set.setOf_forall]
+      exact MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ =>
+        measurableSet_lt (measurable_imbalance j) measurable_const
+    exact (measurableSet_le measurable_const (measurable_imbalance k)).inter h2
+  have hBm : ∀ k, MeasurableSet {v : ℕ → Bool | 0 ≤ tailImbalance v k n} := fun k =>
+    measurableSet_le measurable_const (Finset.measurable_sum _ fun i _ =>
+      (measurable_black.comp (measurable_pi_apply i)).sub measurable_const)
+  -- each first time contributes at most twice its part of `{x ≤ S_n}`
+  have hk : ∀ k ≤ n, coins ℕ (A k) ≤ 2 * coins ℕ (A k ∩ {v | x ≤ imbalance v n}) := by
+    intro k hkn
+    have hρA : ∀ v, flipIco k n v ∈ A k ↔ v ∈ A k := fun v => by
+      simp only [A, Set.mem_setOf_eq, imbalance_flipIco_of_le v (le_refl k)]
+      exact and_congr_right fun _ => forall₂_congr fun j hj => by
+        rw [imbalance_flipIco_of_le v hj.le]
+    have htm : Measurable fun v : ℕ → Bool => tailImbalance v k n :=
+      Finset.measurable_sum _ fun i _ =>
+        (measurable_black.comp (measurable_pi_apply i)).sub measurable_const
+    set Bpos := A k ∩ {v | 0 ≤ tailImbalance v k n} with hBpos
+    set Bneg := A k ∩ {v | tailImbalance v k n < 0} with hBneg
+    have hBnegm : MeasurableSet Bneg := (hAm k).inter (measurableSet_lt htm measurable_const)
+    have hunion : A k = Bpos ∪ Bneg := by
+      ext v
+      simp only [hBpos, hBneg, Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq]
+      constructor
+      · intro hv
+        rcases le_or_gt 0 (tailImbalance v k n) with h | h
+        · exact Or.inl ⟨hv, h⟩
+        · exact Or.inr ⟨hv, h⟩
+      · rintro (⟨hv, -⟩ | ⟨hv, -⟩) <;> exact hv
+    have hdisj' : Disjoint Bpos Bneg := by
+      rw [Set.disjoint_left]
+      rintro v ⟨-, h1⟩ ⟨-, h2⟩
+      simp only [Set.mem_setOf_eq] at h1 h2
+      linarith
+    have hsplit : coins ℕ (A k) = coins ℕ Bpos + coins ℕ Bneg := by
+      rw [hunion, measure_union hdisj' hBnegm]
+    have hneg : coins ℕ Bneg ≤ coins ℕ Bpos := by
+      calc coins ℕ Bneg ≤ coins ℕ (flipIco k n ⁻¹' Bpos) := measure_mono fun v hv => by
+            simp only [hBpos, hBneg, Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq,
+              hρA, tailImbalance_flipIco] at hv ⊢
+            exact ⟨hv.1, by linarith [hv.2]⟩
+        _ = coins ℕ Bpos := (measurePreserving_flipIco k n).measure_preimage
+            ((hAm k).inter (hBm k)).nullMeasurableSet
+    have hpos : Bpos ⊆ A k ∩ {v | x ≤ imbalance v n} := fun v hv => by
+      refine ⟨hv.1, ?_⟩
+      simp only [Set.mem_setOf_eq]
+      rw [imbalance_eq_add v hkn]
+      have h1 := hv.1.1
+      have h2 : 0 ≤ tailImbalance v k n := hv.2
+      linarith
+    calc coins ℕ (A k) = coins ℕ Bpos + coins ℕ Bneg := hsplit
+      _ ≤ coins ℕ Bpos + coins ℕ Bpos := add_le_add le_rfl hneg
+      _ = 2 * coins ℕ Bpos := (two_mul _).symm
+      _ ≤ 2 * coins ℕ (A k ∩ {v | x ≤ imbalance v n}) :=
+        mul_le_mul_of_nonneg_left (measure_mono hpos) zero_le
+  -- the first times partition the event
+  have hcover : {v | ∃ k ≤ n, x ≤ imbalance v k} ⊆ ⋃ k ∈ Finset.range (n + 1), A k := by
+    rintro v ⟨k, hkn, hxk⟩
+    have hex : ∃ k, x ≤ imbalance v k := ⟨k, hxk⟩
+    refine Set.mem_iUnion₂.2 ⟨Nat.find hex, Finset.mem_range.2 ?_, Nat.find_spec hex,
+      fun j hj => not_le.1 (Nat.find_min hex hj)⟩
+    have := Nat.find_min' hex hxk
+    omega
+  have hdisj : (↑(Finset.range (n + 1)) : Set ℕ).PairwiseDisjoint A := by
+    intro k _ k' _ hkk'
+    rw [Function.onFun, Set.disjoint_left]
+    rintro v ⟨hk1, hk2⟩ ⟨hk1', hk2'⟩
+    rcases lt_or_gt_of_ne hkk' with h | h
+    · exact absurd hk1 (not_le.2 (hk2' k h))
+    · exact absurd hk1' (not_le.2 (hk2 k' h))
+  calc coins ℕ {v | ∃ k ≤ n, x ≤ imbalance v k}
+      ≤ coins ℕ (⋃ k ∈ Finset.range (n + 1), A k) := measure_mono hcover
+    _ = ∑ k ∈ Finset.range (n + 1), coins ℕ (A k) := measure_biUnion_finset hdisj fun k _ => hAm k
+    _ ≤ ∑ k ∈ Finset.range (n + 1), 2 * coins ℕ (A k ∩ {v | x ≤ imbalance v n}) :=
+        Finset.sum_le_sum fun k hk' => hk k (Nat.lt_succ_iff.1 (Finset.mem_range.1 hk'))
+    _ = 2 * coins ℕ (⋃ k ∈ Finset.range (n + 1), A k ∩ {v | x ≤ imbalance v n}) := by
+        rw [← Finset.mul_sum, measure_biUnion_finset
+          (hdisj.mono_on fun k _ => Set.inter_subset_left)
+          fun k _ => (hAm k).inter (measurableSet_le measurable_const (measurable_imbalance n))]
+    _ ≤ 2 * coins ℕ {v | x ≤ imbalance v n} :=
+        mul_le_mul_of_nonneg_left (measure_mono (Set.iUnion₂_subset fun k _ =>
+          Set.inter_subset_right)) zero_le
+
+/-- **The envelope `√(2 n log log n)` from above**: for almost every fair-coin sequence the
+imbalance stays below `√(2 n log log n)` from some `n` on. Along the scales `2^j`, Lévy's
+inequality and Hoeffding's give probability at most `2 exp(-2 log log 2^j) = 2 / (j log 2)²` to
+reach `√(2^(j+1) log log 2^j)` before time `2^(j+1)`, a summable sequence. -/
+theorem ae_eventually_imbalance_lt :
+    ∀ᵐ v ∂(coins ℕ), ∀ᶠ n : ℕ in atTop, imbalance v n < √(2 * n * Real.log (Real.log n)) := by
+  set L : ℕ → ℝ := fun j => Real.log (Real.log ((2 : ℝ) ^ j)) with hL
+  set x : ℕ → ℝ := fun j => √(2 * 2 ^ j * L j) with hx
+  set E : ℕ → Set (ℕ → Bool) := fun j => {v | ∃ k ≤ 2 ^ (j + 1), x j ≤ imbalance v k} with hE
+  have hlog2 : 0 < Real.log 2 := Real.log_pos one_lt_two
+  have hlog21 : Real.log 2 < 1 := by
+    have := Real.log_lt_sub_one_of_pos (by norm_num : (0 : ℝ) < 2) (by norm_num)
+    linarith
+  have hlog2half : 1 / 2 < Real.log 2 := by
+    have := Real.log_lt_sub_one_of_pos (by norm_num : (0 : ℝ) < 2⁻¹) (by norm_num)
+    rw [Real.log_inv] at this
+    linarith
+  -- the bound `8 / ((j + 1)² (log 2)²)`
+  have hbound : ∀ j, (coins ℕ).real (E j) ≤ 8 / (((j : ℝ) + 1) ^ 2 * Real.log 2 ^ 2) := by
+    intro j
+    rcases Nat.lt_or_ge j 2 with hj | hj
+    · refine measureReal_le_one.trans ?_
+      rw [le_div_iff₀ (by positivity), one_mul]
+      have : ((j : ℝ) + 1) ^ 2 ≤ 4 := by
+        have : (j : ℝ) ≤ 1 := by exact_mod_cast (by omega : j ≤ 1)
+        nlinarith
+      nlinarith [sq_nonneg (Real.log 2)]
+    -- `L j = log (j log 2) ≥ 0`
+    have hjlog : 1 < (j : ℝ) * Real.log 2 := by
+      have : (2 : ℝ) ≤ j := by exact_mod_cast hj
+      nlinarith
+    have hLj : L j = Real.log ((j : ℝ) * Real.log 2) := by
+      simp only [hL, Real.log_pow]
+    have hL0 : 0 ≤ L j := by rw [hLj]; exact Real.log_nonneg hjlog.le
+    -- Lévy and Hoeffding
+    have h1 : (coins ℕ).real (E j) ≤ 2 * (coins ℕ).real {v | x j ≤ imbalance v (2 ^ (j + 1))} := by
+      have := measure_exists_le_imbalance_le (2 ^ (j + 1)) (x j)
+      rw [measureReal_def, measureReal_def, ← ENNReal.toReal_ofNat 2, ← ENNReal.toReal_mul]
+      exact ENNReal.toReal_mono (ENNReal.mul_ne_top ENNReal.ofNat_ne_top (measure_ne_top _ _)) this
+    have h2 := RandomConfigurations.measureReal_sum_ge_le (2 ^ (j + 1))
+      (Real.sqrt_nonneg (2 * 2 ^ j * L j))
+    have hexp : Real.exp (-2 * (x j) ^ 2 / ((2 ^ (j + 1) : ℕ) : ℝ)) =
+        1 / ((j : ℝ) * Real.log 2) ^ 2 := by
+      rw [hx]
+      simp only
+      rw [Real.sq_sqrt (by positivity), hLj]
+      push_cast
+      rw [show -2 * (2 * 2 ^ j * Real.log ((j : ℝ) * Real.log 2)) / 2 ^ (j + 1) =
+        -Real.log (((j : ℝ) * Real.log 2) ^ 2) by rw [Real.log_pow, pow_succ]; field_simp; ring,
+        Real.exp_neg, Real.exp_log (by positivity), one_div]
+    have hcmp : 2 / ((j : ℝ) * Real.log 2) ^ 2 ≤ 8 / (((j : ℝ) + 1) ^ 2 * Real.log 2 ^ 2) := by
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      have : ((j : ℝ) + 1) ^ 2 ≤ 4 * (j : ℝ) ^ 2 := by
+        have : (1 : ℝ) ≤ j := by exact_mod_cast (by omega : 1 ≤ j)
+        nlinarith
+      nlinarith [sq_nonneg (Real.log 2), mul_pos hlog2 hlog2]
+    calc (coins ℕ).real (E j) ≤ 2 * (coins ℕ).real {v | x j ≤ imbalance v (2 ^ (j + 1))} := h1
+      _ ≤ 2 * (1 / ((j : ℝ) * Real.log 2) ^ 2) := by
+          rw [← hexp]
+          exact mul_le_mul_of_nonneg_left h2 (by norm_num)
+      _ = 2 / ((j : ℝ) * Real.log 2) ^ 2 := by ring
+      _ ≤ 8 / (((j : ℝ) + 1) ^ 2 * Real.log 2 ^ 2) := hcmp
+  have hsum : ∑' j, coins ℕ (E j) ≠ ⊤ := by
+    have hsumm : Summable fun j : ℕ => 8 / (((j : ℝ) + 1) ^ 2 * Real.log 2 ^ 2) := by
+      have := ((summable_nat_add_iff 1).2 (Real.summable_one_div_nat_pow.2 one_lt_two)).mul_left
+        (8 / Real.log 2 ^ 2)
+      refine this.congr fun j => ?_
+      push_cast
+      field_simp
+    refine ne_top_of_le_ne_top (ENNReal.ofReal_ne_top
+      (r := ∑' j : ℕ, 8 / (((j : ℝ) + 1) ^ 2 * Real.log 2 ^ 2))) ?_
+    rw [ENNReal.ofReal_tsum_of_nonneg (fun j => by positivity) hsumm]
+    refine ENNReal.tsum_le_tsum fun j => ?_
+    rw [← ofReal_measureReal (measure_ne_top _ _)]
+    exact ENNReal.ofReal_le_ofReal (hbound j)
+  filter_upwards [ae_eventually_notMem hsum] with v hv
+  obtain ⟨J, hJ⟩ := eventually_atTop.1 hv
+  filter_upwards [eventually_ge_atTop (2 ^ (max J 2))] with n hn
+  set j := Nat.log 2 n with hj
+  have hn0 : n ≠ 0 := by
+    have := Nat.one_le_two_pow (n := max J 2)
+    omega
+  have hJj : max J 2 ≤ j := Nat.le_log_of_pow_le (by norm_num) hn
+  have hlo : 2 ^ j ≤ n := Nat.pow_log_le_self 2 hn0
+  have hhi : n < 2 ^ (j + 1) := Nat.lt_pow_succ_log_self (by norm_num) n
+  have hvj := hJ j (le_of_max_le_left hJj)
+  simp only [hE, Set.mem_setOf_eq, not_exists, not_and, not_le] at hvj
+  refine (hvj n hhi.le).trans_le (Real.sqrt_le_sqrt ?_)
+  -- `2^j ≤ n` and `log log 2^j ≤ log log n`
+  have hj2 : 2 ≤ j := le_of_max_le_right hJj
+  have hpow : ((2 : ℝ) ^ j) ≤ n := by exact_mod_cast hlo
+  have hlogpos : 1 < Real.log ((2 : ℝ) ^ j) := by
+    rw [Real.log_pow]
+    have : (2 : ℝ) ≤ j := by exact_mod_cast hj2
+    have := Real.log_lt_sub_one_of_pos (by norm_num : (0 : ℝ) < 2⁻¹) (by norm_num)
+    rw [Real.log_inv] at this
+    nlinarith
+  have hLle : L j ≤ Real.log (Real.log n) :=
+    Real.log_le_log (by linarith) (Real.log_le_log (by positivity) hpow)
+  have hL0 : 0 ≤ L j := Real.log_nonneg hlogpos.le
+  show 2 * 2 ^ j * L j ≤ 2 * n * Real.log (Real.log n)
+  have : (0 : ℝ) ≤ 2 ^ j := by positivity
+  nlinarith
+
+/-- **For almost every fair-coin sequence, `|N(n) - n/2| < √(2 n log log n)` from some `n` on**
+(by exchanging black and white for the lower side). The law of the iterated logarithm gives the
+sharp constant `1/√2` in place of `√2`. -/
+theorem ae_eventually_abs_imbalance_lt :
+    ∀ᵐ v ∂(coins ℕ), ∀ᶠ n : ℕ in atTop, |imbalance v n| < √(2 * n * Real.log (Real.log n)) := by
+  filter_upwards [ae_eventually_imbalance_lt,
+    measurePreserving_not.quasiMeasurePreserving.ae ae_eventually_imbalance_lt] with v h1 h2
+  filter_upwards [h1, h2] with n hn1 hn2
+  rw [imbalance_not] at hn2
+  exact abs_lt.2 ⟨by linarith, hn1⟩
+
 /-! ### The center column of a random configuration -/
 
 /-- **For almost every configuration and every `K`, infinitely often at least `n/2 + K √n` of the
@@ -365,6 +628,16 @@ theorem ae_frequently_balanced_trace :
     (ae_frequently_imbalance_eq_zero.mono fun v hv => hv.mono fun n hn => by
       rw [imbalance_eq] at hn
       linarith)
+
+/-- **For almost every configuration the discrepancy of the center column stays within
+`√(2 n log log n)`** from some `n` on. -/
+theorem ae_eventually_abs_discrepancy_lt_trace :
+    ∀ᵐ x ∂(coins ℤ), ∀ᶠ n : ℕ in atTop,
+      |∑ k ∈ Finset.range n, black (trace x k) - n / 2| < √(2 * n * Real.log (Real.log n)) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae (p := fun v => ∀ᶠ n : ℕ in atTop,
+      |∑ k ∈ Finset.range n, black (v k) - n / 2| < √(2 * n * Real.log (Real.log n)))
+    (ae_eventually_abs_imbalance_lt.mono fun v hv => hv.mono fun n hn => by
+      rwa [imbalance_eq] at hn)
 
 theorem cast_ones_eq_sum_black (b : ℕ → Bool) (n : ℕ) :
     (BoundedRemainder.ones b n : ℝ) = ∑ k ∈ Finset.range n, black (b k) := by

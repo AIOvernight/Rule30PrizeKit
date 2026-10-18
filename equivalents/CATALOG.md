@@ -2811,7 +2811,9 @@ with Turing machines reading n. Notes:
     `ae_not_eventuallyPeriodic_trace`). Its discrepancy N(n) − n/2 exceeds K√n and falls below −K√n
     infinitely often for every K, so it is exactly balanced infinitely often
     ([Fluctuations](Rule30Equivalents/Fluctuations.lean): `ae_frequently_balanced_trace`, by
-    Kolmogorov's zero-one law and the central limit theorem). The configurations with an eventually
+    Kolmogorov's zero-one law and the central limit theorem), and it stays within
+    √(2n log log n) from some n on (`ae_eventually_abs_discrepancy_lt_trace`, by Lévy's maximal
+    inequality and Hoeffding's along n = 2^j). The configurations with an eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
     ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,

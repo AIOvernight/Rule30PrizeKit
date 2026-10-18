@@ -244,7 +244,8 @@ Hartmanis and Lewis, with the same splicing on the input tape of an offline mach
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
 - automatic complexity [52] (moderate);
-- Kopra's limit-point theorems, a proved related result (moderate; Section 6.3).
+- Kopra's limit-point theorems, a proved related result (Section 6.3): done, in
+  [LimitPoints](Rule30Equivalents/LimitPoints.lean).
 
 Candidates for upstreaming to Mathlib:
 
@@ -2354,10 +2355,17 @@ with Turing machines reading n. Notes:
   width-w trace would be EP. That contradicts Thm 3.5, which for rule 30 is Jen's two-column
   theorem. These are the rule-30 analogues of Pisot–Vijayaraghavan (Thm 4.7) and of Dubickas
   (Thm 4.5) for (p/q)ⁿ mod 1 [Vij40], [Dub08]. They are proved, but they neither imply nor follow
-  from Problem 1. *Lean:* the catalog's `Rule30Jen.jen` and `Rule30Jen.not_adjacent` already give
-  the width-2 input, and Thm 4.6 is a finite counting argument over windows. This could become a
-  fully proved "related" module (moderate). Wolfram (2019) plots y_t and asks about the
-  equidistribution of y_{Pk+r} [W19].
+  from Problem 1. *Lean:* proved in [LimitPoints](Rule30Equivalents/LimitPoints.lean), with
+  Mathlib's `MapClusterPt` for limit points. `exists_periodic_window` is Thm 4.6 for every
+  radius-1 automaton: the windows that occur infinitely often number at most the limit points (by
+  compactness of {0,1}^ℕ each extends to one), and along k + 1 nested windows the count cannot drop
+  every time; where it does not, the window at the next time is a function of the window now, so it
+  is eventually periodic. `infinite_limitPoints_cell` and `infinite_limitPoints_evol` are Thm 4.7
+  for the single seed and for every configuration with a leftmost black cell, through
+  `Rule30Jen.not_adjacent` and `Rule30FiniteConfigs.not_adjacent`. Thm 4.5 is
+  `half_cell_eq_zero_iff` for the single seed (the right edge rules out any return); for
+  configurations infinite to the right it is not formalized. Wolfram (2019) plots y_t and asks
+  about the equidistribution of y_{Pk+r} [W19].
 - **Recurrence and uniform recurrence of c.** As properties of sequences, these are independent of
   Problem 1. A normal sequence is recurrent but not uniformly recurrent. A recurrent EP sequence is
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).

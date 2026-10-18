@@ -98,6 +98,18 @@ theorem coins_fin_singleton (m : ℕ) (w : Fin m → Bool) : coins (Fin m) {w} =
   rw [this, coins_pi, Finset.prod_congr rfl fun j _ => coin_singleton (w j), Finset.prod_const,
     Finset.card_univ, Fintype.card_fin]
 
+/-- **Bernoulli's inequality, multiplied out**: `(1 - x)^K (1 + K x) ≤ 1` for `0 ≤ x ≤ 1`, since
+`1 + K x ≤ (1 + x)^K` and `(1 - x)^K (1 + x)^K = (1 - x²)^K ≤ 1`. -/
+theorem one_sub_pow_mul_le {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (K : ℕ) :
+    (1 - x) ^ K * (1 + K * x) ≤ 1 := by
+  have h1 : 1 + K * x ≤ (1 + x) ^ K := one_add_mul_le_pow (by linarith) K
+  have h2 : (1 - x) ^ K * (1 + x) ^ K ≤ 1 := by
+    rw [← mul_pow]
+    exact pow_le_one₀ (by nlinarith) (by nlinarith)
+  calc (1 - x) ^ K * (1 + K * x) ≤ (1 - x) ^ K * (1 + x) ^ K :=
+        mul_le_mul_of_nonneg_left h1 (pow_nonneg (by linarith) _)
+    _ ≤ 1 := h2
+
 /-- **No long run is rare too**: no run of length `m ≥ 1` among the first `n ≥ 1` cells has
 probability at most `m 2^m / n`. -/
 theorem measureReal_not_hasRun_le (β : Bool) {m : ℕ} (hm : 0 < m) {n : ℕ} (hn : 0 < n) :
@@ -135,14 +147,7 @@ theorem measureReal_not_hasRun_le (β : Bool) {m : ℕ} (hm : 0 < m) {n : ℕ} (
     rw [measureReal_def, hblocks, ENNReal.toReal_pow, ENNReal.toReal_sub_of_le
       (pow_le_one₀ zero_le (by norm_num)) ENNReal.one_ne_top, ENNReal.toReal_one,
       ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat, hx, one_div]
-  have hbern : (1 - x) ^ K * (1 + K * x) ≤ 1 := by
-    have h1 : 1 + K * x ≤ (1 + x) ^ K := one_add_mul_le_pow (by linarith) K
-    have h2 : (1 - x) ^ K * (1 + x) ^ K ≤ 1 := by
-      rw [← mul_pow]
-      exact pow_le_one₀ (by nlinarith) (by nlinarith)
-    calc (1 - x) ^ K * (1 + K * x) ≤ (1 - x) ^ K * (1 + x) ^ K :=
-          mul_le_mul_of_nonneg_left h1 (pow_nonneg (by linarith) _)
-      _ ≤ 1 := h2
+  have hbern := one_sub_pow_mul_le hx0.le hx1 K
   -- `1 + K x ≥ n x / m`, since `m K > n - m`
   have hKm : (n : ℝ) < m * K + m := by
     have := Nat.lt_div_mul_add (a := n) hm

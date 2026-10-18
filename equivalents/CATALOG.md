@@ -2646,7 +2646,9 @@ with Turing machines reading n. Notes:
   Problem 1. A normal sequence is recurrent but not uniformly recurrent
   (`Typicality.isRecurrent_of_disjunctive`, `not_uniformlyRecurrent_of_disjunctive`, already for
   every disjunctive sequence; so for almost every configuration,
-  `ae_recurrent_not_uniformlyRecurrent_trace`). A recurrent EP sequence is
+  `ae_recurrent_not_uniformlyRecurrent_trace`). Quantitatively, the prefix of length n of a random
+  center column first occurs again after 2^(n(1 + o(1))) steps (the recurrence theorem of Wyner and
+  Ziv, [ReturnTimes](Rule30Equivalents/ReturnTimes.lean): `ae_tendsto_logb_returnTime_trace`). A recurrent EP sequence is
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).
 - **Kolmogorov complexity.** K(c↾n) = K(n) + O(1), as for every computable sequence, so it cannot
   see Problem 1 [LV19]. The resource-bounded measures of [5], [27], [28], [37] and [52] can.

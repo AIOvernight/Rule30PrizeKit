@@ -1,5 +1,6 @@
 import Rule30Equivalents.AlgebraicDegree
 import Rule30Equivalents.Symmetry
+import Rule30Equivalents.LimitPoints
 import Mathlib.Topology.Baire.BaireMeasurable
 
 /-!
@@ -29,7 +30,9 @@ omega-limit set `ω(c)` of the center column under the shift (`image_trace_omega
 `image_omegaLimit_eq` for continuous semiconjugacies of compact spaces), so **Problem 1 holds iff
 the trace of the seed's omega-limit set is infinite**
 (`problem1_iff_trace_omegaLimit_seed_infinite`), iff some configuration in it has a center
-column that is not periodic (`problem1_iff_exists_omegaLimit_seed_not_periodic`).
+column that is not periodic (`problem1_iff_exists_omegaLimit_seed_not_periodic`). The
+omega-limit set itself is infinite (`infinite_omegaLimit_seed`, from Kopra's limit points of the
+right halves of the rows), so Problem 1 is about its trace, not its size.
 -/
 
 namespace Rule30Equivalents.Genericity
@@ -319,34 +322,46 @@ theorem not_injective_evol_one : ¬ Function.Injective fun x : ℤ → Bool => e
 
 /-! ### The omega-limit set of the seed -/
 
+/-- A continuous map `π` from a compact space carries the omega-limit set of a point onto the set
+of cluster points of the images of its orbit. A cluster point `z` of the images comes from a
+limit point of the orbit along the finer filter on which the images tend to `z`. -/
+theorem image_omegaLimit_eq_mapClusterPt {X Y : Type*} [TopologicalSpace X] [CompactSpace X]
+    [TopologicalSpace Y] [T2Space Y] {π : X → Y} (hπ : Continuous π) (ϕ : ℕ → X → X) (x : X) :
+    π '' omegaLimit atTop ϕ {x} = {z | MapClusterPt z atTop fun t => π (ϕ t x)} := by
+  ext z
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    rw [mem_omegaLimit_singleton_iff_mapClusterPt] at hy
+    exact hy.continuousAt_comp hπ.continuousAt
+  · intro hz
+    -- the times at which the images approach `z`
+    set G := atTop ⊓ comap (fun t => π (ϕ t x)) (𝓝 z) with hG
+    haveI : NeBot G := by
+      rw [hG, inf_comm]
+      exact neBot_inf_comap_iff_map'.2 hz.neBot
+    obtain ⟨y, -, hy⟩ := isCompact_univ.exists_clusterPt (f := map (fun t => ϕ t x) G)
+      (le_principal_iff.2 univ_mem)
+    refine ⟨y, (mem_omegaLimit_singleton_iff_mapClusterPt atTop ϕ x y).2
+      (hy.mono (map_mono inf_le_left)), ?_⟩
+    -- `π y` is a cluster point of a filter that converges to `z`
+    have h1 : ClusterPt (π y) (map (fun t => π (ϕ t x)) G) := by
+      have := hy.map hπ.continuousAt (tendsto_map)
+      rwa [map_map] at this
+    have h2 : map (fun t => π (ϕ t x)) G ≤ 𝓝 z := by
+      rw [hG, map_le_iff_le_comap]
+      exact inf_le_right
+    exact eq_of_nhds_neBot (h1.neBot.mono (inf_le_inf_left _ h2))
+
 /-- A continuous semiconjugacy `π` from a compact space carries the omega-limit set of a point onto
-the omega-limit set of its image. A limit point `z` of the images comes from a limit point of the
-orbit along the finer filter on which the images tend to `z`. -/
+the omega-limit set of its image. -/
 theorem image_omegaLimit_eq {X Y : Type*} [TopologicalSpace X] [CompactSpace X]
     [TopologicalSpace Y] [T2Space Y] {π : X → Y} (hπ : Continuous π) {ϕ : ℕ → X → X}
     {ψ : ℕ → Y → Y} (hsemi : ∀ t x, π (ϕ t x) = ψ t (π x)) (x : X) :
     π '' omegaLimit atTop ϕ {x} = omegaLimit atTop ψ {π x} := by
-  refine Subset.antisymm (mapsTo_omegaLimit {x} (s' := {π x}) (fun y hy => by
-    rw [mem_singleton_iff.1 hy]; rfl) hsemi hπ).image_subset fun z hz => ?_
-  rw [mem_omegaLimit_singleton_iff_mapClusterPt] at hz
-  -- the times at which the images approach `z`
-  set G := atTop ⊓ comap (fun t => ψ t (π x)) (𝓝 z) with hG
-  haveI : NeBot G := by
-    rw [hG, inf_comm]
-    exact neBot_inf_comap_iff_map'.2 hz.neBot
-  obtain ⟨y, -, hy⟩ := isCompact_univ.exists_clusterPt (f := map (fun t => ϕ t x) G)
-    (le_principal_iff.2 univ_mem)
-  refine ⟨y, (mem_omegaLimit_singleton_iff_mapClusterPt atTop ϕ x y).2
-    (hy.mono (map_mono inf_le_left)), ?_⟩
-  -- `π y` is a cluster point of a filter that converges to `z`
-  have h1 : ClusterPt (π y) (map (fun t => ψ t (π x)) G) := by
-    have := hy.map hπ.continuousAt (tendsto_map)
-    rw [map_map] at this
-    simpa [Function.comp_def, hsemi] using this
-  have h2 : map (fun t => ψ t (π x)) G ≤ 𝓝 z := by
-    rw [hG, map_le_iff_le_comap]
-    exact inf_le_right
-  exact eq_of_nhds_neBot (h1.neBot.mono (inf_le_inf_left _ h2))
+  rw [image_omegaLimit_eq_mapClusterPt hπ ϕ x]
+  ext z
+  rw [mem_omegaLimit_singleton_iff_mapClusterPt]
+  simp only [mem_setOf_eq, hsemi]
 
 /-- **The omega-limit set of the center column is the trace of that of the seed**: `ω_σ(c)` is
 the image under the center trace of the omega-limit set of the single black cell under rule 30
@@ -382,5 +397,22 @@ theorem problem1_iff_exists_omegaLimit_seed_not_periodic : Rule30Prize.Problem1 
     exact ⟨y, hy, hz⟩
   · rintro ⟨y, hy, hz⟩
     exact ⟨trace y, ⟨y, hy, rfl⟩, hz⟩
+
+/-- **The omega-limit set of the seed is infinite**: its right halves are the limit points of the
+right halves of the rows (`image_omegaLimit_eq_mapClusterPt`), and there are infinitely many of
+those (Kopra, `LimitPoints.infinite_limitPoints_cell`). Problem 1 asks whether its center trace
+is infinite too (`problem1_iff_trace_omegaLimit_seed_infinite`). -/
+theorem infinite_omegaLimit_seed :
+    (omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed}).Infinite := by
+  have hR : Continuous fun (x : ℤ → Bool) (p : ℕ) => x p :=
+    continuous_pi fun p => continuous_apply _
+  have h := image_omegaLimit_eq_mapClusterPt hR (fun (n : ℕ) (x : ℤ → Bool) => evol x n) seed
+  have hhalf : {z : ℕ → Bool | MapClusterPt z atTop fun t => fun p : ℕ => evol seed t p} =
+      LimitPoints.limitPoints Rule30Jen.cell := by
+    ext z
+    simp only [LimitPoints.limitPoints, mem_setOf_eq, evol_seed]
+    exact Iff.rfl
+  rw [hhalf] at h
+  exact Set.Infinite.of_image _ (h ▸ LimitPoints.infinite_limitPoints_cell)
 
 end Rule30Equivalents.Genericity

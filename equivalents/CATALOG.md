@@ -1366,7 +1366,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   semiconjugacies of compact spaces). So Problem 1 holds iff Tr₀(ω_F(δ₀)) is infinite
   (`Genericity.problem1_iff_trace_omegaLimit_seed_infinite`), iff some configuration in ω_F(δ₀) has
   a center column that is not periodic
-  (`Genericity.problem1_iff_exists_omegaLimit_seed_not_periodic`).
+  (`Genericity.problem1_iff_exists_omegaLimit_seed_not_periodic`). The set ω_F(δ₀) itself is
+  infinite, since its right halves are Kopra's infinitely many limit points
+  (`Genericity.infinite_omegaLimit_seed`); Problem 1 asks for more, an infinite trace.
 - *Proof route.* If c is EP, ω(c) is one periodic orbit. Conversely, a finite ω(c) is invariant, so
   it consists of periodic points. Choose L so that the length-(L − 1) prefixes separate those
   points. Eventually σᵗc shares its length-L prefix with some z_t ∈ ω(c), and this forces

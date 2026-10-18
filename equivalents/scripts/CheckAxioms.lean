@@ -92,6 +92,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Realization.problem1_iff_column_iff_both
 #print axioms Rule30Equivalents.Realization.problem1_iff_irrational_ofDigits
 #print axioms Rule30Equivalents.Realization.problem1_iff_irrational_cantorFunction
+#print axioms Rule30Equivalents.RegularSequences.problem1_of_not_regularSeq
+#print axioms Rule30Equivalents.RegularSequences.problem1_iff_not_regularSeq_two_three
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_infinite_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_injective_shifts
 #print axioms Rule30Equivalents.ShiftOrbit.problem1_iff_not_preperiodic

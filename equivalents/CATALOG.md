@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 183 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 185 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -197,7 +197,7 @@ files. The rows follow the order of Section 3.
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
-| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃) | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
+| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃); c is not both 2- and 3-regular | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic`, `RegularSequences.problem1_iff_not_regularSeq_two_three` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (α, β = 2, 3) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
@@ -1930,6 +1930,7 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
     works);
   - C(X) is transcendental over F₂(X) or over F₃(X), reading the 0/1 values in F₂ and in F₃;
   - S is not definable in both Büchi arithmetics (ℕ, +, V₂) and (ℕ, +, V₃);
+  - c is not both 2-regular and 3-regular in the sense of Allouche and Shallit, over any field;
   - c is not k-automatic for some k ≥ 2.
 - *Proof route.*
   - EP ⟹ the k-kernel is finite for every k ⟹ c is k-automatic (Eilenberg's criterion).
@@ -1994,6 +1995,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   state. "y is a power of k" (V_k y = y ≥ 1) and "the digit of x at y is j" (x = a + j y + b with
   a < y and b = 0 or k y ≤ V_k b) are definable through Mathlib's definable functions, and the
   conditions on the codes are definable by finite Boolean combinations and quantifiers.
+  The k-regular form is proved in [RegularSequences](Rule30Equivalents/RegularSequences.lean):
+  `problem1_iff_not_regularSeq_two_three`, from `isRegularSeq_iff_isAutomatic`. A 0/1 sequence
+  whose k-kernel spans a finite-dimensional space over a field K has a finite kernel: a
+  finite-dimensional space of sequences is determined by finitely many coordinates
+  (`exists_eq_zero_of_vanish`, since the subspaces vanishing below N stabilize), so the kernel
+  embeds into {0, 1}^N.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=
@@ -2139,7 +2146,7 @@ so they are strictly stronger.
 | **Normality** of x₂ in base 2 (⟺ finite-state dimension 1); the seed is generic for (rule 30, Bernoulli) | normal ⟹ disjunctive. Normality also gives Problem 2. | 500,025,038 ones in the first 10⁹ bits [W19]. | [Bor09], [Wal49], [DLLM04], [W19] |
 | **x₂ is transcendental** (likewise x_B) | transcendental ⟹ irrational | Conditional only: if c were automatic, [AB07] would apply. | [AB07] |
 | **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. | [Bug11], [BHWY16]; number-theory survey (data) |
-| **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
+| **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not k-regular, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
 | **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. | [Nie88], [MeWi17]; algebra survey (data) |
 | **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). | algebra survey, [WM86] |
 | **Hypertranscendence** (new): C(z) satisfies no algebraic differential equation P(z, C, C′, …, C⁽ⁿ⁾) = 0 with P ≠ 0 over ℚ | if c is EP, C is rational, hence differentially algebraic | Strictly stronger: Σ z^(n²) is built on the non-EP set of squares, is a theta function, and satisfies an algebraic differential equation [Jac48]. A Mahler function is either rational or hypertranscendental [ADH21], so a non-EP automatic c would give a hypertranscendental C. In general neither "not automatic" nor "hypertranscendental" implies the other. | [ADH21], [Jac48] |
@@ -2220,7 +2227,8 @@ approximations of order 3/2) and "not a k-Mahler function" (`problem1_of_not_isM
 satisfies P(z^k)Q(z)F(z) − P(z)Q(z^k)F(z^k) = 0) and unbounded expansion complexity
 (`problem1_of_expansionComplexity_unbounded`: Q(X)Y − P(X) vanishes at C exactly), and "not
 morphic" (`problem1_of_not_isMorphic`: an EP sequence is a coding of the fixed point of σ(0) = 0 1,
-σ(i) = i + 1 on its positions). For a density or a distance the
+σ(i) = i + 1 on its positions), and "not k-regular over some field"
+(`RegularSequences.problem1_of_not_regularSeq`). For a density or a distance the
 hypothesis used is the weaker "infinitely many". The others are proved elsewhere: no column EP and
 FinConf through Jen's theorem, the frozen-boundary conjecture
 (`AutomatonGroup.problem1_of_frozenBoundaryConjecture`), not 2-automatic

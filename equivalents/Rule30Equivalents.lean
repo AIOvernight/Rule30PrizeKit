@@ -51,6 +51,7 @@ import Rule30Equivalents.HolderMeans
 import Rule30Equivalents.BlackTimes
 import Rule30Equivalents.CesaroMeans
 import Rule30Equivalents.EmpiricalMeasures
+import Rule30Equivalents.OrbitFrequencies
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

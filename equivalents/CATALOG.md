@@ -2857,10 +2857,14 @@ with Turing machines reading n. Notes:
     does, and so does a comeager set of them, so rule 30 is injective on a set of full measure, and
     every row of the space-time diagram of almost every configuration determines it
     (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
-    `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). Likewise, ergodicity of
-    the doubling map (`AddCircle.ergodic_nsmul`) says nothing about one specific number.
-    *Correction:* an earlier version said that the trace is normal for a comeager set of
-    configurations; that is false.
+    `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). So rule 30 is an
+    automorphism of μ modulo null sets, with a measurable, measure-preserving inverse G
+    ([Invertibility](Rule30Equivalents/Invertibility.lean): `exists_measurePreserving_inverse`), and
+    the center column of a random configuration, run forward with rule 30 and backward with G, is a
+    two-sided sequence of independent fair coins (`measurePreserving_twoSidedTrace`): the two-sided
+    Bernoulli shift is a factor of rule 30. Likewise, ergodicity of the doubling map
+    (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
+    version said that the trace is normal for a comeager set of configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
     neither. This is formal ([Computability](Rule30Equivalents/Computability.lean)): the center
     column is primitive recursive (`primrec_center`), Problem 1 says that for every T and P some t ≥

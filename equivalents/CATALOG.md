@@ -2436,7 +2436,9 @@ with Turing machines reading n. Notes:
   left diagonal into cells that are again linear in their leftmost variable. Lower bound: the
   coefficient of x_{2−t} ⋯ x_t is the parity of the number of configurations whose cone has a
   white right diagonal; running rule 30 sideways maps them bijectively to the words w of length
-  t − 1 with f_{2t−2}(w) = 0, and the top coefficient of f_{2m} is 1 by induction on m.
+  t − 1 with f_{2t−2}(w) = 0, and the top coefficient of f_{2m} is 1 by induction on m. Also,
+  Φ_t is balanced and its Walsh coefficient vanishes at every linear function that does not
+  involve x_{−t} (`walsh_center_eq_zero`, `card_center_true`), since Φ_t flips with x_{−t}.
 - **Rowland's Conjecture 1** (rigidity of the right edge) has no known relation to Problem 1. The
   stripe seeds [21] show that the center column does not determine the right edge.
 

@@ -28,6 +28,9 @@ the Möbius transform `coef Φ_t S = ∑_{U ⊆ S} Φ_t(1_U)`.
 * `eq_Icc_of_coef_ne_zero`: for `t ≥ 3` this is the only monomial of degree `2t − 1`.
 * `coef_center_singleton`: the coefficient of `x_0` is the center column `c(t)`, so Problem 1
   concerns the linear part of `Φ_t`.
+* `walsh_center_eq_zero`, `card_center_true`: `Φ_t` is balanced, and uncorrelated with every affine
+  function that does not involve `x_{-t}`: its Walsh coefficient there is `0`, because `Φ_t` flips
+  with `x_{-t}`.
 
 The degree does not decide Problem 1: there are rules of maximal degree whose single-seed center
 columns are eventually periodic (catalog Section 6.3).
@@ -589,5 +592,67 @@ theorem coef_center_singleton (t : ℕ) :
   rw [coef_of_mem (mem_singleton_self 0), erase_singleton]
   simp only [coef, powerset_empty, sum_singleton, deriv, h1, h0, evol_seed, hw, Bool.xor_false]
   rfl
+
+/-! ### Walsh coefficients -/
+
+/-- The Walsh coefficient of `f` at the linear function `x ↦ ⊕_{i ∈ A} x_i`, over the cube on the
+variables `S`: `∑_{U ⊆ S} (-1)^(f(1_U) ⊕ |U ∩ A|)`. -/
+def walsh {ι : Type*} [DecidableEq ι] (f : (ι → Bool) → Bool) (S A : Finset ι) : ℤ :=
+  ∑ U ∈ S.powerset, if xor (f (ind U)) (decide ((U ∩ A).card % 2 = 1)) then -1 else 1
+
+/-- A function that flips with `x_i` has Walsh coefficient `0` at every linear function that does
+not involve `x_i`. -/
+theorem walsh_eq_zero {ι : Type*} [DecidableEq ι] {f : (ι → Bool) → Bool} {S A : Finset ι}
+    {i : ι} (hi : i ∈ S) (hiA : i ∉ A)
+    (hf : ∀ x, f (Function.update x i true) = !f (Function.update x i false)) :
+    walsh f S A = 0 := by
+  rw [walsh, ← insert_erase hi, sum_powerset_insert (notMem_erase i S), ← sum_add_distrib]
+  refine sum_eq_zero fun U hU => ?_
+  have hiU : i ∉ U := fun h => notMem_erase i S (mem_powerset.1 hU h)
+  have h1 : ind (insert i U) = Function.update (ind U) i true := by
+    funext j
+    by_cases hj : j = i
+    · subst hj; simp [ind]
+    · simp [ind, hj]
+  have h0 : Function.update (ind U) i false = ind U := by
+    funext j
+    by_cases hj : j = i
+    · subst hj; simp [ind, hiU]
+    · simp [ind, hj]
+  have hA : insert i U ∩ A = U ∩ A := by
+    ext j
+    simp only [mem_inter, mem_insert]
+    constructor
+    · rintro ⟨rfl | h, hj⟩
+      · exact absurd hj hiA
+      · exact ⟨h, hj⟩
+    · rintro ⟨h, hj⟩
+      exact ⟨Or.inr h, hj⟩
+  rw [h1, hA, hf, h0]
+  cases f (ind U) <;> cases decide ((U ∩ A).card % 2 = 1) <;> simp
+
+/-- **`Φ_t` is uncorrelated with every affine function that does not involve `x_{-t}`.** -/
+theorem walsh_center_eq_zero (t : ℕ) {A : Finset ℤ} (hA : -(t : ℤ) ∉ A) :
+    walsh (fun x => evol x t 0) (Icc (-(t : ℤ)) t) A = 0 := by
+  refine walsh_eq_zero (i := 0 - (t : ℤ)) (by simp) (by simpa using hA) fun x => ?_
+  exact evol_update_left x t 0
+
+/-- **`Φ_t` is balanced**: it takes the value `1` on exactly half of the `2^(2t+1)` inputs. -/
+theorem card_center_true (t : ℕ) :
+    ((Icc (-(t : ℤ)) t).powerset.filter fun U => evol (ind U) t 0 = true).card = 2 ^ (2 * t) := by
+  have hw := walsh_center_eq_zero t (A := ∅) (by simp)
+  simp only [walsh, inter_empty, card_empty, Nat.zero_mod, zero_ne_one, decide_false,
+    Bool.xor_false] at hw
+  rw [sum_ite, sum_const, sum_const, nsmul_eq_mul, nsmul_eq_mul, mul_neg, mul_one, mul_one] at hw
+  have htot := card_filter_add_card_filter_not (s := (Icc (-(t : ℤ)) t).powerset)
+    (fun U => evol (ind U) t 0 = true)
+  rw [card_powerset, Int.card_Icc, show ((t : ℤ) + 1 - -(t : ℤ)).toNat = 2 * t + 1 by omega]
+    at htot
+  simp only [Bool.not_eq_true] at htot hw
+  have : ((((Icc (-(t : ℤ)) t).powerset.filter fun U => evol (ind U) t 0 = true).card : ℤ)) =
+      (((Icc (-(t : ℤ)) t).powerset.filter fun U => evol (ind U) t 0 = false).card : ℤ) := by
+    omega
+  have h2 : (2 : ℕ) ^ (2 * t + 1) = 2 ^ (2 * t) * 2 := pow_succ 2 (2 * t)
+  omega
 
 end Rule30Equivalents.AlgebraicDegree

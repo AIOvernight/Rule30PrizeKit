@@ -390,20 +390,6 @@ theorem eq_sum_cartier (g : PowerSeries (ZMod p)) :
   · intro h
     exact absurd (Finset.mem_range.2 (Nat.mod_lt n hp0)) h
 
-omit hp in
-/-- The kernel is closed under `g ↦ (n ↦ g(pn + r))`. -/
-theorem kernel_cartier {f g : ℕ → Bool} (hg : g ∈ kernel p f) {r : ℕ} (hr : r < p) :
-    (fun n => g (p * n + r)) ∈ kernel p f := by
-  obtain ⟨e, s, hs, rfl⟩ := hg
-  refine ⟨e + 1, p ^ e * r + s, ?_, funext fun n => ?_⟩
-  · calc p ^ e * r + s < p ^ e * r + p ^ e := by omega
-      _ = p ^ e * (r + 1) := by ring
-      _ ≤ p ^ e * p := Nat.mul_le_mul_left _ hr
-      _ = p ^ (e + 1) := by ring
-  · show f (p ^ e * (p * n + r) + s) = f (p ^ (e + 1) * n + (p ^ e * r + s))
-    congr 1
-    ring
-
 theorem cartier_series (g : ℕ → Bool) (r : ℕ) :
     cartier p r (LinearRelations.series (ZMod p) g) =
       LinearRelations.series (ZMod p) fun n => g (p * n + r) := by
@@ -460,7 +446,7 @@ theorem isAlgebraic_of_isAutomatic {f : ℕ → Bool} (hf : IsAutomatic p f) :
       exact RatFunc.coe_coe _
     rw [hX, ← Algebra.smul_def]
     exact Submodule.smul_mem _ _ (Submodule.subset_span
-      ⟨_, ⟨_, kernel_cartier hg (Finset.mem_range.1 hr), rfl⟩, rfl⟩)
+      ⟨_, ⟨_, mem_kernel_step hg (Finset.mem_range.1 hr), rfl⟩, rfl⟩)
   have hle : U ≤ U' := Submodule.span_le.2 hTU'
   -- the span of the `p`-th powers has no larger dimension
   obtain ⟨b, hbT, hbspan, hbli⟩ := exists_linearIndependent (RatFunc (ZMod p)) T

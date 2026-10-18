@@ -53,6 +53,23 @@ def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=
 /-- `f` is k-automatic: its k-kernel is finite. -/
 def IsAutomatic (k : ℕ) (f : ℕ → Bool) : Prop := (kernel k f).Finite
 
+theorem self_mem_kernel (k : ℕ) (f : ℕ → Bool) : f ∈ kernel k f :=
+  ⟨0, 0, by simp, by simp⟩
+
+/-- The kernel is closed under `g ↦ (n ↦ g(kn + r))` for `r < k`. -/
+theorem mem_kernel_step {k : ℕ} {f g : ℕ → Bool} (hg : g ∈ kernel k f) {r : ℕ} (hr : r < k) :
+    (fun n => g (k * n + r)) ∈ kernel k f := by
+  obtain ⟨e, s, hs, rfl⟩ := hg
+  refine ⟨e + 1, k ^ e * r + s, ?_, funext fun n => ?_⟩
+  · calc k ^ e * r + s < k ^ e * r + k ^ e := by omega
+      _ = k ^ e * (r + 1) := (Nat.mul_succ _ _).symm
+      _ ≤ k ^ e * k := Nat.mul_le_mul_left _ hr
+      _ = k ^ (e + 1) := (pow_succ _ _).symm
+  · show f (k ^ e * (k * n + r) + s) = f (k ^ (e + 1) * n + (k ^ e * r + s))
+    rw [Nat.mul_add, ← Nat.mul_assoc, ← pow_succ]
+    congr 1
+    omega
+
 /-- On the periodic part, the value depends only on the residue mod `P`. -/
 theorem eq_of_mod_eq {b : ℕ → Bool} {T P : ℕ} (hper : ∀ t, T ≤ t → b (t + P) = b t)
     {m m' : ℕ} (hm : T ≤ m) (hm' : T ≤ m') (hmod : m % P = m' % P) : b m = b m' := by

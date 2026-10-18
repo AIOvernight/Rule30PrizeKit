@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 152 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 154 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2303,9 +2303,16 @@ with Turing machines reading n. Notes:
   Problem 1. Wolfram notes that Problem 3 implies Problem 1 [W19].
 - Problem 1 is itself exactly the analogous statement for *unary* input ([43]).
 - The literal statement is Π⁰₂.
-- It is formalized nowhere, and formal-conjectures omits it as model-relative. Mathlib's
+- Elsewhere it is formalized nowhere, and formal-conjectures omits it as model-relative. Mathlib's
   `Turing.TM2ComputableInTime` measures time in the input length, so "O(n)" would correspond to
   O(2^len).
+- *Lean.* [ProblemThree](Rule30Equivalents/ProblemThree.lean) states it in the one-tape model of
+  [OneTapeGap](Rule30Equivalents/OneTapeGap.lean), with the binary digits of n (least significant
+  first) as input: `Problem3` (literal: no machine computes c(n) in time O(n)) and `Problem3Verbal`
+  (verbal: none in time o(n)), with `problem3Verbal_of_problem3`. A machine whose states are the
+  2-kernel computes every 2-automatic sequence in |bin n| + 1 = O(log n) steps
+  (`decidesBinInTime_kernelTM`), so `not_isAutomatic_of_problem3Verbal`, `problem1_of_problem3Verbal` and
+  `problem1_of_problem3` hold: the chain above, formally.
 - Its circuit-complexity strengthenings are beyond current lower-bound techniques [LY22], [FGHK16],
   and natural proofs are a barrier [RR97].
 - Problem 3 transfers to rules 86, 135 and 149 and to the stripe seeds, since their columns are

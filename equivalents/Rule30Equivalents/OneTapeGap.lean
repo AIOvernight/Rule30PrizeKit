@@ -95,6 +95,13 @@ structure Cfg (M : Machine) where
 
 variable {M : Machine}
 
+theorem Cfg.ext' {x y : Cfg M} (hq : x.q = y.q) (hh : x.h = y.h) (ht : x.tape = y.tape) :
+    x = y := by
+  cases x; cases y
+  simp only at hq hh ht
+  subst hq hh ht
+  rfl
+
 /-- One step; a halting state stays put. -/
 def step (c : Cfg M) : Cfg M :=
   if M.halt c.q then c else

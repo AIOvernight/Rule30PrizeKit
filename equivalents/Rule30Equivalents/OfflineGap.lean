@@ -38,13 +38,6 @@ section ReadOnly
 
 variable {M : Machine}
 
-theorem Cfg.ext' {x y : Cfg M} (hq : x.q = y.q) (hh : x.h = y.h) (ht : x.tape = y.tape) :
-    x = y := by
-  cases x; cases y
-  simp only at hq hh ht
-  subst hq hh ht
-  rfl
-
 theorem halt_mono {X : ℕ → Cfg M} (hX : IsRun X) {s t : ℕ} (hs : M.halt (X s).q = true)
     (hst : s ≤ t) : M.halt (X t).q = true := by
   rw [eq_of_halt hX hs hst]; exact hs

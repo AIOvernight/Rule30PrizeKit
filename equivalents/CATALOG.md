@@ -2746,9 +2746,12 @@ with Turing machines reading n. Notes:
     strong law of large numbers applies), the trace is normal for μ-almost every configuration
     (`ae_isNormal_trace`); the right half does not matter, since for every fixed right half R (all
     white, as for the seed) a fair-coin left half gives a normal trace almost surely
-    (`ae_isNormal_trace_glue`). So the trace has density 1/2, is disjunctive and is not eventually
-    periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`).
-    The configurations with an eventually periodic trace are dense, meager and null
+    (`ae_isNormal_trace_glue`), and the trace of a fair-coin configuration is independent of its
+    right half x₁, x₂, … (`indepFun_trace_rightHalf`: conditioned on any event about the right half,
+    the trace is still a fair-coin sequence, `measure_inter_prefix_of_flipsLeft`). So the trace has
+    density 1/2, is disjunctive and is not eventually periodic (`ae_halfDensity_trace`,
+    `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`). The configurations with an
+    eventually periodic trace are dense, meager and null
     (`dense_isMeagre_null_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
     measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ
     (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window I of

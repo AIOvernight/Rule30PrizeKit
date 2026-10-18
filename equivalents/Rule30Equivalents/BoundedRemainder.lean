@@ -21,6 +21,10 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
 * `problem1_of_problem2_of_unbounded_discrepancy`: **if Problem 2 holds and the discrepancy
   `N(n) - n/2` of the center column is unbounded, Problem 1 holds**, since an eventually periodic
   sequence with density `1/2` has bounded discrepancy.
+* `problem1_of_unpredictable_half`, `problem2_of_unpredictable_half`: **if every finite-state
+  predictor errs on half of the center column, Problems 1 and 2 hold.** An eventually periodic
+  column has a predictor that is eventually always right; the predictor that always guesses white
+  errs exactly on the black cells.
 -/
 
 namespace Rule30Equivalents.BoundedRemainder
@@ -212,6 +216,59 @@ theorem problem1_of_problem2_of_unbounded_discrepancy (h2 : Rule30Prize.Problem2
   have := hC n
   rw [hα, show (1 / 2 : ℝ) * n = n / 2 by ring] at this
   exact absurd this (not_le.2 hn)
+
+/-! ### Unpredictability at error rate `1/2` -/
+
+/-- The error rate of a finite-state predictor on the center column tends to `1/2`. -/
+def PredictsAtHalf (σ : Type) (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool) : Prop :=
+  Tendsto (fun N : ℕ => (((Finset.range N).filter fun n =>
+    g (WordsAutomata.readState Rule30Prize.center s₀ δ n) ≠ Rule30Prize.center n).card : ℝ) / N)
+    atTop (𝓝 (1 / 2))
+
+/-- **Problem 1 from unpredictability at rate `1/2`**: if every finite-state predictor errs on
+half of the center column, Problem 1 holds. An eventually periodic column has a predictor that is
+eventually always right (`WordsAutomata.problem1_iff_unpredictable`), whose error rate is `0`. -/
+theorem problem1_of_unpredictable_half
+    (h : ∀ (σ : Type) [Finite σ] (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool),
+      PredictsAtHalf σ s₀ δ g) : Rule30Prize.Problem1 := by
+  by_contra hP
+  rw [WordsAutomata.problem1_iff_unpredictable] at hP
+  push Not at hP
+  obtain ⟨σ, hσ, s₀, δ, g, N, hN⟩ := hP
+  -- the errors happen before `N`
+  have hle : ∀ M : ℕ, (((Finset.range M).filter fun n =>
+      g (WordsAutomata.readState Rule30Prize.center s₀ δ n) ≠ Rule30Prize.center n).card : ℝ) ≤
+        N := fun M => by
+    have : ((Finset.range M).filter fun n =>
+        g (WordsAutomata.readState Rule30Prize.center s₀ δ n) ≠ Rule30Prize.center n) ⊆
+          Finset.range N := fun n hn => by
+      rw [Finset.mem_filter] at hn
+      by_contra hnN
+      exact hn.2 (hN n (by simpa using hnN))
+    exact_mod_cast (Finset.card_le_card this).trans (Finset.card_range N).le
+  have h0 : Tendsto (fun M : ℕ => (((Finset.range M).filter fun n =>
+      g (WordsAutomata.readState Rule30Prize.center s₀ δ n) ≠ Rule30Prize.center n).card : ℝ) /
+        M) atTop (𝓝 0) := by
+    refine squeeze_zero (fun M => by positivity) (fun M => div_le_div_of_nonneg_right (hle M)
+      (Nat.cast_nonneg M)) (tendsto_const_div_atTop_nhds_zero_nat (N : ℝ))
+  have := tendsto_nhds_unique h0 (h σ s₀ δ g)
+  norm_num at this
+
+/-- **Problem 2 from unpredictability at rate `1/2`**: the predictor that always guesses white
+errs exactly on the black cells, so its error rate is the density of black cells. -/
+theorem problem2_of_unpredictable_half
+    (h : ∀ (σ : Type) [Finite σ] (s₀ : σ) (δ : σ → Bool → σ) (g : σ → Bool),
+      PredictsAtHalf σ s₀ δ g) : Rule30Prize.Problem2 := by
+  have h0 := h Unit () (fun _ _ => ()) fun _ => false
+  rw [ProblemTwo.problem2_iff_tendsto]
+  refine h0.congr fun N => ?_
+  congr 2
+  rw [show Rule30Prize.blackCount N = ((List.range N).filter c).length from rfl,
+    BlackTimes.length_filter_eq_count, Nat.count_eq_card_filter_range]
+  congr 1
+  refine Finset.filter_congr fun n _ => ?_
+  simp only [c]
+  cases Rule30Prize.center n <;> decide
 
 /-- **Random configurations have unbounded remainder**: for almost every configuration, the
 number of black cells among the first `n` cells of the center trace is not `α n + O(1)` for any

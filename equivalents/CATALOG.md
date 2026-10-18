@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 213 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 215 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -1868,7 +1868,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   output is eventually periodic.
 - *Stronger relative.* Finite-state unpredictability at error rate 1/2 implies both Problem 1 and
   Problem 2 (own reasoning: an EP column is predicted with error rate 0, and the two constant
-  predictors measure the density).
+  predictors measure the density; proved: `BoundedRemainder.problem1_of_unpredictable_half`,
+  `problem2_of_unpredictable_half`).
 - *Difficulty.* Easy.
 - *Lean.* Proved in the library (batch 2: `WordsAutomata.problem1_iff_unpredictable`,
   `problem1_iff_no_finite_generator` and `problem1_iff_no_regular_predictor`). Before batch 2 it was

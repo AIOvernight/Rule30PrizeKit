@@ -44,7 +44,8 @@ those is vacuous.
   put, `eq_of_decidesBinInTime`), and relabeling states and symbols by `Fin`
   (`decidesBinInTime_relabel`) leaves countably many machines, so no machine computes the center
   column of almost every configuration, in any time (`ae_not_decidesBin_trace`): Problem 3 holds
-  for it in both readings.
+  for it in both readings. With the analogues of Problems 1 and 2, **all three Prize problems hold
+  for almost every configuration** (`ae_prizeProblems_trace`).
 * **Words.** For every disjunctive sequence, multiplication is definable in `(ℕ, +, S)`
   (`PresburgerExpansion.mul_definable_of_disjunctive`), and the unbordered words `1 0^L` occur
   arbitrarily late (`not_bordered_one_zeros`). For every sequence that is not eventually periodic,
@@ -626,5 +627,19 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     ae_not_decidesBin_trace] with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 hq h11 hd h13 hz hp3
   exact ⟨h1, hw, h2, h3, h4, h5, h6, h7, h8, h9, h10, hq, h11,
     late_long_unbordered_of_disjunctive hd, h13, hz, hp3⟩
+
+/-- **The three Prize problems hold for almost every configuration.** For almost every
+configuration the center column is not eventually periodic (Problem 1), has density `1/2`
+(Problem 2), and no one-tape Turing machine computes it from the binary digits of `n` in time
+`O(n)` (Problem 3), nor in any time. The single seed is one configuration, a null set, so this says
+nothing about `c` itself. -/
+theorem ae_prizeProblems_trace : ∀ᵐ x ∂(coins ℤ),
+    ¬ EventuallyPeriodic (trace x) ∧ Symmetry.HalfDensity (trace x) ∧
+      ¬ ∃ (M : OneTapeGap.TM) (zero : M.Γ) (T : ℕ → ℕ),
+        (fun n => (T n : ℝ)) =O[atTop] (fun n => (n : ℝ)) ∧
+          ProblemThree.DecidesBinInTime M.toMachine zero (trace x) T := by
+  filter_upwards [ae_not_eventuallyPeriodic_trace, ae_halfDensity_trace, ae_not_decidesBin_trace]
+    with x h1 h2 h3
+  exact ⟨h1, h2, fun ⟨M, zero, T, _, hM⟩ => h3 ⟨M, zero, T, hM⟩⟩
 
 end Rule30Equivalents.TypicalConditions

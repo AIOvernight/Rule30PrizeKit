@@ -2321,7 +2321,8 @@ Lempel–Ziv forms, black times that are not the zero set of a linear recurrence
 (Skolem–Mahler–Lech) or a finite field, Prize Problem 3 in both readings (no one-tape machine
 computes the column at all: a machine computes at most one sequence, and machines are countably
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
-(`ae_value_not_mem_adjoin_trace`).
+(`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration
+(`TypicalConditions.ae_prizeProblems_trace`).
 
 ---
 

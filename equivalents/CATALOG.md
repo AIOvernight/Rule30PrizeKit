@@ -500,8 +500,10 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   top bit of every nonzero number by two. So every nonzero finite configuration has the same
   infinite cycle structure at its right edge as the seed.
 - *Difficulty.* Easy.
-- *Lean.* Stated, with the bridge to [25]. The bridge statement typechecks in core Lean, `#eval`
-  agrees with it for j, t < 10, and the critic checked it numerically for j, t < 80.
+- *Lean.* Proved in the library: `IntegerRows.problem1_iff_diagArray`, with the periodicity of each
+  row (`IntegerRows.diagArray_row_periodic`, period 2^j) and the T-function reading
+  `TFunction.testBit_orbit_periodic`. The original scratch statement, with the bridge to [25], was
+  the following.
 
   ```lean
   def diagArray : ℕ → ℕ → Bool

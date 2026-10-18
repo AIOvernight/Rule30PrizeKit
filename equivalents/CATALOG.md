@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 175 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 178 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2194,7 +2194,10 @@ recurrence as independent of Problem 1 (critic).
 [StrongerStatements](Rule30Equivalents/StrongerStatements.lean) (`problem1_of_*`) for the effective
 boundary, every line, unbounded runs, anti-Toeplitz, disagreements, the Besicovitch distance,
 the orbit closure and positive entropy, disjunctive and normal, x₂ transcendental, Lₙ/n → 1/2,
-the Hankel determinants, the defect bound and hypertranscendence. For a density or a distance the
+the Hankel determinants, the defect bound, hypertranscendence, unbounded abelian complexity, the
+irrationality exponent μ(x₂) ≥ 2 (`problem1_of_irrExponentGE`: a rational has only finitely many
+approximations of order 3/2) and "not a k-Mahler function" (`problem1_of_not_isMahler`: P/Q
+satisfies P(z^k)Q(z)F(z) − P(z)Q(z^k)F(z^k) = 0). For a density or a distance the
 hypothesis used is the weaker "infinitely many". The others are proved elsewhere: no column EP and
 FinConf through Jen's theorem, the frozen-boundary conjecture
 (`AutomatonGroup.problem1_of_frozenBoundaryConjecture`), not 2-automatic

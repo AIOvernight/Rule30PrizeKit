@@ -6,6 +6,8 @@ import Rule30Equivalents.PowerSeriesF2
 import Rule30Equivalents.Automatic
 import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.Algebra.MvPolynomial.Basic
+import Mathlib.RingTheory.PowerSeries.Expand
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Stronger statements that imply Problem 1
@@ -34,6 +36,10 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_of_defect_bound`: the Π⁰₁ defect bound.
 * `problem1_of_hypertranscendental`: `∑ c(t) zᵗ` satisfies no algebraic differential equation
   over `ℚ`.
+* `problem1_of_unbounded_abelianComplexity`: the abelian complexity of `c` is unbounded.
+* `problem1_of_irrExponentGE`: the irrationality exponent of `x₂` is at least some `μ > 1`, for
+  example `μ(x₂) = 2`.
+* `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function.
 -/
 
 namespace Rule30Equivalents.StrongerStatements
@@ -237,5 +243,153 @@ theorem problem1_of_hypertranscendental
     rw [Polynomial.aeval_def, Polynomial.aeval_def,
       show algebraMap ℚ (PowerSeries ℚ) = PowerSeries.C from rfl,
       Polynomial.eval₂_C_X_eq_coe, Polynomial.eval₂_C_X_eq_coe, hPQ, sub_self]
+
+/-! ### Abelian complexity, irrationality exponent, Mahler functions -/
+
+/-- The abelian complexity of `b`: the number of distinct counts of `true` among its factors of
+length `n`. -/
+noncomputable def abelianComplexity (b : ℕ → Bool) (n : ℕ) : ℕ :=
+  ((fun w : Fin n → Bool => (Finset.univ.filter fun i => w i = true).card) ''
+    ShiftOrbit.factors b n).ncard
+
+/-- **Unbounded abelian complexity.** -/
+theorem problem1_of_unbounded_abelianComplexity (h : ∀ C, ∃ n, C < abelianComplexity c n) :
+    Rule30Prize.Problem1 := fun hep => by
+  obtain ⟨C, hC⟩ := (ShiftOrbit.eventuallyPeriodic_iff_bounded_ncard_factors c).1 hep
+  obtain ⟨n, hn⟩ := h C
+  exact absurd (lt_of_lt_of_le hn ((Set.ncard_image_le (Set.toFinite _)).trans (hC n)))
+    (lt_irrefl _)
+
+/-- `x` has irrationality exponent at least `μ`: for every `ν < μ` there are infinitely many
+rationals `q ≠ x` with `|x - q| < den(q)^(-ν)`. -/
+def IrrExponentGE (x μ : ℝ) : Prop :=
+  ∀ ν < μ, {q : ℚ | 0 < |x - q| ∧ |x - q| < (q.den : ℝ) ^ (-ν)}.Infinite
+
+/-- A rational number has only finitely many approximations of order `3/2`. -/
+theorem finite_approx (r : ℚ) :
+    {q : ℚ | 0 < |(r : ℝ) - q| ∧ |(r : ℝ) - q| < (q.den : ℝ) ^ (-(3 / 2 : ℝ))}.Finite := by
+  set D := r.den
+  set B : ℕ := ⌈|(r : ℝ)|⌉₊ + 1
+  refine (((Set.finite_Icc (-((B * D ^ 2 : ℕ) : ℤ)) ((B * D ^ 2 : ℕ) : ℤ)).prod
+    (Set.finite_Iio (D ^ 2))).image fun z => (z.1 : ℚ) / z.2).subset ?_
+  rintro q ⟨hq0, hq⟩
+  have hden0 : (0 : ℝ) < q.den := by exact_mod_cast q.den_pos
+  have hD0 : (0 : ℝ) < D := by exact_mod_cast r.den_pos
+  -- `|r - q| · den r · den q ≥ 1`
+  have hr : (r : ℝ) * D = r.num := by exact_mod_cast Rat.mul_den_eq_num r
+  have hqq : (q : ℝ) * q.den = q.num := by exact_mod_cast Rat.mul_den_eq_num q
+  have hint : (1 : ℝ) ≤ |(r : ℝ) - q| * (D * q.den) := by
+    have e : ((r : ℝ) - q) * (D * q.den) = ((r.num * q.den - q.num * r.den : ℤ) : ℝ) := by
+      push_cast
+      linear_combination (q.den : ℝ) * hr - (D : ℝ) * hqq
+    have hne : r.num * q.den - q.num * r.den ≠ 0 := by
+      intro h0
+      apply hq0.ne'
+      rw [abs_eq_zero, sub_eq_zero]
+      have h1 : ((r : ℝ) - q) * (D * q.den) = 0 := by rw [e, h0]; simp
+      rcases mul_eq_zero.1 h1 with h2 | h2
+      · linarith
+      · exact absurd h2 (by positivity)
+    rw [← abs_of_pos (show (0 : ℝ) < D * q.den by positivity), ← abs_mul, e]
+    exact_mod_cast Int.one_le_abs hne
+  -- squaring: `1 ≤ |r - q|² D² den² < D² / den`, so `den < D²`
+  have hsq : |(r : ℝ) - q| ^ 2 < (q.den : ℝ) ^ (-(3 : ℝ)) := by
+    have h0 : 0 ≤ |(r : ℝ) - q| := abs_nonneg _
+    have := pow_lt_pow_left₀ hq h0 (two_ne_zero)
+    rwa [← Real.rpow_natCast ((q.den : ℝ) ^ (-(3 / 2 : ℝ))) 2, ← Real.rpow_mul hden0.le,
+      show (-(3 / 2 : ℝ)) * ((2 : ℕ) : ℝ) = -(3 : ℝ) by push_cast; ring] at this
+  have hden_lt : (q.den : ℝ) < (D : ℝ) ^ 2 := by
+    have h3 : (q.den : ℝ) ^ (-(3 : ℝ)) = ((q.den : ℝ) ^ 3)⁻¹ := by
+      rw [Real.rpow_neg hden0.le, show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    rw [h3] at hsq
+    have h4 : (1 : ℝ) ≤ |(r : ℝ) - q| ^ 2 * ((D : ℝ) * q.den) ^ 2 := by
+      have := pow_le_pow_left₀ zero_le_one hint 2
+      rwa [one_pow, mul_pow] at this
+    have h5 : |(r : ℝ) - q| ^ 2 * ((D : ℝ) * q.den) ^ 2 <
+        ((q.den : ℝ) ^ 3)⁻¹ * ((D : ℝ) * q.den) ^ 2 :=
+      mul_lt_mul_of_pos_right hsq (by positivity)
+    have h6 : ((q.den : ℝ) ^ 3)⁻¹ * ((D : ℝ) * q.den) ^ 2 = (D : ℝ) ^ 2 / q.den := by
+      field_simp
+    rw [h6, lt_div_iff₀ hden0] at h5
+    calc (q.den : ℝ) = 1 * q.den := (one_mul _).symm
+      _ ≤ |(r : ℝ) - q| ^ 2 * ((D : ℝ) * q.den) ^ 2 * q.den :=
+        mul_le_mul_of_nonneg_right h4 hden0.le
+      _ < (D : ℝ) ^ 2 := h5
+  have hden_nat : q.den < D ^ 2 := by exact_mod_cast hden_lt
+  -- `|q| < |r| + 1 ≤ B`
+  have hq1 : |(r : ℝ) - q| < 1 := by
+    calc |(r : ℝ) - q| < (q.den : ℝ) ^ (-(3 / 2 : ℝ)) := hq
+      _ ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by exact_mod_cast q.den_pos) (by norm_num)
+  have hqB : |(q : ℝ)| ≤ B := by
+    have h1 : |(q : ℝ)| ≤ |(r : ℝ)| + 1 := by
+      have := abs_sub_abs_le_abs_sub (q : ℝ) r
+      rw [abs_sub_comm] at hq1
+      linarith
+    have h2 : |(r : ℝ)| ≤ ⌈|(r : ℝ)|⌉₊ := Nat.le_ceil _
+    simp only [B]
+    push_cast
+    linarith
+  refine ⟨(q.num, q.den), ⟨?_, hden_nat⟩, by simp [Rat.num_div_den]⟩
+  -- `|num q| = |q| den q ≤ B D²`
+  have hnum : |(q.num : ℝ)| ≤ (B * D ^ 2 : ℕ) := by
+    rw [← hqq, abs_mul, abs_of_pos hden0]
+    push_cast
+    have : (q.den : ℝ) ≤ D ^ 2 := hden_lt.le
+    nlinarith [abs_nonneg (q : ℝ)]
+  have hnum' : |q.num| ≤ ((B * D ^ 2 : ℕ) : ℤ) := by exact_mod_cast hnum
+  exact ⟨by linarith [neg_abs_le q.num], by linarith [le_abs_self q.num]⟩
+
+/-- **The irrationality exponent.** If `μ(x₂) ≥ 2` (the catalog's `μ(x₂) = 2`), Problem 1 holds. -/
+theorem problem1_of_irrExponentGE (h : IrrExponentGE BinaryIrrational.centerBinary 2) :
+    Rule30Prize.Problem1 := by
+  rw [BinaryIrrational.problem1_iff_irrational_binary]
+  rintro ⟨r, hr⟩
+  apply h (3 / 2) (by norm_num)
+  rw [← hr]
+  exact finite_approx r
+
+/-- `F` is `k`-Mahler over `ℚ`: `∑_{i ≤ d} pᵢ(z) F(z^(kⁱ)) = 0` for polynomials `pᵢ`, not all
+`0`. -/
+def IsMahler (k : ℕ) (hk : k ≠ 0) (F : PowerSeries ℚ) : Prop :=
+  ∃ (d : ℕ) (p : Fin (d + 1) → Polynomial ℚ), (∃ i, p i ≠ 0) ∧
+    ∑ i, (p i : PowerSeries ℚ) * PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk) F = 0
+
+/-- `X ↦ X^k` commutes with the inclusion of polynomials into power series. -/
+theorem expand_coe (k : ℕ) (hk : k ≠ 0) (P : Polynomial ℚ) :
+    PowerSeries.expand k hk (P : PowerSeries ℚ) = ((Polynomial.expand ℚ k P : Polynomial ℚ) :
+      PowerSeries ℚ) := by
+  have : (PowerSeries.expand k hk).comp (Polynomial.coeToPowerSeries.algHom ℚ) =
+      (Polynomial.coeToPowerSeries.algHom ℚ).comp (Polynomial.expand ℚ k) := by
+    apply Polynomial.algHom_ext
+    simp
+  exact congrArg (fun φ => φ P) this
+
+/-- **Mahler functions.** If `∑ c(t) zᵗ` is not `k`-Mahler for some `k ≥ 1`, Problem 1 holds: a
+rational function `P/Q` satisfies `P(z^k) Q(z) F(z) - P(z) Q(z^k) F(z^k) = 0`. -/
+theorem problem1_of_not_isMahler {k : ℕ} (hk : k ≠ 0)
+    (h : ¬ IsMahler k hk (LinearRelations.series ℚ c)) : Rule30Prize.Problem1 := by
+  intro hep
+  obtain ⟨P, Q, hQ, hPQ⟩ := (LinearRelations.eventuallyPeriodic_iff_rational (K := ℚ) c).1 hep
+  apply h
+  set F := LinearRelations.series ℚ c
+  by_cases hP : P = 0
+  · -- `F = 0`
+    refine ⟨0, fun _ => 1, ⟨0, one_ne_zero⟩, ?_⟩
+    have hF : F = 0 := by
+      rw [hP, Polynomial.coe_zero] at hPQ
+      exact (mul_eq_zero.1 hPQ).resolve_left (by exact_mod_cast hQ)
+    simp [hF]
+  · refine ⟨1, ![Polynomial.expand ℚ k P * Q, -(P * Polynomial.expand ℚ k Q)],
+      ⟨0, mul_ne_zero ((Polynomial.expand_ne_zero (Nat.pos_of_ne_zero hk)).2 hP) hQ⟩, ?_⟩
+    have hPQk := congrArg (PowerSeries.expand k hk) hPQ
+    rw [map_mul, expand_coe, expand_coe] at hPQk
+    show ∑ i : Fin 2, _ = 0
+    rw [Fin.sum_univ_two]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Fin.val_zero, Fin.val_one, pow_zero,
+      pow_one, Polynomial.coe_mul, Polynomial.coe_neg]
+    rw [show PowerSeries.expand 1 (pow_ne_zero 0 hk) F = F from
+      PowerSeries.expand_one_apply F]
+    linear_combination (↑(Polynomial.expand ℚ k P) : PowerSeries ℚ) * hPQ -
+      (↑P : PowerSeries ℚ) * hPQk
 
 end Rule30Equivalents.StrongerStatements

@@ -1,3 +1,4 @@
+import Rule30Equivalents.TFunctionCycles
 import Ruliology.CellularAutomata.Rule30RightPeriods
 import Mathlib.NumberTheory.Padics.RingHoms
 import Mathlib.Topology.LocallyConstant.Basic
@@ -6,21 +7,27 @@ import Mathlib.NumberTheory.Padics.ProperSpace
 /-!
 # The right edge of rule 30 is a 2-adic odometer
 
-Catalog Section 3.3 ([25], [26]) and Section 7, item 9, which cite Coven, Pivato and Yassawi
-[CPY07]: in the frame of the right edge, the orbit closure of the single seed is the 2-adic
-odometer. Read row `t` leftward from its right edge: `row t j = R j t = cell(t, t - j)`.
+Catalog Section 3.3 ([25], [26]) and Section 7, items 8 and 9, which cite Coven, Pivato and
+Yassawi [CPY07]: in the frame of the right edge, the orbit closure of the single seed is the 2-adic
+odometer. This holds for every nonzero finite configuration, not only the seed.
 
-* `G_row`: in these coordinates rule 30 is `G(y)_j = y_j ⊕ (y_{j-1} ∨ y_{j-2})`, with
-  `y_{-1} = y_{-2} = 0`, and the seed is `row 0 = (1, 0, 0, …)`.
+`TFunction` writes rule 30 on finite configurations, in the frame of the right edge, as the map
+`Φ` on `ℕ`: row `t` of `TFunction.row a`, read leftward from its right edge, is the binary
+expansion of `Φ^t(a)` (`TFunction.testBit_orbit`).
+
+* `G_bits`: on binary expansions `Φ` is `G(y)_j = y_j ⊕ (y_{j-1} ∨ y_{j-2})`, with
+  `y_{-1} = y_{-2} = 0`.
 * `G_bijective`, `agree_G_iff`: `G` is a bijection, and `G y`, `G y'` agree below `n` iff `y`, `y'`
   do. So `G` is an isometry of `{0,1}^ℕ` for the metric `2^-(first difference)`.
-* `ψ α j = R j (α mod 2^j)` for a 2-adic integer `α` (each `R j` has period `2^j`):
-  `ψ_natCast` (`ψ t = row t`), `ψ_add_one` (`ψ (α + 1) = G (ψ α)`), `continuous_ψ`,
-  `ψ_injective`, `range_ψ` (`range ψ = closure (range row)`), and `isClosedEmbedding_ψ`.
-  **So `ψ` is a homeomorphism from `ℤ₂` onto the orbit closure of the seed that conjugates
-  `α ↦ α + 1` to rule 30.** Injectivity is where rule 30 enters: if `ψ α = ψ β` with
-  `α - β ∉ 2^m ℤ₂`, every diagonal would have period `2^(m-1)`, but the periods of the diagonals
-  are unbounded (`Rule30RightPeriods.not_per_small`).
+* `ψ a α j` is bit `j` of `Φ^(α mod 2^j)(a)`, for a 2-adic integer `α` (bit `j` of `Φ^t(a)` has
+  period dividing `2^j` in `t`): `ψ_natCast` (`ψ a t` is the expansion of `Φ^t(a)`), `ψ_add_one`
+  (`ψ a (α + 1) = G (ψ a α)`), `continuous_ψ`, `range_ψ` (the image is the orbit closure),
+  `ψ_injective` and `isClosedEmbedding_ψ` for `a ≠ 0`. **So for every nonzero finite
+  configuration `ψ a` is a homeomorphism from `ℤ₂` onto the orbit closure of its right-edge
+  reading that conjugates `α ↦ α + 1` to rule 30.** Injectivity: if `ψ a α = ψ a β` with
+  `α - β ∉ 2^m ℤ₂`, every bit of `Φ^t(a)` would repeat with period `2^(m-1)`, so
+  `Φ^(2^(m-1))(a) = a`; but `Φ` strictly increases every nonzero number (`TFunctionCycles.lt_Phi`).
+* The single seed (`a = 1`): `row t j = R j t`, `isClosedEmbedding_seed`, `range_seed`.
 
 The finite levels are in `TFunctionCycles` (`seed_rows_return_iff`, `per_unbounded`). None of this
 reaches the center column, which reads the moving coordinate `row t t`.
@@ -28,7 +35,7 @@ reaches the center column, which reads the moving coordinate `row t t`.
 
 namespace Rule30Equivalents.Odometer
 
-open Ruliology.CellularAutomata Rule30Diagonals Rule30RightPeriods
+open Ruliology.CellularAutomata
 
 /-! ### Rule 30 in the frame of the right edge -/
 
@@ -86,78 +93,60 @@ theorem agree_G_iff (y y' : ℕ → Bool) (n : ℕ) :
     | 1 => simp only [G]; rw [h 1 hj, h 0 (by omega)]
     | j + 2 => simp only [G]; rw [h _ hj, h (j + 1) (by omega), h j (by omega)]
 
-/-- Row `t`, read leftward from its right edge. -/
-def row (t : ℕ) : ℕ → Bool := fun j => R j t
+/-! ### Binary expansions -/
 
-theorem R_one_succ (t : ℕ) : R 1 (t + 1) = xor (R 1 t) (R 0 t) := by
-  rw [R_one_eq, R_one_eq, R_zero]
-  rcases Nat.mod_two_eq_zero_or_one t with h | h
-  · have : (t + 1) % 2 = 1 := by omega
-    simp [h, this]
-  · have : (t + 1) % 2 = 0 := by omega
-    simp [h, this]
+/-- The binary expansion of `x`, least significant bit first. -/
+def bits (x : ℕ) : ℕ → Bool := fun j => x.testBit j
 
-/-- **Rule 30 acts on the rows as `G`.** -/
-theorem G_row (t : ℕ) : G (row t) = row (t + 1) := by
+/-- **On binary expansions, `Φ` is `G`.** -/
+theorem G_bits (x : ℕ) : G (bits x) = bits (TFunction.Phi x) := by
   funext j
+  simp only [bits, TFunction.testBit_Phi, TFunction.low]
   match j with
-  | 0 => simp [G, row, R_zero]
-  | 1 => exact (R_one_succ t).symm
-  | j + 2 => exact (R_step j t).symm
+  | 0 => simp [G, bits, Nat.testBit_zero]
+  | 1 => simp [G, bits, Nat.testBit_zero]
+  | j + 2 => simp [G, bits]
 
-theorem row_zero : row 0 = fun j => decide (j = 0) := by
-  funext j
-  rcases Nat.eq_zero_or_pos j with rfl | hj
-  · simp [row, R_zero]
-  · simp [row, R_init hj]
-    omega
-
-/-! ### The 2-adic parametrization -/
-
-/-- `R j` only sees its time modulo `2^j`. -/
-theorem R_mod (j n : ℕ) : R j (n % 2 ^ j) = R j n := by
-  have h := (per_R_periodic j).mul (n / 2 ^ j) (n % 2 ^ j)
+/-- Bit `j` of `Φ^t(a)` only sees `t mod 2^j`. -/
+theorem testBit_orbit_mod (a j n : ℕ) :
+    (TFunction.orbit a (n % 2 ^ j)).testBit j = (TFunction.orbit a n).testBit j := by
+  have h := TFunction.testBit_orbit_periodic_mul a j (n / 2 ^ j) (n % 2 ^ j)
   rw [mul_comm, Nat.mod_add_div] at h
   exact h.symm
 
-theorem R_val_eq {j : ℕ} {x : ZMod (2 ^ j)} {y : ℕ} (h : x = y) : R j x.val = R j y := by
-  rw [h, ZMod.val_natCast, R_mod]
+theorem testBit_val_eq (a : ℕ) {j : ℕ} {x : ZMod (2 ^ j)} {y : ℕ} (h : x = y) :
+    (TFunction.orbit a x.val).testBit j = (TFunction.orbit a y).testBit j := by
+  rw [h, ZMod.val_natCast, testBit_orbit_mod]
 
 theorem val_toZModPow_mod {m n : ℕ} (h : m ≤ n) (α : ℤ_[2]) :
     (PadicInt.toZModPow m α).val = (PadicInt.toZModPow n α).val % 2 ^ m := by
   rw [← PadicInt.cast_toZModPow m n h, ZMod.cast_eq_val, ZMod.val_natCast]
 
-/-- The point of the orbit closure at the 2-adic time `α`: diagonal `j` read at `α mod 2^j`. -/
-noncomputable def ψ (α : ℤ_[2]) : ℕ → Bool := fun j => R j (PadicInt.toZModPow j α).val
+/-! ### The 2-adic parametrization -/
 
-/-- At natural times `ψ` is the orbit of the seed. -/
-theorem ψ_natCast (t : ℕ) : ψ (t : ℤ_[2]) = row t := by
+/-- The point of the orbit closure of `a` at the 2-adic time `α`: bit `j` of `Φ^(α mod 2^j)(a)`. -/
+noncomputable def ψ (a : ℕ) (α : ℤ_[2]) : ℕ → Bool :=
+  fun j => (TFunction.orbit a (PadicInt.toZModPow j α).val).testBit j
+
+/-- At natural times `ψ a` is the orbit of `a`. -/
+theorem ψ_natCast (a t : ℕ) : ψ a (t : ℤ_[2]) = bits (TFunction.orbit a t) := by
   funext j
-  simp only [ψ, row, map_natCast, ZMod.val_natCast, R_mod]
+  simp only [ψ, bits, map_natCast, ZMod.val_natCast, testBit_orbit_mod]
 
-/-- **`ψ` conjugates `α ↦ α + 1` to rule 30.** -/
-theorem ψ_add_one (α : ℤ_[2]) : ψ (α + 1) = G (ψ α) := by
-  have hsucc : ∀ j, ψ (α + 1) j = R j ((PadicInt.toZModPow j α).val + 1) := fun j =>
-    R_val_eq (by rw [map_add, map_one]; push_cast; rw [ZMod.natCast_zmod_val])
-  have hlow : ∀ i j, i ≤ j → ψ α i = R i (PadicInt.toZModPow j α).val := fun i j hij => by
-    simp only [ψ]
-    rw [val_toZModPow_mod hij, R_mod]
+/-- **`ψ a` conjugates `α ↦ α + 1` to rule 30.** -/
+theorem ψ_add_one (a : ℕ) (α : ℤ_[2]) : ψ a (α + 1) = G (ψ a α) := by
   funext j
-  rw [hsucc]
-  match j with
-  | 0 => simp [G, ψ, R_zero]
-  | 1 => rw [R_one_succ]; simp only [G]; rw [hlow 1 1 le_rfl, hlow 0 1 (by omega)]
-  | j + 2 =>
-    rw [R_step]
-    simp only [G]
-    rw [hlow (j + 2) (j + 2) le_rfl, hlow (j + 1) (j + 2) (by omega), hlow j (j + 2) (by omega)]
+  set A := (PadicInt.toZModPow j α).val with hA
+  have h1 : ψ a (α + 1) j = (TFunction.orbit a (A + 1)).testBit j :=
+    testBit_val_eq a (by rw [map_add, map_one, Nat.cast_add, ZMod.natCast_zmod_val, Nat.cast_one])
+  -- `ψ a α` agrees with the expansion of `Φ^A(a)` up to bit `j`
+  have hag : ∀ i < j + 1, ψ a α i = bits (TFunction.orbit a A) i := fun i hi => by
+    simp only [ψ, bits, hA]
+    rw [val_toZModPow_mod (show i ≤ j by omega), testBit_orbit_mod]
+  rw [h1, (agree_G_iff _ _ (j + 1)).2 hag j (by omega), G_bits]
+  rfl
 
-theorem ψ_zero : ψ 0 = fun j => decide (j = 0) := by
-  have := ψ_natCast 0
-  rw [Nat.cast_zero] at this
-  rw [this, row_zero]
-
-theorem continuous_ψ : Continuous ψ := by
+theorem continuous_ψ (a : ℕ) : Continuous (ψ a) := by
   refine continuous_pi fun j => IsLocallyConstant.continuous ?_
   rw [IsLocallyConstant.iff_eventually_eq]
   intro α
@@ -173,12 +162,12 @@ theorem continuous_ψ : Continuous ψ := by
   rw [map_sub, sub_eq_zero] at h0
   simp only [ψ, h0]
 
-/-- **`ψ` is injective**, because the periods of the right diagonals are unbounded. -/
-theorem ψ_injective : Function.Injective ψ := by
+/-- **`ψ a` is injective for `a ≠ 0`**: `Φ` strictly increases every nonzero number, so no bit
+pattern of `Φ^t(a)` can repeat with a bounded period. -/
+theorem ψ_injective {a : ℕ} (ha : a ≠ 0) : Function.Injective (ψ a) := by
   intro α β hαβ
   by_contra hne
-  -- `ψ (α + n) = ψ (β + n)` for every natural `n`
-  have hn : ∀ n : ℕ, ψ (α + n) = ψ (β + n) := by
+  have hn : ∀ n : ℕ, ψ a (α + n) = ψ a (β + n) := by
     intro n
     induction n with
     | zero => simpa using hαβ
@@ -202,64 +191,111 @@ theorem ψ_injective : Function.Injective ψ := by
     rcases Nat.eq_zero_or_pos m with rfl | h
     · simp at hm
     · exact h
-  -- every diagonal `R j`, `j ≥ m`, has period `2^(m - 1)`
-  have hper : ∀ j, m ≤ j → Per j (2 ^ (m - 1)) := by
-    intro j hj
-    set A := PadicInt.toZModPow j α with hA
-    set B := PadicInt.toZModPow j β with hB
-    set D := PadicInt.toZModPow j (α - β) with hD
-    have hDAB : D = A - B := by rw [hD, map_sub]
-    have hBlt : B.val < 2 ^ j := ZMod.val_lt B
-    -- `R j` is invariant under the shift by `D`
-    have hinv : ∀ t, R j (t + D.val) = R j t := by
-      intro t
-      have h := congrFun (hn (t + (2 ^ j - B.val))) j
-      simp only [ψ, map_add, map_natCast] at h
-      rw [← hA, ← hB] at h
+  -- every bit of `Φ^t(a)` repeats with period `2^(m - 1)`
+  have hper : ∀ j, Rule30RightPeriods.PerF (fun t => (TFunction.orbit a t).testBit j)
+      (2 ^ (m - 1)) := by
+    intro j
+    by_cases hj : m ≤ j
+    · set A := PadicInt.toZModPow j α with hA
+      set B := PadicInt.toZModPow j β with hB
+      set D := PadicInt.toZModPow j (α - β) with hD
+      have hDAB : D = A - B := by rw [hD, map_sub]
+      have hBlt : B.val < 2 ^ j := ZMod.val_lt B
       have h2j : ((2 ^ j : ℕ) : ZMod (2 ^ j)) = 0 := ZMod.natCast_self _
-      rw [R_val_eq (y := t + D.val) (by
-          rw [hDAB, Nat.cast_add, Nat.cast_sub hBlt.le, h2j, Nat.cast_add, ZMod.natCast_zmod_val,
-            ZMod.natCast_zmod_val]
-          ring),
-        R_val_eq (y := t + 2 ^ j) (by
-          rw [Nat.cast_add, Nat.cast_sub hBlt.le, h2j, Nat.cast_add, h2j, ZMod.natCast_zmod_val]
-          ring)] at h
-      rw [h, per_R_periodic j t]
-    -- the gcd of `D.val` and `2^j` is a power of two below `2^m`
-    have hg := PerF.gcd (f := R j) D.val (2 ^ j) hinv (per_R_periodic j)
-    obtain ⟨w, hwj, hw⟩ := (Nat.dvd_prime_pow Nat.prime_two).1 (Nat.gcd_dvd_right D.val (2 ^ j))
-    have hwm : w ≤ m - 1 := by
-      by_contra hwm
-      apply hm
-      have hdvd : 2 ^ m ∣ D.val :=
-        (pow_dvd_pow 2 (by omega)).trans (hw ▸ Nat.gcd_dvd_left D.val (2 ^ j))
-      have h0 : PadicInt.toZModPow m (α - β) = 0 := by
-        rw [← PadicInt.cast_toZModPow m j hj, ← hD, ZMod.cast_eq_val,
-          ZMod.natCast_eq_zero_iff]
-        exact_mod_cast hdvd
-      rw [← PadicInt.ker_toZModPow]
-      exact h0
-    rw [hw] at hg
-    exact Per.pow_mono hg hwm
-  exact not_per_small (j := 2 ^ m) (k := m - 1) Nat.one_le_two_pow
-    (by rw [Nat.sub_add_cancel hm1]) (hper (2 ^ m) Nat.lt_two_pow_self.le)
+      have hinv : Rule30RightPeriods.PerF (fun t => (TFunction.orbit a t).testBit j) D.val := by
+        intro t
+        have h := congrFun (hn (t + (2 ^ j - B.val))) j
+        simp only [ψ, map_add, map_natCast] at h
+        rw [← hA, ← hB] at h
+        rw [testBit_val_eq a (y := t + D.val) (by
+            rw [hDAB, Nat.cast_add, Nat.cast_sub hBlt.le, h2j, Nat.cast_add,
+              ZMod.natCast_zmod_val, ZMod.natCast_zmod_val]
+            ring),
+          testBit_val_eq a (y := t + 2 ^ j) (by
+            rw [Nat.cast_add, Nat.cast_sub hBlt.le, h2j, Nat.cast_add, h2j, ZMod.natCast_zmod_val]
+            ring)] at h
+        simp only
+        rw [h, TFunction.testBit_orbit_periodic]
+      have hg := Rule30RightPeriods.PerF.gcd D.val (2 ^ j) hinv
+        (fun t => TFunction.testBit_orbit_periodic a j t)
+      obtain ⟨w, hwj, hw⟩ :=
+        (Nat.dvd_prime_pow Nat.prime_two).1 (Nat.gcd_dvd_right D.val (2 ^ j))
+      have hwm : w ≤ m - 1 := by
+        by_contra hwm
+        apply hm
+        have hdvd : 2 ^ m ∣ D.val :=
+          (pow_dvd_pow 2 (by omega)).trans (hw ▸ Nat.gcd_dvd_left D.val (2 ^ j))
+        have h0 : PadicInt.toZModPow m (α - β) = 0 := by
+          rw [← PadicInt.cast_toZModPow m j hj, ← hD, ZMod.cast_eq_val, ZMod.natCast_eq_zero_iff]
+          exact_mod_cast hdvd
+        rw [← PadicInt.ker_toZModPow]
+        exact h0
+      rw [hw] at hg
+      have := hg.mul (2 ^ (m - 1 - w))
+      rwa [← pow_add, Nat.sub_add_cancel hwm] at this
+    · have := Rule30RightPeriods.PerF.mul (f := fun t => (TFunction.orbit a t).testBit j)
+        (p := 2 ^ j) (fun t => TFunction.testBit_orbit_periodic a j t) (2 ^ (m - 1 - j))
+      rwa [← pow_add, Nat.sub_add_cancel (by omega)] at this
+  -- so `Φ^(2^(m-1))(a) = a`, against `a < Φ^(2^(m-1))(a)`
+  have heq : TFunction.orbit a (2 ^ (m - 1)) = a :=
+    Nat.eq_of_testBit_eq fun j => by simpa [TFunction.orbit] using hper j 0
+  have hlt := TFunctionCycles.lt_iterate_Phi ha (2 ^ (m - 1)) Nat.one_le_two_pow
+  rw [← TFunctionCycles.orbit_eq_iterate, heq] at hlt
+  exact lt_irrefl a hlt
 
-/-- **The orbit closure.** The image of `ψ` is the closure of the orbit of the seed. -/
-theorem range_ψ : Set.range ψ = closure (Set.range row) := by
+/-- **The orbit closure.** The image of `ψ a` is the closure of the orbit of `a`. -/
+theorem range_ψ (a : ℕ) :
+    Set.range (ψ a) = closure (Set.range fun t => bits (TFunction.orbit a t)) := by
   apply le_antisymm
   · rintro _ ⟨α, rfl⟩
     have hd := PadicInt.denseRange_natCast (p := 2)
-    have : ψ α ∈ closure (ψ '' Set.range (Nat.cast : ℕ → ℤ_[2])) :=
-      image_closure_subset_closure_image continuous_ψ
+    have : ψ a α ∈ closure (ψ a '' Set.range (Nat.cast : ℕ → ℤ_[2])) :=
+      image_closure_subset_closure_image (continuous_ψ a)
         ⟨α, by rw [hd.closure_eq]; exact Set.mem_univ α, rfl⟩
-    rwa [← Set.range_comp, show ψ ∘ (Nat.cast : ℕ → ℤ_[2]) = row from funext ψ_natCast] at this
-  · refine closure_minimal ?_ (isCompact_range continuous_ψ).isClosed
+    rwa [← Set.range_comp, show ψ a ∘ (Nat.cast : ℕ → ℤ_[2]) = fun t => bits (TFunction.orbit a t)
+      from funext (ψ_natCast a)] at this
+  · refine closure_minimal ?_ (isCompact_range (continuous_ψ a)).isClosed
     rintro _ ⟨t, rfl⟩
-    exact ⟨t, ψ_natCast t⟩
+    exact ⟨t, ψ_natCast a t⟩
 
-/-- **The 2-adic odometer**: `ψ` is a closed embedding of `ℤ₂` onto the orbit closure of the seed
-in the frame of the right edge, conjugating `α ↦ α + 1` to rule 30. -/
-theorem isClosedEmbedding_ψ : Topology.IsClosedEmbedding ψ :=
-  continuous_ψ.isClosedEmbedding ψ_injective
+/-- **The 2-adic odometer**: for every nonzero finite configuration, `ψ a` is a closed embedding
+of `ℤ₂` onto the orbit closure of its right-edge reading, conjugating `α ↦ α + 1` to rule 30. -/
+theorem isClosedEmbedding_ψ {a : ℕ} (ha : a ≠ 0) : Topology.IsClosedEmbedding (ψ a) :=
+  (continuous_ψ a).isClosedEmbedding (ψ_injective ha)
+
+/-! ### The single seed -/
+
+/-- Row `t` of the single seed, read leftward from its right edge. -/
+def row (t : ℕ) : ℕ → Bool := fun j => Rule30Diagonals.R j t
+
+theorem bits_orbit_one (t : ℕ) : bits (TFunction.orbit 1 t) = row t := by
+  have hseed : TFunction.row 1 = Rule30Realization.seed := by
+    funext p
+    simp only [TFunction.row, Rule30Realization.seed]
+    by_cases hp : p ≤ 0
+    · rw [if_pos hp]
+      by_cases hp0 : p = 0
+      · subst hp0
+        rfl
+      · rw [decide_eq_false hp0]
+        obtain ⟨n, hn⟩ : ∃ n, (-p).toNat = n + 1 := ⟨(-p).toNat - 1, by omega⟩
+        rw [hn, Nat.testBit_succ]
+        simp
+    · rw [if_neg hp, decide_eq_false (by omega)]
+  funext j
+  simp only [bits, row, TFunction.testBit_orbit, hseed, Rule30Realization.evol_seed,
+    Rule30Diagonals.R]
+
+/-- Rule 30 acts on the rows of the seed as `G`. -/
+theorem G_row (t : ℕ) : G (row t) = row (t + 1) := by
+  rw [← bits_orbit_one, ← bits_orbit_one, G_bits]
+  rfl
+
+theorem isClosedEmbedding_seed : Topology.IsClosedEmbedding (ψ 1) :=
+  isClosedEmbedding_ψ one_ne_zero
+
+theorem range_seed : Set.range (ψ 1) = closure (Set.range row) := by
+  rw [range_ψ]
+  simp only [bits_orbit_one]
 
 end Rule30Equivalents.Odometer

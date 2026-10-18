@@ -463,11 +463,13 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   This explains the odometer of [CPY07]: in the frame moving with the right edge, the orbit closure
   of the seed is the 2-adic odometer, and c is the diagonal of an odometer orbit. It also puts [25]
   and [26] one lemma apart. Both routes are identity transfers. The odometer itself is proved in
-  [Odometer](Rule30Equivalents/Odometer.lean): rule 30 acts on the rows read from the right edge as
-  the bijective isometry G(y)_j = y_j ⊕ (y_{j−1} ∨ y_{j−2}), and ψ(α)_j = R_j(α mod 2^j) is a closed
-  embedding of ℤ₂ onto the orbit closure of the seed with ψ(α + 1) = G(ψ(α))
-  (`isClosedEmbedding_ψ`, `range_ψ`, `ψ_add_one`). Injectivity comes from the unbounded periods of
-  the diagonals.
+  [Odometer](Rule30Equivalents/Odometer.lean), for every nonzero finite configuration: rule 30 acts
+  on the rows read from the right edge as the bijective isometry G(y)_j = y_j ⊕ (y_{j−1} ∨ y_{j−2})
+  (Φ on binary expansions), and ψ_a(α)_j = bit j of Φ^(α mod 2^j)(a) is a closed embedding of ℤ₂
+  onto the orbit closure of the right-edge reading of a, with ψ_a(α + 1) = G(ψ_a(α))
+  (`isClosedEmbedding_ψ`, `range_ψ`, `ψ_add_one`; the seed is a = 1, `isClosedEmbedding_seed`).
+  Injectivity: a repeat of all bits with period 2^(m−1) would give Φ^(2^(m−1))(a) = a, but Φ
+  increases every nonzero number.
 
   The critic's argument is proved in [TFunction](Rule30Equivalents/TFunction.lean), for every
   starting value a, not only 1:
@@ -2506,7 +2508,8 @@ with Turing machines reading n. Notes:
    also prove FinConf must use something specific to the seed's orbit, and the odometer
    structure of its right edge is not such a thing.
 9. **Odometer and diagonals.** In the frame of the right edge, the orbit closure of the seed is the
-   2-adic odometer [CPY07] (proved: `Odometer.isClosedEmbedding_ψ`). The T-function Φ(x) = x ⊕ (2x ∨ 4x) makes this concrete (critic):
+   2-adic odometer [CPY07] (proved: `Odometer.isClosedEmbedding_seed`, and
+   `Odometer.isClosedEmbedding_ψ` for every nonzero finite configuration). The T-function Φ(x) = x ⊕ (2x ∨ 4x) makes this concrete (critic):
    - row j of the diagonal array is bit j of the Φ-orbit of 1;
    - Φ is a bijection of ℤ₂, and its cycle through 1 modulo 2^(j+1) has length dividing 2^j
      ([26]).

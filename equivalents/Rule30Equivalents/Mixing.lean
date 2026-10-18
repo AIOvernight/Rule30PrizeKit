@@ -512,31 +512,19 @@ section Entropy
 
 open Dynamics Uniformity
 
-/-- The shift on `{0,1}^ℕ`. -/
-def shift (v : ℕ → Bool) : ℕ → Bool := fun t => v (t + 1)
-
-theorem shift_iterate (k : ℕ) (v : ℕ → Bool) : shift^[k] v = fun t => v (t + k) := by
-  induction k generalizing v with
-  | zero => rfl
-  | succ k ih =>
-    rw [Function.iterate_succ_apply, ih]
-    funext t
-    simp only [shift]
-    congr 1
-
 /-- The full shift on `{0,1}^ℕ` has topological entropy at least `log 2`: a dynamical cover for
 the first coordinate over `n` steps must show every word of length `n`. -/
 theorem log_two_le_coverEntropy_shift :
-    ENNReal.log 2 ≤ coverEntropy shift (Set.univ : Set (ℕ → Bool)) := by
+    ENNReal.log 2 ≤ coverEntropy ShiftOrbit.shift (Set.univ : Set (ℕ → Bool)) := by
   let V : SetRel (ℕ → Bool) (ℕ → Bool) := {p | p.1 0 = p.2 0}
   have hV : V ∈ 𝓤 (ℕ → Bool) :=
     (Pi.uniformContinuous_proj (fun _ : ℕ => Bool) 0)
       (UniformSpace.uniformSpace_eq_bot.mp rfl : SetRel.id ∈ 𝓤 Bool)
-  refine le_trans ?_ (coverEntropyEntourage_le_coverEntropy shift Set.univ hV)
+  refine le_trans ?_ (coverEntropyEntourage_le_coverEntropy ShiftOrbit.shift Set.univ hV)
   rw [← ExpGrowth.expGrowthSup_pow]
   refine ExpGrowth.expGrowthSup_monotone fun n => ?_
   -- a dynamical cover shows every word of length `n`
-  have key : ∀ s : Finset (ℕ → Bool), IsDynCoverOf shift Set.univ V n s → 2 ^ n ≤ s.card := by
+  have key : ∀ s : Finset (ℕ → Bool), IsDynCoverOf ShiftOrbit.shift Set.univ V n s → 2 ^ n ≤ s.card := by
     intro s hs
     have hsurj : (s.image fun y => fun k : Fin n => y k) = Finset.univ := by
       refine Finset.eq_univ_of_forall fun w => ?_
@@ -544,14 +532,14 @@ theorem log_two_le_coverEntropy_shift :
         (Set.mem_univ _)
       refine Finset.mem_image.2 ⟨y, hy, funext fun k => ?_⟩
       simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
-        Prod.map_apply, shift_iterate, V, Set.mem_setOf_eq, zero_add] at hxy
+        Prod.map_apply, ShiftOrbit.shift_iterate, V, Set.mem_setOf_eq, add_zero] at hxy
       have hk := hxy k k.2
       simp only [dif_pos k.2] at hk
       exact hk.symm
     calc 2 ^ n = (Finset.univ : Finset (Fin n → Bool)).card := by simp
       _ = (s.image fun y => fun k : Fin n => y k).card := by rw [hsurj]
       _ ≤ s.card := Finset.card_image_le
-  have hmin : ((2 ^ n : ℕ) : ℕ∞) ≤ coverMincard shift Set.univ V n :=
+  have hmin : ((2 ^ n : ℕ) : ℕ∞) ≤ coverMincard ShiftOrbit.shift Set.univ V n :=
     le_iInf₂ fun s hs => by exact_mod_cast key s hs
   have := ENat.toENNReal_le.2 hmin
   simpa using this
@@ -561,7 +549,7 @@ continuous factor map onto the full shift on `{0,1}^ℕ` (`RandomConfigurations.
 `Genericity.surjective_trace`). -/
 theorem log_two_le_coverEntropy :
     ENNReal.log 2 ≤ coverEntropy (fun x : ℤ → Bool => evol x 1) Set.univ := by
-  have hsemi : Function.Semiconj trace (fun x : ℤ → Bool => evol x 1) shift := fun x =>
+  have hsemi : Function.Semiconj trace (fun x : ℤ → Bool => evol x 1) ShiftOrbit.shift := fun x =>
     trace_evol_one x
   have h := coverEntropy_image_le_of_uniformContinuous hsemi
     (CompactSpace.uniformContinuous_of_continuous continuous_trace) Set.univ

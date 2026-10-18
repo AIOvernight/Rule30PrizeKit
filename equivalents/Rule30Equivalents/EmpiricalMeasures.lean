@@ -15,6 +15,9 @@ the compact space of probability measures (Mathlib's Prokhorov theorem). Its mas
   iff `g x = L` at every cluster point `x` of `(u N)`.
 * `halfDensity_iff_mapClusterPt`, `problem2_iff_mapClusterPt`: **Problem 2 holds iff every limit
   point of the empirical measures of the center column gives the cylinder `[1]` mass `1/2`.**
+* `problem1_of_nonatomic_mapClusterPt`: if some limit point has no atoms, Problem 1 holds; for an
+  eventually periodic sequence every empirical measure, hence every limit point, is carried by
+  finitely many shifts (`not_eventuallyPeriodic_of_nonatomic`).
 * `map_shift_of_mapClusterPt`: **Krylov–Bogolyubov**, every such limit point is shift-invariant.
   The function `μ ↦ ∫ f ∘ σ dμ - ∫ f dμ` is continuous and equals
   `(f(σᴺ⁺¹b) - f(b)) / (N + 1)` at the `N`-th empirical measure (`integral_empiricalOf`).
@@ -68,12 +71,12 @@ theorem empiricalOf_apply {X : Type*} [MeasurableSpace X] (u : ℕ → X) (N : �
 
 /-- The empirical measure of `b` over the times `0, …, N`: of the shifts `b, σb, …, σᴺb`. -/
 noncomputable def empirical (b : ℕ → Bool) (N : ℕ) : ProbabilityMeasure (ℕ → Bool) :=
-  empiricalOf (fun n => Mixing.shift^[n] b) N
+  empiricalOf (fun n => ShiftOrbit.shift^[n] b) N
 
 theorem empirical_apply (b : ℕ → Bool) (N : ℕ) {s : Set (ℕ → Bool)} [DecidablePred (· ∈ s)]
     (hs : MeasurableSet s) :
     ((empirical b N) s : ℝ) =
-      (#{i ∈ range (N + 1) | Mixing.shift^[i] b ∈ s} : ℝ) / ((N + 1 : ℕ) : ℝ) :=
+      (#{i ∈ range (N + 1) | ShiftOrbit.shift^[i] b ∈ s} : ℝ) / ((N + 1 : ℕ) : ℝ) :=
   empiricalOf_apply _ N hs
 
 /-- **The mass of `[1]` is the proportion of `1`s** among `b 0, …, b N`. -/
@@ -84,7 +87,7 @@ theorem empirical_one (b : ℕ → Bool) (N : ℕ) :
   rw [empirical_apply b N measurableSet_one, ProblemTwo.count_eq_sum, sum_boole]
   congr 3
   refine filter_congr fun i _ => ?_
-  simp [one, Mixing.shift_iterate]
+  simp [one, ShiftOrbit.shift_iterate]
 
 /-- `ν ↦ ν [1]` is continuous: `[1]` is clopen, so its frontier is null (portmanteau). -/
 theorem continuous_mass_one :
@@ -147,7 +150,7 @@ theorem problem2_iff_mapClusterPt : Rule30Prize.Problem2 ↔
 
 /-! ### Krylov–Bogolyubov -/
 
-theorem continuous_shift : Continuous Mixing.shift :=
+theorem continuous_shift : Continuous ShiftOrbit.shift :=
   continuous_pi fun t => continuous_apply (A := fun _ : ℕ => Bool) (t + 1)
 
 /-- The integral of a bounded continuous function against an empirical measure is its average
@@ -165,48 +168,93 @@ theorem integral_empiricalOf {X : Type*} [MeasurableSpace X] [MeasurableSingleto
 invariant under the shift. -/
 theorem map_shift_of_mapClusterPt {b : ℕ → Bool} {ν : ProbabilityMeasure (ℕ → Bool)}
     (hν : MapClusterPt ν atTop (empirical b)) :
-    (ν : Measure (ℕ → Bool)).map Mixing.shift = ν := by
+    (ν : Measure (ℕ → Bool)).map ShiftOrbit.shift = ν := by
   have hσ := continuous_shift
   refine ext_of_forall_integral_eq_of_IsFiniteMeasure fun f => ?_
   have hint : ∀ g : (ℕ → Bool) →ᵇ ℝ,
       Continuous fun μ : ProbabilityMeasure (ℕ → Bool) => ∫ x, g x ∂(μ : Measure (ℕ → Bool)) :=
     fun g => continuous_iff_continuousAt.2 fun μ =>
       (ProbabilityMeasure.tendsto_iff_forall_integral_tendsto.1 tendsto_id) g
-  let fσ : (ℕ → Bool) →ᵇ ℝ := f.compContinuous ⟨Mixing.shift, hσ⟩
+  let fσ : (ℕ → Bool) →ᵇ ℝ := f.compContinuous ⟨ShiftOrbit.shift, hσ⟩
   -- `Φ μ = ∫ f ∘ σ dμ - ∫ f dμ` is continuous and tends to `0` along the empirical measures
   let Φ : ProbabilityMeasure (ℕ → Bool) → ℝ := fun μ =>
     ∫ x, fσ x ∂(μ : Measure (ℕ → Bool)) - ∫ x, f x ∂(μ : Measure (ℕ → Bool))
   have hΦ : Continuous Φ := (hint fσ).sub (hint f)
   have hcomp : ∀ N : ℕ, Φ (empirical b N) =
-      (f (Mixing.shift^[N + 1] b) - f b) / ((N : ℝ) + 1) := by
+      (f (ShiftOrbit.shift^[N + 1] b) - f b) / ((N : ℝ) + 1) := by
     intro N
     simp only [Φ, empirical]
     rw [integral_empiricalOf, integral_empiricalOf, ← sub_div, ← Finset.sum_sub_distrib]
     congr 1
-    have hterm : ∀ n, fσ (Mixing.shift^[n] b) - f (Mixing.shift^[n] b) =
-        f (Mixing.shift^[n + 1] b) - f (Mixing.shift^[n] b) := fun n => by
+    have hterm : ∀ n, fσ (ShiftOrbit.shift^[n] b) - f (ShiftOrbit.shift^[n] b) =
+        f (ShiftOrbit.shift^[n + 1] b) - f (ShiftOrbit.shift^[n] b) := fun n => by
       simp only [fσ, BoundedContinuousFunction.compContinuous_apply, ContinuousMap.coe_mk,
         Function.iterate_succ_apply']
     rw [Finset.sum_congr rfl fun n _ => hterm n,
-      Finset.sum_range_sub (fun n => f (Mixing.shift^[n] b)), Function.iterate_zero_apply]
+      Finset.sum_range_sub (fun n => f (ShiftOrbit.shift^[n] b)), Function.iterate_zero_apply]
   have hlim : Tendsto (Φ ∘ empirical b) atTop (𝓝 0) := by
     refine squeeze_zero_norm (a := fun N : ℕ => 2 * ‖f‖ / ((N : ℝ) + 1)) (fun N => ?_) ?_
     · simp only [Function.comp, hcomp, norm_div]
       have hN : (0 : ℝ) < (N : ℝ) + 1 := by positivity
       rw [Real.norm_of_nonneg hN.le]
       refine div_le_div_of_nonneg_right ?_ hN.le
-      calc ‖f (Mixing.shift^[N + 1] b) - f b‖ ≤ ‖f (Mixing.shift^[N + 1] b)‖ + ‖f b‖ :=
+      calc ‖f (ShiftOrbit.shift^[N + 1] b) - f b‖ ≤ ‖f (ShiftOrbit.shift^[N + 1] b)‖ + ‖f b‖ :=
             norm_sub_le _ _
         _ ≤ ‖f‖ + ‖f‖ := add_le_add (f.norm_coe_le_norm _) (f.norm_coe_le_norm _)
         _ = 2 * ‖f‖ := by ring
     · exact tendsto_const_nhds.div_atTop
         (tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds)
   have h0 := (tendsto_comp_iff_forall_mapClusterPt hΦ).1 hlim ν hν
-  have h0' : ∫ x, f (Mixing.shift x) ∂(ν : Measure (ℕ → Bool)) -
+  have h0' : ∫ x, f (ShiftOrbit.shift x) ∂(ν : Measure (ℕ → Bool)) -
       ∫ x, f x ∂(ν : Measure (ℕ → Bool)) = 0 := by
     simpa [Φ, fσ] using h0
   rw [integral_map hσ.measurable.aemeasurable f.continuous.aestronglyMeasurable]
   exact sub_eq_zero.1 h0'
+
+/-! ### A sufficient condition for Problem 1 -/
+
+/-- **Eventually periodic sequences have atomic limits**: if some limit point of the empirical
+measures of `b` has no atoms, `b` is not eventually periodic. For an eventually periodic `b`
+every shift `σⁿ b` is among the finitely many `σᵐ b`, `m < T + P`, so every empirical measure is
+carried by that finite set, and so is every limit point (portmanteau for closed sets). -/
+theorem not_eventuallyPeriodic_of_nonatomic {b : ℕ → Bool} {ν : ProbabilityMeasure (ℕ → Bool)}
+    (hν : MapClusterPt ν atTop (empirical b)) (hna : ∀ x, (ν : Measure (ℕ → Bool)) {x} = 0) :
+    ¬ EventuallyPeriodic b := by
+  classical
+  rintro ⟨T, P, hP, hper⟩
+  let F : Finset (ℕ → Bool) := (range (T + P)).image fun n => ShiftOrbit.shift^[n] b
+  have hmem : ∀ n, ShiftOrbit.shift^[n] b ∈ F := fun n => by
+    obtain ⟨m, hm, hmt⟩ := ShiftOrbit.exists_lt_shift_eq hP hper n
+    refine Finset.mem_image.2 ⟨m, Finset.mem_range.2 hm, ?_⟩
+    rw [ShiftOrbit.shift_iterate, ShiftOrbit.shift_iterate]
+    exact funext fun t => (hmt t).symm
+  -- every empirical measure is carried by `F`
+  have hμF : ∀ N, (empirical b N : Measure (ℕ → Bool)) (F : Set (ℕ → Bool)) = 1 := by
+    intro N
+    show (((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1),
+      Measure.dirac (ShiftOrbit.shift^[n] b)) (F : Set (ℕ → Bool)) = 1
+    rw [Measure.smul_apply, Measure.coe_finsetSum, Finset.sum_apply, smul_eq_mul]
+    simp only [Measure.dirac_apply_of_mem (Finset.mem_coe.2 (hmem _)), sum_const, card_range,
+      nsmul_eq_mul, mul_one]
+    push_cast
+    exact ENNReal.inv_mul_cancel (by simp) (by simp)
+  -- so is `ν`
+  haveI : NeBot (comap (empirical b) (𝓝 ν) ⊓ atTop) := neBot_inf_comap_iff_map'.2 hν.neBot
+  have hlim : Tendsto (empirical b) (comap (empirical b) (𝓝 ν) ⊓ atTop) (𝓝 ν) :=
+    tendsto_comap.mono_left inf_le_left
+  have hle := ProbabilityMeasure.limsup_measure_closed_le_of_tendsto hlim
+    (F := (F : Set (ℕ → Bool))) F.finite_toSet.isClosed
+  simp only [hμF, limsup_const] at hle
+  -- but a finite set of measure `1` has an atom
+  rw [← sum_measure_singleton, sum_eq_zero fun x _ => hna x] at hle
+  exact absurd hle (by simp)
+
+/-- **Problem 1 from a non-atomic limit**: if some limit point of the empirical measures of the
+center column has no atoms (for instance a fair-coin limit), Problem 1 holds. -/
+theorem problem1_of_nonatomic_mapClusterPt {ν : ProbabilityMeasure (ℕ → Bool)}
+    (hν : MapClusterPt ν atTop (empirical c)) (hna : ∀ x, (ν : Measure (ℕ → Bool)) {x} = 0) :
+    Rule30Prize.Problem1 :=
+  not_eventuallyPeriodic_of_nonatomic hν hna
 
 /-! ### Normal sequences are the generic points of the fair coin -/
 
@@ -260,7 +308,7 @@ theorem isNormal_iff_tendsto_empirical (b : ℕ → Bool) :
     rw [empirical_apply b N (measurableSet_cyl w)]
     congr 3
     refine filter_congr fun i _ => ?_
-    simp only [cyl, Set.mem_setOf_eq, Mixing.shift_iterate, Nat.add_comm]
+    simp only [cyl, Set.mem_setOf_eq, ShiftOrbit.shift_iterate]
   have hnorm : StrongerStatements.IsNormal b ↔ ∀ n (w : Fin n → Bool),
       Tendsto (fun N => ((empirical b N) (cyl w) : ℝ)) atTop (𝓝 ((2 : ℝ)⁻¹ ^ n)) := by
     refine forall_congr' fun n => forall_congr' fun w => ?_

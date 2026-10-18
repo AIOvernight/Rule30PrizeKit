@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 207 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 208 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2173,6 +2173,7 @@ so they are strictly stronger.
 | **Every line**: no line of rational slope s with abs(s) < 1 carries an EP sequence | slope 0 is Problem 1 | Slopes ±1 are periodic (`Rule30Diagonals`). The other slopes tested look aperiodic (data, CA-structure survey). | [W86] §6, [W19] |
 | **Unbounded runs**: 0ⁿ (or 1ⁿ) occurs in c for every n | if c were EP, its runs would be bounded, because c is not eventually constant (`center_not_eventually_constant`) | Strictly stronger: Thue–Morse has no run longer than 2. In 10⁷ bits the longest runs have lengths 22 and 23. | words survey |
 | **Unbounded abelian complexity** | an EP c has abelian complexity ≤ T + P | Strictly stronger, as Thue–Morse shows. | [RSZ11] |
+| **Non-atomic limit**: some limit point of the empirical measures (δ_c + ⋯ + δ_{σᴺc})/(N + 1) has no atoms | for an EP c every empirical measure, hence every limit point, is carried by the finitely many shifts σᵐc, m < T + P (`EmpiricalMeasures.problem1_of_nonatomic_mapClusterPt`) | Strictly stronger: a sequence with sparse aperiodic defects has the atomic limit of its periodic part. Normality gives the fair-coin limit, which has no atoms. | own reasoning |
 | **Anti-Toeplitz**: no residue class k ↦ c(r + kP) is eventually constant. Density 1/2 along every arithmetic progression implies it | if c had period P, every class modulo P would be eventually constant; form (b) of [20] needs only one non-constant class | Holds for P = 1. Equidistribution of y_{Pk+r} implies it [W19]. | [JK69], [Wal49] |
 | **Disagreements of positive density**: for every τ ≥ 1, c(t) ≠ c(t + τ) for a set of t of positive upper density; vanishing autocorrelations | if c had period P from T, there would be no disagreement at τ = P after T | Data: at least 49.96% disagreement for τ ≤ 300 in 10⁷ bits. | [Gol67], [MS97]; algebra survey (data) |
 | **Positive Besicovitch distance** from every periodic sequence | an EP c has distance 0 from a periodic sequence | Data: excess agreement of random size for P ≤ 1024. | [BFK97]; words survey (data) |

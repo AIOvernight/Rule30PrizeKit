@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 210 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 211 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2390,6 +2390,10 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
 - x₂ is simply normal in base 2. This uses that c is not eventually constant, so c is the unique
   binary expansion of x₂ (proved: `ProblemTwo.problem2_iff_simplyNormal`, through
   `binDigit_centerBinary`);
+- the orbit of x₂ under the doubling map y ↦ 2y mod 1 lies in the upper half (1/2, 1) of the circle
+  with frequency 1/2, since c(t) is black iff 2ᵗx₂ mod 1 > 1/2 (proved:
+  `NumberTheory.problem2_iff_doubling`, through `center_iff_fract`; the Problem 1 form is
+  `problem1_iff_doubling_not_preperiodic`);
 - lim_{x→1⁻} (1 − x)·Σ c(t)xᵗ = 1/2. The Abelian direction is elementary. The converse is the
   Hardy–Littlewood–Karamata Tauberian theorem [HL14], [Kar30], which applies because the
   coefficients are nonnegative;

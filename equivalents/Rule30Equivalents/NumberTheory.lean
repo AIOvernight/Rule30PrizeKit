@@ -1,5 +1,6 @@
 import Rule30Equivalents.BinaryIrrational
 import Rule30Equivalents.ShiftOrbit
+import Rule30Equivalents.BlackTimes
 import Mathlib.Algebra.ContinuedFractions.Computation.TerminatesIffRat
 import Mathlib.NumberTheory.DiophantineApproximation.Basic
 import Mathlib.NumberTheory.Transcendental.Liouville.LiouvilleWith
@@ -29,7 +30,9 @@ every digit sequence, and then specializes them to the center column.
 * `problem1_iff_dense_multiples`: the multiples `n x₂ mod 1`, `n : ℤ`, are dense in the circle;
 * `problem1_iff_doubling_not_preperiodic`: `x₂ mod 1` is not a preperiodic point of the doubling map
   `y ↦ 2y` of the circle. The doubling map shifts binary digits: its `n`-th iterate sends `x₂` to
-  `0.c(n) c(n+1) …₂ mod 1` (`iterate_doubling_centerBinary`);
+  `0.c(n) c(n+1) …₂ mod 1` (`iterate_doubling_centerBinary`). Read the other way, `c(t)` is black
+  iff `2^t x₂ mod 1 > 1/2` (`center_iff_fract`), so **Problem 2 holds iff** the doubling orbit of
+  `x₂` lies in `(1/2, 1)` with frequency `1/2` (`problem2_iff_doubling`);
 * `problem1_iff_not_rational_digits` (**no real numbers**): there are no natural numbers `p` and
   `q > 0` with `c(t) = decide (⌊2^(t+1) p / q⌋ mod 2 = 1)` for every `t`, i.e. the center column is
   not the sequence of binary digits of a fraction. `problem1_iff_not_rational_digits_base` says the
@@ -573,6 +576,34 @@ theorem problem1_iff_doubling_not_preperiodic : Rule30Prize.Problem1 ↔
     ∀ m, (fun y : AddCircle (1 : ℝ) => 2 • y)^[m] (centerBinary : AddCircle (1 : ℝ)) ∉
       Function.periodicPts (fun y : AddCircle (1 : ℝ) => 2 • y) :=
   problem1_iff_irrational_binary.trans (irrational_iff_not_preperiodic_mul le_rfl _)
+
+/-- **The doubling map reads the center column**: `c(t)` is black iff `2^t x₂ mod 1` lies in the
+upper half `(1/2, 1)` of the circle. -/
+theorem center_iff_fract (t : ℕ) : c t = true ↔ 1 / 2 < Int.fract (2 ^ t * centerBinary) := by
+  have hpow := pow_mul_baseValue (B := 2) le_rfl c t
+  have hlt := tail_lt_one (B := 2) le_rfl center_not_eventually_true t
+  have hnn := baseValue_nonneg (B := 2) le_rfl (tail c t)
+  have hinf : ∀ T, ∃ s, T ≤ s ∧ c s = true := fun T => by
+    obtain ⟨s, hs, hTs⟩ := WordForms.infinite_black.exists_gt T
+    exact ⟨s, hTs.le, hs⟩
+  have hd := digit_iff (B := 2) le_rfl c hinf t
+  rw [Nat.cast_ofNat] at hpow hd
+  rw [centerBinary_eq_baseValue, hpow, add_comm, Int.fract_add_natCast,
+    Int.fract_eq_self.2 ⟨hnn, hlt⟩, hd]
+  constructor <;> intro h <;> linarith
+
+open Filter Topology in
+/-- **Problem 2 for the doubling map**: Problem 2 holds iff the orbit of `x₂` under the doubling
+map `y ↦ 2y mod 1` lies in the upper half `(1/2, 1)` of the circle with frequency `1/2`. -/
+theorem problem2_iff_doubling : Rule30Prize.Problem2 ↔
+    Tendsto (fun n : ℕ => (((Finset.range n).filter fun t =>
+      1 / 2 < Int.fract (2 ^ t * centerBinary)).card : ℝ) / n) atTop (𝓝 (1 / 2)) := by
+  rw [ProblemTwo.problem2_iff_tendsto]
+  refine tendsto_congr fun n => ?_
+  congr 2
+  rw [show Rule30Prize.blackCount n = ((List.range n).filter c).length from rfl,
+    BlackTimes.length_filter_eq_count, Nat.count_eq_card_filter_range]
+  exact congrArg Finset.card (Finset.filter_congr fun t _ => center_iff_fract t)
 
 /-- **Problem 1 without real numbers**: the center column is not the sequence of binary digits
 `⌊2^(t+1) p / q⌋ mod 2` of a fraction `p / q`. -/

@@ -76,6 +76,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_addOrderOf_eq_zero
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_dense_multiples
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_doubling_not_preperiodic
+#print axioms Rule30Equivalents.NumberTheory.problem2_iff_doubling
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_digits
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_digits_base
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_decimal_digits

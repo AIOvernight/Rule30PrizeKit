@@ -31,7 +31,9 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   everywhere and generically**: almost every configuration, and a comeager set of them, show `010`
   arbitrarily far to the right and so have exactly one preimage
   (`Preimages.eq_of_evol_one_eq_of_frequently`). Hence rule 30 is injective on a set of full
-  measure (`exists_injOn_ae`), though not injective (`Preimages.exists_ne_left_eq`).
+  measure (`exists_injOn_ae`), though not injective (`Preimages.exists_ne_left_eq`), and every
+  row of the space-time diagram of almost every configuration determines it
+  (`ae_injective_iterate`).
 * `mixing_all_orders`: **rule 30 is mixing of all orders**: cylinders at times whose gaps exceed
   the width of their windows are independent (`measure_biInter_preimage_cylinder`), so
   `μ(F^{-t₀} A₀ ∩ ⋯ ∩ F^{-tₙ₋₁} Aₙ₋₁) → μ(A₀) ⋯ μ(Aₙ₋₁)` as the gaps between the times grow.
@@ -293,6 +295,29 @@ theorem residual_existsUnique_preimage :
     Preimages.eq_of_evol_one_eq_of_frequently (hx'.trans hx.symm) fun n => ?_⟩
   rw [hx']
   exact hy n
+
+/-- **Every row determines almost every configuration**: for almost every configuration `x`, no
+other configuration has the same image as `x` under any iterate of rule 30. Each `F^(n+1) x` has
+a unique preimage almost surely (`ae_existsUnique_preimage`, carried back along `F^(n+1)`, which
+preserves the measure), so `F^(n+1) x' = F^(n+1) x` gives `F^n x' = F^n x`. -/
+theorem ae_injective_iterate :
+    ∀ᵐ x ∂(coins ℤ), ∀ (n : ℕ) (x' : ℤ → Bool), evol x' n = evol x n → x' = x := by
+  have h : ∀ᵐ x ∂(coins ℤ), ∀ n : ℕ, ∃! z : ℤ → Bool, evol z 1 = evol x (n + 1) :=
+    ae_all_iff.2 fun n =>
+      (measurePreserving_evol (n + 1)).quasiMeasurePreserving.ae ae_existsUnique_preimage
+  filter_upwards [h] with x hx n
+  induction n with
+  | zero => exact fun x' hx' => hx'
+  | succ n ih =>
+    intro x' hx'
+    apply ih
+    obtain ⟨z, -, hz⟩ := hx n
+    have e1 : evol (evol x' n) 1 = evol x (n + 1) := by
+      rw [← hx']
+      exact funext fun p => Rule30ZeroBoundaryBarriers.evol_restart x' n 1 p
+    have e2 : evol (evol x n) 1 = evol x (n + 1) :=
+      funext fun p => Rule30ZeroBoundaryBarriers.evol_restart x n 1 p
+    exact (hz _ e1).trans (hz _ e2).symm
 
 /-! ### Mixing for all measurable sets, and ergodicity -/
 

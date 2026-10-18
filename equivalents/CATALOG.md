@@ -2310,12 +2310,14 @@ sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin m
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal
 cells (`measure_not_defectBound_trace`). The sufficient conditions proved in other files hold almost
 surely too ([TypicalConditions](Rule30Equivalents/TypicalConditions.lean),
-`ae_sufficientConditions_trace`): unbounded remainders N(n) − αn for every α, an oscillating
-discrepancy, unpredictability, a non-atomic limit of the empirical measures, not k-automatic (the
+`ae_sufficientConditions_trace`): unbounded remainders N(n) − αn for every α, also for every word
+w (for α = 2^-|w| the block w^L raises the remainder), an oscillating discrepancy, unpredictability, a non-atomic limit of the empirical measures, not k-automatic (the
 k-automatic sequences are countably many, `Automatic.countable_setOf_isAutomatic`), automatic
 complexity → ∞, multiplication definable in (ℕ, +, S), density 1/2 along every progression, a
 transcendental generating function over 𝔽_p(X) (Christol), the golden-power, unbordered-factor and
-Lempel–Ziv forms, and x_β ∉ ℚ(β) for every real β > 2 (`ae_value_not_mem_adjoin_trace`).
+Lempel–Ziv forms, black times that are not the zero set of a linear recurrence over ℚ
+(Skolem–Mahler–Lech) or a finite field, and x_β ∉ ℚ(β) for every real β > 2
+(`ae_value_not_mem_adjoin_trace`).
 
 ---
 

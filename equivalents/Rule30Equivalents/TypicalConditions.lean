@@ -6,6 +6,7 @@ import Rule30Equivalents.LempelZiv
 import Rule30Equivalents.Christol
 import Rule30Equivalents.RegularSequences
 import Rule30Equivalents.PisotNumbers
+import Rule30Equivalents.SkolemMahlerLech
 import Mathlib.Data.Finsupp.Encodable
 
 /-!
@@ -31,8 +32,12 @@ those is vacuous.
 * **Densities and discrepancies.** Every arithmetic progression of the column has density `1/2`
   (`ae_density_progressions_trace`: its cells have distinct feet), the remainder `N(n) - α n` is
   unbounded for every `α` (`ae_unbounded_remainder_trace`: the density is `1/2`, and for `α = 1/2`
-  the discrepancy oscillates), and the empirical measures converge to the fair-coin measure, which
-  has no atoms.
+  the discrepancy oscillates), and so is the remainder `N_w(n) - α n` of every word `w`
+  (`unbounded_word_remainder_of_isNormal`: for `α = 2^-|w|` the block `w^L` raises it by a multiple
+  of `L`). The empirical measures converge to the fair-coin measure, which has no atoms.
+* **Zero sets.** The black times are not the zero set of a linear recurrence sequence over `ℚ` (the
+  Skolem–Mahler–Lech theorem) or over a finite field (`ae_not_zero_set_rat_trace`,
+  `ae_not_zero_set_finite_trace`).
 * **Words.** For every disjunctive sequence, multiplication is definable in `(ℕ, +, S)`
   (`PresburgerExpansion.mul_definable_of_disjunctive`), and the unbordered words `1 0^L` occur
   arbitrarily late (`not_bordered_one_zeros`). For every sequence that is not eventually periodic,
@@ -162,6 +167,35 @@ theorem tendsto_ones_div {b : ℕ → Bool} (hb : StrongerStatements.IsNormal b)
   refine h1.congr fun n => ?_
   simp [BoundedRemainder.ones, Nat.count_eq_card_filter_range]
 
+/-- If `f n / n → β` and `α ≠ β`, then `f n - α n` is unbounded. -/
+theorem exists_lt_abs_sub_of_tendsto {f : ℕ → ℝ} {β : ℝ}
+    (hf : Tendsto (fun n : ℕ => f n / n) atTop (𝓝 β)) {α : ℝ} (hα : α ≠ β) (C : ℝ) :
+    ∃ n, C < |f n - α * n| := by
+  -- `|f n / n - α| > δ` once `f n / n` is within `δ = |β - α|/2` of `β`
+  set δ := |β - α| / 2 with hδ
+  have hδpos : 0 < δ := by
+    have : 0 < |β - α| := abs_pos.2 (sub_ne_zero.2 (Ne.symm hα))
+    positivity
+  obtain ⟨n, hn1, hn2⟩ := ((hf.eventually (Metric.ball_mem_nhds _ hδpos)).and
+    (eventually_gt_atTop ⌈C / δ⌉₊)).exists
+  refine ⟨n, ?_⟩
+  have hnpos : (0 : ℝ) < n := by
+    have : 0 < n := lt_of_le_of_lt (Nat.zero_le _) hn2
+    exact_mod_cast this
+  rw [Real.dist_eq] at hn1
+  have hfar : δ < |f n / n - α| := by
+    have := abs_sub_abs_le_abs_sub (β - α) (f n / n - α)
+    rw [show β - α - (f n / n - α) = -(f n / n - β) by ring, abs_neg] at this
+    linarith
+  have heq : |f n - α * n| = n * |f n / n - α| := by
+    rw [← abs_of_pos hnpos, ← abs_mul, abs_of_pos hnpos, mul_sub, mul_div_cancel₀ _ hnpos.ne',
+      mul_comm (n : ℝ) α]
+  have hCn : C < δ * n := by
+    have h1 : C / δ < n := (Nat.le_ceil _).trans_lt (by exact_mod_cast hn2)
+    rwa [div_lt_iff₀ hδpos, mul_comm] at h1
+  rw [heq]
+  nlinarith
+
 /-- **For almost every configuration the remainder `N(n) - α n` is unbounded for every `α`**: the
 density is `1/2`, and for `α = 1/2` the discrepancy oscillates beyond every bound. -/
 theorem ae_unbounded_remainder_trace : ∀ᵐ x ∂(coins ℤ), ∀ α C : ℝ, ∃ n,
@@ -173,32 +207,87 @@ theorem ae_unbounded_remainder_trace : ∀ᵐ x ∂(coins ℤ), ∀ α C : ℝ, 
     refine ⟨n, hn'.trans_le ?_⟩
     rw [mul_comm, mul_one_div]
     exact le_abs_self _
-  -- `|N(n)/n - α| > δ` once `N(n)/n` is within `δ = |1/2 - α|/2` of `1/2`
-  set δ := |1 / 2 - α| / 2 with hδ
+  exact exists_lt_abs_sub_of_tendsto (tendsto_ones_div hn) hα C
+
+/-- **Word remainders of a normal sequence are unbounded**: for a word `w` of length `m ≥ 1` and
+every `α`, `N_w(n) - α n` is unbounded. For `α ≠ 2^-m` the frequency of `w` is `2^-m`. For
+`α = 2^-m`, the block `w^L` holds `L` occurrences of `w` within `m L` cells, so it raises the
+remainder by at least `L (1 - m 2^-m)`, and `m < 2^m`. -/
+theorem unbounded_word_remainder_of_isNormal {b : ℕ → Bool} (hb : StrongerStatements.IsNormal b)
+    {m : ℕ} (hm : 0 < m) (w : Fin m → Bool) (α C : ℝ) : ∃ n, C <
+      |(BoundedRemainder.ones (fun i => decide (∀ j : Fin m, b (i + j) = w j)) n : ℝ) - α * n| := by
+  set I : ℕ → Bool := fun i => decide (∀ j : Fin m, b (i + j) = w j) with hI
+  have hfreq : Tendsto (fun n : ℕ => (BoundedRemainder.ones I n : ℝ) / n) atTop
+      (𝓝 ((2 : ℝ)⁻¹ ^ m)) := by
+    refine (hb m w).congr fun n => ?_
+    simp [BoundedRemainder.ones, Nat.count_eq_card_filter_range, hI]
+  rcases ne_or_eq α ((2 : ℝ)⁻¹ ^ m) with hα | rfl
+  · exact exists_lt_abs_sub_of_tendsto hfreq hα C
+  by_contra hbound
+  push Not at hbound
+  -- the block `w^L` with `L δ > 2C`, `δ = 1 - m 2^-m`
+  set δ : ℝ := 1 - m * (2 : ℝ)⁻¹ ^ m with hδ
   have hδpos : 0 < δ := by
-    have : 0 < |1 / 2 - α| := abs_pos.2 (sub_ne_zero.2 (Ne.symm hα))
-    positivity
-  obtain ⟨n, hn1, hn2⟩ := ((tendsto_ones_div hn).eventually (Metric.ball_mem_nhds _ hδpos)).and
-    (eventually_gt_atTop ⌈C / δ⌉₊) |>.exists
-  refine ⟨n, ?_⟩
-  have hnpos : (0 : ℝ) < n := by
-    have : 0 < n := lt_of_le_of_lt (Nat.zero_le _) hn2
-    exact_mod_cast this
-  rw [Real.dist_eq] at hn1
-  have hfar : δ < |(BoundedRemainder.ones (trace x) n : ℝ) / n - α| := by
-    have := abs_sub_abs_le_abs_sub (1 / 2 - α) ((BoundedRemainder.ones (trace x) n : ℝ) / n - α)
-    rw [show 1 / 2 - α - ((BoundedRemainder.ones (trace x) n : ℝ) / n - α) =
-      -((BoundedRemainder.ones (trace x) n : ℝ) / n - 1 / 2) by ring, abs_neg] at this
+    have h1 : (m : ℝ) < 2 ^ m := by exact_mod_cast Nat.lt_two_pow_self
+    have h2 : (m : ℝ) * (2 : ℝ)⁻¹ ^ m < 1 := by
+      rw [inv_pow, ← div_eq_mul_inv, div_lt_one (by positivity)]
+      exact h1
     linarith
-  have heq : |(BoundedRemainder.ones (trace x) n : ℝ) - α * n| =
-      n * |(BoundedRemainder.ones (trace x) n : ℝ) / n - α| := by
-    rw [← abs_of_pos hnpos, ← abs_mul, abs_of_pos hnpos, mul_sub, mul_div_cancel₀ _ hnpos.ne',
-      mul_comm (n : ℝ) α]
-  have hCn : C < δ * n := by
-    have h1 : C / δ < n := (Nat.le_ceil _).trans_lt (by exact_mod_cast hn2)
-    rwa [div_lt_iff₀ hδpos, mul_comm] at h1
-  rw [heq]
+  set L : ℕ := ⌈2 * C / δ⌉₊ + 1 with hL
+  have hLδ : 2 * C < L * δ := by
+    have h1 : 2 * C / δ < L := by
+      rw [hL]
+      push_cast
+      linarith [Nat.le_ceil (2 * C / δ)]
+    rwa [div_lt_iff₀ hδpos] at h1
+  obtain ⟨s, hs⟩ := StrongerStatements.disjunctive_of_isNormal hb (m * L)
+    fun k : Fin (m * L) => w ⟨k % m, Nat.mod_lt _ hm⟩
+  -- the occurrences of `w` at `s + l m`, `l < L`
+  have hocc : ∀ l < L, I (s + l * m) = true := fun l hl => by
+    simp only [hI, decide_eq_true_eq]
+    intro j
+    have hk : l * m + (j : ℕ) < m * L := by
+      have := j.isLt
+      have : (l + 1) * m ≤ L * m := Nat.mul_le_mul_right m hl
+      nlinarith
+    have h := hs ⟨l * m + j, hk⟩
+    have hj : (⟨(l * m + (j : ℕ)) % m, Nat.mod_lt _ hm⟩ : Fin m) = j := by
+      ext
+      simp only
+      rw [Nat.add_comm, Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt j.isLt]
+    calc b (s + l * m + j) = b (s + (l * m + j)) := by rw [add_assoc]
+      _ = w ⟨(l * m + (j : ℕ)) % m, Nat.mod_lt _ hm⟩ := h
+      _ = w j := by rw [hj]
+  have hcount : L ≤ BoundedRemainder.ones (fun k => I (s + k)) (m * L) := by
+    rw [BoundedRemainder.ones, Nat.count_eq_card_filter_range]
+    calc L = ((Finset.range L).image (· * m)).card := by
+          rw [Finset.card_image_of_injective _ fun a b h => Nat.eq_of_mul_eq_mul_right hm h,
+            Finset.card_range]
+      _ ≤ _ := Finset.card_le_card fun k hk => by
+          obtain ⟨l, hl, rfl⟩ := Finset.mem_image.1 hk
+          rw [Finset.mem_range] at hl
+          simp only [Finset.mem_filter, Finset.mem_range]
+          refine ⟨?_, hocc l hl⟩
+          have : (l + 1) * m ≤ L * m := Nat.mul_le_mul_right m hl
+          nlinarith
+  have hsplit := BoundedRemainder.ones_add I s (m * L)
+  have h1 := abs_le.1 (hbound s)
+  have h2 := abs_le.1 (hbound (s + m * L))
+  have hcount' : (L : ℝ) ≤ BoundedRemainder.ones (fun k => I (s + k)) (m * L) := by
+    exact_mod_cast hcount
+  have hsplit' : (BoundedRemainder.ones I (s + m * L) : ℝ) =
+      BoundedRemainder.ones I s + BoundedRemainder.ones (fun k => I (s + k)) (m * L) := by
+    exact_mod_cast hsplit
+  push_cast at h2
+  rw [hδ] at hLδ
   nlinarith
+
+/-- For almost every configuration, every word remainder `N_w(n) - α n` of the center column is
+unbounded. -/
+theorem ae_unbounded_word_remainder_trace : ∀ᵐ x ∂(coins ℤ), ∀ (m : ℕ), 0 < m →
+    ∀ (w : Fin m → Bool) (α C : ℝ), ∃ n, C < |(BoundedRemainder.ones
+      (fun i => decide (∀ j : Fin m, trace x (i + j) = w j)) n : ℝ) - α * n| :=
+  ae_isNormal_trace.mono fun _ hx _ hm w α C => unbounded_word_remainder_of_isNormal hx hm w α C
 
 /-- For almost every configuration the empirical measures of the center column have a cluster
 point without atoms, the fair-coin measure. -/
@@ -270,6 +359,26 @@ theorem ae_golden_trace :
     exact hx (GoldenPowers.eventuallyPeriodic_of_gp fun n hn =>
       WordForms.gp_of_endsWithGoldenPower (hall n hn))
 
+/-- For almost every configuration the black times of the center column are not the zero set of a
+linear recurrence sequence over `ℚ` (the Skolem–Mahler–Lech theorem makes such zero sets eventually
+periodic). -/
+theorem ae_not_zero_set_rat_trace : ∀ᵐ x ∂(coins ℤ), ∀ (E : LinearRecurrence ℚ) (u : ℕ → ℚ),
+    E.IsSolution u → {t | u t = 0} ≠ {t | trace x t = true} :=
+  ae_not_eventuallyPeriodic_trace.mono fun x hx E u hu hS => hx (by
+    obtain ⟨T, P, hP, hTP⟩ := SkolemMahlerLech.skolem_mahler_lech E hu
+    refine ⟨T, P, hP, fun t ht => ?_⟩
+    have := hTP t ht
+    rw [hS] at this
+    simp only [Set.mem_setOf_eq] at this
+    cases h1 : trace x (t + P) <;> cases h2 : trace x t <;> simp_all)
+
+/-- The same over every finite field. -/
+theorem ae_not_zero_set_finite_trace (K : Type*) [Field K] [Finite K] :
+    ∀ᵐ x ∂(coins ℤ), ∀ (E : LinearRecurrence K) (u : ℕ → K),
+      E.IsSolution u → {t | u t = 0} ≠ {t | trace x t = true} :=
+  ae_not_eventuallyPeriodic_trace.mono fun _ hx _ _ hu hS =>
+    hx (LinearRelations.eventuallyPeriodic_of_zero_set hu hS)
+
 /-! ### Values in a real base -/
 
 /-- `ℚ(β)` is countable: its elements are quotients of polynomials in `β`. -/
@@ -298,6 +407,7 @@ theorem ae_value_not_mem_adjoin_trace {β : ℝ} (hβ : 2 < β) :
 /-- **The other sufficient conditions hold for almost every configuration.** For almost every
 configuration `x`, the center column `trace x` satisfies, with `c` replaced by `trace x`, the
 hypotheses of `BoundedRemainder.problem1_of_unbounded_remainder`,
+`problem1_of_unbounded_word_remainder` (every word of length `m ≥ 1`),
 `problem1_of_problem2_of_unbounded_discrepancy` (density `1/2` and an unbounded discrepancy),
 `problem1_of_oscillating_discrepancy`, `problem1_of_unpredictable_half`,
 `EmpiricalMeasures.problem1_of_nonatomic_mapClusterPt`, `Automatic.problem1_of_not_automatic`,
@@ -305,9 +415,12 @@ hypotheses of `BoundedRemainder.problem1_of_unbounded_remainder`,
 `PresburgerExpansion.problem1_of_mul_definable`, `ProblemTwo.problem1_of_density_on_progressions`,
 `Transcendence.problem1_of_transcendental_F2_or_F3`,
 `WordForms.problem1_of_infinitely_many_prefixes_without_golden_power`,
-`problem1_of_late_long_unbordered_factors` and `problem1_of_lz_unbounded`. -/
+`problem1_of_late_long_unbordered_factors`, `problem1_of_lz_unbounded` and
+`LinearRelations.problem1_of_not_zero_set` over `ℚ`. -/
 theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     (∀ α C : ℝ, ∃ n, C < |(BoundedRemainder.ones (trace x) n : ℝ) - α * n|) ∧
+    (∀ (m : ℕ), 0 < m → ∀ (w : Fin m → Bool) (α C : ℝ), ∃ n, C < |(BoundedRemainder.ones
+      (fun i => decide (∀ j : Fin m, trace x (i + j) = w j)) n : ℝ) - α * n|) ∧
     Symmetry.HalfDensity (trace x) ∧
     ((∀ C : ℝ, ∃ n, C < (BoundedRemainder.ones (trace x) n : ℝ) - n / 2) ∧
       ∀ C : ℝ, ∃ n, (BoundedRemainder.ones (trace x) n : ℝ) - n / 2 < -C) ∧
@@ -326,15 +439,18 @@ theorem ae_sufficientConditions_trace : ∀ᵐ x ∂(coins ℤ),
     (∀ N, ∃ n, N ≤ n ∧ ¬ WordForms.EndsWithGoldenPower (trace x) n) ∧
     (∀ n L : ℕ, ∃ i ℓ : ℕ, n ≤ i ∧ L ≤ ℓ ∧
       ¬ Lyndon.Bordered ((List.range ℓ).map fun j => trace x (i + j))) ∧
-    (∀ K, ∃ n, K < WordForms.lzComplexity (trace x) n) := by
-  filter_upwards [ae_unbounded_remainder_trace, ae_halfDensity_trace,
+    (∀ K, ∃ n, K < WordForms.lzComplexity (trace x) n) ∧
+    (∀ (E : LinearRecurrence ℚ) (u : ℕ → ℚ), E.IsSolution u →
+      {t | u t = 0} ≠ {t | trace x t = true}) := by
+  filter_upwards [ae_unbounded_remainder_trace, ae_unbounded_word_remainder_trace,
+    ae_halfDensity_trace,
     Fluctuations.ae_oscillating_discrepancy_trace, BoundedRemainder.ae_predictsAtHalf_trace,
     ae_nonatomic_mapClusterPt_trace, ae_not_isAutomatic_trace,
     measurePreserving_trace.quasiMeasurePreserving.ae ae_autComplexity_tendsto,
     ae_mul_definable_trace, ae_density_progressions_trace, ae_transcendental_series_trace,
-    ae_golden_trace, ae_disjunctive_trace, ae_lz_unbounded_trace]
-    with x h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 hd h13
-  exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11,
-    late_long_unbordered_of_disjunctive hd, h13⟩
+    ae_golden_trace, ae_disjunctive_trace, ae_lz_unbounded_trace, ae_not_zero_set_rat_trace]
+    with x h1 hw h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 hd h13 hz
+  exact ⟨h1, hw, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11,
+    late_long_unbordered_of_disjunctive hd, h13, hz⟩
 
 end Rule30Equivalents.TypicalConditions

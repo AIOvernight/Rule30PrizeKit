@@ -2690,7 +2690,9 @@ with Turing machines reading n. Notes:
     so every prefix has probability 2^−(n+1), `measure_prefix`). With Borel's normal number
     theorem for fair coins (`ae_isNormal`: along each residue class modulo m the blocks of length
     m are independent fair words, and the strong law of large numbers applies), the trace is
-    normal for μ-almost every configuration (`ae_isNormal_trace`), so it has density 1/2, is
+    normal for μ-almost every configuration (`ae_isNormal_trace`); the right half does not
+    matter, since for every fixed right half R (all white, as for the seed) a fair-coin left half
+    gives a normal trace almost surely (`ae_isNormal_trace_glue`). So the trace has density 1/2, is
     disjunctive and is not eventually periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`,
     `ae_not_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
     measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves

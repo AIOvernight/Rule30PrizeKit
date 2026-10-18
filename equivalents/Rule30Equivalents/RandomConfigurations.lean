@@ -24,6 +24,10 @@ uniform Bernoulli product measure).
   numbers `u` occurs with frequency `2⁻ᵐ` along the residue class `r`
   (`ae_tendsto_residue_frequency`); averaging over the `m` classes gives frequency `2⁻ᵐ`
   (`tendsto_average_of_residues`).
+* `ae_isNormal_trace_glue`: **the right half does not matter**. The same holds for the map
+  `x ↦ glue R x` that keeps the cells `p ≤ 0` of `x` and puts a fixed right half `R` beside them
+  (white, say, as for the single seed): the prefix argument only flips cells left of `1`
+  (`FlipsLeft`, `measure_prefix_of_flipsLeft`, `measurePreserving_trace_of_flipsLeft`).
 * `ae_isNormal_trace`: for almost every configuration the trace is normal; hence it has density
   `1/2` (`ae_halfDensity_trace`), is disjunctive (`ae_disjunctive_trace`) and is not eventually
   periodic (`ae_not_eventuallyPeriodic_trace`). The configurations whose trace has density `1/2`
@@ -96,11 +100,18 @@ theorem map_flip (j : ℤ) :
       coin_singleton, coin_singleton]
   · exact Measure.map_id
 
-theorem measurableSet_prefix (w : ℕ → Bool) (n : ℕ) :
-    MeasurableSet {x : ℤ → Bool | ∀ t ≤ n, trace x t = w t} := by
+/-- `G` commutes with flipping any cell `p ≤ 0`: the identity does, and so does replacing the right
+half by a fixed one (`glue`). -/
+def FlipsLeft (G : (ℤ → Bool) → (ℤ → Bool)) : Prop :=
+  ∀ x (p : ℤ), p ≤ 0 → G (Function.update x p (!x p)) = Function.update (G x) p (!G x p)
+
+theorem flipsLeft_id : FlipsLeft id := fun _ _ _ => rfl
+
+theorem measurableSet_prefix {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G) (w : ℕ → Bool)
+    (n : ℕ) : MeasurableSet {x : ℤ → Bool | ∀ t ≤ n, trace (G x) t = w t} := by
   simp only [Set.setOf_forall]
   exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
-    measurable_evol t 0 (measurableSet_singleton (w t))
+    ((measurable_evol t 0).comp hG) (measurableSet_singleton (w t))
 
 /-- **Flip halving**: if flipping the coin at `j` preserves `A` and flips `f` on `A`, then `f`
 takes each value on half of `A`. -/
@@ -144,38 +155,50 @@ theorem eq_mul_inv_of_two_mul {X Y : ENNReal} (h : 2 * X = Y) : X = Y * 2⁻¹ :
   rw [← h, mul_comm 2 X, mul_assoc, ENNReal.mul_inv_cancel two_ne_zero ENNReal.ofNat_ne_top,
     mul_one]
 
-/-- **Every prefix of the trace has probability `2^-(n+1)`.** Flipping the coin at `-(n+1)`
-preserves the measure, fixes the trace up to time `n` and flips it at time `n + 1`. -/
-theorem measure_prefix (w : ℕ → Bool) :
-    ∀ n : ℕ, coins ℤ {x | ∀ t ≤ n, trace x t = w t} = 2⁻¹ ^ (n + 1)
+/-- **Every prefix of the trace has probability `2^-(n+1)`**, for the configuration `G x` with `G`
+commuting with the flips left of `1`. Flipping the coin at `-(n+1)` preserves the measure, fixes
+the trace up to time `n` and flips it at time `n + 1`. -/
+theorem measure_prefix_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
+    (hflip : FlipsLeft G) (w : ℕ → Bool) :
+    ∀ n : ℕ, coins ℤ {x | ∀ t ≤ n, trace (G x) t = w t} = 2⁻¹ ^ (n + 1)
   | 0 => by
-    have : {x : ℤ → Bool | ∀ t ≤ 0, trace x t = w t} = (fun x => x 0) ⁻¹' {w 0} := by
+    have hset : {x : ℤ → Bool | ∀ t ≤ 0, trace (G x) t = w t} =
+        Set.univ ∩ {x | G x 0 = w 0} := by
       ext x
-      simp only [Set.mem_setOf_eq, Set.mem_preimage, Set.mem_singleton_iff]
+      simp only [Set.mem_setOf_eq, Set.univ_inter]
       constructor
       · intro h
         exact h 0 le_rfl
       · intro h t ht
         obtain rfl : t = 0 := by omega
         exact h
-    rw [this, ← Measure.map_apply (measurable_pi_apply 0) (measurableSet_singleton _),
-      coins_map_eval, coin_singleton, zero_add, pow_one]
+    have h : 2 * coins ℤ (Set.univ ∩ {x | G x 0 = w 0}) = coins ℤ Set.univ :=
+      two_mul_measure_flip MeasurableSet.univ ((measurable_pi_apply 0).comp hG) 0
+        (fun x => by simp) (fun x _ => by
+          show G (Function.update x 0 (!x 0)) 0 = !G x 0
+          rw [hflip x 0 le_rfl, Function.update_self]) (w 0)
+    rw [hset, eq_mul_inv_of_two_mul h, measure_univ, one_mul, zero_add, pow_one]
   | n + 1 => by
     -- the prefix up to time `n` does not see the coin at `-(n+1)`
     have hinv : ∀ x, Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))) ∈
-        {x : ℤ → Bool | ∀ t ≤ n, trace x t = w t} ↔ x ∈ {x | ∀ t ≤ n, trace x t = w t} := by
+        {x : ℤ → Bool | ∀ t ≤ n, trace (G x) t = w t} ↔
+          x ∈ {x | ∀ t ≤ n, trace (G x) t = w t} := by
       intro x
       simp only [Set.mem_setOf_eq]
+      rw [hflip x (-((n + 1 : ℕ) : ℤ)) (by omega)]
       refine forall_congr' fun t => imp_congr_right fun ht => ?_
-      rw [show trace (Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ)))) t =
-        trace x t from AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by
+      rw [show trace (Function.update (G x) (-((n + 1 : ℕ) : ℤ)) (!G x (-((n + 1 : ℕ) : ℤ)))) t =
+        trace (G x) t from AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by
           rw [Function.update_of_ne (by omega)]]
-    have h : 2 * coins ℤ ({x | ∀ t ≤ n, trace x t = w t} ∩ {x | evol x (n + 1) 0 = w (n + 1)}) =
-        coins ℤ {x | ∀ t ≤ n, trace x t = w t} :=
-      two_mul_measure_flip (measurableSet_prefix w n) (measurable_evol (n + 1) 0) _ hinv
-        (fun x _ => evol_flip x (n + 1)) (w (n + 1))
-    have htarget : {x : ℤ → Bool | ∀ t ≤ n + 1, trace x t = w t} =
-        {x | ∀ t ≤ n, trace x t = w t} ∩ {x | evol x (n + 1) 0 = w (n + 1)} := by
+    have h : 2 * coins ℤ ({x | ∀ t ≤ n, trace (G x) t = w t} ∩
+        {x | evol (G x) (n + 1) 0 = w (n + 1)}) = coins ℤ {x | ∀ t ≤ n, trace (G x) t = w t} :=
+      two_mul_measure_flip (measurableSet_prefix hG w n) ((measurable_evol (n + 1) 0).comp hG) _
+        hinv (fun x _ => by
+          show evol (G (Function.update x _ _)) (n + 1) 0 = !evol (G x) (n + 1) 0
+          rw [hflip x (-((n + 1 : ℕ) : ℤ)) (by omega)]
+          exact evol_flip (G x) (n + 1)) (w (n + 1))
+    have htarget : {x : ℤ → Bool | ∀ t ≤ n + 1, trace (G x) t = w t} =
+        {x | ∀ t ≤ n, trace (G x) t = w t} ∩ {x | evol (G x) (n + 1) 0 = w (n + 1)} := by
       ext x
       simp only [Set.mem_inter_iff, Set.mem_setOf_eq]
       constructor
@@ -186,14 +209,21 @@ theorem measure_prefix (w : ℕ → Bool) :
         · exact h1 t (by omega)
         · obtain rfl : t = n + 1 := by omega
           exact h2
-    rw [htarget, eq_mul_inv_of_two_mul h, measure_prefix w n, ← pow_succ]
+    rw [htarget, eq_mul_inv_of_two_mul h, measure_prefix_of_flipsLeft hG hflip w n, ← pow_succ]
 
-/-- **The trace of a random configuration is a random sequence**: the trace map pushes the
-fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/
-theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ) := by
-  refine ⟨measurable_trace, ?_⟩
-  have : IsProbabilityMeasure ((coins ℤ).map trace) :=
-    Measure.isProbabilityMeasure_map measurable_trace.aemeasurable
+/-- **Every prefix of the trace has probability `2^-(n+1)`.** -/
+theorem measure_prefix (w : ℕ → Bool) (n : ℕ) :
+    coins ℤ {x | ∀ t ≤ n, trace x t = w t} = 2⁻¹ ^ (n + 1) :=
+  measure_prefix_of_flipsLeft measurable_id flipsLeft_id w n
+
+/-- The center trace of `G x` is a fair-coin sequence, for `G` commuting with the flips left
+of `1`: cylinders over initial segments determine the measure. -/
+theorem measurePreserving_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
+    (hflip : FlipsLeft G) : MeasurePreserving (fun x => trace (G x)) (coins ℤ) (coins ℕ) := by
+  have hT : Measurable fun x => trace (G x) := measurable_trace.comp hG
+  refine ⟨hT, ?_⟩
+  have : IsProbabilityMeasure ((coins ℤ).map fun x => trace (G x)) :=
+    Measure.isProbabilityMeasure_map hT.aemeasurable
   refine ext_of_generate_finite _ generateFrom_measurableCylinders.symm
     isPiSystem_measurableCylinders (fun s hs => ?_) (by rw [measure_univ, measure_univ])
   rw [measurableCylinders_nat] at hs
@@ -201,14 +231,15 @@ theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ
   obtain ⟨a, S, hS, rfl⟩ := hs
   rw [cylinder, ← Measure.map_apply (Finset.measurable_restrict _) hS,
     ← Measure.map_apply (Finset.measurable_restrict _) hS, coins_map_restrict,
-    Measure.map_map (Finset.measurable_restrict _) measurable_trace]
+    Measure.map_map (Finset.measurable_restrict _) hT]
   congr 1
   refine Measure.ext_iff_singleton.2 fun v => ?_
-  rw [Measure.map_apply ((Finset.measurable_restrict _).comp measurable_trace)
-    (measurableSet_singleton v), Measure.pi_singleton]
+  rw [Measure.map_apply ((Finset.measurable_restrict _).comp hT) (measurableSet_singleton v),
+    Measure.pi_singleton]
   -- the event is a prefix of the trace
   let w : ℕ → Bool := fun t => if h : t ≤ a then v ⟨t, Finset.mem_Iic.2 h⟩ else false
-  have hset : ((Finset.Iic a).restrict ∘ trace) ⁻¹' {v} = {x | ∀ t ≤ a, trace x t = w t} := by
+  have hset : ((Finset.Iic a).restrict ∘ fun x => trace (G x)) ⁻¹' {v} =
+      {x | ∀ t ≤ a, trace (G x) t = w t} := by
     ext x
     simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff, Set.mem_setOf_eq]
     constructor
@@ -221,8 +252,13 @@ theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ
       have := h i.1 (Finset.mem_Iic.1 i.2)
       simp only [w, dif_pos (Finset.mem_Iic.1 i.2)] at this
       exact this
-  rw [hset, measure_prefix, Finset.prod_congr rfl fun i _ => coin_singleton (v i),
-    Finset.prod_const, Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
+  rw [hset, measure_prefix_of_flipsLeft hG hflip, Finset.prod_congr rfl fun i _ =>
+    coin_singleton (v i), Finset.prod_const, Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
+
+/-- **The trace of a random configuration is a random sequence**: the trace map pushes the
+fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/
+theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ) :=
+  measurePreserving_trace_of_flipsLeft measurable_id flipsLeft_id
 
 /-! ### Normality almost surely (Borel) -/
 
@@ -408,6 +444,37 @@ theorem ae_isNormal : ∀ᵐ v ∂(coins ℕ), StrongerStatements.IsNormal v := 
 normal. -/
 theorem ae_isNormal_trace : ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal (trace x) :=
   measurePreserving_trace.quasiMeasurePreserving.ae ae_isNormal
+
+/-! ### The right half does not matter -/
+
+/-- The configuration that agrees with `x` at the cells `p ≤ 0` and with `R` right of `0`. -/
+def glue (R x : ℤ → Bool) (p : ℤ) : Bool := if p ≤ 0 then x p else R p
+
+theorem measurable_glue (R : ℤ → Bool) : Measurable (glue R) :=
+  measurable_pi_lambda _ fun p => by
+    by_cases hp : p ≤ 0
+    · simp only [glue, if_pos hp]
+      exact measurable_pi_apply p
+    · simp only [glue, if_neg hp]
+      exact measurable_const
+
+theorem flipsLeft_glue (R : ℤ → Bool) : FlipsLeft (glue R) := by
+  intro x p hp
+  funext q
+  by_cases hq : q = p
+  · subst hq
+    simp [glue, hp]
+  · by_cases hq0 : q ≤ 0
+    · simp [glue, hq0, Function.update_of_ne hq]
+    · simp [glue, hq0, Function.update_of_ne hq]
+
+/-- **The right half does not matter**: for every right half `R` (all white, say, as for the
+single seed), a fair-coin left half gives a fair-coin center trace, which is normal almost
+surely. -/
+theorem ae_isNormal_trace_glue (R : ℤ → Bool) :
+    ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal (trace (glue R x)) :=
+  (measurePreserving_trace_of_flipsLeft (measurable_glue R)
+    (flipsLeft_glue R)).quasiMeasurePreserving.ae ae_isNormal
 
 /-! ### Consequences: category versus measure -/
 

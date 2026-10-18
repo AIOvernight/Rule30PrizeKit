@@ -2297,12 +2297,14 @@ FinConf through Jen's theorem, the frozen-boundary conjecture
 (`Automatic.problem1_of_not_automatic`), the zero sets in any characteristic
 (`LinearRelations.problem1_of_not_zero_set`), and Problem 3 ([ProblemThree](Rule30Equivalents/ProblemThree.lean)).
 
-*Almost surely.* For almost every configuration the center column satisfies sixteen of these
+*Almost surely.* For almost every configuration the center column satisfies seventeen of these
 statements ([Typicality](Rule30Equivalents/Typicality.lean), `ae_strongerStatements_trace`): the
 effective boundary, every line, unbounded runs in both colors, anti-Toeplitz, disagreements, the
 Besicovitch distance, the uncountable orbit closure, positive entropy, disjunctive and normal, x₂
 transcendental, μ(x₂) ≥ 2, unbounded abelian complexity, not morphic, recurrent but not purely
-periodic, and Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplexity.lean)). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
+periodic, Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplexity.lean)), and not
+k-Mahler for every k ≥ 2 (a solution of a Mahler equation is determined by finitely many
+coefficients, `StrongerStatements.countable_setOf_isMahler`; every series is 1-Mahler). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal

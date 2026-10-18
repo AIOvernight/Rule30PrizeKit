@@ -6,9 +6,9 @@ import Rule30Equivalents.LinearComplexity
 # The stronger statements hold for almost every configuration
 
 Problem 1 follows from many stronger statements about the center column
-(`StrongerStatements.problem1_of_*`). Sixteen of them hold for almost every configuration, with the
-seed replaced by the configuration (`ae_strongerStatements_trace`); in particular none of them is
-vacuous.
+(`StrongerStatements.problem1_of_*`). Seventeen of them hold for almost every configuration, with
+the seed replaced by the configuration (`ae_strongerStatements_trace`); in particular none of them
+is vacuous.
 
 * **Words.** Most of them hold for every disjunctive sequence: the effective boundary
   `t ↦ b(t) ∧ b(t + 1)` is not eventually periodic (`not_eventuallyPeriodic_and_of_disjunctive`),
@@ -26,7 +26,9 @@ vacuous.
   sequence has a transcendental value (`ae_transcendental_baseValue`), of irrationality exponent at
   least `2` by Dirichlet's theorem (`StrongerStatements.irrExponentGE_two_of_irrational`).
 * **Morphic sequences** are countably many (`StrongerStatements.countable_setOf_isMorphic`), so
-  almost every sequence is not morphic (`ae_not_isMorphic`).
+  almost every sequence is not morphic (`ae_not_isMorphic`); so are the `k`-Mahler series with
+  `0/1` coefficients for `k ≥ 2` (`StrongerStatements.countable_setOf_isMahler`), so almost every
+  generating function is not `k`-Mahler (`ae_not_isMahler`).
 * No line inside the light cone is eventually periodic (`Mixing.ae_every_line`), and the linear
   complexity satisfies `Lₙ/n → 1/2` (`LinearComplexity.ae_tendsto_linComplexity_trace`).
 
@@ -261,6 +263,19 @@ theorem ae_not_isMorphic : ∀ᵐ v ∂(coins ℕ), ¬ IsMorphic v :=
 theorem ae_not_isMorphic_trace : ∀ᵐ x ∂(coins ℤ), ¬ IsMorphic (trace x) :=
   measurePreserving_trace.quasiMeasurePreserving.ae ae_not_isMorphic
 
+/-- **Almost every generating function is not `k`-Mahler**, for any `k ≥ 2`. -/
+theorem ae_not_isMahler : ∀ᵐ v ∂(coins ℕ), ∀ k (hk : k ≠ 0), 2 ≤ k →
+    ¬ IsMahler k hk (LinearRelations.series ℚ v) :=
+  ae_all_iff.2 fun k => by
+    rcases Nat.lt_or_ge k 2 with h2 | h2
+    · exact Eventually.of_forall fun _ _ h => absurd h (by omega)
+    · exact (measure_eq_zero_iff_ae_notMem.1
+        ((countable_setOf_isMahler h2 (by omega)).measure_zero _)).mono fun _ hv _ _ => hv
+
+theorem ae_not_isMahler_trace : ∀ᵐ x ∂(coins ℤ), ∀ k (hk : k ≠ 0), 2 ≤ k →
+    ¬ IsMahler k hk (LinearRelations.series ℚ (trace x)) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae ae_not_isMahler
+
 /-! ### The stronger statements, almost surely -/
 
 /-- **The stronger statements hold for almost every configuration.** For almost every
@@ -271,7 +286,8 @@ hypotheses of `StrongerStatements.problem1_of_effective_boundary`, `problem1_of_
 `problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity`,
 `problem1_of_disjunctive`, `problem1_of_isNormal`, `problem1_of_transcendental_binary`,
 `problem1_of_irrExponentGE`, `problem1_of_unbounded_abelianComplexity`, `problem1_of_not_isMorphic`,
-`problem1_of_recurrent_not_purelyPeriodic` and `problem1_of_linComplexity_tendsto`. -/
+`problem1_of_recurrent_not_purelyPeriodic`, `problem1_of_linComplexity_tendsto` and
+`problem1_of_not_isMahler` (for every `k ≥ 2`). -/
 theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     (¬ EventuallyPeriodic fun t => trace x t && trace x (t + 1)) ∧
     (∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
@@ -289,10 +305,11 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
     (∀ C, ∃ n, C < abelianComplexity (trace x) n) ∧
     ¬ IsMorphic (trace x) ∧
     IsRecurrent (trace x) ∧ (¬ ∃ P, 0 < P ∧ ∀ t, trace x (t + P) = trace x t) ∧
-    Tendsto (fun n : ℕ => (linComplexity (trace x) n : ℝ) / n) atTop (𝓝 (1 / 2)) := by
+    Tendsto (fun n : ℕ => (linComplexity (trace x) n : ℝ) / n) atTop (𝓝 (1 / 2)) ∧
+    ∀ k (hk : k ≠ 0), 2 ≤ k → ¬ IsMahler k hk (LinearRelations.series ℚ (trace x)) := by
   filter_upwards [ae_isNormal_trace, Mixing.ae_every_line, ae_transcendental_trace,
-    ae_not_isMorphic_trace, LinearComplexity.ae_tendsto_linComplexity_trace]
-    with x hn hline htr hmor hlin
+    ae_not_isMorphic_trace, LinearComplexity.ae_tendsto_linComplexity_trace, ae_not_isMahler_trace]
+    with x hn hline htr hmor hlin hmah
   have hd : Disjunctive (trace x) := fun n w => disjunctive_of_isNormal hn n w
   refine ⟨not_eventuallyPeriodic_and_of_disjunctive hd, hline, fun β n => ?_,
     fun P hP r => antiToeplitz_of_disjunctive hd hP r,
@@ -303,7 +320,7 @@ theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
       ((BinaryIrrational.irrational_iff_not_eventuallyPeriodic le_rfl (trace x)).2
         (not_eventuallyPeriodic_of_disjunctive hd)),
     fun C => ⟨C, by rw [abelianComplexity_of_disjunctive hd]; omega⟩, hmor,
-    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd, hlin⟩
+    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd, hlin, hmah⟩
   · obtain ⟨t, ht⟩ := hd n fun _ => β
     exact ⟨t, fun i hi => ht ⟨i, hi⟩⟩
   · rw [closure_shifts_of_disjunctive hd]

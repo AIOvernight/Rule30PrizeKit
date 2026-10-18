@@ -10,6 +10,7 @@ import Mathlib.RingTheory.PowerSeries.Expand
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.NumberTheory.DiophantineApproximation.Basic
 import Mathlib.Algebra.AlgebraicCard
+import Mathlib.Data.Finsupp.Encodable
 
 /-!
 # Stronger statements that imply Problem 1
@@ -44,7 +45,10 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_iff_irrExponentGE`: the irrationality exponent of `x₂` is at least `2`. By
   Dirichlet's theorem this holds for every irrational number (`irrExponentGE_two_of_irrational`),
   so it is equivalent to Problem 1; the conjecture is `μ(x₂) = 2`.
-* `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function.
+* `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function. For `k ≥ 2` a solution of a
+  Mahler equation is determined by finitely many coefficients (`eq_zero_of_mahler`), so the
+  `k`-Mahler series with `0/1` coefficients are countably many (`countable_setOf_isMahler`); every
+  series is `1`-Mahler.
 * `problem1_of_expansionComplexity_unbounded`: the expansion complexity of `∑ c(t) Xᵗ` over `𝔽₂`
   is unbounded.
 * `problem1_of_not_isMorphic`: `c` is not morphic. A morphic sequence is determined by finitely
@@ -394,6 +398,122 @@ def IsMahler (k : ℕ) (hk : k ≠ 0) (F : PowerSeries ℚ) : Prop :=
   ∃ (d : ℕ) (p : Fin (d + 1) → Polynomial ℚ), (∃ i, p i ≠ 0) ∧
     ∑ i, (p i : PowerSeries ℚ) * PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk) F = 0
 
+/-- **A Mahler equation has at most one solution with given low coefficients**, for `k ≥ 2`. Let
+`∑ pᵢ(z) D(z^(kⁱ)) = 0` with `p_{i₀}` the first nonzero coefficient. If `D` has order larger than
+`p_{i₀}`, then `D = 0`: otherwise the term `p_{i₀}(z) D(z^(k^{i₀}))` has order
+`ord p_{i₀} + k^{i₀} ord D`, below the order `ord pᵢ + kⁱ ord D` of every later term. -/
+theorem eq_zero_of_mahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) {d : ℕ}
+    {p : Fin (d + 1) → Polynomial ℚ} {i₀ : Fin (d + 1)} (hi₀ : p i₀ ≠ 0)
+    (hlow : ∀ i, i < i₀ → p i = 0) {D : PowerSeries ℚ}
+    (hD : ∑ i, (p i : PowerSeries ℚ) * PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk0) D = 0)
+    (hord : (p i₀ : PowerSeries ℚ).order < D.order) : D = 0 := by
+  by_contra hD0
+  set T : Fin (d + 1) → PowerSeries ℚ := fun i =>
+    (p i : PowerSeries ℚ) * PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk0) D with hTdef
+  obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.1 (PowerSeries.order_eq_top.not.2 hD0)
+  obtain ⟨ν, hν⟩ := ENat.ne_top_iff_exists.1
+    (PowerSeries.order_eq_top.not.2 (Polynomial.coe_eq_zero_iff.not.2 hi₀))
+  have hνn : ν < n := by
+    rw [← hν, ← hn] at hord
+    exact_mod_cast hord
+  have hT0 : (T i₀).order = ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) := by
+    rw [hTdef, PowerSeries.order_mul, PowerSeries.order_expand, ← hν, ← hn, nsmul_eq_mul]
+    push_cast
+    ring
+  -- every other term has a larger order
+  have hT : ∀ i, i ≠ i₀ → ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) < (T i).order := by
+    intro i hi
+    by_cases hpi : p i = 0
+    · rw [hTdef]
+      simp only [hpi, Polynomial.coe_zero, zero_mul, PowerSeries.order_zero]
+      exact ENat.coe_lt_top _
+    have hlt : i₀ < i := lt_of_le_of_ne (not_lt.1 fun h => hpi (hlow i h)) hi.symm
+    have hpow : k ^ ((i₀ : ℕ) + 1) ≤ k ^ (i : ℕ) := Nat.pow_le_pow_right (by omega) hlt
+    have hk1 : 1 ≤ k ^ (i₀ : ℕ) := Nat.one_le_pow _ _ (by omega)
+    have hnat : ν + k ^ (i₀ : ℕ) * n < k ^ (i : ℕ) * n := by
+      rw [pow_succ] at hpow
+      have h1 : k ^ (i₀ : ℕ) * k * n ≤ k ^ (i : ℕ) * n := Nat.mul_le_mul_right n hpow
+      have h2 : k ^ (i₀ : ℕ) * 2 * n ≤ k ^ (i₀ : ℕ) * k * n :=
+        Nat.mul_le_mul_right n (Nat.mul_le_mul_left _ hk)
+      have h3 : n ≤ k ^ (i₀ : ℕ) * n := Nat.le_mul_of_pos_left n (by omega)
+      nlinarith
+    rw [hTdef, PowerSeries.order_mul, PowerSeries.order_expand, ← hn, nsmul_eq_mul]
+    calc ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) < ((k ^ (i : ℕ) * n : ℕ) : ℕ∞) := by exact_mod_cast hnat
+      _ ≤ (p i : PowerSeries ℚ).order + (k ^ (i : ℕ) : ℕ∞) * n := by
+        push_cast
+        exact le_add_self
+  have hrest : ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) <
+      (∑ i ∈ Finset.univ.erase i₀, T i).order := by
+    refine lt_of_lt_of_le (ENat.coe_lt_coe.2 (Nat.lt_succ_self _)) (PowerSeries.le_order _ _
+      fun j hj => ?_)
+    rw [map_sum]
+    refine Finset.sum_eq_zero fun i hi => PowerSeries.coeff_of_lt_order _ ?_
+    have h1 := hT i (Finset.ne_of_mem_erase hi)
+    have h2 : (j : ℕ∞) ≤ ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) := by
+      have : j < ν + k ^ (i₀ : ℕ) * n + 1 := by exact_mod_cast hj
+      exact_mod_cast Nat.lt_succ_iff.1 this
+    exact lt_of_le_of_lt h2 h1
+  have hsum : (∑ i, T i).order = ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) := by
+    rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i₀),
+      PowerSeries.order_add_of_order_ne _ _ (by rw [hT0]; exact hrest.ne), hT0]
+    exact min_eq_left hrest.le
+  rw [hTdef] at hsum
+  rw [hD, PowerSeries.order_zero] at hsum
+  exact ENat.top_ne_coe _ hsum
+
+/-- **`k`-Mahler series with `0/1` coefficients are countably many**, for `k ≥ 2`: a solution of a
+given equation is determined by its first `ord p_{i₀} + 1` coefficients (`eq_zero_of_mahler`), and
+there are countably many equations. -/
+theorem countable_setOf_isMahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) :
+    {b : ℕ → Bool | IsMahler k hk0 (LinearRelations.series ℚ b)}.Countable := by
+  classical
+  haveI : Countable (AddMonoidAlgebra ℚ ℕ) := inferInstanceAs (Countable (ℕ →₀ ℚ))
+  haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
+  let Sol : (Σ d : ℕ, Fin (d + 1) → Polynomial ℚ) → Set (ℕ → Bool) := fun e =>
+    {b | (∃ i, e.2 i ≠ 0) ∧ ∑ i, (e.2 i : PowerSeries ℚ) *
+      PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk0) (LinearRelations.series ℚ b) = 0}
+  have hSol : ∀ e, (Sol e).Countable := by
+    rintro ⟨d, p⟩
+    by_cases hne : ∃ i, p i ≠ 0
+    swap
+    · refine Set.Subsingleton.countable fun b hb => absurd hb.1 hne
+    -- the first nonzero coefficient
+    obtain ⟨i₁, hi₁⟩ := hne
+    let i₀ := Finset.min' (Finset.univ.filter fun i => p i ≠ 0)
+      ⟨i₁, Finset.mem_filter.2 ⟨Finset.mem_univ _, hi₁⟩⟩
+    have hi₀ : p i₀ ≠ 0 :=
+      (Finset.mem_filter.1 (Finset.min'_mem (Finset.univ.filter fun i => p i ≠ 0) _)).2
+    have hlow : ∀ i, i < i₀ → p i = 0 := fun i hi => by
+      by_contra h
+      exact absurd (Finset.min'_le _ i (Finset.mem_filter.2 ⟨Finset.mem_univ _, h⟩))
+        (not_le.2 hi)
+    obtain ⟨ν, hν⟩ := ENat.ne_top_iff_exists.1
+      (PowerSeries.order_eq_top.not.2 (Polynomial.coe_eq_zero_iff.not.2 hi₀))
+    -- the first `ν + 1` digits determine a solution
+    have hinj : Set.InjOn (fun (b : ℕ → Bool) (t : Fin (ν + 1)) => b t) (Sol ⟨d, p⟩) := by
+      intro b hb b' hb' hbb'
+      have hdiff := eq_zero_of_mahler hk hk0 hi₀ hlow
+        (D := LinearRelations.series ℚ b - LinearRelations.series ℚ b') (by
+          simp only [map_sub, mul_sub, Finset.sum_sub_distrib]
+          rw [hb.2, hb'.2, sub_zero]) (by
+          rw [← hν]
+          refine lt_of_lt_of_le (ENat.coe_lt_coe.2 (Nat.lt_succ_self ν))
+            (PowerSeries.le_order _ _ fun j hj => ?_)
+          have hj' : j < ν + 1 := by exact_mod_cast hj
+          have := congrFun hbb' ⟨j, hj'⟩
+          simp only at this
+          simp only [map_sub, LinearRelations.coeff_series]
+          unfold LinearRelations.toK
+          rw [this, sub_self])
+      funext t
+      have := congrArg (PowerSeries.coeff t) (sub_eq_zero.1 hdiff)
+      simp only [LinearRelations.coeff_series, LinearRelations.toK] at this
+      cases hbt : b t <;> cases hbt' : b' t <;> simp_all
+    exact (Set.Finite.of_finite_image (Set.toFinite _) hinj).countable
+  refine (Set.countable_iUnion hSol).mono fun b hb => ?_
+  obtain ⟨d, p, hp, heq⟩ := hb
+  exact Set.mem_iUnion.2 ⟨⟨d, p⟩, hp, heq⟩
+
 /-- `X ↦ X^k` commutes with the inclusion of polynomials into power series. -/
 theorem expand_coe (k : ℕ) (hk : k ≠ 0) (P : Polynomial ℚ) :
     PowerSeries.expand k hk (P : PowerSeries ℚ) = ((Polynomial.expand ℚ k P : Polynomial ℚ) :
@@ -404,8 +524,9 @@ theorem expand_coe (k : ℕ) (hk : k ≠ 0) (P : Polynomial ℚ) :
     simp
   exact congrArg (fun φ => φ P) this
 
-/-- **Mahler functions.** If `∑ c(t) zᵗ` is not `k`-Mahler for some `k ≥ 1`, Problem 1 holds: a
-rational function `P/Q` satisfies `P(z^k) Q(z) F(z) - P(z) Q(z^k) F(z^k) = 0`. -/
+/-- **Mahler functions.** If `∑ c(t) zᵗ` is not `k`-Mahler for some `k ≥ 2`, Problem 1 holds: a
+rational function `P/Q` satisfies `P(z^k) Q(z) F(z) - P(z) Q(z^k) F(z^k) = 0`. (For `k = 1` the
+hypothesis never holds: `F(z) - F(z) = 0`.) -/
 theorem problem1_of_not_isMahler {k : ℕ} (hk : k ≠ 0)
     (h : ¬ IsMahler k hk (LinearRelations.series ℚ c)) : Rule30Prize.Problem1 := by
   intro hep

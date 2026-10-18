@@ -243,7 +243,7 @@ Hartmanis and Lewis, with the same splicing on the input tape of an offline mach
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
-- automatic complexity [52] (moderate);
+- automatic complexity [52]: done, `Automatic.problem1_iff_automaticComplexity_tendsto_top`;
 - Kopra's limit-point theorems, a proved related result (Section 6.3): done, in
   [LimitPoints](Rule30Equivalents/LimitPoints.lean) and
   [RightHalfReturns](Rule30Equivalents/RightHalfReturns.lean).
@@ -462,7 +462,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 
   This explains the odometer of [CPY07]: in the frame moving with the right edge, the orbit closure
   of the seed is the 2-adic odometer, and c is the diagonal of an odometer orbit. It also puts [25]
-  and [26] one lemma apart. Both routes are identity transfers.
+  and [26] one lemma apart. Both routes are identity transfers. The odometer itself is proved in
+  [Odometer](Rule30Equivalents/Odometer.lean): rule 30 acts on the rows read from the right edge as
+  the bijective isometry G(y)_j = y_j ⊕ (y_{j−1} ∨ y_{j−2}), and ψ(α)_j = R_j(α mod 2^j) is a closed
+  embedding of ℤ₂ onto the orbit closure of the seed with ψ(α + 1) = G(ψ(α))
+  (`isClosedEmbedding_ψ`, `range_ψ`, `ψ_add_one`). Injectivity comes from the unbounded periods of
+  the diagonals.
 
   The critic's argument is proved in [TFunction](Rule30Equivalents/TFunction.lean), for every
   starting value a, not only 1:
@@ -2499,7 +2504,7 @@ with Turing machines reading n. Notes:
    also prove FinConf must use something specific to the seed's orbit, and the odometer
    structure of its right edge is not such a thing.
 9. **Odometer and diagonals.** In the frame of the right edge, the orbit closure of the seed is the
-   2-adic odometer [CPY07]. The T-function Φ(x) = x ⊕ (2x ∨ 4x) makes this concrete (critic):
+   2-adic odometer [CPY07] (proved: `Odometer.isClosedEmbedding_ψ`). The T-function Φ(x) = x ⊕ (2x ∨ 4x) makes this concrete (critic):
    - row j of the diagonal array is bit j of the Φ-orbit of 1;
    - Φ is a bijection of ℤ₂, and its cycle through 1 modulo 2^(j+1) has length dividing 2^j
      ([26]).

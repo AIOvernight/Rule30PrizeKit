@@ -2773,11 +2773,14 @@ with Turing machines reading n. Notes:
     white, as for the seed) a fair-coin left half gives a normal trace almost surely
     (`ae_isNormal_trace_glue`), and the trace of a fair-coin configuration is independent of its
     right half x₁, x₂, … (`indepFun_trace_rightHalf`: conditioned on any event about the right half,
-    the trace is still a fair-coin sequence, `measure_inter_prefix_of_flipsLeft`). So the trace has
-    density 1/2, is disjunctive and is not eventually periodic (`ae_halfDensity_trace`,
-    `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`). Its discrepancy N(n) − n/2 exceeds
-    K√n and falls below −K√n infinitely often for every K, so it is exactly balanced infinitely
-    often ([Fluctuations](Rule30Equivalents/Fluctuations.lean): `ae_frequently_balanced_trace`, by
+    the trace is still a fair-coin sequence, `measure_inter_prefix_of_flipsLeft`). So the
+    configuration space is the product of the center column and the right half: x ↦ (trace, x₁ x₂ …)
+    is a homeomorphism {0,1}^ℤ ≃ {0,1}^ℕ × {0,1}^ℕ carrying μ to the product of fair-coin measures
+    (`traceRightHalf`, `measurePreserving_traceRightHalf`). So the trace has density 1/2, is
+    disjunctive and is not eventually periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`,
+    `ae_not_eventuallyPeriodic_trace`). Its discrepancy N(n) − n/2 exceeds K√n and falls below −K√n
+    infinitely often for every K, so it is exactly balanced infinitely often
+    ([Fluctuations](Rule30Equivalents/Fluctuations.lean): `ae_frequently_balanced_trace`, by
     Kolmogorov's zero-one law and the central limit theorem). The configurations with an eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system

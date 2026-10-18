@@ -45,6 +45,10 @@ uniform Bernoulli product measure).
   `measure_inter_prefix_of_adapted`) and inside any event about the right half
   (`measure_inter_prefix_of_flipsLeft`), so
   `indepFun_trace_rightHalf`: **the trace is independent of the cells `x_1, x_2, …`**.
+* `traceRightHalf`: **the configuration space is the product of the center column and the right
+  half**: `x ↦ ((F^t(x)_0)ₜ, (x_n)_{n ≥ 1})` is a homeomorphism `{0,1}^ℤ ≃ {0,1}^ℕ × {0,1}^ℕ`, since
+  rule 30 is affine in its left cell (`bijective_trace_rightHalf`), and it carries `coins ℤ` to the
+  product of fair-coin measures (`measurePreserving_traceRightHalf`).
 * `ae_isNormal_trace`: for almost every configuration the trace is normal; hence it has density
   `1/2` (`ae_halfDensity_trace`), is disjunctive (`ae_disjunctive_trace`) and is not eventually
   periodic (`ae_not_eventuallyPeriodic_trace`). The configurations whose trace has density `1/2`
@@ -330,22 +334,26 @@ fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/
 theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ) :=
   measurePreserving_trace_of_flipsLeft measurable_id flipsLeft_id
 
+/-- The right half `x_1, x_2, …` of a configuration. -/
+def rightHalf (x : ℤ → Bool) : ℕ → Bool := fun n => x (n + 1)
+
+theorem continuous_rightHalf : Continuous rightHalf := continuous_pi fun _ => continuous_apply _
+
+theorem measurable_rightHalf : Measurable rightHalf := continuous_rightHalf.measurable
+
 /-- **The center trace is independent of the right half**: for a fair-coin configuration `x`, the
 trace `(F^t(x)_0)ₜ` is independent of the cells `x_1, x_2, …`. Conditioned on any event `A` about
 those cells, the trace is still a fair-coin sequence (`measure_inter_prefix_of_flipsLeft`). -/
-theorem indepFun_trace_rightHalf :
-    IndepFun trace (fun (x : ℤ → Bool) (n : ℕ) => x (n + 1)) (coins ℤ) := by
+theorem indepFun_trace_rightHalf : IndepFun trace rightHalf (coins ℤ) := by
   rw [indepFun_iff_measure_inter_preimage_eq_mul]
   intro s t hs ht
-  have hR : Measurable fun (x : ℤ → Bool) (n : ℕ) => x (n + 1) :=
-    measurable_pi_lambda _ fun n => measurable_pi_apply _
-  set A := (fun (x : ℤ → Bool) (n : ℕ) => x (n + 1)) ⁻¹' t with hAdef
-  have hA : MeasurableSet A := hR ht
+  set A := rightHalf ⁻¹' t with hAdef
+  have hA : MeasurableSet A := measurable_rightHalf ht
   have hAm : ∀ x (p : ℤ), p ≤ 0 → (Function.update x p (!x p) ∈ A ↔ x ∈ A) := by
     intro x p hp
     simp only [hAdef, Set.mem_preimage]
-    rw [show (fun n : ℕ => Function.update x p (!x p) ((n : ℤ) + 1)) = fun n : ℕ => x ((n : ℤ) + 1)
-      from funext fun n => Function.update_of_ne (by omega) _ _]
+    rw [show rightHalf (Function.update x p (!x p)) = rightHalf x from
+      funext fun n => Function.update_of_ne (by omega) _ _]
   have h2 : coins ℤ (trace ⁻¹' s) = coins ℕ s :=
     measurePreserving_trace.measure_preimage hs.nullMeasurableSet
   rcases eq_or_ne (coins ℤ A) 0 with h0 | h0
@@ -366,6 +374,66 @@ theorem indepFun_trace_rightHalf :
           rw [← mul_assoc, ENNReal.mul_inv_cancel h0 (measure_ne_top _ _), one_mul,
             Set.inter_comm]
       _ = coins ℤ (trace ⁻¹' s) * coins ℤ A := by rw [h1, h2, mul_comm]
+
+/-! ### Coordinates: the center column and the right half -/
+
+theorem measurePreserving_rightHalf : MeasurePreserving rightHalf (coins ℤ) (coins ℕ) := by
+  refine measurePreserving_of_measure_prefix measurable_rightHalf fun w n => ?_
+  let S : Finset ℤ := (Finset.range (n + 1)).image fun t : ℕ => (t : ℤ) + 1
+  have hset : {x : ℤ → Bool | ∀ t ≤ n, rightHalf x t = w t} =
+      Set.pi (S : Set ℤ) fun p => {w (p - 1).toNat} := by
+    ext x
+    simp only [Set.mem_setOf_eq, Set.mem_pi, S, Finset.coe_image, Finset.coe_range, Set.mem_image,
+      Set.mem_Iio, rightHalf, Set.mem_singleton_iff]
+    constructor
+    · rintro h p ⟨t, ht, rfl⟩
+      rw [show ((t : ℤ) + 1 - 1).toNat = t by omega]
+      exact h t (by omega)
+    · intro h t ht
+      have := h ((t : ℤ) + 1) ⟨t, by omega, rfl⟩
+      rwa [show ((t : ℤ) + 1 - 1).toNat = t by omega] at this
+  have hcard : S.card = n + 1 := by
+    rw [Finset.card_image_of_injective _ fun a b h => by simpa using h, Finset.card_range]
+  rw [hset, coins_pi, Finset.prod_congr rfl fun p _ => coin_singleton _, Finset.prod_const, hcard]
+
+/-- A configuration is determined by its center column and its right half, and every pair occurs:
+rule 30 is affine in its left cell (`Rule30Realization.realize`, `Rule30Realization.unique`). -/
+theorem bijective_trace_rightHalf :
+    Function.Bijective fun x : ℤ → Bool => (trace x, rightHalf x) := by
+  constructor
+  · intro x x' h
+    simp only [Prod.mk.injEq] at h
+    refine Rule30Realization.unique (fun p hp => ?_) fun t => congrFun h.1 t
+    have := congrFun h.2 (p - 1).toNat
+    simp only [rightHalf] at this
+    rwa [show ((p - 1).toNat : ℤ) + 1 = p by omega] at this
+  · rintro ⟨u, r⟩
+    refine ⟨Rule30Realization.conf (fun p => r (p - 1).toNat) u, ?_⟩
+    have h := Rule30Realization.realize (fun p => r (p - 1).toNat) u
+    refine Prod.ext (funext fun t => h.2 t) (funext fun n => ?_)
+    show Rule30Realization.conf _ u ((n : ℤ) + 1) = r n
+    rw [h.1 _ (by omega)]
+    simp
+
+/-- **The configuration space is the product of the center column and the right half**: the map
+`x ↦ ((F^t(x)_0)ₜ, (x_n)_{n ≥ 1})` is a homeomorphism `{0,1}^ℤ ≃ {0,1}^ℕ × {0,1}^ℕ` (a continuous
+bijection of compact Hausdorff spaces). -/
+noncomputable def traceRightHalf : (ℤ → Bool) ≃ₜ (ℕ → Bool) × (ℕ → Bool) :=
+  Continuous.homeoOfEquivCompactToT2 (f := Equiv.ofBijective _ bijective_trace_rightHalf)
+    (continuous_trace.prodMk continuous_rightHalf)
+
+theorem traceRightHalf_apply (x : ℤ → Bool) : traceRightHalf x = (trace x, rightHalf x) := rfl
+
+/-- **In these coordinates the fair-coin measure is the product of fair-coin measures**: the center
+column and the right half of a random configuration are independent fair-coin sequences
+(`indepFun_trace_rightHalf`, `measurePreserving_trace`, `measurePreserving_rightHalf`). -/
+theorem measurePreserving_traceRightHalf :
+    MeasurePreserving traceRightHalf (coins ℤ) ((coins ℕ).prod (coins ℕ)) := by
+  refine ⟨traceRightHalf.continuous.measurable, ?_⟩
+  have h := (indepFun_iff_map_prod_eq_prod_map_map measurable_trace.aemeasurable
+    measurable_rightHalf.aemeasurable).1 indepFun_trace_rightHalf
+  rw [measurePreserving_trace.map_eq, measurePreserving_rightHalf.map_eq] at h
+  exact h
 
 /-- **The Bernoulli shift is a factor of rule 30**: the trace intertwines rule 30 with the shift,
 `trace (F x) = σ (trace x)`, and it carries `coins ℤ` to `coins ℕ` (`measurePreserving_trace`). -/

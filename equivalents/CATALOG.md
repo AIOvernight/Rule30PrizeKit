@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 206 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 207 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2406,7 +2406,13 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
   consecutive black cells tends to 2 (proved: `BlackTimes.problem2_iff_trueTime`,
   `problem2_iff_mean_gap`). The time of the k-th black cell (`Nat.nth`) and the number of black
   cells before n (`Nat.count`) are inverse to each other, so density L > 0 is the same as the k-th
-  occurrence at time k/L + o(k) (`tendsto_count_div_iff`).
+  occurrence at time k/L + o(k) (`tendsto_count_div_iff`);
+- the ergodic form: every limit point ν of the empirical measures
+  (δ_c + δ_{σc} + ⋯ + δ_{σᴺc})/(N + 1) on {0,1}^ℕ has ν[1] = 1/2 (proved:
+  `EmpiricalMeasures.problem2_iff_mapClusterPt`). The space of probability measures on {0,1}^ℕ is
+  compact (Mathlib's Prokhorov theorem), ν ↦ ν[1] is continuous because [1] is clopen
+  (portmanteau), and the mass of [1] under the N-th empirical measure is the proportion of black
+  cells.
 
 Both Lean forms are proved in [ProblemTwo](Rule30Equivalents/ProblemTwo.lean), the second through
 the Hardy–Littlewood–Karamata theorem, which the kit proves in

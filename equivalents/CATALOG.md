@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 189 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 190 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2290,7 +2290,14 @@ Each statement below is implied by Problem 1.
     so it reads only α mod 2^k. The Mahler coefficients are Mathlib's forward differences
     Δⁿu(0) = Σ_{j ≤ n} C(n, j)u(j); Lucas' theorem is not needed: in characteristic 2,
     Δ^(2^k)u(t) = u(t + 2^k) − u(t), and Newton's forward formula writes Δ^(2^k)u(t) through the
-    coefficients Δ^(j + 2^k)u(0). The profinite form is not formalized (Mathlib has no Ẑ).
+    coefficients Δ^(j + 2^k)u(0). The profinite form is proved in
+    [ProfiniteIntegers](Rule30Equivalents/ProfiniteIntegers.lean):
+    `problem1_iff_no_continuous_extension`, Problem 1 ⟺ no tail of c extends to a continuous
+    function Ẑ → Bool. Mathlib has no Ẑ, so `Zhat` is the inverse limit of the rings ℤ/(k+1)!ℤ, a
+    cofinal subsystem, inside the product of the finite discrete spaces Fin (k+1)!. A continuous
+    function to Bool is constant on a cylinder around each point, hence (the system is a chain)
+    on a cylinder over one coordinate; compactness gives one coordinate K for all points, so the
+    tail has period (K+1)! (`exists_level`, `exists_continuous_extension_iff`).
 - **Jen's pairs and masked Jen** (proved):
   - c and column j ≠ 0 are not both EP (`Rule30Jen.jen`);
   - c and c ∨ (column 1) are not both EP;

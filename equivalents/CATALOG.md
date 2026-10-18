@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 180 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 181 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -198,7 +198,7 @@ files. The rows follow the order of Section 3.
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃) | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
-| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
+| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (α, β = 2, 3) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider` |
 
 **Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
@@ -239,7 +239,8 @@ sequences, so it decides an eventually periodic language
 ([OneTapeGap](Rule30Equivalents/OneTapeGap.lean)); its space form through the theorem of Stearns,
 Hartmanis and Lewis, with the same splicing on the input tape of an offline machine
 ([OfflineGap](Rule30Equivalents/OfflineGap.lean)). 1 form is stated,
-[41], and its direction "the form implies Problem 1" is proved. 1 form is a sketch, [46].
+[41], and its direction "the form implies Problem 1" is proved. 1 form is a sketch, [46]; its
+uniform case (bases 2 and 3, uniform substitutions) is proved.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -2016,9 +2017,14 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   and β. The critic checked on arXiv that the abstract states "if and only if". k-automatic
   sequences are k-substitutive, so the 2-and-3 form of [42] is a special case.
 - *Difficulty.* Hard: it needs Durand's theorem.
-- *Lean.* Sketch. Mathlib has no substitutions, morphic words or Perron numbers (it has
-  `Real.goldenRatio`). A statement needs a substitution as `Fin m → List (Fin m)`, its fixed point,
-  a coding and the dominant eigenvalue.
+- *Lean.* The uniform case is proved in [UniformMorphic](Rule30Equivalents/UniformMorphic.lean):
+  Cobham's "little" theorem `isAutomatic_iff_isUniformMorphic` (k-automatic ⟺ a coding of a
+  fixed point of a k-uniform morphism; the alphabet is kernel → Bool, the letter at n the column
+  g ↦ g(n) of the kernel), so with Cobham's theorem
+  `problem1_iff_not_uniformMorphic_two_three`: Problem 1 ⟺ c is not both 2- and 3-uniformly
+  morphic. The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's
+  theorem (and, for the easy direction, Lind's theorem that every Perron number is the dominant
+  eigenvalue of a primitive substitution).
 - *Known.* No data exist for non-integer Perron bases; the kernel bounds of [42] cover only the
   integer case.
 - *Sources.* [Dur11]; [Cob69].

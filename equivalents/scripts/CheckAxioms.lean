@@ -157,6 +157,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_padic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity_odd
+#print axioms Rule30Equivalents.UniformMorphic.problem1_iff_not_uniformMorphic_two_three
 #print axioms Rule30Equivalents.WordForms.problem1_iff_prefix_certificates
 #print axioms Rule30Equivalents.WordForms.problem1_iff_black_gaps
 #print axioms Rule30Equivalents.WordForms.problem1_iff_white_gaps

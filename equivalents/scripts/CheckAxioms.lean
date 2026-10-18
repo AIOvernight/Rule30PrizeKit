@@ -70,6 +70,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_digits_base
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_not_rational_decimal_digits
 #print axioms Rule30Equivalents.OfflineGap.problem1_iff_no_small_space_decider
+#print axioms Rule30Equivalents.OfflineGap.problem1_iff_no_small_space_digit_deciders
 #print axioms Rule30Equivalents.OmegaRegular.problem1_iff_not_omega_regular
 #print axioms Rule30Equivalents.OneTapeGap.problem1_iff_no_fast_one_tape_decider
 #print axioms Rule30Equivalents.OneTapeRegular.problem1_iff_no_fast_digit_deciders

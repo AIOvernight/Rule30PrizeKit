@@ -1,36 +1,43 @@
-import Rule30Equivalents.OneTapeGap
+import Rule30Equivalents.OneTapeRegular
+import Rule30Equivalents.LogicAutomata
 import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
-# Offline Turing machines: the `log log n` space gap for unary input
+# Offline Turing machines: the `log log n` space gap
 
 Catalog entry [43], the space form. **Stearns, Hartmanis and Lewis** (1965): a deterministic
 Turing machine with a read-only input tape and a work tape that decides a language in space
-`o(log log n)` decides a regular language. For unary input this means the language is eventually
-periodic, so Problem 1 holds iff no such machine decides `{1ⁿ : c(n) = 1}` in space
-`o(log log n)` (`problem1_iff_no_small_space_decider`).
+`o(log log n)` decides a regular language (`DecidesInSpace.isRegular`), for every input alphabet.
+Conversely a finite automaton is such a machine that uses no work space, so a language is regular
+iff some such machine decides it in space `o(log log n)`
+(`isRegular_iff_exists_small_space_decider`).
 
-* `OTM`: finitely many states and work symbols, a two-way read-only input tape holding `1ⁿ` with
-  blanks on both sides, and a two-way infinite work tape. `OTM.toMachine` is the same machine seen
-  on its input tape, with the work configurations (state, work tape, work head) as states, so the
-  crossing sequences and the splicing of `OneTapeGap` apply.
-* `DecidesInSpace M f s`: on input `1ⁿ` the machine halts with the answer `f n`, and its work head
-  stays within `s n` cells of its start.
+* `OTM α`: finitely many states and work symbols, a two-way read-only input tape holding a word
+  over `α` with blanks on both sides, and a two-way infinite work tape. `OTM.toMachine` is the same
+  machine seen on its input tape, with the work configurations (state, work tape, work head) as
+  states, so the crossing sequences and the splicing of `OneTapeGap` and `OneTapeRegular` apply.
+* `DecidesInSpace M L s`: on every input `w` the machine halts, accepting iff `w ∈ L`, and its work
+  head stays within `s |w|` cells of its start.
 * Crossing sequences are short: the configurations right after two rightward crossings of one
   boundary differ, or the run would loop (`rs_nodup`), so a crossing sequence over `N` work
-  configurations has length at most `2N + 1` (`length_cs_le`).
+  configurations has length at most `2N + 1` (`length_cs_le_of_mem`).
 * `space_lower_bound`: in a shortest input on which the work head goes beyond `K`, the boundaries
-  on each side of the input head at that moment have distinct crossing sequences, or cutting would
-  give a shorter one. So `n ≤ 2 (N + 1)^(2N + 1)`, where `N ≤ C^(2 s(n) + 1)` counts the work
-  configurations; space `o(log log n)` rules this out for large `K`.
-* Bounded space leaves finitely many crossing sequences, so `f` is eventually periodic by
-  `DecidesInTime.eventuallyPeriodic_of_finite`.
-* `periodicOTM`: an eventually periodic `f` is decided without using the work tape.
+  on each side of the input head at that moment have distinct crossing sequences, or cutting out
+  the word between two of them would give a shorter one. So `n ≤ 2 (N + 1)^(2N + 1)`, where
+  `N ≤ C^(2 s(n) + 1)` counts the work configurations; space `o(log log n)` rules this out for
+  large `K` (`bounded_space`).
+* Bounded space leaves finitely many crossing sequences, so the language is regular by
+  `OneTapeRegular.DecidesLang.isRegular_of_finite`.
+
+For Rule 30: with unary input, **Problem 1 holds iff no such machine decides
+`{1ⁿ : c(n) = 1}` in space `o(log log n)`** (`problem1_iff_no_small_space_decider`); with digit
+input and Cobham's theorem, iff no such machines decide `c(n)` from the base-`2` and the base-`3`
+digits of `n` (`problem1_iff_no_small_space_digit_deciders`).
 -/
 
 namespace Rule30Equivalents.OfflineGap
 
-open Ruliology.CellularAutomata OneTapeGap
+open Ruliology.CellularAutomata OneTapeGap OneTapeRegular
 
 /-! ### Crossing sequences of machines that do not write -/
 
@@ -209,9 +216,9 @@ theorem finite_lists {α : Type*} (S : Finset α) (L : ℕ) :
 
 /-! ### Offline machines -/
 
-/-- A deterministic Turing machine with a two-way read-only input tape and one work tape, with
-finitely many states and work symbols. -/
-structure OTM where
+/-- A deterministic Turing machine with a two-way read-only input tape holding a word over `α`, and
+one work tape, with finitely many states and work symbols. -/
+structure OTM (α : Type) where
   /-- States. -/
   Q : Type
   [instFintype : Fintype Q]
@@ -226,23 +233,24 @@ structure OTM where
   halt : Q → Bool
   /-- Accepting states. -/
   accept : Q → Bool
-  /-- From the state, the input symbol (`true` for `1`) and the work symbol: the new state, the
-  written work symbol, the move of the input head and the move of the work head. -/
-  δ : Q → Bool → Γ → Q × Γ × Move × Move
+  /-- From the state, the input symbol (`none` for a blank) and the work symbol: the new state,
+  the written work symbol, the move of the input head and the move of the work head. -/
+  δ : Q → Option α → Γ → Q × Γ × Move × Move
 
 attribute [instance] OTM.instFintype OTM.instFintypeΓ
 
 namespace OTM
 
-variable (M : OTM)
+variable {α : Type} (M : OTM α)
 
 /-- The machine on the input tape whose states are the work configurations (state, work tape,
-work head). It writes back the symbol it reads. -/
+work head). It writes back the symbol it reads. Its inputs are words, written with `some`
+(`OneTapeRegular.runW`), so its unary input symbol `one` is not used. -/
 def toMachine : Machine where
   Q := M.Q × (ℤ → M.Γ) × ℤ
-  Γ := Bool
-  blank := false
-  one := true
+  Γ := Option α
+  blank := none
+  one := none
   start := (M.start, fun _ => M.blank, 0)
   halt w := M.halt w.1
   accept w := M.accept w.1
@@ -250,31 +258,34 @@ def toMachine : Machine where
       Function.update w.2.1 w.2.2 (M.δ w.1 x (w.2.1 w.2.2)).2.1,
       w.2.2 + (M.δ w.1 x (w.2.1 w.2.2)).2.2.2.shift), x, (M.δ w.1 x (w.2.1 w.2.2)).2.2.1)
 
-/-- `M` decides `f` in space `s`: on every input `1ⁿ` it halts with the answer `f n`, and its work
-head stays within `s n` cells of its start. -/
-def DecidesInSpace (f : ℕ → Bool) (s : ℕ → ℕ) : Prop :=
-  (∃ T, DecidesInTime M.toMachine f T) ∧
-    ∀ n t, -(s n : ℤ) ≤ (run M.toMachine n t).q.2.2 ∧ (run M.toMachine n t).q.2.2 ≤ s n
+/-- `M` decides `L` in space `s`: on every input `w` it halts, accepting iff `w ∈ L`, and its
+work head stays within `s |w|` cells of its start. -/
+def DecidesInSpace (L : Language α) (s : ℕ → ℕ) : Prop :=
+  (∃ T, DecidesLang M.toMachine some L T) ∧
+    ∀ (w : List α) t, -(s w.length : ℤ) ≤ (runW M.toMachine some w t).q.2.2 ∧
+      (runW M.toMachine some w t).q.2.2 ≤ s w.length
 
 /-- The input tape never changes. -/
-theorem tape_run (n t : ℕ) : (run M.toMachine n t).tape = (init M.toMachine n).tape := by
+theorem tape_run (w : List α) (t : ℕ) :
+    (runW M.toMachine some w t).tape = (initW M.toMachine some w).tape := by
   induction t with
   | zero => rfl
   | succ t ih =>
-    rw [run_succ, ← ih]
+    rw [isRun_runW (M := M.toMachine) some w t, ← ih]
     unfold step
     split_ifs
     · rfl
     · exact Function.update_eq_self _ _
 
 /-- Under a space bound `K`, the work tape stays blank beyond `K`. -/
-theorem work_blank {n K : ℕ}
-    (hK : ∀ t, -(K : ℤ) ≤ (run M.toMachine n t).q.2.2 ∧ (run M.toMachine n t).q.2.2 ≤ K)
-    (t : ℕ) (i : ℤ) (hi : i < -K ∨ K < i) : (run M.toMachine n t).q.2.1 i = M.blank := by
+theorem work_blank {w : List α} {K : ℕ}
+    (hK : ∀ t, -(K : ℤ) ≤ (runW M.toMachine some w t).q.2.2 ∧
+      (runW M.toMachine some w t).q.2.2 ≤ K)
+    (t : ℕ) (i : ℤ) (hi : i < -K ∨ K < i) : (runW M.toMachine some w t).q.2.1 i = M.blank := by
   induction t with
   | zero => rfl
   | succ t ih =>
-    rw [run_succ]
+    rw [isRun_runW (M := M.toMachine) some w t]
     unfold step
     split_ifs
     · exact ih
@@ -316,50 +327,62 @@ theorem mem_cfgs {K : ℕ} {w : M.toMachine.Q} (hh : -(K : ℤ) ≤ w.2.2 ∧ w.
   · show ((((wh + K).toNat : ℕ) : ℤ) - K) = wh
     omega
 
-/-- The work head stays within `K` cells of its start on input `1ⁿ`. -/
-def SpaceLE (n K : ℕ) : Prop :=
-  ∀ t, -(K : ℤ) ≤ (run M.toMachine n t).q.2.2 ∧ (run M.toMachine n t).q.2.2 ≤ K
+/-- The work head stays within `K` cells of its start on the input `w`. -/
+def SpaceLE (w : List α) (K : ℕ) : Prop :=
+  ∀ t, -(K : ℤ) ≤ (runW M.toMachine some w t).q.2.2 ∧ (runW M.toMachine some w t).q.2.2 ≤ K
 
 variable {M}
 
-theorem mem_cfgs_run {n K : ℕ} (h : M.SpaceLE n K) (t : ℕ) :
-    (run M.toMachine n t).q ∈ M.cfgs K :=
+theorem mem_cfgs_run {w : List α} {K : ℕ} (h : M.SpaceLE w K) (t : ℕ) :
+    (runW M.toMachine some w t).q ∈ M.cfgs K :=
   M.mem_cfgs (h t) fun i hi => M.work_blank h t i hi
 
-theorem length_cs_run_le {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M.toMachine f T)
-    {n K : ℕ} (h : M.SpaceLE n K) (b : ℤ) (T' : ℕ) :
-    (cs (run M.toMachine n) b T').length ≤ 2 * (M.cfgs K).card + 1 :=
-  length_cs_le_of_mem (isRun_run n) (fun t => (M.tape_run n t).trans (M.tape_run n 0).symm)
-    (hT n).1 _ (M.mem_cfgs_run h) b T'
+theorem length_cs_run_le {L : Language α} {T : ℕ → ℕ} (hT : DecidesLang M.toMachine some L T)
+    {w : List α} {K : ℕ} (h : M.SpaceLE w K) (b : ℤ) (T' : ℕ) :
+    (cs (runW M.toMachine some w) b T').length ≤ 2 * (M.cfgs K).card + 1 :=
+  length_cs_le_of_mem (isRun_runW (M := M.toMachine) some w)
+    (fun t => (M.tape_run w t).trans (M.tape_run w 0).symm)
+    (hT w).1 _ (M.mem_cfgs_run h) b T'
 
-/-- **The space bound.** Let `1ⁿ` be a shortest input on which the work head goes beyond `K`. At
-that moment the input head is at some cell `x₀`; cutting out the part between two boundaries on
-the same side of `x₀` with equal crossing sequences would give a shorter such input. So the
-boundaries `1, …, n` have distinct crossing sequences on each side of `x₀`, and there are at most
-`(N + 1)^(2N + 1)` of those, for `N` the number of work configurations within `s n`. -/
-theorem space_lower_bound {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M.toMachine f T)
-    {s : ℕ → ℕ} (hs : ∀ n, M.SpaceLE n (s n)) {K n : ℕ} (hmin : ∀ n' < n, M.SpaceLE n' K)
-    (hbig : ¬ M.SpaceLE n K) :
-    n ≤ 2 * ((M.cfgs (s n)).card + 1) ^ (2 * (M.cfgs (s n)).card + 1) := by
+/-- **The space bound.** Let `w` be a shortest input on which the work head goes beyond `K`. At
+that moment the input head is at some cell `x₀`; cutting out the part of `w` between two
+boundaries on the same side of `x₀` with equal crossing sequences would give a shorter such input.
+So the boundaries `1, …, |w|` have distinct crossing sequences on each side of `x₀`, and there are
+at most `(N + 1)^(2N + 1)` of those, for `N` the number of work configurations within `s |w|`. -/
+theorem space_lower_bound {L : Language α} {T : ℕ → ℕ} (hT : DecidesLang M.toMachine some L T)
+    {s : ℕ → ℕ} (hs : ∀ w : List α, M.SpaceLE w (s w.length)) {K : ℕ} {w : List α}
+    (hmin : ∀ w' : List α, w'.length < w.length → M.SpaceLE w' K) (hbig : ¬ M.SpaceLE w K) :
+    w.length ≤ 2 * ((M.cfgs (s w.length)).card + 1) ^ (2 * (M.cfgs (s w.length)).card + 1) := by
   classical
+  set n := w.length with hn
   -- the moment the work head is beyond `K`, taken before halting
   obtain ⟨t₀, ht₀, hbig₀⟩ : ∃ t₀, t₀ ≤ T n ∧
-      ¬ (-(K : ℤ) ≤ (run M.toMachine n t₀).q.2.2 ∧ (run M.toMachine n t₀).q.2.2 ≤ K) := by
+      ¬ (-(K : ℤ) ≤ (runW M.toMachine some w t₀).q.2.2 ∧
+        (runW M.toMachine some w t₀).q.2.2 ≤ K) := by
     obtain ⟨t, ht⟩ := not_forall.1 hbig
     rcases le_total t (T n) with h | h
     · exact ⟨t, h, ht⟩
-    · exact ⟨T n, le_rfl, by rwa [← eq_of_halt (isRun_run n) (hT n).1 h]⟩
-  set x₀ := (run M.toMachine n t₀).h
-  set g : ℕ → List M.toMachine.Q := fun b => cs (run M.toMachine n) (b : ℤ) (T n)
+    · exact ⟨T n, le_rfl, by rwa [← eq_of_halt (isRun_runW (M := M.toMachine) some w) (hT w).1 h]⟩
+  set x₀ := (runW M.toMachine some w t₀).h
+  set g : ℕ → List M.toMachine.Q := fun b => cs (runW M.toMachine some w) (b : ℤ) (T n)
   have hdist : ∀ i j : ℕ, 1 ≤ i → i < j → j ≤ n → ((j : ℤ) ≤ x₀ ∨ x₀ < i) → g i ≠ g j := by
     intro i j hi hij hjn hside hC
-    have hv := hT.splice_visit (n := n) (m := n) (n' := i + (n - j)) (a₁ := i) (a₂ := j) hi
-      (by omega) (by omega) hjn (by omega) hC
-    obtain ⟨σ, hσ⟩ : ∃ σ, (run M.toMachine (i + (n - j)) σ).q = (run M.toMachine n t₀).q := by
+    have hu : (w.take i).length = i := by rw [List.length_take]; omega
+    have hu' : (w.take j).length = j := by rw [List.length_take]; omega
+    have hw1 : w.take i ++ w.drop i = w := List.take_append_drop i w
+    have hw2 : w.take j ++ w.drop j = w := List.take_append_drop j w
+    have hv := hT.splice_visit (u := w.take i) (v := w.drop i) (u' := w.take j) (v' := w.drop j)
+      (by omega) (by omega) (by rw [hw1, hw2, hu, hu']; exact hC)
+    rw [hw1, hw2, hu, hu'] at hv
+    obtain ⟨σ, hσ⟩ : ∃ σ, (runW M.toMachine some (w.take i ++ w.drop j) σ).q =
+        (runW M.toMachine some w t₀).q := by
       rcases hside with h | h
       · exact hv.2 t₀ ht₀ h
       · exact hv.1 t₀ ht₀ h
-    have := hmin (i + (n - j)) (by omega) σ
+    have hlen : (w.take i ++ w.drop j).length < w.length := by
+      rw [List.length_append, hu, List.length_drop]
+      omega
+    have := hmin _ hlen σ
     rw [hσ] at this
     exact hbig₀ this
   set BL := (Finset.Icc 1 n).filter fun b : ℕ => (b : ℤ) ≤ x₀
@@ -394,8 +417,8 @@ theorem space_lower_bound {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTi
   have hle := card_le_of_lists (S := M.cfgs (s n)) (L := 2 * (M.cfgs (s n)).card + 1) hinj
     (fun b _ x hx => by
       obtain ⟨t, rfl⟩ := mem_cs hx
-      exact M.mem_cfgs_run (hs n) _)
-    (fun b _ => length_cs_run_le hT (hs n) _ _)
+      exact M.mem_cfgs_run (hs w) _)
+    (fun b _ => length_cs_run_le hT (hs w) _ _)
   omega
 
 /-- The arithmetic at the end of the space argument: `n ≤ 2 (N + 1)^(2N + 1)` with
@@ -433,10 +456,10 @@ theorem loglog_bound {C N n s : ℕ} (hC : 2 ≤ C) (hN : N ≤ C ^ (2 * s + 1))
     _ = 4 * ((s : ℝ) + 1) * Real.log C := by push_cast; ring
 
 /-- **Space `o(log log n)` is bounded.** -/
-theorem bounded_space {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M.toMachine f T)
-    {s : ℕ → ℕ} (hs : ∀ n, M.SpaceLE n (s n))
+theorem bounded_space {L : Language α} {T : ℕ → ℕ} (hT : DecidesLang M.toMachine some L T)
+    {s : ℕ → ℕ} (hs : ∀ w : List α, M.SpaceLE w (s w.length))
     (hlo : (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n))) :
-    ∃ K, ∀ n, M.SpaceLE n K := by
+    ∃ K, ∀ w, M.SpaceLE w K := by
   classical
   by_contra hne
   push Not at hne
@@ -452,16 +475,22 @@ theorem bounded_space {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M
     Filter.eventually_atTop.1 (hlo.def (show (0 : ℝ) < 1 / (8 * Real.log C) by positivity))
   set N := max N₀ (4 ^ (C ^ 8))
   set K := ∑ n ∈ Finset.range N, s n
-  have hex : ∃ n, ¬ M.SpaceLE n K := hne K
-  have hbig := Nat.find_spec hex
-  set n := Nat.find hex
-  have hmin : ∀ n' < n, M.SpaceLE n' K := fun n' hn' => not_not.1 (Nat.find_min hex hn')
+  -- a shortest input on which the work head goes beyond `K`
+  have hex : ∃ n, ∃ w : List α, w.length = n ∧ ¬ M.SpaceLE w K := by
+    obtain ⟨w, hw⟩ := hne K
+    exact ⟨w.length, w, rfl, hw⟩
+  obtain ⟨w, hwn, hbig⟩ := Nat.find_spec hex
+  have hmin : ∀ w' : List α, w'.length < w.length → M.SpaceLE w' K := fun w' hw' => by
+    by_contra hc
+    exact Nat.find_min hex (by omega) ⟨w', rfl, hc⟩
+  set n := w.length with hn
   have hnN : N ≤ n := by
     by_contra h
     push Not at h
     apply hbig
     intro t
-    have h1 := hs n t
+    have h1 := hs w t
+    rw [← hn] at h1
     have h2 : s n ≤ K :=
       Finset.single_le_sum (f := s) (fun _ _ => Nat.zero_le _) (Finset.mem_range.2 h)
     have h3 : (s n : ℤ) ≤ K := by exact_mod_cast h2
@@ -477,7 +506,7 @@ theorem bounded_space {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M
         ≤ Fintype.card M.Q ^ (2 * s n + 1) * Fintype.card M.Γ ^ (2 * s n + 1) *
             2 ^ (2 * s n + 1) := by gcongr
       _ = C ^ (2 * s n + 1) := by simp only [C, mul_pow]; ring
-  have hN1 : 1 ≤ (M.cfgs (s n)).card := Finset.card_pos.2 ⟨_, M.mem_cfgs_run (hs n) 0⟩
+  have hN1 : 1 ≤ (M.cfgs (s n)).card := Finset.card_pos.2 ⟨_, M.mem_cfgs_run (hs w) 0⟩
   have e1 := loglog_bound hC hcard hN1 (space_lower_bound hT hs hmin hbig) hn2
   -- `s n ≤ log log n / (8 log C)`
   have hlog1 : 1 ≤ Real.log n := by
@@ -518,107 +547,149 @@ theorem bounded_space {f : ℕ → Bool} {T : ℕ → ℕ} (hT : DecidesInTime M
     linarith
   linarith
 
-/-- **Stearns–Hartmanis–Lewis for unary input.** An offline machine that decides `f` in space
-`o(log log n)` uses bounded space, so it has finitely many crossing sequences and `f` is
-eventually periodic. -/
-theorem DecidesInSpace.eventuallyPeriodic {f : ℕ → Bool} {s : ℕ → ℕ} (hM : M.DecidesInSpace f s)
+/-- **The theorem of Stearns, Hartmanis and Lewis.** An offline machine that decides `L` in space
+`o(log log n)` uses bounded space, so it has finitely many crossing sequences and `L` is
+regular. -/
+theorem DecidesInSpace.isRegular {L : Language α} {s : ℕ → ℕ} (hM : M.DecidesInSpace L s)
     (hlo : (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n))) :
-    EventuallyPeriodic f := by
+    L.IsRegular := by
   obtain ⟨⟨T, hT⟩, hs⟩ := hM
   obtain ⟨K, hK⟩ := bounded_space hT hs hlo
-  refine hT.eventuallyPeriodic_of_finite
+  refine hT.isRegular_of_finite
     ((finite_lists (M.cfgs K) (2 * (M.cfgs K).card + 1)).subset ?_)
-  rintro _ ⟨n, b, rfl⟩
-  refine ⟨length_cs_run_le hT (hK n) b _, fun x hx => ?_⟩
+  rintro _ ⟨w, b, rfl⟩
+  refine ⟨length_cs_run_le hT (hK w) b _, fun x hx => ?_⟩
   obtain ⟨t, rfl⟩ := mem_cs hx
-  exact M.mem_cfgs_run (hK n) _
+  exact M.mem_cfgs_run (hK w) _
 
 end OTM
 
-/-! ### A machine without work space for an eventually periodic `f` -/
+/-! ### A finite automaton is an offline machine without work space -/
 
-/-- The offline machine that reads `1ⁿ` from left to right, counting with `wrap`, and at the first
-blank halts with the answer `f` of the count. It never moves its work head. -/
-def periodicOTM (f : ℕ → Bool) (N P : ℕ) (hP : 0 < P) : OTM where
-  Q := Fin (N + P) ⊕ Bool
+section DFA
+
+variable {α σ : Type} [Fintype σ] (D : DFA α σ)
+
+/-- The offline machine of a finite automaton: it reads the input left to right, and at the first
+blank halts with the answer. It never moves its work head. -/
+noncomputable def dfaOTM : OTM α where
+  Q := σ ⊕ Bool
   Γ := Unit
   blank := ()
-  start := Sum.inl (cnt N P hP 0)
+  start := Sum.inl D.start
   halt := Sum.isRight
   accept := Sum.elim (fun _ => false) id
   δ := fun s x _ => match s, x with
-    | Sum.inl s, true => (Sum.inl ⟨wrap N P s, wrap_lt hP s⟩, (), Move.right, Move.stay)
-    | Sum.inl s, false => (Sum.inr (f s), (), Move.right, Move.stay)
+    | Sum.inl g, some a => (Sum.inl (D.step g a), (), Move.right, Move.stay)
+    | Sum.inl g, none =>
+      (Sum.inr (@decide (g ∈ D.accept) (Classical.dec _)), (), Move.right, Move.stay)
     | Sum.inr b, _ => (Sum.inr b, (), Move.stay, Move.stay)
 
-theorem run_periodicOTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) {n t : ℕ} (ht : t ≤ n) :
-    run (periodicOTM f N P hP).toMachine n t =
-      ⟨(Sum.inl (cnt N P hP t), fun _ => (), 0), t,
-        (init (periodicOTM f N P hP).toMachine n).tape⟩ := by
+theorem runW_dfaOTM (w : List α) {t : ℕ} (ht : t ≤ w.length) :
+    runW (dfaOTM D).toMachine some w t =
+      ⟨(Sum.inl (D.evalFrom D.start (w.take t)), fun _ => (), 0), t,
+        (initW (dfaOTM D).toMachine some w).tape⟩ := by
   induction t with
   | zero => rfl
   | succ t ih =>
-    rw [run_succ, ih (by omega), step_eq rfl]
-    have htape : (init (periodicOTM f N P hP).toMachine n).tape (t : ℤ) = true := by
-      simp only [init]; rw [if_pos (by omega)]; rfl
+    rw [(isRun_runW (M := (dfaOTM D).toMachine) some w) t, ih (by omega), step_eq rfl]
+    have htape : (initW (dfaOTM D).toMachine some w).tape (t : ℤ) = some (w[t]'(by omega)) := by
+      simp only [initW]
+      rw [dif_pos (by omega)]
+      simp
     refine Cfg.ext' ?_ ?_ ?_
-    · show ((_, _, _) : _ × _ × _) = _
+    · dsimp only
       rw [htape]
-      exact Prod.ext rfl (Prod.ext (funext fun _ => rfl) rfl)
-    · show (t : ℤ) + _ = ((t + 1 : ℕ) : ℤ)
+      show ((Sum.inl _, _, _) : _ × _ × _) = _
+      refine Prod.ext ?_ (Prod.ext (funext fun _ => rfl) rfl)
+      show Sum.inl _ = Sum.inl _
+      rw [List.take_add_one, List.getElem?_eq_getElem (by omega), Option.toList_some,
+        DFA.evalFrom_append_singleton]
+    · dsimp only
       rw [htape]
       push_cast
       rfl
-    · show Function.update _ _ _ = _
+    · dsimp only
       rw [htape]
       exact Function.update_eq_self_iff.2 htape.symm
 
-theorem run_periodicOTM_succ {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) (n : ℕ) :
-    (run (periodicOTM f N P hP).toMachine n (n + 1)).q =
-      (Sum.inr (f (cnt N P hP n)), fun _ => (), 0) := by
-  rw [run_succ, run_periodicOTM hP le_rfl, step_eq rfl]
-  have htape : (init (periodicOTM f N P hP).toMachine n).tape (n : ℤ) = false := by
-    simp only [init]; rw [if_neg (by omega)]; rfl
-  show ((_, _, _) : _ × _ × _) = _
+theorem runW_dfaOTM_succ (w : List α) :
+    (runW (dfaOTM D).toMachine some w (w.length + 1)).q =
+      (Sum.inr (@decide (D.evalFrom D.start w ∈ D.accept) (Classical.dec _)), fun _ => (), 0) := by
+  rw [(isRun_runW (M := (dfaOTM D).toMachine) some w) w.length, runW_dfaOTM D w le_rfl,
+    step_eq rfl]
+  have htape : (initW (dfaOTM D).toMachine some w).tape (w.length : ℤ) = none := by
+    simp only [initW]
+    rw [dif_neg (by omega)]
+    rfl
+  dsimp only
   rw [htape]
+  show ((Sum.inr _, _, _) : _ × _ × _) = _
+  rw [List.take_length]
   exact Prod.ext rfl (Prod.ext (funext fun _ => rfl) rfl)
 
-theorem decidesInSpace_periodicOTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P)
-    (hf : ∀ t, N ≤ t → f (t + P) = f t) : (periodicOTM f N P hP).DecidesInSpace f fun _ => 0 := by
-  have hhalt : ∀ n, (periodicOTM f N P hP).toMachine.halt
-      (run (periodicOTM f N P hP).toMachine n (n + 1)).q = true := fun n => by
-    rw [run_periodicOTM_succ]; rfl
-  refine ⟨⟨(· + 1), fun n => ⟨hhalt n, ?_⟩⟩, fun n t => ?_⟩
-  · rw [run_periodicOTM_succ]
-    exact apply_cnt hP hf n
-  · have h0 : (run (periodicOTM f N P hP).toMachine n t).q.2.2 = 0 := by
-      rcases le_or_gt t n with h | h
-      · rw [run_periodicOTM hP h]
-      · rw [eq_of_halt (isRun_run n) (hhalt n) (by omega : n + 1 ≤ t), run_periodicOTM_succ]
+/-- **A finite automaton decides its language without work space.** -/
+theorem decidesInSpace_dfaOTM : (dfaOTM D).DecidesInSpace D.accepts fun _ => 0 := by
+  have hhalt : ∀ w : List α, (dfaOTM D).toMachine.halt
+      (runW (dfaOTM D).toMachine some w (w.length + 1)).q = true := fun w => by
+    rw [runW_dfaOTM_succ]; rfl
+  refine ⟨⟨(· + 1), fun w => ⟨hhalt w, ?_⟩⟩, fun w t => ?_⟩
+  · rw [runW_dfaOTM_succ, DFA.mem_accepts]
+    exact ⟨@of_decide_eq_true _ (Classical.dec _), @decide_eq_true _ (Classical.dec _)⟩
+  · have h0 : (runW (dfaOTM D).toMachine some w t).q.2.2 = 0 := by
+      rcases le_or_gt t w.length with h | h
+      · rw [runW_dfaOTM D w h]
+      · rw [eq_of_halt (isRun_runW (M := (dfaOTM D).toMachine) some w) (hhalt w)
+          (by omega : w.length + 1 ≤ t),
+          runW_dfaOTM_succ]
     rw [h0]
     simp
 
+end DFA
+
 /-! ### Catalog entry [43], space form -/
 
-/-- A unary language is decided by an offline Turing machine in space `o(log log n)` iff it is
-eventually periodic (Stearns, Hartmanis and Lewis; the converse uses no work space). -/
-theorem eventuallyPeriodic_iff_exists_small_space_decider (f : ℕ → Bool) :
-    EventuallyPeriodic f ↔ ∃ (M : OTM) (s : ℕ → ℕ),
+/-- **Regular ⟺ decided in space `o(log log n)`** by an offline machine (Stearns, Hartmanis and
+Lewis; the converse uses no work space). -/
+theorem isRegular_iff_exists_small_space_decider {α : Type} (L : Language α) :
+    L.IsRegular ↔ ∃ (M : OTM α) (s : ℕ → ℕ),
       (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n)) ∧
-      M.DecidesInSpace f s := by
+      M.DecidesInSpace L s := by
   constructor
-  · rintro ⟨N, P, hP, hf⟩
-    refine ⟨periodicOTM f N P hP, fun _ => 0, ?_, decidesInSpace_periodicOTM hP hf⟩
-    simp
+  · rintro ⟨σ, _, D, rfl⟩
+    exact ⟨dfaOTM D, fun _ => 0, by simp, decidesInSpace_dfaOTM D⟩
   · rintro ⟨M, s, hs, hM⟩
-    exact hM.eventuallyPeriodic hs
+    exact hM.isRegular hs
+
+/-- For unary input: a sequence is eventually periodic iff an offline machine decides
+`{1ⁿ : f(n) = 1}` in space `o(log log n)`. -/
+theorem eventuallyPeriodic_iff_exists_small_space_decider (f : ℕ → Bool) :
+    EventuallyPeriodic f ↔ ∃ (M : OTM Unit) (s : ℕ → ℕ),
+      (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n)) ∧
+      M.DecidesInSpace (LogicAutomata.unaryLang f) s := by
+  rw [LogicAutomata.eventuallyPeriodic_iff_unary_isRegular,
+    isRegular_iff_exists_small_space_decider]
 
 /-- **[43], space form.** Problem 1 holds iff no deterministic Turing machine with a read-only input
 tape decides `L₁ = {1ⁿ : c(n) = 1}` in space `o(log log n)`. -/
 theorem problem1_iff_no_small_space_decider : Rule30Prize.Problem1 ↔
-    ¬ ∃ (M : OTM) (s : ℕ → ℕ),
+    ¬ ∃ (M : OTM Unit) (s : ℕ → ℕ),
       (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n)) ∧
-      M.DecidesInSpace c s := by
+      M.DecidesInSpace (LogicAutomata.unaryLang c) s := by
   rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_exists_small_space_decider]
+
+/-- **[43], space form for digit input.** Problem 1 holds iff no offline machines decide `c(n)`
+from the base-`2` and from the base-`3` digits of `n` (least significant first) in space
+`o(log log ℓ)`, where `ℓ` is the number of digits. -/
+theorem problem1_iff_no_small_space_digit_deciders : Rule30Prize.Problem1 ↔
+    ¬ ((∃ (M : OTM (Fin 2)) (s : ℕ → ℕ),
+        (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n)) ∧
+          M.DecidesInSpace (digitLang 2 c) s) ∧
+      (∃ (M : OTM (Fin 3)) (s : ℕ → ℕ),
+        (fun n => (s n : ℝ)) =o[Filter.atTop] (fun n => Real.log (Real.log n)) ∧
+          M.DecidesInSpace (digitLang 3 c) s)) := by
+  rw [Cobham.problem1_iff_not_two_three_automatic, ← isRegular_digitLang_iff le_rfl,
+    ← isRegular_digitLang_iff (by norm_num), isRegular_iff_exists_small_space_decider,
+    isRegular_iff_exists_small_space_decider]
 
 end Rule30Equivalents.OfflineGap

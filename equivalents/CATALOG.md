@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 182 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 183 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃) | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (α, β = 2, 3) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three` |
-| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider` |
+| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
 **Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
 batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
@@ -2054,7 +2054,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   quotients are the digit languages of the k-kernel). With Cobham's theorem:
   Problem 1 ⟺ c(n) is not decided both from the base-2 and from the base-3 digits of n by
   one-tape machines in time o(ℓ log ℓ), ℓ the number of digits
-  (`problem1_iff_no_fast_digit_deciders`). Problem 3 asks for time n, exponentially more.
+  (`problem1_iff_no_fast_digit_deciders`). Problem 3 asks for time n, exponentially more. The
+  theorem of Stearns, Hartmanis and Lewis also holds for every input alphabet
+  ([OfflineGap](Rule30Equivalents/OfflineGap.lean), `DecidesInSpace.isRegular`,
+  `isRegular_iff_exists_small_space_decider`), so Problem 1 ⟺ c(n) is not decided both from the
+  base-2 and from the base-3 digits of n by offline machines in space o(log log ℓ)
+  (`problem1_iff_no_small_space_digit_deciders`).
 - *Lean.* The time form is proved in [OneTapeGap](Rule30Equivalents/OneTapeGap.lean):
   `problem1_iff_no_fast_one_tape_decider`, from `eventuallyPeriodic_iff_exists_fast_decider`.
   The machine model is the textbook one: finitely many states, a finite tape alphabet, a two-way
@@ -2079,12 +2084,14 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
     so T(n) ≥ (n/4)·log_{q+1}(n/4), which time o(n log n) rules out for large K.
   - The converse: `periodicTM` decides an eventually periodic f in n + 1 steps.
 
-  The space form is proved in [OfflineGap](Rule30Equivalents/OfflineGap.lean):
-  `problem1_iff_no_small_space_decider`, from `eventuallyPeriodic_iff_exists_small_space_decider`.
-  An `OTM` has finitely many states and work symbols, a two-way read-only input tape with blanks on
-  both sides of 1ⁿ, and a work tape; `DecidesInSpace M f s` says that it halts with the answer
-  f(n) and keeps its work head within s(n) cells of the start. Seen on its input tape it is a
-  `Machine` whose states are the work configurations, so `splice` applies.
+  The space form is proved in [OfflineGap](Rule30Equivalents/OfflineGap.lean), for every input
+  alphabet α: `isRegular_iff_exists_small_space_decider`, and for unary input
+  `problem1_iff_no_small_space_decider` (with `LogicAutomata.unaryLang c`, through
+  `eventuallyPeriodic_iff_unary_isRegular`). An `OTM α` has finitely many states and work symbols,
+  a two-way read-only input tape holding a word over α with blanks on both sides, and a work tape;
+  `DecidesInSpace M L s` says that on every input w it halts, accepting iff w ∈ L, and keeps its
+  work head within s(|w|) cells of the start. Seen on its input tape it is a `Machine` whose
+  states are the work configurations, so `splice` applies to runs on words.
   - `rs_nodup`: in a halting run that never writes, the configurations after two rightward
     crossings of one boundary differ, or the run would loop. So a crossing sequence through N work
     configurations has length at most 2N + 1.
@@ -2093,8 +2100,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
     sequences, since `splice` passes through the configuration that goes beyond K. This gives
     n ≤ 2(N + 1)^(2N + 1) with N ≤ C^(2s(n) + 1), so log log n ≤ 4(s(n) + 1) log C, which space
     o(log log n) rules out for large K.
-  - Bounded space leaves finitely many crossing sequences, and `eventuallyPeriodic_of_finite`
-    applies. The converse, `periodicOTM`, uses no work space.
+  - Bounded space leaves finitely many crossing sequences, and
+    `OneTapeRegular.DecidesLang.isRegular_of_finite` applies (Myhill–Nerode on the types of
+    prefixes). The converse, `dfaOTM`, runs a finite automaton and uses no work space.
 
   ```lean
   theorem problem1_iff_no_fast_one_tape_decider : Rule30Prize.Problem1 ↔

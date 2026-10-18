@@ -16,9 +16,10 @@ case. A one-tape machine reads its input word `w ∈ α*`, written on the cells 
 * `DecidesLang.time_lower_bound`, `DecidesLang.bounded`: in a shortest input with a crossing
   sequence longer than `K`, the crossing sequences on each side of it are pairwise distinct, so the
   time is at least `(n/4) log_{q+1}(n/4)`. Hence time `o(n log n)` bounds the crossing sequences.
-* `DecidesLang.isRegular_of_bounded`: with bounded crossing sequences, a prefix `u` has a finite
-  type, the set of crossing sequences it shows at its right end together with the outcome for the
-  even ones; equal types give equal left quotients (splice), so `L` is regular (Myhill–Nerode).
+* `DecidesLang.isRegular_of_finite`, `DecidesLang.isRegular_of_bounded`: with finitely many (for
+  example bounded) crossing sequences, a prefix `u` has a finite type, the set of crossing
+  sequences it shows at its right end together with the outcome for the even ones; equal types
+  give equal left quotients (splice), so `L` is regular (Myhill–Nerode).
 * `isRegular_iff_exists_fast_decider`: `L` is regular iff some one-tape machine decides it in time
   `o(n log n)`; a finite automaton is a machine that runs in time `n + 1`.
 
@@ -51,7 +52,7 @@ theorem isRun_runW (enc : α → M.Γ) (w : List α) : IsRun (runW M enc w) := f
 theorem runW_zero (enc : α → M.Γ) (w : List α) : runW M enc w 0 = initW M enc w := rfl
 
 /-- Splicing runs on words: the run on `u ++ v'` follows the run on `u ++ v` left of `|u|`, and the
-run on `u' ++ v'` right of `|u'|`. -/
+run on `u' ++ v'` right of `|u'|`; it passes through every state those runs have there. -/
 theorem splice_word (enc : α → M.Γ) {u v u' v' : List α} (hu : 1 ≤ u.length)
     (hu' : 1 ≤ u'.length) {TX TY : ℕ} (hXT : M.halt (runW M enc (u ++ v) TX).q = true)
     (hYT : M.halt (runW M enc (u' ++ v') TY).q = true)
@@ -61,7 +62,11 @@ theorem splice_word (enc : α → M.Γ) {u v u' v' : List α} (hu : 1 ≤ u.leng
       (∀ b : ℤ, u.length ≤ b → cs (runW M enc (u ++ v')) b T =
         cs (runW M enc (u' ++ v')) (b + ((u'.length : ℤ) - u.length)) TY) ∧
       (runW M enc (u ++ v') T).q = (if Even (cs (runW M enc (u ++ v)) u.length TX).length then
-        (runW M enc (u ++ v) TX).q else (runW M enc (u' ++ v') TY).q) := by
+        (runW M enc (u ++ v) TX).q else (runW M enc (u' ++ v') TY).q) ∧
+      (∀ t, t ≤ TX → (runW M enc (u ++ v) t).h < u.length →
+        ∃ σ, (runW M enc (u ++ v') σ).q = (runW M enc (u ++ v) t).q) ∧
+      (∀ t, t ≤ TY → (u'.length : ℤ) ≤ (runW M enc (u' ++ v') t).h →
+        ∃ σ, (runW M enc (u ++ v') σ).q = (runW M enc (u' ++ v') t).q) := by
   have htL : ∀ i : ℤ, i < u.length → (runW M enc (u ++ v') 0).tape i =
       (runW M enc (u ++ v) 0).tape i := by
     intro i hi
@@ -82,10 +87,9 @@ theorem splice_word (enc : α → M.Γ) {u v u' v' : List α} (hu : 1 ≤ u.leng
       congr 1
       omega
     · rw [dif_neg (fun h => hlt h.2), dif_neg (fun h => by omega)]
-  obtain ⟨T, h1, h2, h3, h4, -, -⟩ := splice (isRun_runW enc (u ++ v)) (isRun_runW enc (u' ++ v'))
+  exact splice (isRun_runW enc (u ++ v)) (isRun_runW enc (u' ++ v'))
     (isRun_runW enc (u ++ v')) hXT hYT hC rfl rfl (by simp only [runW_zero, initW]; omega)
     (by simp only [runW_zero, initW]; omega) htL htR
-  exact ⟨T, h1, h2, h3, h4⟩
 
 /-! ### Deciders on words -/
 
@@ -110,13 +114,27 @@ theorem DecidesLang.splice (hM : DecidesLang M enc L T) {u v u' v' : List α} (h
       cs (runW M enc (u' ++ v')) (b + ((u'.length : ℤ) - u.length)) (T (u' ++ v').length)) ∧
     (u ++ v' ∈ L ↔ if Even (cs (runW M enc (u ++ v)) u.length (T (u ++ v).length)).length
       then u ++ v ∈ L else u' ++ v' ∈ L) := by
-  obtain ⟨T', hT', hL, hR, hq⟩ := splice_word enc hu hu' (hM (u ++ v)).1 (hM (u' ++ v')).1 hC
+  obtain ⟨T', hT', hL, hR, hq, -, -⟩ := splice_word enc hu hu' (hM (u ++ v)).1 (hM (u' ++ v')).1 hC
   have heq := cs_eq_of_halt (isRun_runW enc (u ++ v')) hT' (hM (u ++ v')).1
   refine ⟨fun b hb => (heq b).symm.trans (hL b hb), fun b hb => (heq b).symm.trans (hR b hb), ?_⟩
   rw [← (hM (u ++ v')).2, ← eq_of_halt' (isRun_runW enc (u ++ v')) hT' (hM (u ++ v')).1, hq]
   split_ifs
   · exact (hM (u ++ v)).2
   · exact (hM (u' ++ v')).2
+
+/-- Splicing for a decider on words: the spliced run passes through every state of the left run on
+the left of `|u|`, and of the right run from `|u'|` on. -/
+theorem DecidesLang.splice_visit (hM : DecidesLang M enc L T) {u v u' v' : List α}
+    (hu : 1 ≤ u.length) (hu' : 1 ≤ u'.length)
+    (hC : cs (runW M enc (u ++ v)) u.length (T (u ++ v).length) =
+      cs (runW M enc (u' ++ v')) u'.length (T (u' ++ v').length)) :
+    (∀ t, t ≤ T (u ++ v).length → (runW M enc (u ++ v) t).h < u.length →
+      ∃ σ, (runW M enc (u ++ v') σ).q = (runW M enc (u ++ v) t).q) ∧
+    (∀ t, t ≤ T (u' ++ v').length → (u'.length : ℤ) ≤ (runW M enc (u' ++ v') t).h →
+      ∃ σ, (runW M enc (u ++ v') σ).q = (runW M enc (u' ++ v') t).q) := by
+  obtain ⟨-, -, -, -, -, hvL, hvR⟩ :=
+    splice_word enc hu hu' (hM (u ++ v)).1 (hM (u' ++ v')).1 hC
+  exact ⟨hvL, hvR⟩
 
 /-- **Hennie's bound for words.** In a shortest input with a crossing sequence longer than `K`,
 the crossing sequences on each side of it are pairwise distinct, so the time is at least
@@ -293,17 +311,17 @@ theorem DecidesLang.leftQuotient_eq_of_ctype_eq (hM : DecidesLang M enc L T) {u 
   · rw [if_neg he] at hsp
     exact hsp.2 hv
 
-/-- **Bounded crossing sequences give a regular language** (Myhill–Nerode): the types of the
+/-- **Finitely many crossing sequences give a regular language** (Myhill–Nerode): the types of the
 nonempty prefixes take finitely many values. -/
-theorem DecidesLang.isRegular_of_bounded [Finite M.Q] (hM : DecidesLang M enc L T) {K : ℕ}
-    (hK : ∀ (w : List α) (b : ℤ), (cs (runW M enc w) b (T w.length)).length ≤ K) :
+theorem DecidesLang.isRegular_of_finite (hM : DecidesLang M enc L T)
+    (hfin : {C | ∃ (w : List α) (b : ℤ), cs (runW M enc w) b (T w.length) = C}.Finite) :
     L.IsRegular := by
   classical
   apply Language.IsRegular.of_finite_range_leftQuotient
-  set S := {C : List M.Q | C.length ≤ K}
-  have hS : S.Finite := List.finite_length_le M.Q K
+  set S := {C | ∃ (w : List α) (b : ℤ), cs (runW M enc w) b (T w.length) = C}
   set Types := {τ : Set (List M.Q) × Set (List M.Q) | τ.1 ⊆ S ∧ τ.2 ⊆ S}
-  have hTypes : Types.Finite := (hS.finite_subsets.prod hS.finite_subsets).subset fun τ hτ => hτ
+  have hTypes : Types.Finite :=
+    (hfin.finite_subsets.prod hfin.finite_subsets).subset fun τ hτ => hτ
   -- a language for each type
   let G : Set (List M.Q) × Set (List M.Q) → Language α := fun τ =>
     if h : ∃ u : List α, 1 ≤ u.length ∧ ctype M enc L T u = τ then L.leftQuotient h.choose
@@ -316,12 +334,18 @@ theorem DecidesLang.isRegular_of_bounded [Finite M.Q] (hM : DecidesLang M enc L 
   · right
     refine ⟨ctype M enc L T u, ⟨fun C hC => ?_, fun C hC => ?_⟩, ?_⟩
     · obtain ⟨v, hv⟩ := hC
-      exact hv ▸ hK _ _
+      exact ⟨u ++ v, u.length, hv⟩
     · obtain ⟨v, hv, -⟩ := hC
-      exact hv ▸ hK _ _
+      exact ⟨u ++ v, u.length, hv⟩
     have h : ∃ u' : List α, 1 ≤ u'.length ∧ ctype M enc L T u' = ctype M enc L T u := ⟨u, h0, rfl⟩
     simp only [G, dif_pos h]
     exact hM.leftQuotient_eq_of_ctype_eq h.choose_spec.1 h0 h.choose_spec.2
+
+/-- **Bounded crossing sequences give a regular language.** -/
+theorem DecidesLang.isRegular_of_bounded [Finite M.Q] (hM : DecidesLang M enc L T) {K : ℕ}
+    (hK : ∀ (w : List α) (b : ℤ), (cs (runW M enc w) b (T w.length)).length ≤ K) :
+    L.IsRegular :=
+  hM.isRegular_of_finite ((List.finite_length_le M.Q K).subset fun _ ⟨w, b, hC⟩ => hC ▸ hK w b)
 
 /-- **The Hennie–Trakhtenbrot theorem.** A language decided by a one-tape machine in time
 `o(n log n)` is regular. -/

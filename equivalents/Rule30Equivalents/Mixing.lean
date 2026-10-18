@@ -14,10 +14,13 @@ import Mathlib.Dynamics.Ergodic.Function
 
 Rule 30 as a measure-preserving dynamical system on
 `{0,1}^ℤ` with the fair-coin measure `coins ℤ`. Everything comes from left-permutivity: flipping
-the coin at `a - t` flips the cell `(t, a)` (`Genericity.evol_flip_at`), preserves the measure, and
-changes no cell `(t, i)` with `i > a`. Adding the cells of a finite window `I` from the left, each
-one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
+the coin at the foot `a - t` of the cell `(t, a)` flips that cell (`Genericity.evol_flip_at`),
+preserves the measure, and changes no cell whose foot lies to its right.
 
+* `measure_inter_cells`, `measure_cells`: **cells with distinct feet are independent fair coins**.
+  The foot of the cell `(t, i)` is `i - t`, the leftmost coin of its light cone. Finitely many cells
+  with pairwise distinct feet take each pattern with probability `2^-|S|`: adding them from the
+  leftmost foot, each one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
 * `measure_inter_window`: if an event `A` does not depend on the coins left of `m`, and
   `i - t < m` for every `i ∈ I`, then the window `I` of the `t`-th image is uniform and independent
   of `A`.
@@ -65,12 +68,17 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   in time by at most three of the four letters, at most `4 · 3^L` words of length `L + 1` occur
   (`card_pairWords_le`), and they cover `n` steps (`coverMincard_le`). The light-cone count gives
   only `2 log 2`.
-* `measurePreserving_path`: along any path that never moves right, `p (t + 1) ≤ p t`, the cells
-  `F^t(x)_{p t}` are independent fair coins (`measure_prefix_path`); so for almost every
-  configuration they form a normal sequence (`ae_isNormal_path`). Columns are the constant paths
-  (`ae_isNormal_columns`), and the left edge of the light cone is `p t = -t`. Along a right
-  diagonal the cells are not fair coins: `(t, a)` and `(t + 1, a + 1)` agree with probability
-  `1/4` (`measure_diag_eq`).
+* `measurePreserving_cells`: a sequence of cells with pairwise distinct feet is a fair-coin
+  sequence. Along any path that never moves right, `p (t + 1) ≤ p t`, the feet decrease
+  (`measurePreserving_path`, `ae_isNormal_path`); columns are the constant paths
+  (`ae_isNormal_columns`), and the left edge of the light cone is `p t = -t`.
+* `measurePreserving_line`, `ae_isNormal_lines`: **every line of velocity other than `1` is a
+  fair-coin sequence**: the cells `(qk + t₀, pk + x₀)` have distinct feet `(p - q) k + x₀ - t₀`
+  when `p ≠ q`, whatever the sign and size of the velocity `p/q`. So for almost every configuration
+  the cells along every such line, through every cell, form a normal sequence, and no line inside
+  the light cone is eventually periodic (`ae_every_line`, the hypothesis of
+  `StrongerStatements.problem1_of_every_line`). Velocity `1` is the exception: along a right
+  diagonal, `(t, a)` and `(t + 1, a + 1)` agree with probability `1/4` (`measure_diag_eq`).
 * `ae_isNormal_rows`: for almost every configuration the right half of every row is normal (every
   iterate preserves the measure).
 -/
@@ -86,40 +94,82 @@ theorem measurableSet_window (t : ℕ) (I : Finset ℤ) (w : ℤ → Bool) :
   exact MeasurableSet.iInter fun i => MeasurableSet.iInter fun _ =>
     measurable_evol t i (measurableSet_singleton (w i))
 
-/-- **Independence beyond the light cone.** If `A` does not depend on the coins left of `m`, and
-every cell `i` of the window `I` has `i - t < m`, then the window `I` of the `t`-th image is
-uniform and independent of `A`. -/
-theorem measure_inter_window {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m : ℤ}
-    (hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (t : ℕ) (w : ℤ → Bool) :
-    ∀ I : Finset ℤ, (∀ i ∈ I, i - t < m) →
-      coins ℤ (A ∩ {x | ∀ i ∈ I, evol x t i = w i}) = coins ℤ A * 2⁻¹ ^ I.card := by
-  intro I
-  induction I using Finset.induction_on_min with
-  | empty =>
-    intro _
+/-- The foot `i - t` of the space-time cell `(t, i)`, the leftmost coin of its light cone: the cell
+flips with this coin (`Genericity.evol_flip_at`) and ignores every coin further left. -/
+def foot (c : ℕ × ℤ) : ℤ := c.2 - c.1
+
+theorem measurableSet_cells {ι : Type*} (cell : ι → ℕ × ℤ) (S : Finset ι) (w : ι → Bool) :
+    MeasurableSet {x : ℤ → Bool | ∀ k ∈ S, evol x (cell k).1 (cell k).2 = w k} := by
+  have : {x : ℤ → Bool | ∀ k ∈ S, evol x (cell k).1 (cell k).2 = w k} =
+      ⋂ k ∈ S, {x | evol x (cell k).1 (cell k).2 = w k} := by
+    ext
     simp
-  | insert a s ha ih =>
-    intro hI
-    have has : a ∉ s := fun h => lt_irrefl a (ha a h)
-    set E := A ∩ {x : ℤ → Bool | ∀ i ∈ s, evol x t i = w i} with hEdef
-    -- flipping the coin at `a - t` preserves `E`
-    have hinv : ∀ x, Function.update x (a - t) (!x (a - t)) ∈ E ↔ x ∈ E := by
+  rw [this]
+  exact Finset.measurableSet_biInter S fun k _ =>
+    measurable_evol _ _ (measurableSet_singleton (w k))
+
+/-- **Cells with distinct feet are independent fair coins, and independent of the coins far to
+the right.** If `A` does not depend on the coins left of `m`, and the cells `cell k`, `k ∈ S`, have
+pairwise distinct feet, all left of `m`, then they take each pattern with probability `2^-|S|`,
+independently of `A`. Add the cells from the leftmost foot: flipping the coin there flips the new
+cell and changes neither `A` nor the cells already added, whose light cones lie to its right. -/
+theorem measure_inter_cells {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m : ℤ}
+    (hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) {ι : Type*}
+    (cell : ι → ℕ × ℤ) (w : ι → Bool) (S : Finset ι)
+    (hinj : Set.InjOn (fun k => foot (cell k)) S) (hS : ∀ k ∈ S, foot (cell k) < m) :
+    coins ℤ (A ∩ {x | ∀ k ∈ S, evol x (cell k).1 (cell k).2 = w k}) =
+      coins ℤ A * 2⁻¹ ^ S.card := by
+  classical
+  induction S using Finset.induction_on_min_value fun k => foot (cell k) with
+  | empty => simp
+  | insert a s has hmin ih =>
+    -- the other cells have their feet right of the foot of `cell a`
+    have hlt : ∀ k ∈ s, foot (cell a) < foot (cell k) := fun k hk =>
+      (hmin k hk).lt_of_ne fun h => has (by
+        rwa [hinj (Finset.mem_insert_self a s) (Finset.mem_insert_of_mem hk) h])
+    set E := A ∩ {x : ℤ → Bool | ∀ k ∈ s, evol x (cell k).1 (cell k).2 = w k} with hEdef
+    -- flipping the coin at the foot of `cell a` preserves `E`
+    have hinv : ∀ x, Function.update x (foot (cell a)) (!x (foot (cell a))) ∈ E ↔ x ∈ E := by
       intro x
       simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq,
-        hAm x (a - t) (hI a (Finset.mem_insert_self a s))]
-      refine and_congr_right fun _ => forall₂_congr fun i hi => ?_
-      rw [AlgebraicDegree.evol_update_of_far (Or.inl (by have := ha i hi; omega))]
-    have h : 2 * coins ℤ (E ∩ {x | evol x t a = w a}) = coins ℤ E :=
-      two_mul_measure_flip (hA.inter (measurableSet_window t s w)) (measurable_evol t a) _ hinv
-        (fun x _ => evol_flip_at x t a) (w a)
-    have hset : A ∩ {x : ℤ → Bool | ∀ i ∈ insert a s, evol x t i = w i} =
-        E ∩ {x | evol x t a = w a} := by
+        hAm x _ (hS a (Finset.mem_insert_self a s))]
+      refine and_congr_right fun _ => forall₂_congr fun k hk => ?_
+      have := hlt k hk
+      rw [AlgebraicDegree.evol_update_of_far (Or.inl (by unfold foot at this ⊢; omega))]
+    have h : 2 * coins ℤ (E ∩ {x | evol x (cell a).1 (cell a).2 = w a}) = coins ℤ E :=
+      two_mul_measure_flip (hA.inter (measurableSet_cells cell s w)) (measurable_evol _ _) _ hinv
+        (fun x _ => evol_flip_at x (cell a).1 (cell a).2) (w a)
+    have hset : A ∩ {x : ℤ → Bool | ∀ k ∈ insert a s, evol x (cell k).1 (cell k).2 = w k} =
+        E ∩ {x | evol x (cell a).1 (cell a).2 = w a} := by
       ext x
       simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq, Finset.mem_insert,
         forall_eq_or_imp]
       tauto
-    rw [hset, eq_mul_inv_of_two_mul h, ih fun i hi => hI i (Finset.mem_insert_of_mem hi),
+    rw [hset, eq_mul_inv_of_two_mul h,
+      ih (hinj.mono (Finset.coe_subset.2 (Finset.subset_insert a s)))
+        fun k hk => hS k (Finset.mem_insert_of_mem hk),
       Finset.card_insert_of_notMem has, pow_succ, mul_assoc]
+
+/-- **Cells with distinct feet are independent fair coins**: finitely many space-time cells with
+pairwise distinct feet take each pattern with probability `2^-|S|`. -/
+theorem measure_cells {ι : Type*} (cell : ι → ℕ × ℤ) (w : ι → Bool) (S : Finset ι)
+    (hinj : Set.InjOn (fun k => foot (cell k)) S) :
+    coins ℤ {x | ∀ k ∈ S, evol x (cell k).1 (cell k).2 = w k} = 2⁻¹ ^ S.card := by
+  obtain ⟨M, hM⟩ := (S.image fun k => foot (cell k)).bddAbove
+  have h := measure_inter_cells MeasurableSet.univ (m := M + 1) (fun x p _ => by simp) cell w S
+    hinj fun k hk => by
+      have := hM (Finset.mem_coe.2 (Finset.mem_image_of_mem _ hk))
+      omega
+  rwa [Set.univ_inter, measure_univ, one_mul] at h
+
+/-- **Independence beyond the light cone.** If `A` does not depend on the coins left of `m`, and
+every cell `i` of the window `I` has `i - t < m`, then the window `I` of the `t`-th image is
+uniform and independent of `A`: the cells `(t, i)` have distinct feet. -/
+theorem measure_inter_window {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m : ℤ}
+    (hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (t : ℕ) (w : ℤ → Bool) :
+    ∀ I : Finset ℤ, (∀ i ∈ I, i - t < m) →
+      coins ℤ (A ∩ {x | ∀ i ∈ I, evol x t i = w i}) = coins ℤ A * 2⁻¹ ^ I.card := fun I hI =>
+  measure_inter_cells hA hAm (fun i => (t, i)) w I (fun i _ j _ h => by simpa [foot] using h) hI
 
 /-- **Every window of every iterate is uniform**: the cells of a finite window `I` after `t` steps
 take each pattern with probability `2^-|I|`. -/
@@ -209,72 +259,84 @@ theorem exists_mem_evol_mem {U V : Set (ℤ → Bool)} (hU : IsOpen U) (hV : IsO
   exact ⟨x, hn₁ fun p hp1 hp2 => hxJ p (Finset.mem_Icc.2 ⟨by omega, by omega⟩),
     hn₂ fun p hp1 hp2 => hxI p (Finset.mem_Icc.2 ⟨by omega, by omega⟩)⟩
 
-/-! ### Cells along paths -/
+/-! ### Cells along paths and lines -/
 
-/-- **Along a path that never moves right, every prefix has probability `2^-(n+1)`**: for
-`p (t + 1) ≤ p t`, the cells `F^t(x)_{p t}` up to time `n` do not see the coins left of
-`p n - n`, and the cell at time `n + 1` sits beyond their light cone (`measure_inter_window`). -/
-theorem measure_prefix_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) (w : ℕ → Bool) :
-    ∀ n : ℕ, coins ℤ {x | ∀ t ≤ n, evol x t (p t) = w t} = 2⁻¹ ^ (n + 1)
-  | 0 => by
-    have h := measure_window 0 {p 0} fun _ => w 0
-    rw [Finset.card_singleton] at h
-    rw [← h]
-    congr 1
-    ext x
-    simp only [Set.mem_setOf_eq, Finset.mem_singleton, forall_eq]
-    constructor
-    · intro hx
-      exact hx 0 le_rfl
-    · intro hx t ht
-      obtain rfl : t = 0 := by omega
-      exact hx
-  | n + 1 => by
-    have hanti : Antitone p := antitone_nat_of_succ_le hp
-    set A := {x : ℤ → Bool | ∀ t ≤ n, evol x t (p t) = w t} with hAdef
-    have hA : MeasurableSet A := by
-      simp only [hAdef, Set.setOf_forall]
-      exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
-        measurable_evol t (p t) (measurableSet_singleton _)
-    have hAm : ∀ x q, q < p n - n → (Function.update x q (!x q) ∈ A ↔ x ∈ A) := by
-      intro x q hq
-      simp only [hAdef, Set.mem_setOf_eq]
-      refine forall₂_congr fun t ht => ?_
-      have := hanti ht
-      rw [AlgebraicDegree.evol_update_of_far (Or.inl (by omega))]
-    have h := measure_inter_window hA hAm (n + 1) (fun _ => w (n + 1)) {p (n + 1)}
-      fun i hi => by
-        rw [Finset.mem_singleton] at hi
-        have := hp n
-        push_cast
-        omega
-    have hset : {x : ℤ → Bool | ∀ t ≤ n + 1, evol x t (p t) = w t} =
-        A ∩ {x | ∀ i ∈ ({p (n + 1)} : Finset ℤ), evol x (n + 1) i = w (n + 1)} := by
-      ext x
-      simp only [hAdef, Set.mem_inter_iff, Set.mem_setOf_eq, Finset.mem_singleton, forall_eq]
-      constructor
-      · intro hx
-        exact ⟨fun t ht => hx t (by omega), hx (n + 1) le_rfl⟩
-      · rintro ⟨h1, h2⟩ t ht
-        rcases Nat.lt_or_ge t (n + 1) with h' | h'
-        · exact h1 t (by omega)
-        · obtain rfl : t = n + 1 := by omega
-          exact h2
-    rw [hset, h, measure_prefix_path hp w n, Finset.card_singleton, pow_one, ← pow_succ]
+/-- **Every prefix of a sequence of cells with distinct feet has probability `2^-(n+1)`.** -/
+theorem measure_prefix_cells {cell : ℕ → ℕ × ℤ}
+    (hcell : Function.Injective fun k => foot (cell k)) (w : ℕ → Bool) (n : ℕ) :
+    coins ℤ {x | ∀ k ≤ n, evol x (cell k).1 (cell k).2 = w k} = 2⁻¹ ^ (n + 1) := by
+  rw [← Finset.card_range (n + 1), ← measure_cells cell w _ hcell.injOn]
+  congr 1
+  ext x
+  simp only [Set.mem_setOf_eq, Finset.mem_range, Nat.lt_succ_iff]
+
+/-- **A sequence of cells with distinct feet is a fair-coin sequence**: if the cells `cell k` have
+pairwise distinct feet, `x ↦ (F^{t_k}(x)_{i_k})_k` carries `coins ℤ` to `coins ℕ`. -/
+theorem measurePreserving_cells {cell : ℕ → ℕ × ℤ}
+    (hcell : Function.Injective fun k => foot (cell k)) :
+    MeasurePreserving (fun (x : ℤ → Bool) k => evol x (cell k).1 (cell k).2) (coins ℤ)
+      (coins ℕ) :=
+  measurePreserving_of_measure_prefix (measurable_pi_lambda _ fun _ => measurable_evol _ _)
+    (measure_prefix_cells hcell)
 
 /-- **The cells along a path that never moves right are independent fair coins**: for
-`p (t + 1) ≤ p t`, the map `x ↦ (F^t(x)_{p t})ₜ` carries `coins ℤ` to `coins ℕ`. Columns are the
-constant paths; the left edge of the light cone is `p t = -t`. -/
+`p (t + 1) ≤ p t` the feet `p t - t` decrease. Columns are the constant paths; the left edge of the
+light cone is `p t = -t`. -/
 theorem measurePreserving_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) :
     MeasurePreserving (fun (x : ℤ → Bool) (t : ℕ) => evol x t (p t)) (coins ℤ) (coins ℕ) :=
-  measurePreserving_of_measure_prefix (measurable_pi_lambda _ fun t => measurable_evol t (p t))
-    (measure_prefix_path hp)
+  measurePreserving_cells (cell := fun t => (t, p t)) (strictAnti_nat_of_succ_lt fun t => by
+    have := hp t
+    simp only [foot]
+    push_cast
+    omega).injective
 
 /-- For almost every configuration, the cells along a given path that never moves right form a
 normal sequence. -/
 theorem ae_isNormal_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) :
     ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal fun t => evol x t (p t) :=
   (measurePreserving_path hp).quasiMeasurePreserving.ae ae_isNormal
+
+/-- The cells `(qk + t₀, pk + x₀)` of the line of slope `p/q` through `(t₀, x₀)` have pairwise
+distinct feet `(p - q) k + x₀ - t₀`, unless `p = q`. -/
+theorem injective_foot_line {p : ℤ} {q : ℕ} (hpq : p ≠ q) (t₀ : ℕ) (x₀ : ℤ) :
+    Function.Injective fun k : ℕ => foot (q * k + t₀, p * k + x₀) := by
+  intro k l h
+  simp only [foot] at h
+  push_cast at h
+  have h' : (p - q) * k = (p - q) * l := by linear_combination h
+  exact_mod_cast mul_left_cancel₀ (sub_ne_zero.2 hpq) h'
+
+/-- **Every line of velocity other than `1` is a fair-coin sequence**: for `p ≠ q`, the cells
+`(qk + t₀, pk + x₀)` of a random configuration are independent fair coins, whatever the sign and
+size of the velocity `p/q`. Lines of velocity `1` are not (`measure_diag_eq`). -/
+theorem measurePreserving_line {p : ℤ} {q : ℕ} (hpq : p ≠ q) (t₀ : ℕ) (x₀ : ℤ) :
+    MeasurePreserving (fun (x : ℤ → Bool) (k : ℕ) => evol x (q * k + t₀) (p * k + x₀))
+      (coins ℤ) (coins ℕ) :=
+  measurePreserving_cells (cell := fun k => (q * k + t₀, p * k + x₀))
+    (injective_foot_line hpq t₀ x₀)
+
+/-- **Every line is normal, almost surely**: for almost every configuration, the cells along
+every line of rational velocity other than `1`, through every cell, form a normal sequence. -/
+theorem ae_isNormal_lines :
+    ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
+      StrongerStatements.IsNormal fun k => evol x (q * k + t₀) (p * k + x₀) := by
+  refine ae_all_iff.2 fun p => ae_all_iff.2 fun q => ae_all_iff.2 fun t₀ =>
+    ae_all_iff.2 fun x₀ => ?_
+  by_cases hpq : p = q
+  · exact Eventually.of_forall fun _ h => absurd hpq h
+  · exact ((measurePreserving_line hpq t₀ x₀).quasiMeasurePreserving.ae ae_isNormal).mono
+      fun _ h _ => h
+
+/-- **No line inside the light cone is eventually periodic, almost surely**: for almost every
+configuration, the hypothesis of `StrongerStatements.problem1_of_every_line` holds with the seed
+replaced by the configuration. -/
+theorem ae_every_line :
+    ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
+      ¬ EventuallyPeriodic fun t => evol x (q * t + t₀) (p * t + x₀) :=
+  ae_isNormal_lines.mono fun _ hx p q t₀ x₀ _ hp =>
+    StrongerStatements.not_eventuallyPeriodic_of_disjunctive
+      (StrongerStatements.disjunctive_of_isNormal
+        (hx p q t₀ x₀ ((le_abs_self p).trans_lt hp).ne))
 
 /-- **Right diagonals are not fair coins**: the cells `(t, a)` and `(t + 1, a + 1)` agree with
 probability `1/4`, not `1/2`, because `F^(t+1)(x)_{a+1} = F^t(x)_a ⊕ (F^t(x)_{a+1} ∨ F^t(x)_{a+2})`

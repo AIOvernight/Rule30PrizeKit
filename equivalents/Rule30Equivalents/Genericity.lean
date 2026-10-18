@@ -1,0 +1,245 @@
+import Rule30Equivalents.AlgebraicDegree
+import Rule30Equivalents.Symmetry
+import Mathlib.Topology.Baire.BaireMeasurable
+
+/-!
+# Generic configurations
+
+Catalog Section 7, item 11. Let `trace x = (t ↦ cell (t, 0))` be the center column of rule 30 from
+a configuration `x : ℤ → Bool`.
+
+* `continuous_trace`, `isOpenMap_trace`, `surjective_trace`: the trace map is continuous, open and
+  onto. By left-permutivity, flipping the cell `-m` flips the center at time `m` and changes nothing
+  before (`evol_flip`), so every continuation of a trace prefix is realized by changing only cells
+  left of the prefix's light cone (`exists_extend`).
+* `residual_disjunctive`, `isMeagre_halfDensity`: in `{0,1}^ℕ` the disjunctive sequences (every
+  word occurs) form a comeager set, and the sequences with density `1/2` a meager one.
+* So the configurations with a disjunctive trace form a comeager set
+  (`residual_disjunctive_trace`), and those whose trace has density `1/2`, the property of Prize
+  Problem 2, a meager set (`isMeagre_halfDensity_trace`).
+
+The single black cell is one point of the meager, countable set of finite configurations, so
+neither statement says anything about the center column `c` itself.
+-/
+
+namespace Rule30Equivalents.Genericity
+
+open Ruliology.CellularAutomata Rule30Realization Topology Filter Set
+
+/-- The center column of rule 30 from the configuration `x`. -/
+def trace (x : ℤ → Bool) : ℕ → Bool := fun t => evol x t 0
+
+theorem continuous_evol : ∀ (t : ℕ) (p : ℤ), Continuous fun x : ℤ → Bool => evol x t p
+  | 0, p => continuous_apply p
+  | t + 1, p => by
+    have h := (continuous_evol t (p - 1)).prodMk ((continuous_evol t p).prodMk
+      (continuous_evol t (p + 1)))
+    exact (continuous_of_discreteTopology
+      (f := fun q : Bool × Bool × Bool => xor q.1 (q.2.1 || q.2.2))).comp h
+
+theorem continuous_trace : Continuous trace := continuous_pi fun t => continuous_evol t 0
+
+/-- **Left-permutivity**: flipping the cell `-m` flips the center at time `m`. -/
+theorem evol_flip (x : ℤ → Bool) (m : ℕ) :
+    evol (Function.update x (-(m : ℤ)) (!x (-(m : ℤ)))) m 0 = !evol x m 0 := by
+  have h := AlgebraicDegree.evol_update_left x m 0
+  rw [zero_sub] at h
+  cases hx : x (-(m : ℤ))
+  · rw [Bool.not_false, h, Function.update_eq_self_iff.2 hx.symm]
+  · have e : Function.update x (-(m : ℤ)) true = x := Function.update_eq_self_iff.2 hx.symm
+    rw [e] at h
+    rw [Bool.not_true, h, Bool.not_not]
+
+/-- **Every continuation of a trace prefix is realized**, by changing only the cells left of
+`-n`. -/
+theorem exists_extend (x : ℤ → Bool) (n : ℕ) (w : ℕ → Bool) (hw : ∀ t ≤ n, w t = trace x t) :
+    ∃ y : ℤ → Bool, (∀ p, -(n : ℤ) ≤ p → y p = x p) ∧ trace y = w := by
+  classical
+  -- step `k` fixes the time `n + k + 1`, flipping the cell `-(n + k + 1)` if needed
+  let step : ℕ → (ℤ → Bool) → (ℤ → Bool) := fun k y =>
+    if evol y (n + k + 1) 0 = w (n + k + 1) then y
+    else Function.update y (-((n + k + 1 : ℕ) : ℤ)) (!y (-((n + k + 1 : ℕ) : ℤ)))
+  let cfg : ℕ → (ℤ → Bool) := fun k => Nat.rec x (fun k y => step k y) k
+  have cfg_succ : ∀ k, cfg (k + 1) = step k (cfg k) := fun _ => rfl
+  -- later steps only change cells further left
+  have hstable : ∀ k k', k ≤ k' → ∀ p, -((n + k : ℕ) : ℤ) ≤ p → cfg k' p = cfg k p := by
+    intro k k' hkk' p hp
+    induction k', hkk' using Nat.le_induction with
+    | base => rfl
+    | succ k' hk' ih =>
+      rw [cfg_succ]
+      simp only [step]
+      split_ifs
+      · exact ih
+      · rw [Function.update_of_ne (by push_cast at hp ⊢; omega)]
+        exact ih
+  -- the trace of `cfg k` is `w` up to time `n + k`
+  have htrace : ∀ k, ∀ t ≤ n + k, evol (cfg k) t 0 = w t := by
+    intro k
+    induction k with
+    | zero => intro t ht; exact (hw t (by omega)).symm
+    | succ k ih =>
+      intro t ht
+      rcases Nat.lt_or_ge t (n + k + 1) with h | h
+      · rw [AlgebraicDegree.evol_congr t 0 (y := cfg k) fun j hj1 hj2 =>
+          hstable k (k + 1) (Nat.le_succ k) j (by push_cast; omega), ih t (by omega)]
+      · obtain rfl : t = n + k + 1 := by omega
+        rw [cfg_succ]
+        simp only [step]
+        split_ifs with hc
+        · exact hc
+        · have := evol_flip (cfg k) (n + k + 1)
+          rw [this]
+          cases hcfg : evol (cfg k) (n + k + 1) 0 <;> cases hww : w (n + k + 1) <;> simp_all
+  -- the limit configuration
+  let y : ℤ → Bool := fun p => if -(n : ℤ) ≤ p then x p else cfg ((-p).toNat - n) p
+  have hy : ∀ k, ∀ p, -((n + k : ℕ) : ℤ) ≤ p → y p = cfg k p := by
+    intro k p hp
+    simp only [y]
+    split_ifs with h
+    · exact (hstable 0 k (Nat.zero_le k) p (by push_cast; omega)).symm
+    · have hk : (-p).toNat - n ≤ k := by omega
+      exact (hstable _ k hk p (by push_cast; omega)).symm
+  refine ⟨y, fun p hp => by simp only [y, if_pos hp], funext fun t => ?_⟩
+  show evol y t 0 = w t
+  rw [AlgebraicDegree.evol_congr t 0 (y := cfg t) fun j hj1 hj2 => hy t j (by push_cast; omega),
+    htrace t t (by omega)]
+
+theorem surjective_trace : Function.Surjective trace := fun w => by
+  obtain ⟨y, -, hy⟩ := exists_extend (fun p => if p = 0 then w 0 else false) 0 w fun t ht => by
+    obtain rfl : t = 0 := by omega
+    simp [trace, evol]
+  exact ⟨y, hy⟩
+
+/-- A neighbourhood of a configuration contains a cylinder over a window `[-n, n]`. -/
+theorem exists_window_subset {x : ℤ → Bool} {U : Set (ℤ → Bool)} (hU : U ∈ 𝓝 x) :
+    ∃ n : ℕ, {y | ∀ p, -(n : ℤ) ≤ p → p ≤ n → y p = x p} ⊆ U := by
+  rw [nhds_pi, Filter.mem_pi] at hU
+  obtain ⟨I, hI, t, ht, hIt⟩ := hU
+  obtain ⟨n, hn⟩ := (hI.image Int.natAbs).bddAbove
+  refine ⟨n, fun y hy => hIt fun i hi => ?_⟩
+  have hin : i.natAbs ≤ n := hn ⟨i, hi, rfl⟩
+  rw [hy i (by omega) (by omega)]
+  exact mem_of_mem_nhds (ht i)
+
+/-- A cylinder over a prefix is a neighbourhood of a sequence. -/
+theorem prefix_mem_nhds (v : ℕ → Bool) (n : ℕ) : {u : ℕ → Bool | ∀ t ≤ n, u t = v t} ∈ 𝓝 v := by
+  have h : ∀ t, ∀ᶠ u in 𝓝 v, u t = v t := fun t =>
+    (continuous_apply t).continuousAt ((isOpen_discrete {v t}).mem_nhds rfl)
+  have hfin : (Set.Iic n).Finite := Set.finite_Iic n
+  exact (hfin.eventually_all.2 fun t _ => h t).mono fun u hu t ht => hu t ht
+
+/-- **The trace map is open**: the image of a window cylinder is the cylinder of its trace
+prefix. -/
+theorem isOpenMap_trace : IsOpenMap trace := by
+  rw [isOpenMap_iff_nhds_le]
+  intro x V hV
+  obtain ⟨n, hn⟩ := exists_window_subset (Filter.mem_map.1 hV)
+  refine Filter.mem_of_superset (prefix_mem_nhds (trace x) n) fun v hv => ?_
+  obtain ⟨y, hyx, hyv⟩ := exists_extend x n v hv
+  have : y ∈ trace ⁻¹' V := hn fun p hp _ => hyx p hp
+  rwa [Set.mem_preimage, hyv] at this
+
+/-! ### Comeager and meager sets of sequences -/
+
+/-- Every finite word occurs in `v`. -/
+def Disjunctive (v : ℕ → Bool) : Prop := ∀ n (w : Fin n → Bool), ∃ i, ∀ j : Fin n, v (i + j) = w j
+
+/-- A neighbourhood of a sequence contains a cylinder over a prefix. -/
+theorem exists_prefix_subset {v : ℕ → Bool} {U : Set (ℕ → Bool)} (hU : U ∈ 𝓝 v) :
+    ∃ L : ℕ, {u | ∀ t < L, u t = v t} ⊆ U := by
+  rw [nhds_pi, Filter.mem_pi] at hU
+  obtain ⟨I, hI, t, ht, hIt⟩ := hU
+  obtain ⟨L, hL⟩ := hI.bddAbove
+  refine ⟨L + 1, fun u hu => hIt fun i hi => ?_⟩
+  rw [hu i (by have := hL hi; omega)]
+  exact mem_of_mem_nhds (ht i)
+
+/-- **Disjunctive sequences are generic**: they form a comeager set. -/
+theorem residual_disjunctive : {v : ℕ → Bool | Disjunctive v} ∈ residual (ℕ → Bool) := by
+  have h : {v : ℕ → Bool | Disjunctive v} =
+      ⋂ p : (Σ n, Fin n → Bool), {v | ∃ i, ∀ j : Fin p.1, v (i + j) = p.2 j} := by
+    ext v
+    simp only [Set.mem_setOf_eq, Set.mem_iInter, Disjunctive, Sigma.forall]
+  rw [h]
+  refine countable_iInter_mem.2 fun p => residual_of_dense_open ?_ ?_
+  · rw [Set.setOf_exists]
+    refine isOpen_iUnion fun i => ?_
+    rw [Set.setOf_forall]
+    exact isOpen_iInter_of_finite fun j =>
+      (isOpen_discrete ({p.2 j} : Set Bool)).preimage
+        (continuous_apply (A := fun _ : ℕ => Bool) (i + (j : ℕ)))
+  · rw [dense_iff_inter_open]
+    rintro U hU ⟨v, hv⟩
+    obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
+    -- copy the prefix of `v`, then the word
+    refine ⟨fun t => if t < L then v t else if h : t - L < p.1 then p.2 ⟨t - L, h⟩ else false,
+      hL fun t ht => by simp only [if_pos ht], L, fun j => ?_⟩
+    simp only [show ¬ (L + (j : ℕ) < L) by omega, if_false, show L + (j : ℕ) - L = j by omega,
+      dif_pos j.isLt]
+
+/-- The number of `true` values of `v` before `n`. -/
+def count (v : ℕ → Bool) (n : ℕ) : ℕ := ((List.range n).filter v).length
+
+theorem count_succ (v : ℕ → Bool) (n : ℕ) :
+    count v (n + 1) = count v n + if v n then 1 else 0 := by
+  unfold count
+  rw [List.range_succ, List.filter_append, List.length_append]
+  cases hv : v n <;> simp [hv]
+
+theorem count_congr {u v : ℕ → Bool} {n : ℕ} (h : ∀ t < n, u t = v t) : count u n = count v n := by
+  unfold count
+  congr 1
+  exact List.filter_congr fun t ht => h t (List.mem_range.1 ht)
+
+theorem le_count {v : ℕ → Bool} {L : ℕ} (h : ∀ t, L ≤ t → v t = true) : ∀ n, n - L ≤ count v n
+  | 0 => by simp
+  | n + 1 => by
+    rw [count_succ]
+    have := le_count h n
+    by_cases hn : L ≤ n
+    · rw [h n hn, if_pos rfl]
+      omega
+    · omega
+
+/-- **Sequences with density `1/2` are rare**: they form a meager set. Sequences with a frequency of
+ones at least `2/3` infinitely often are generic, and none of them has density `1/2`. -/
+theorem isMeagre_halfDensity : IsMeagre {v : ℕ → Bool | Symmetry.HalfDensity v} := by
+  have hA : (⋂ N : ℕ, ⋃ n : ℕ, {v : ℕ → Bool | N < n ∧ 2 * n ≤ 3 * count v n}) ∈
+      residual (ℕ → Bool) := by
+    refine countable_iInter_mem.2 fun N => residual_of_dense_open ?_ ?_
+    · refine isOpen_iUnion fun n => ?_
+      -- the condition reads only the first `n` letters
+      rw [isOpen_iff_mem_nhds]
+      intro v hv
+      refine Filter.mem_of_superset (prefix_mem_nhds v n) fun u hu => ?_
+      rw [Set.mem_setOf_eq, count_congr fun t ht => hu t ht.le]
+      exact hv
+    · rw [dense_iff_inter_open]
+      rintro U hU ⟨v, hv⟩
+      obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
+      -- copy the prefix of `v`, then only ones
+      refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [if_pos ht], ?_⟩
+      refine Set.mem_iUnion.2 ⟨3 * (L + N + 1), by omega, ?_⟩
+      have := le_count (v := fun t => if t < L then v t else true) (L := L)
+        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) (3 * (L + N + 1))
+      omega
+  refine Filter.mem_of_superset hA fun v hv hhalf => ?_
+  simp only [Set.mem_iInter, Set.mem_iUnion, Set.mem_setOf_eq] at hv
+  obtain ⟨N, hN⟩ := hhalf 10 (by norm_num)
+  obtain ⟨n, hNn, hn⟩ := hv N
+  have h1 := hN n hNn.le
+  unfold count at hn
+  omega
+
+/-- **Configurations with a disjunctive trace are generic.** -/
+theorem residual_disjunctive_trace :
+    {x : ℤ → Bool | Disjunctive (trace x)} ∈ residual (ℤ → Bool) :=
+  tendsto_residual_of_isOpenMap continuous_trace isOpenMap_trace residual_disjunctive
+
+/-- **Configurations whose trace has density `1/2` are rare.** -/
+theorem isMeagre_halfDensity_trace :
+    IsMeagre {x : ℤ → Bool | Symmetry.HalfDensity (trace x)} :=
+  isMeagre_halfDensity.preimage_of_isOpenMap continuous_trace isOpenMap_trace
+
+end Rule30Equivalents.Genericity

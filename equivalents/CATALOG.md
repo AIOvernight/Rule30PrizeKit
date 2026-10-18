@@ -2685,7 +2685,12 @@ with Turing machines reading n. Notes:
       a comeager set, while those whose trace is even simply normal form a meager set.
 
     The single seed lies in the countable, null, meager set of finite configurations, so neither
-    statement says anything about it. Likewise, ergodicity of the doubling map
+    statement says anything about it. *Lean*
+    ([Genericity](Rule30Equivalents/Genericity.lean)): the trace map is continuous, open and onto
+    (`continuous_trace`, `isOpenMap_trace`, `surjective_trace`; flipping x_{−m} flips c(m) and
+    nothing before, `exists_extend`); the configurations with a disjunctive trace form a comeager
+    set (`residual_disjunctive_trace`), and those whose trace has density 1/2 a meager set
+    (`isMeagre_halfDensity_trace`, so a fortiori those with a normal trace). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
     version said that the trace is normal for a comeager set of configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles

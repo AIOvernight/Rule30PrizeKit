@@ -53,6 +53,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_unary_not_regular
 #print axioms Rule30Equivalents.LogicAutomata.problem1_iff_prefixes_not_regular
 #print axioms Rule30Equivalents.Minkowski.problem1_iff_minkowski_not_quadratic
+#print axioms Rule30Equivalents.MonadicLogic.problem1_iff_not_msoDefinable
 #print axioms Rule30Equivalents.NaturalBoundary.problem1_of_natural_boundary
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_cf_not_terminates
 #print axioms Rule30Equivalents.NumberTheory.problem1_iff_dirichlet

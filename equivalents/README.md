@@ -10,10 +10,10 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 ```
 
 **Status:**
-- 51 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 139 theorems named `problem1_iff_*`.
+- 51 of the 54 equivalent forms in [CATALOG.md](CATALOG.md) are proved here, as 140 theorems named `problem1_iff_*`.
 - For one more form, [41], and for the frozen-boundary conjecture, the direction "the statement implies Problem 1" is proved: `problem1_of_*`.
 - Every one uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The thirty-four later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree, AlgebraicDFinite, Strassmann, SkolemMahlerLech, DiophantineGraph, NaturalBoundary, Cobham, Christol, OneTapeGap and OfflineGap) were compiled and axiom-checked by their author only.
+- For each module of the first two batches, an independent verifier recompiled the file, checked its axioms and restated its main theorems. The thirty-five later modules (IntegerRows, LogicAutomata, Realization, WordForms, Expansions, Holonomic, OmegaRegular, PisotBase, Automatic, Transcendence, LempelZiv, CoupledHalves, TailLanguage, TFunction, TFunctionCycles, DFinite, AutomatonGroup, FrozenBoundary, FrozenBoundaryPeriodTwo, FrozenBoundaryCore, Lyndon, Lagrange, Minkowski, GoldenPowers, ContextFree, AlgebraicDFinite, Strassmann, SkolemMahlerLech, DiophantineGraph, NaturalBoundary, Cobham, Christol, OneTapeGap, OfflineGap and MonadicLogic) were compiled and axiom-checked by their author only.
 
 ## What is here
 
@@ -36,6 +36,7 @@ theorem problem1_iff_irrational_binary : Rule30Prize.Problem1 ↔ Irrational cen
 | [FrozenBoundaryCore](Rule30Equivalents/FrozenBoundaryCore.lean) | no new form: the frozen-boundary conjecture is FinConf plus a core. Dropping edge bits that the bulk sees as a fixed pattern reduces the steps (0,0,1), (0,1,0) and (0,1,1), and (1,0,1) on seeds whose bit 1 is black, to Φ and b. What is left is the white-blinking edge of (1,0,1) and the step (1,1,1). Above its edge bits each is rule 30 with a boundary that switches periodically between genuine ones, (Φ, b) and (Φ, a, a, b) | `frozenBoundaryConjecture_iff_core`, `step_101_two_steps`, `step_111_four_steps`, `noPeriodicReadout_of_finConfRows`, `transfer`, `step_two_mul`, `step_four_mul_add_one`, `step_101` |
 | [LogicAutomata](Rule30Equivalents/LogicAutomata.lean) | the black times are not definable in Presburger arithmetic (with any parameters) and do not form a semilinear set; the unary language {1ⁿ : c(n) = 1} and the language of prefixes of c are not regular | `problem1_iff_not_presburger`, `problem1_iff_not_semilinear`, `problem1_iff_unary_not_regular`, `problem1_iff_prefixes_not_regular` |
 | [Realization](Rule30Equivalents/Realization.lean) | no eventually periodic column is realized by the single seed (the inverse problem); the irrationality of `Real.ofDigits` of the column in every base, and of the Cantor function `cantorFunction (1/b) c`. Also `problem1_iff_column_iff_both`: by Jen's theorem, an equivalence with the same question for another column would prove both | `problem1_iff_realization`, `problem1_iff_irrational_ofDigits` |
+| [MonadicLogic](Rule30Equivalents/MonadicLogic.lean) | the black times are not definable in monadic second-order logic over (ℕ, <) ([36], MSO form). The proof is the composition method without automata: formulas translate into a logic of set variables, the finitely many k-types of assignments decide formulas of depth k, and putting one position in front of ℕ respects types; an eventually periodic set is defined by the counting automaton written as a formula | `problem1_iff_not_msoDefinable`, `eventuallyPeriodic_iff_msoDefinable`, `holds_iff_of_tp_eq`, `tp_shift` |
 | [OmegaRegular](Rule30Equivalents/OmegaRegular.lean) | no Büchi automaton accepts exactly the center column: {c} is not ω-regular | `problem1_iff_not_omega_regular`, `eventuallyPeriodic_iff_omegaRegular_singleton` |
 | [Holonomic](Rule30Equivalents/Holonomic.lean) | c satisfies no recurrence Σ pᵢ(n)·c(n + i) = 0, from any point on, with polynomial coefficients not all zero (c is not P-recursive) | `problem1_iff_not_pRecursive`, `eventuallyPeriodic_iff_pRecursive` |
 | [DFinite](Rule30Equivalents/DFinite.lean) | Σ c(t) Xᵗ is not D-finite over ℚ(X): it satisfies no linear differential equation Σ qᵢ(X)·F⁽ⁱ⁾ = 0 with polynomial coefficients not all zero | `problem1_iff_not_dFinite`, `eventuallyPeriodic_iff_dFinite` |
@@ -92,8 +93,5 @@ lake env lean equivalents/scripts/CheckAxioms.lean   # axioms of all problem1_if
    - `0 < P`.
 4. Keep the file free of `sorry`, `native_decide` and new axioms. Add it to `Rule30Equivalents.lean`, and regenerate `scripts/CheckAxioms.lean` with `python3 equivalents/scripts/gen_check_axioms.py` from the kit root.
 5. Have someone other than the author restate the main theorem from scratch and check that it says what it claims.
-
-Next targets:
-- Büchi's theorem for the MSO form of [36].
 
 The hard classical ones are Szegő and Pólya–Carlson (natural boundary, [41]) and Durand ([46]).

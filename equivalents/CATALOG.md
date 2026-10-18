@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 150 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 151 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -193,7 +193,7 @@ files. The rows follow the order of Section 3.
 | 9 | presburger | logic | S is not Presburger-definable; S is not semilinear | Proved (library) | `LogicAutomata.problem1_iff_not_presburger`, `LogicAutomata.problem1_iff_not_semilinear` |
 | 18 | regular-languages | automata | {1ⁿ : c(n) = 1} and the prefix language of c are not regular | Proved (library) | `LogicAutomata.problem1_iff_unary_not_regular`, `LogicAutomata.problem1_iff_prefixes_not_regular` |
 | 40 | context-free | automata | the same two languages are not context-free | Proved (library) | `ContextFree.problem1_iff_unary_not_contextFree`, `ContextFree.problem1_iff_prefixes_not_contextFree`, `ContextFree.pumping` |
-| 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Proved (library) for the Büchi form; Stated (MSO) | `OmegaRegular.problem1_iff_not_omega_regular` |
+| 36 | omega-regular | automata, logic | {c} is not ω-regular; S is not MSO(ℕ,<)-definable | Proved (library), both forms | `OmegaRegular.problem1_iff_not_omega_regular`, `MonadicLogic.problem1_iff_not_msoDefinable` |
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
@@ -207,8 +207,8 @@ batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
 [Expansions](Rule30Equivalents/Expansions.lean), [31] in [Holonomic](Rule30Equivalents/Holonomic.lean)
-(the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] (the Büchi form) in
-[OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [48] (β = 1 + √2) in
+(the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] in
+[OmegaRegular](Rule30Equivalents/OmegaRegular.lean) (Büchi) and [MonadicLogic](Rule30Equivalents/MonadicLogic.lean) (MSO), [48] (β = 1 + √2) in
 [PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), [54] in
@@ -220,7 +220,8 @@ batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [Cobham](Rule30Equivalents/Cobham.lean), and [43] in [OneTapeGap](Rule30Equivalents/OneTapeGap.lean)
 (time) and [OfflineGap](Rule30Equivalents/OfflineGap.lean) (space). One more, [7], is proved in the core catalog and
 also has a library proof. All three parts of [14] are proved, the Diophantine graph included
-([DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean)), and for [36] the MSO form is stated. All four parts of [50] are proved, Lüroth included. [51] is proved through the
+([DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean)). The MSO form of [36] is proved by the composition method,
+with types of assignments instead of Büchi automata ([MonadicLogic](Rule30Equivalents/MonadicLogic.lean)). All four parts of [50] are proved, Lüroth included. [51] is proved through the
 Ehrenfeucht–Silberger theorem for infinite words ([Lyndon](Rule30Equivalents/Lyndon.lean)). [39] is proved
 through the Euler–Lagrange theorem ([Lagrange](Rule30Equivalents/Lagrange.lean)), and [49] from it and [29]
 ([Minkowski](Rule30Equivalents/Minkowski.lean)). [47] is proved through the Mignosi–Restivo–Salemi theorem
@@ -1763,11 +1764,25 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Kernel consequence.* A Büchi automaton accepting exactly {c}, if one existed, would need at
   least 16359 states (logic survey). The reason: if the run is in the same state at times m < n,
   then c(0)…c(m − 1) followed by σⁿc is also accepted, so σᵐc = σⁿc.
-- *Difficulty.* Moderate for the Büchi form; hard for MSO, which needs Büchi's theorem.
+- *Difficulty.* Moderate for the Büchi form; hard for MSO, which needs Büchi's theorem or the
+  composition method. Both forms are proved here.
 - *Lean.* The Büchi form is proved in the library: `OmegaRegular.problem1_iff_not_omega_regular`,
   from `eventuallyPeriodic_iff_omegaRegular_singleton` (`lasso_accepts_iff` and
-  `eventuallyPeriodic_of_accepts_iff`), with the definitions below. The MSO form needs Büchi's
-  theorem and is stated only in words.
+  `eventuallyPeriodic_of_accepts_iff`), with the definitions below. The MSO form is proved in
+  [MonadicLogic](Rule30Equivalents/MonadicLogic.lean): `problem1_iff_not_msoDefinable`, from
+  `eventuallyPeriodic_iff_msoDefinable`. `MSO` has first-order and set variables named by natural
+  numbers, with atoms x < y and x ∈ X; `MSODefinable S` says that some formula holds exactly when
+  its first-order variables are n ∈ S. The proof avoids Büchi automata and their complementation:
+  - `MSO.toMSO0` translates into a logic with set variables only (first-order variables become
+    singletons), with atoms X = ∅, X a singleton, X ⊆ Y, and "X entirely below Y".
+  - `tp m k ρ`, the k-type of an assignment: its atomic facts and, for each variable, the set of
+    (k − 1)-types of its modifications. Types range over a finite type, and equal k-types satisfy
+    the same formulas of depth at most k (`holds_iff_of_tp_eq`).
+  - `tp_shift`: putting one position in front of ℕ maps equal types to equal types. The
+    assignments for n and n + 1 differ by such a shift, so by pigeonhole their types, and with
+    them membership in S, are eventually periodic.
+  - The converse, `periodicFormula`: "every family of sets that contains 0 and follows the
+    counting automaton puts x into an accepting set".
 
   ```lean
   structure Buchi (α : Type) where

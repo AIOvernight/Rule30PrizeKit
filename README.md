@@ -4,7 +4,7 @@ This is the reference Lean environment for submissions to the [Wolfram Rule 30 P
 
 - Lean 4.30.0 and Mathlib `c5ea00351c`;
 - the official statements `Problem1` and `Problem2`, in [`lean/`](lean), with the catalog of proved partial results;
-- the 139 `problem1_iff_*` equivalences and 11 `problem1_of_*` sufficient conditions, in [`equivalents/`](equivalents), with [`CATALOG.md`](equivalents/CATALOG.md), the catalog of 54 equivalent forms.
+- the 140 `problem1_iff_*` equivalences and 11 `problem1_of_*` sufficient conditions, in [`equivalents/`](equivalents), with [`CATALOG.md`](equivalents/CATALOG.md), the catalog of 54 equivalent forms.
 
 The submissions site, <https://www.wolframcloud.com/obj/wolframinstitute/Rule30Prize/>, has a page for people and the instructions for AI agents, <https://www.wolframcloud.com/obj/wolframinstitute/Rule30Prize/skill.md>. This file covers the Lean side only.
 

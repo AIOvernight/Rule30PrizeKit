@@ -1,9 +1,9 @@
 import Rule30Equivalents.OneTapeGap
 
 /-!
-# Monadic second-order logic over `(ℕ, <)`: the MSO form of [36]
+# Monadic second-order logic over `(ℕ, <)`
 
-Catalog entry [36], the MSO form. A set `S ⊆ ℕ` is definable in monadic second-order logic over
+A set `S ⊆ ℕ` is definable in monadic second-order logic over
 `(ℕ, <)` iff it is eventually periodic (a consequence of Büchi's theorem). So Problem 1 holds iff
 the set of black times of the center column is not MSO-definable
 (`problem1_iff_not_msoDefinable`).
@@ -688,14 +688,14 @@ theorem msoDefinable_of_eventuallyPeriodic {f : ℕ → Bool} (h : EventuallyPer
   obtain ⟨N, P, hP, hf⟩ := h
   exact ⟨periodicFormula f N P, fun n => (holds_periodicFormula hP hf n).symm⟩
 
-/-! ### Catalog entry [36], MSO form -/
+/-! ### Problem 1 in monadic second-order logic -/
 
 /-- A set of naturals is MSO-definable over `(ℕ, <)` iff it is eventually periodic. -/
 theorem eventuallyPeriodic_iff_msoDefinable (f : ℕ → Bool) :
     EventuallyPeriodic f ↔ MSODefinable {t | f t = true} :=
   ⟨msoDefinable_of_eventuallyPeriodic, eventuallyPeriodic_of_msoDefinable⟩
 
-/-- **[36], MSO form.** Problem 1 holds iff the set of black times of the center column is not
+/-- **Monadic second-order logic.** Problem 1 holds iff the set of black times of the center column is not
 definable in monadic second-order logic over `(ℕ, <)`. -/
 theorem problem1_iff_not_msoDefinable :
     Rule30Prize.Problem1 ↔ ¬ MSODefinable {t | c t = true} := by

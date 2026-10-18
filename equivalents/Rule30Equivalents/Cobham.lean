@@ -8,7 +8,7 @@ import Mathlib.Tactic.Zify
 /-!
 # Cobham's theorem
 
-Catalog entry [42]. **Cobham's theorem** (1969): if `a, b ≥ 2` are multiplicatively independent
+**Cobham's theorem** (1969): if `a, b ≥ 2` are multiplicatively independent
 (`aᵐ ≠ bⁿ` for all `m, n ≥ 1`), a sequence that is both `a`-automatic and `b`-automatic is
 eventually periodic. So Problem 1 holds iff the center column is not both 2-automatic and
 3-automatic, iff it is not `k`-automatic for some `k ≥ 2`.
@@ -28,11 +28,10 @@ automaticity as finiteness of the `k`-kernel (`Automatic.IsAutomatic`).
 * `eventuallyPeriodic_of_isAutomatic`: every large `x` has a signature shared by infinitely many
   numbers. These local periods are at most `bⁿ / 6` on intervals of radius `2bⁿ/3` around
   consecutive multiples of `bⁿ`, so they glue into one period.
-* `problem1_iff_not_two_three_automatic`, `problem1_iff_exists_not_automatic` (catalog [42]).
+* `problem1_iff_not_two_three_automatic`, `problem1_iff_exists_not_automatic`.
 
 Sources: A. Cobham, *On the base-dependence of sets of numbers recognizable by finite automata*,
-Math. Systems Theory 3 (1969) 186–192; T. J. P. Krebs, arXiv:1801.06704 (2018). Catalog entry
-[42].
+Math. Systems Theory 3 (1969) 186–192; T. J. P. Krebs, arXiv:1801.06704 (2018).
 -/
 
 namespace Rule30Equivalents.Cobham
@@ -332,7 +331,7 @@ theorem eventuallyPeriodic_of_isAutomatic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤
   have : t + P0 ≤ (x₀ + (t + P0)) * N := by nlinarith
   omega
 
-/-! ### Catalog entry [42] -/
+/-! ### The center column -/
 
 theorem two_pow_ne_three_pow {m n : ℕ} (hm : 0 < m) : (2 : ℕ) ^ m ≠ 3 ^ n := by
   intro h
@@ -349,12 +348,12 @@ theorem eventuallyPeriodic_iff_isAutomatic_two_three (f : ℕ → Bool) :
     fun ⟨h2, h3⟩ => eventuallyPeriodic_of_isAutomatic le_rfl (by norm_num)
       (fun _ _ hm _ => two_pow_ne_three_pow hm) h2 h3⟩
 
-/-- **Problem 1 ⟺ the center column is not both 2-automatic and 3-automatic** (catalog [42]). -/
+/-- **Problem 1 ⟺ the center column is not both 2-automatic and 3-automatic**. -/
 theorem problem1_iff_not_two_three_automatic : Rule30Prize.Problem1 ↔
     ¬ (IsAutomatic 2 Rule30Prize.center ∧ IsAutomatic 3 Rule30Prize.center) :=
   not_congr (eventuallyPeriodic_iff_isAutomatic_two_three _)
 
-/-- **Problem 1 ⟺ the center column is not `k`-automatic for some `k ≥ 2`** (catalog [42]). -/
+/-- **Problem 1 ⟺ the center column is not `k`-automatic for some `k ≥ 2`**. -/
 theorem problem1_iff_exists_not_automatic : Rule30Prize.Problem1 ↔
     ∃ k, 2 ≤ k ∧ ¬ IsAutomatic k c := by
   constructor

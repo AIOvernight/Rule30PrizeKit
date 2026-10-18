@@ -10,9 +10,9 @@ import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 /-!
 # Periods that are prime powers: the p-adic and Mahler forms
 
-Catalog Section 5, "no eventual period `2^k`". This weaker statement follows from Problem 1 and
-includes periods `2` and `4`, so it is open. Its two equivalent forms in the catalog are proved
-here, for every bit sequence and every prime `p` in place of `2`.
+The statement that the center column has no eventual period `2^k` follows from Problem 1 and
+includes periods `2` and `4`, so it is open. Two equivalent forms of it are proved here, for every
+bit sequence and every prime `p` in place of `2`.
 
 * **p-adic continuity** (`exists_continuous_extension_iff`): `u : ℕ → Bool` has a period `p^k` iff
   it extends to a continuous function `ℤ_p → Bool`. On the compact `ℤ_p` such a function is

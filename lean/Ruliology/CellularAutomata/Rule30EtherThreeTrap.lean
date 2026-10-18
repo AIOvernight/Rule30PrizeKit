@@ -18,9 +18,6 @@ the center column `1` is a fixed function `u` of the label.
   half driven by `w^∞` enters the trap, the center column is not eventually `w^∞`. Whether this
   holds for `001` is open; in the period-3 study all `18,258` tested right halves entered `t001`,
   with delays up to about `2 · 10^5` steps (computation, not a proof).
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): period-3 study
-(`p3-ether`); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

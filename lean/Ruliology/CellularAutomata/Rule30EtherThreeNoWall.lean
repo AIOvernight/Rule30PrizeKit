@@ -16,9 +16,6 @@ violates the U-property.
 
 The exhaustive search behind the certificates (and a C search, not kernel-checked) also finds no
 wall for widths `13..23`.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): period-3 study
-(`p3-ether`); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

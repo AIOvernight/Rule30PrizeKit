@@ -649,7 +649,7 @@ theorem problem1_iff_no_pow_dvd {p : ℕ} (hp : 2 ≤ p) :
   problem1_iff_not_eventuallyPeriodic.trans
     (not_congr (eventuallyPeriodic_iff_exists_pow_dvd hp c))
 
-/-- **Problem 1, `p`-adic integer form** (the statement of the survey, for a prime `p`). -/
+/-- **Problem 1, `p`-adic integer form**, for a prime `p`. -/
 theorem problem1_iff_padic_int (p : ℕ) (hp : p.Prime) :
     Rule30Prize.Problem1 ↔ ¬ ∃ a b : ℤ, b ≠ 0 ∧ ∀ n, (p : ℤ) ^ n ∣ b * S p n - a :=
   problem1_iff_no_pow_dvd hp.two_le
@@ -699,7 +699,7 @@ theorem problem1_iff_padic_complexity {p : ℕ} (hp : 2 ≤ p) : Rule30Prize.Pro
     ((not_congr (eventuallyPeriodic_iff_bounded_height hp c)).trans
       (not_exists.trans (forall_congr' fun _ => not_forall)))
 
-/-- **Problem 1 as unbounded 2-adic complexity** (the statement of the survey). -/
+/-- **Problem 1 as unbounded 2-adic complexity.** -/
 theorem problem1_iff_two_adic_complexity : Rule30Prize.Problem1 ↔
     ∀ B : ℕ, ∃ n, ¬ ∃ a b : ℤ, b ≠ 0 ∧ |a| ≤ B ∧ |b| ≤ B ∧ (2 : ℤ) ^ n ∣ b * S 2 n - a := by
   have h := problem1_iff_padic_complexity (p := 2) le_rfl

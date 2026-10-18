@@ -29,9 +29,6 @@ about arguments that use `Q01` alone.
 center alternates for about `7 N` steps. `no_joint_local_ranking`: no function of (leftmost and
 rightmost black positions, center window, left-edge window, right-edge window) into `Nat` strictly
 decreases at every step where the center column flips, over all finite configurations.
-
-Sources: the Rule 30 Prize project (2026), period-2 program, round 2 (invariant search and its
-verification).
 -/
 
 namespace Ruliology.CellularAutomata

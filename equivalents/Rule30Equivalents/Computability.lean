@@ -12,7 +12,7 @@ import Mathlib.Algebra.Order.Ring.Abs
 /-!
 # Problem 1 is Π⁰₂ and Problem 2 is Π⁰₃
 
-Catalog Section 7, item 12. Row `t + 1` of the single-seed pattern is a primitive recursive
+Row `t + 1` of the single-seed pattern is a primitive recursive
 function of row `t`, stored as the list of its cells `-t, …, t` (`stepList`, `getD_rowList`). So:
 
 * `primrec_center`: **the center column `c` is primitive recursive**.

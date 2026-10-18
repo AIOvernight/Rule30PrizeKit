@@ -4,7 +4,7 @@ import Ruliology.CellularAutomata.Rule30Diagonals
 /-!
 # Rule 30 on a ring of `n` cells
 
-Catalog Section 6.3, "Finite rings". A configuration of a ring of `n` cells is an `n`-periodic
+A configuration of a ring of `n` cells is an `n`-periodic
 configuration of `{0,1}^ℤ`, and rule 30 on the ring is rule 30 on such configurations
 (`evol_ringSeed_add`). Start from one black cell, `ringSeed n`.
 

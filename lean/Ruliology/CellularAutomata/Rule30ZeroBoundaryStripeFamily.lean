@@ -17,9 +17,6 @@ in the namespace `Rule30ZeroBoundaryStripeFront`.
 * `stripe_prefix_family_list`: the word given as a list `v` with `|v| ≤ 3` (`rowV`).
 
 Only tails `|v| ≤ 3` are kernel-checked; the bound `31` after arrival is attained (computation).
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 2); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

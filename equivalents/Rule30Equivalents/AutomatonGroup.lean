@@ -32,7 +32,7 @@ and `s = 3` (black, any) for `a`.
 * `Phi_two_mul`, `Phi_two_mul_add_one`: `Φ(2y) = 2 Φ(y)` and `Φ(2y + 1) = 2 a(y) + 1`, where
   `a = PhiS 3`. `Φ` never changes the lowest bit, and on odd numbers it continues as the
   black-boundary step.
-* `orbit_one_eq_wall`, `problem1_iff_black_wall` (catalog [54]): `Φᵗ(1) = 2 aᵗ(0) + 1`. So the center
+* `orbit_one_eq_wall`, `problem1_iff_black_wall`: `Φᵗ(1) = 2 aᵗ(0) + 1`. So the center
   column is `c(t) = bit (t - 1) of aᵗ(0)`: the column at distance `t - 1` from a black wall that
   moves right with speed 1, on the half-line that starts white.
 * `FrozenBoundaryConjecture` (**open**): for each of the 8 frozen-boundary steps (`Φ`, then one of
@@ -210,7 +210,7 @@ theorem center_succ_eq_wall (t : ℕ) : c (t + 1) = ((PhiS 3)^[t + 1] 0).testBit
     testBit_two_mul_add_one]
   simp
 
-/-- **Problem 1 ⟺ the black-wall readout is not eventually periodic** (catalog [54]): with
+/-- **Problem 1 ⟺ the black-wall readout is not eventually periodic**: with
 `a(y) = y ⊕ (2y ∨ 4y ∨ 3)`, the sequence `t ↦ bit t of a^(t+1)(0)` is not eventually periodic. -/
 theorem problem1_iff_black_wall : Rule30Prize.Problem1 ↔
     ¬ EventuallyPeriodic (fun t => ((PhiS 3)^[t + 1] 0).testBit t) := by

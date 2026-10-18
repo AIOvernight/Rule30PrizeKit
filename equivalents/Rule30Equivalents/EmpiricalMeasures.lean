@@ -5,7 +5,7 @@ import Mathlib.MeasureTheory.Measure.Portmanteau
 /-!
 # Problem 2 through empirical measures
 
-Catalog Section 6.1, the ergodic form. The empirical measure of a bit sequence `b` over the times
+The empirical measure of a bit sequence `b` over the times
 `0, …, N` is `μ_N = (δ_b + δ_{σb} + ⋯ + δ_{σᴺb}) / (N + 1)` on `{0,1}^ℕ` (`empirical`), a point of
 the compact space of probability measures (Mathlib's Prokhorov theorem). Its mass on the cylinder
 `[1] = {v | v 0 = 1}` is the proportion of `1`s among `b 0, …, b N` (`empirical_one`).

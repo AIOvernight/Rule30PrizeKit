@@ -6,7 +6,7 @@ import Mathlib.Analysis.Normed.Ring.InfiniteSum
 /-!
 # The Hardy–Littlewood–Karamata Tauberian theorem
 
-Catalog Section 6.1. For a sequence `a` of nonnegative reals,
+For a sequence `a` of nonnegative reals,
 
   `(1 - x) ∑ aₙ xⁿ → L` as `x → 1⁻`  implies  `(a₀ + ⋯ + a_{N-1}) / N → L`
 

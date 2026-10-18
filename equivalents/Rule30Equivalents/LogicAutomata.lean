@@ -20,8 +20,6 @@ For the two languages the proof counts left quotients (Myhill–Nerode): the quo
 language are the unary languages of the shifts of `c`, and those of the prefix language are the
 prefix languages of the shifts together with the empty language. Both counts are finite exactly
 when the shift orbit is finite (`ShiftOrbit.eventuallyPeriodic_iff_finite_shifts`).
-
-Catalog entries [9] and [18].
 -/
 
 namespace Rule30Equivalents.LogicAutomata

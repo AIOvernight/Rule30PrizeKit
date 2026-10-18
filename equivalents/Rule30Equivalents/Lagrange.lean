@@ -32,7 +32,7 @@ For an irrational `x`, the *complete quotients* are `x₀ = x` and `xₙ₊₁ =
   (`cauchySeq_conv`). `digit_cfValue`: its digits are `b`; `irrational_cfValue`: it is irrational,
   because a rational number reaches an integer complete quotient (`exists_fract_cq_eq_zero`).
   `quadratic_cfValue_iff`: it is a quadratic irrational iff `b` is eventually periodic.
-* `problem1_iff_not_quadratic` (catalog [39]): Problem 1 holds iff
+* `problem1_iff_not_quadratic`: Problem 1 holds iff
   `θ = [1 + c(0); 1 + c(1), …]` is not a quadratic irrational.
 
 Sources: G. H. Hardy and E. M. Wright, *An Introduction to the Theory of Numbers*, §10.12
@@ -793,7 +793,7 @@ theorem quadratic_cfValue_iff :
 end Digits
 
 
-/-! ### Catalog entry [39] -/
+/-! ### Problem 1 -/
 
 open Ruliology.CellularAutomata
 
@@ -801,7 +801,7 @@ open Ruliology.CellularAutomata
 quotients are `2` at the black cells of the center column and `1` at the white cells. -/
 noncomputable def theta : ℝ := cfValue fun n => 1 + if c n then 1 else 0
 
-/-- **Problem 1 ⟺ `θ` is not a quadratic irrational** (catalog [39]). By Euler–Lagrange, the
+/-- **Problem 1 ⟺ `θ` is not a quadratic irrational**. By Euler–Lagrange, the
 digits `1 + c(t)` of `θ` are eventually periodic iff `θ` satisfies a nontrivial integer quadratic
 equation; `θ` is never rational. -/
 theorem problem1_iff_not_quadratic : Rule30Prize.Problem1 ↔

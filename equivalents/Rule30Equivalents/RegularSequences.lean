@@ -5,7 +5,7 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 /-!
 # k-regular sequences
 
-Catalog entry [42], in the vocabulary of Allouche and Shallit (1992). A sequence is `k`-regular
+In the vocabulary of Allouche and Shallit (1992), a sequence is `k`-regular
 over a field `K` if the `K`-span of its `k`-kernel `{n ↦ f(kᵉ n + r) : r < kᵉ}` is
 finite-dimensional (`IsRegularSeq`). Regular sequences generalize automatic ones to infinitely
 many values; for a sequence with values in `{0, 1}` the two notions agree
@@ -96,7 +96,7 @@ theorem problem1_of_not_regularSeq (K : Type*) [Field K] {k : ℕ} (hk : 2 ≤ k
     (h : ¬ IsRegularSeq K k c) : Rule30Prize.Problem1 :=
   problem1_of_not_automatic hk ((isRegularSeq_iff_isAutomatic k c).not.1 h)
 
-/-- **[42], k-regular form.** Over any field, Problem 1 holds iff the center column is not both
+/-- **`k`-regular sequences.** Over any field, Problem 1 holds iff the center column is not both
 `2`-regular and `3`-regular. -/
 theorem problem1_iff_not_regularSeq_two_three (K : Type*) [Field K] : Rule30Prize.Problem1 ↔
     ¬ (IsRegularSeq K 2 c ∧ IsRegularSeq K 3 c) := by

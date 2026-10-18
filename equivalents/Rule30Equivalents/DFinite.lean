@@ -21,14 +21,14 @@ denominators.
   vanish at infinitely many `t`, so it is `0`; its coefficient of `t^{i₀}` is
   `∑_{m ≤ K} q_{i₀, K-m} · b(t + i₀ + m)`. That is a constant-coefficient relation, not all zero, and
   `LinearRelations.eventuallyPeriodic_of_relation'` gives eventual periodicity.
-* `problem1_iff_not_dFinite` (catalog [31], D-finite form).
+* `problem1_iff_not_dFinite`.
 
 This is Stanley's equivalence of D-finite series and P-recursive sequences, specialized to bit
 sequences, where both are equivalent to eventual periodicity (`Holonomic`).
 
 Sources: R. P. Stanley, *Differentiably finite power series*, European J. Combin. 1 (1980)
 175–188; A. J. van der Poorten and I. E. Shparlinski, *On linear recurrence sequences with
-polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155. Catalog entry [31].
+polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155.
 -/
 
 namespace Rule30Equivalents.DFinite
@@ -203,7 +203,7 @@ theorem eventuallyPeriodic_of_dFinite {b : ℕ → Bool} (h : IsDFinite b) : Eve
 theorem eventuallyPeriodic_iff_dFinite (b : ℕ → Bool) : EventuallyPeriodic b ↔ IsDFinite b :=
   ⟨dFinite_of_eventuallyPeriodic, eventuallyPeriodic_of_dFinite⟩
 
-/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is not D-finite over `ℚ(X)`** (catalog [31], D-finite form): no
+/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is not D-finite over `ℚ(X)`**: no
 linear differential equation with polynomial coefficients, not all zero, holds for it. -/
 theorem problem1_iff_not_dFinite : Rule30Prize.Problem1 ↔
     ¬ ∃ (r : ℕ) (q : Fin (r + 1) → ℚ[X]), (∃ i, q i ≠ 0) ∧

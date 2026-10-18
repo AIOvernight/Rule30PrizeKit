@@ -18,9 +18,6 @@ node (`pure_ether_not_in_trap_*`). The theorems live in the namespace `Rule30Eth
 
 This concerns the strip relaxation, where column `b + 1` is arbitrary. It says nothing about
 whether the true right half reaches the pure ether, and absorption remains open.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 3); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

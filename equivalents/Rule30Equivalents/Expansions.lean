@@ -8,7 +8,7 @@ import Rule30Equivalents.BinaryIrrational
 * **Engel.** `engelRem x` is the sequence of remainders of the Engel expansion
   `x = 1/a₁ + 1/(a₁a₂) + 1/(a₁a₂a₃) + ⋯`: a nonzero remainder `r` is followed by `⌈1/r⌉ r - 1`.
   `irrational_iff_engelRem_ne_zero`: for `x ≥ 0`, the expansion is infinite exactly when `x` is
-  irrational. `problem1_iff_engel_infinite` (catalog [50]): Problem 1 holds iff the Engel expansion
+  irrational. `problem1_iff_engel_infinite`: Problem 1 holds iff the Engel expansion
   of `x₂` is infinite.
 * **Sylvester.** `sylvesterRem x` is the sequence of remainders of the greedy Egyptian-fraction
   expansion: a nonzero remainder `r` is followed by `r - 1/⌈1/r⌉`.
@@ -36,7 +36,7 @@ reach `0`. Then apply `BinaryIrrational.problem1_iff_irrational_binary`.
 Sources: P. Erdős, A. Rényi and P. Szüsz, *On Engel's and Sylvester's series*, Ann. Univ. Sci.
 Budapest. Eötvös Sect. Math. 1 (1958) 7–32; J. Lüroth, *Ueber eine eindeutige Entwickelung von
 Zahlen in eine unendliche Reihe*, Math. Ann. 21 (1883) 411–423; J. Galambos, *Representations of Real Numbers by
-Infinite Series*, Springer (1976). Catalog entry [50].
+Infinite Series*, Springer (1976).
 -/
 
 namespace Rule30Equivalents.Expansions
@@ -139,7 +139,7 @@ theorem irrational_iff_engelRem_ne_zero {x : ℝ} (hx : 0 ≤ x) :
       exact (Rat.cast_def q).symm
     rwa [this] at hn
 
-/-- **Problem 1 ⟺ the Engel expansion of `x₂` is infinite** (catalog [50]). -/
+/-- **Problem 1 ⟺ the Engel expansion of `x₂` is infinite**. -/
 theorem problem1_iff_engel_infinite :
     Rule30Prize.Problem1 ↔ ∀ n, engelRem BinaryIrrational.centerBinary n ≠ 0 := by
   rw [BinaryIrrational.problem1_iff_irrational_binary]
@@ -306,7 +306,7 @@ theorem irrational_iff_factRem_ne_zero (x : ℝ) : Irrational x ↔ ∀ n, factR
       field_simp
     rw [factRem, e, Int.fract_intCast]
 
-/-- **Problem 1 ⟺ the factorial-base expansion of `x₂` is infinite** (catalog [50]): no `k! · x₂`
+/-- **Problem 1 ⟺ the factorial-base expansion of `x₂` is infinite**: no `k! · x₂`
 is an integer. -/
 theorem problem1_iff_factorial_infinite :
     Rule30Prize.Problem1 ↔ ∀ n, factRem BinaryIrrational.centerBinary n ≠ 0 := by
@@ -560,7 +560,7 @@ theorem centerBinary_mem : 0 < BinaryIrrational.centerBinary ∧ BinaryIrrationa
   exact ⟨BinaryIrrational.baseValue_pos (le_refl 2) c (s := 0) (by decide),
     BinaryIrrational.baseValue_le_one (le_refl 2) c⟩
 
-/-- **Problem 1 ⟺ the Lüroth expansion of `x₂` is not eventually periodic** (catalog [50]). -/
+/-- **Problem 1 ⟺ the Lüroth expansion of `x₂` is not eventually periodic**. -/
 theorem problem1_iff_luroth_not_eventuallyPeriodic :
     Rule30Prize.Problem1 ↔
       ¬ ∃ K P, 0 < P ∧ ∀ n, K ≤ n → lurothDigits BinaryIrrational.centerBinary (n + P) =

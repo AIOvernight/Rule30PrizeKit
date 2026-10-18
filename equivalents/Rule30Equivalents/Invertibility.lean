@@ -5,7 +5,7 @@ import Mathlib.Topology.Metrizable.CompletelyMetrizable
 /-!
 # Rule 30 is an automorphism of the fair-coin measure, modulo null sets
 
-Catalog Section 7, item 11. Rule 30 `F` is not one-to-one (`Genericity.not_injective_evol_one`),
+Rule 30 `F` is not one-to-one (`Genericity.not_injective_evol_one`),
 but almost every configuration has exactly one preimage (`Mixing.ae_existsUnique_preimage`). So `F`
 is invertible modulo null sets:
 

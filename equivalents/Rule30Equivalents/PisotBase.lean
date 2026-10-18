@@ -8,14 +8,14 @@ import Mathlib.Tactic.ComputeDegree
 Read the center column as the digits of `x_β = ∑ c(t) β^-(t+1)` with `β = 1 + √2`, the Pisot number
 whose conjugate is `1 - √2`.
 
-* `problem1_iff_not_mem_Q_sqrt_two` (catalog [48]): Problem 1 holds iff `x_β` is not of the form
+* `problem1_iff_not_mem_Q_sqrt_two`: Problem 1 holds iff `x_β` is not of the form
   `a + b √2` with `a, b` rational, that is, `x_β ∉ ℚ(√2)`.
 * In general, `eventuallyPeriodic_iff_mem_qsqrt2`: a `Bool` sequence is eventually periodic iff its
   value in base `1 + √2` lies in `ℚ(√2)`.
 
 This is the case `β = 1 + √2` of `PisotNumbers.eventuallyPeriodic_iff_mem_adjoin`: `1 + √2` is a
 root of `X² - 2X - 1`, whose other root `1 - √2` has absolute value `√2 - 1 < 1` (`isPisot_β`), and
-`ℚ(1 + √2)` is the field `ℚ(√2)` of the numbers `a + b √2` (`mem_adjoin_iff`). Catalog entry [48].
+`ℚ(1 + √2)` is the field `ℚ(√2)` of the numbers `a + b √2` (`mem_adjoin_iff`).
 -/
 
 namespace Rule30Equivalents.PisotBase
@@ -130,7 +130,7 @@ theorem eventuallyPeriodic_iff_mem_qsqrt2 (b : ℕ → Bool) :
     EventuallyPeriodic b ↔ BinaryIrrational.value β b ∈ qsqrt2 := by
   rw [PisotNumbers.eventuallyPeriodic_iff_mem_adjoin isPisot_β two_lt_β, mem_adjoin_iff]
 
-/-- **Problem 1 ⟺ `x_β ∉ ℚ(√2)` for `β = 1 + √2`** (catalog [48]). -/
+/-- **Problem 1 ⟺ `x_β ∉ ℚ(√2)` for `β = 1 + √2`**. -/
 theorem problem1_iff_not_mem_Q_sqrt_two : Rule30Prize.Problem1 ↔
     ¬ ∃ a b : ℚ, ∑' t, (if Rule30Prize.center t then (1 : ℝ) else 0) / (1 + Real.sqrt 2) ^ (t + 1) =
       a + b * Real.sqrt 2 :=

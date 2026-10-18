@@ -25,8 +25,8 @@ of `a t`, so Problem 1 is a statement about this explicit integer recurrence.
 The map `a ↦ a ^^^ ((2 * a) ||| (4 * a))` is a T-function: bit `j` of the image depends only on
 bits `j`, `j - 1` and `j - 2` of the argument, with bit `j` entering through `xor`.
 
-Sources: S. Wolfram, *A New Kind of Science* (2002), the integer form of rule 30 cited as
-catalog entry [25] in `CATALOG.md`; OEIS A110240 and A051023.
+Sources: S. Wolfram, *A New Kind of Science* (2002), the integer form of rule 30; OEIS A110240 and
+A051023.
 -/
 
 namespace Rule30Equivalents.IntegerRows

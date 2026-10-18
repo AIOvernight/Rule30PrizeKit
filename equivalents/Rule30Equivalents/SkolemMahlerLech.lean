@@ -8,7 +8,7 @@ import Mathlib.Analysis.SpecificLimits.Basic
 /-!
 # The Skolem–Mahler–Lech theorem, and Problem 1 as a zero set over `ℚ`
 
-Catalog entry [45]: Problem 1 holds iff the black times of the center column are not the zero set
+Problem 1 holds iff the black times of the center column are not the zero set
 of any linear recurrence sequence over `ℚ`. The library already has the sufficient direction
 (`LinearRelations.problem1_of_not_zero_set`). The converse needs the **Skolem–Mahler–Lech
 theorem**: the zero set of a linear recurrence sequence over `ℚ` is eventually periodic.
@@ -28,13 +28,12 @@ The proof is the classical `p`-adic one.
 
 * `skolem_mahler_lech`: the zero set of a linear recurrence sequence over `ℚ` is eventually
   periodic.
-* `problem1_iff_not_LRS_zero_set` (catalog [45]).
+* `problem1_iff_not_LRS_zero_set`.
 
 Sources: T. Skolem, *Ein Verfahren zur Behandlung gewisser exponentialer Gleichungen*, 8. Skand.
 Mat. Kongr. (1934) 163–188; K. Mahler, *Eine arithmetische Eigenschaft der Taylor-Koeffizienten
 rationaler Funktionen*, Proc. Akad. Wet. Amsterdam 38 (1935) 50–60; C. Lech, *A note on recurring
 series*, Ark. Mat. 2 (1953) 417–421; the exposition of T. Tao, *Structure and Randomness*, §1.9.
-Catalog entry [45].
 -/
 
 namespace Rule30Equivalents.SkolemMahlerLech
@@ -397,8 +396,8 @@ theorem skolem_mahler_lech (E : LinearRecurrence ℚ) {u : ℕ → ℚ} (hu : E.
     EPSet {n | u n = 0} :=
   epSet_zeros_aux E.order E.coeffs u hu
 
-/-- **Problem 1 ⟺ the black times are not the zero set of a linear recurrence sequence over `ℚ`**
-(catalog [45]). -/
+/-- **Problem 1 ⟺ the black times are not the zero set of a linear recurrence sequence over
+`ℚ`**. -/
 theorem problem1_iff_not_LRS_zero_set : Rule30Prize.Problem1 ↔
     ∀ (E : LinearRecurrence ℚ) (u : ℕ → ℚ), E.IsSolution u → {t | u t = 0} ≠ {t | c t = true} := by
   refine ⟨fun h E u hu hS => h ?_, LinearRelations.problem1_of_not_zero_set ℚ⟩

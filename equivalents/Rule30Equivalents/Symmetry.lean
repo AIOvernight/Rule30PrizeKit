@@ -13,7 +13,7 @@ any of the four rules, as long as the seed is transformed too.
 
 ## Statements
 
-* Rule 30 from a single black cell, run by the general `evolve`, is the catalog's
+* Rule 30 from a single black cell, run by the general `evolve`, is
   `Rule30Jen.cell` (`evolve_30`), so `c` is its center column.
 * Rule 86, the mirror image of rule 30, started from a single black cell, draws the rule-30
   pattern reflected by `p ↦ -p` (`evolve_86`). Its center column is exactly `c` (`center_86`).
@@ -31,7 +31,7 @@ Hence `Problem1` is equivalent to each of: the center column of rule 86 from a s
 is not eventually periodic (`problem1_iff_rule86`), and the same for rule 135
 (`problem1_iff_rule135`) or rule 149 (`problem1_iff_rule149`) from a single white cell.
 
-The seed matters. Rule 135 from a single *black* cell is the catalog's
+The seed matters. Rule 135 from a single *black* cell is
 `Rule30WhiteSeed.cell135` (`evolve_135_blackSeed`). Its center column is column `-1` of rule 30,
 complemented and delayed by one step. Whether that column is eventually periodic is a different
 question, not known to be equivalent to Problem 1.
@@ -145,7 +145,7 @@ theorem ruleBit_conjugate (n : Nat) (l c r : Bool) :
 
 /-! ### The rule numbers, checked on the 8-entry tables -/
 
-/-- The catalog's `Rule30Jen.rule`, `l xor (c || r)`, is rule 30. -/
+/-- `Rule30Jen.rule`, `l xor (c || r)`, is rule 30. -/
 theorem ruleBit_30 : ∀ l c r, ruleBit 30 l c r = Rule30Jen.rule l c r := by decide
 
 /-- **Rule 86 is the mirror image of rule 30.** -/
@@ -161,7 +161,7 @@ theorem ruleBit_149 : ∀ l c r, ruleBit 149 l c r = ruleBit 135 r c l := by dec
 theorem ruleBit_149_conjugate_86 : ∀ l c r, ruleBit 149 l c r = !ruleBit 86 (!l) (!c) (!r) := by
   decide
 
-/-- The catalog's `Rule30WhiteSeed.rule135`, `!l xor (c && r)`, is rule 135. -/
+/-- `Rule30WhiteSeed.rule135`, `!l xor (c && r)`, is rule 135. -/
 theorem ruleBit_135_eq_catalog : ∀ l c r, ruleBit 135 l c r = Rule30WhiteSeed.rule135 l c r := by
   decide
 
@@ -240,7 +240,7 @@ theorem evolve_conjugate (n : Nat) (init : Int → Bool) (t : Nat) (p : Int) :
 
 /-! ### Rules 30, 86, 135 and 149 from a single seed -/
 
-/-- Rule 30 from a single black cell is the catalog's pattern `Rule30Jen.cell`. -/
+/-- Rule 30 from a single black cell is the pattern `Rule30Jen.cell`. -/
 theorem evolve_30 : ∀ (t : Nat) (p : Int), evolve 30 blackSeed t p = Rule30Jen.cell t p
   | 0, _ => rfl
   | t + 1, p => by
@@ -268,7 +268,7 @@ theorem evolve_149 (t : Nat) (p : Int) : evolve 149 whiteSeed t p = !Rule30Jen.c
   rw [show (fun q => whiteSeed (-q)) = whiteSeed from funext whiteSeed_neg] at h
   rw [h, evolve_135]
 
-/-- Rule 135 from a single *black* cell is the catalog's `Rule30WhiteSeed.cell135`. Its center
+/-- Rule 135 from a single *black* cell is `Rule30WhiteSeed.cell135`. Its center
 column is column `-1` of rule 30, complemented and delayed by one step
 (`Rule30WhiteSeed.center135_succ`), not the center column `c`. So Problem 1 needs the white
 seed. -/

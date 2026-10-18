@@ -26,8 +26,6 @@ by the alternating column (`Rule30Ether.drv`).
   alternating column, and the free bits are the complement of column `1` at the white steps.
 So the ether satisfies every condition of `CQ01` except finite support: as for `Q01` (whose
 infinite witness is the stripe, `Rule30ZeroBoundary.zrow_stripe`), finite support is essential.
-
-Sources: the Rule 30 Prize project (2026), period-2 program, round-2 synthesis.
 -/
 
 namespace Ruliology.CellularAutomata

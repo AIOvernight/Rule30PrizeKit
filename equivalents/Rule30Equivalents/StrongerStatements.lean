@@ -12,8 +12,8 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 /-!
 # Stronger statements that imply Problem 1
 
-Catalog Section 4 lists statements, mostly open, each of which implies Problem 1. This file proves
-those implications (`problem1_of_*`). Where a statement is about a density or a distance, the
+Many statements, mostly open, imply Problem 1. This file proves those implications
+(`problem1_of_*`). Where a statement is about a density or a distance, the
 theorem uses the weaker consequence that some set is infinite, so it covers the stated form.
 
 * `problem1_of_effective_boundary`: `t ↦ c(t) ∧ c(t + 1)` is not eventually periodic.
@@ -357,7 +357,7 @@ theorem finite_approx (r : ℚ) :
   have hnum' : |q.num| ≤ ((B * D ^ 2 : ℕ) : ℤ) := by exact_mod_cast hnum
   exact ⟨by linarith [neg_abs_le q.num], by linarith [le_abs_self q.num]⟩
 
-/-- **The irrationality exponent.** If `μ(x₂) ≥ 2` (the catalog's `μ(x₂) = 2`), Problem 1 holds. -/
+/-- **The irrationality exponent.** If `μ(x₂) ≥ 2` (the conjecture is `μ(x₂) = 2`), Problem 1 holds. -/
 theorem problem1_of_irrExponentGE (h : IrrExponentGE BinaryIrrational.centerBinary 2) :
     Rule30Prize.Problem1 := by
   rw [BinaryIrrational.problem1_iff_irrational_binary]

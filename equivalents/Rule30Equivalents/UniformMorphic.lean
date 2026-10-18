@@ -3,7 +3,7 @@ import Rule30Equivalents.Cobham
 /-!
 # Automatic sequences are the uniformly morphic ones
 
-Catalog entry [46], uniform case. Cobham's "little" theorem (1972): `f` is `k`-automatic iff it is
+Cobham's "little" theorem (1972): `f` is `k`-automatic iff it is
 a coding `τ ∘ x` of a fixed point `x` of a `k`-uniform morphism `σ` of a finite alphabet, that is
 `x (k n + d) = σ (x n) d` (`isAutomatic_iff_isUniformMorphic`).
 
@@ -14,8 +14,9 @@ a coding `τ ∘ x` of a fixed point `x` of a `k`-uniform morphism `σ` of a fin
 
 With Cobham's theorem, **Problem 1 holds iff `c` is not both a `2`-uniformly morphic and a
 `3`-uniformly morphic sequence** (`problem1_iff_not_uniformMorphic_two_three`), and likewise for
-any multiplicatively independent `a, b ≥ 2` (`problem1_iff_not_uniformMorphic`). This is [46] for
-integer Perron numbers and uniform substitutions; the general form needs Durand's theorem.
+any multiplicatively independent `a, b ≥ 2` (`problem1_iff_not_uniformMorphic`). This is the
+uniform case of the statement for substitutions with multiplicatively independent Perron numbers;
+the general case needs Durand's theorem.
 -/
 
 namespace Rule30Equivalents.UniformMorphic
@@ -82,7 +83,7 @@ theorem eventuallyPeriodic_of_isUniformMorphic {a b : ℕ} (ha : 2 ≤ a) (hb : 
   Cobham.eventuallyPeriodic_of_isAutomatic ha hb hab
     ((isAutomatic_iff_isUniformMorphic ha f).2 hfa) ((isAutomatic_iff_isUniformMorphic hb f).2 hfb)
 
-/-- **[46] for uniform substitutions, any pair of bases.** For multiplicatively independent
+/-- **Uniform substitutions, any pair of bases.** For multiplicatively independent
 `a, b ≥ 2`, Problem 1 holds iff the center column is not both `a`- and `b`-uniformly morphic. -/
 theorem problem1_iff_not_uniformMorphic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤ b)
     (hab : ∀ m n, 0 < m → 0 < n → a ^ m ≠ b ^ n) : Rule30Prize.Problem1 ↔
@@ -92,7 +93,7 @@ theorem problem1_iff_not_uniformMorphic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤ b
       (isAutomatic_of_eventuallyPeriodic hep ha),
       (isAutomatic_iff_isUniformMorphic hb _).1 (isAutomatic_of_eventuallyPeriodic hep hb)⟩⟩
 
-/-- **[46] for uniform substitutions.** Problem 1 holds iff the center column is not both a
+/-- **Uniform substitutions.** Problem 1 holds iff the center column is not both a
 `2`-uniformly morphic and a `3`-uniformly morphic sequence. -/
 theorem problem1_iff_not_uniformMorphic_two_three : Rule30Prize.Problem1 ↔
     ¬ (IsUniformMorphic 2 Rule30Prize.center ∧ IsUniformMorphic 3 Rule30Prize.center) := by

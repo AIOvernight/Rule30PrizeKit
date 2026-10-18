@@ -6,7 +6,7 @@ import Mathlib.Analysis.SpecificLimits.Normed
 /-!
 # Natural boundary: the sufficient direction
 
-Catalog entry [41]. Let `f(z) = ∑ c(t) zᵗ` on the unit disk. Problem 1 is equivalent to `f` having
+Let `f(z) = ∑ c(t) zᵗ` on the unit disk. Problem 1 is equivalent to `f` having
 the unit circle as a natural boundary: no analytic continuation across any arc. The hard direction
 is Szegő's theorem (or Pólya–Carlson). This file proves the easy one.
 
@@ -14,11 +14,11 @@ is Szegő's theorem (or Pólya–Carlson). This file proves the easy one.
   disk `(1 − z^P) f(z)` is the polynomial `∑_{t < T + P} (bₜ − b_{t−P}) zᵗ`.
 * `exists_continuation`: so `f` continues analytically across the circle at `z₀ = e^{iπ/P}`, where
   `1 − z₀^P = 2 ≠ 0`, as the rational function `Q(z) / (1 − z^P)`.
-* `problem1_of_natural_boundary` (catalog [41], sufficient direction).
+* `problem1_of_natural_boundary`.
 
 Sources: G. Szegő, *Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten*, Sitzungsber.
 Preuss. Akad. Wiss. (1922) 88–91; F. Carlson, *Über Potenzreihen mit ganzzahligen Koeffizienten*,
-Math. Z. 9 (1921) 1–13. Catalog entry [41].
+Math. Z. 9 (1921) 1–13.
 -/
 
 namespace Rule30Equivalents.NaturalBoundary
@@ -98,7 +98,7 @@ theorem exists_continuation {b : ℕ → Bool} (h : EventuallyPeriodic b) :
   · have hne : 1 - z ^ P ≠ 0 := hball hz
     rw [div_eq_iff hne, mul_comm, mul_genFun_eq hTP hz1]
 
-/-- **A sufficient condition** (catalog [41]): if the generating function of the center column
+/-- **A sufficient condition**: if the generating function of the center column
 continues analytically across no arc of the unit circle, Problem 1 holds. The converse is Szegő's
 theorem, which is not proved here. -/
 theorem problem1_of_natural_boundary

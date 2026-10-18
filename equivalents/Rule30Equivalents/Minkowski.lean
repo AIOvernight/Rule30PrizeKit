@@ -15,14 +15,14 @@ over the Gauss-map digits, and `questionMark_yMink` proves `?(y) = x₂`: the di
 even, `center_of_mem_run`) gives the same alternating series `∑ (-1)^k 2^-(r₁ + ⋯ + r_k)`
 (`partial_sum_eq`).
 
-* `problem1_iff_minkowski_not_quadratic` (catalog [49]): Problem 1 holds iff `y` is not a quadratic
+* `problem1_iff_minkowski_not_quadratic`: Problem 1 holds iff `y` is not a quadratic
   irrational. `y` is the reciprocal of `[1; r₁, r₂, …]`, so it is a quadratic irrational iff that
   number is. By `Lagrange.quadratic_cfValue_iff` this happens iff the run lengths are eventually
-  periodic, which by `WordForms.problem1_iff_run_lengths` ([29]) is the negation of Problem 1.
+  periodic, which by `WordForms.problem1_iff_run_lengths` is the negation of Problem 1.
 
 Sources: H. Minkowski, *Zur Geometrie der Zahlen* (1904); A. Denjoy, *Sur une fonction réelle de
 Minkowski*, J. Math. Pures Appl. 17 (1938) 105–151; R. Salem, *On some singular monotonic
-functions which are strictly increasing*, Trans. AMS 53 (1943) 427–439. Catalog entry [49].
+functions which are strictly increasing*, Trans. AMS 53 (1943) 427–439.
 -/
 
 namespace Rule30Equivalents.Minkowski
@@ -78,8 +78,7 @@ theorem quadratic_inv_iff {X : ℝ} (hX : X ≠ 0) :
       field_simp at this ⊢
       linear_combination this
 
-/-- **Problem 1 ⟺ `y = ?⁻¹(x₂) = [0; 1, r₁, r₂, …]` is not a quadratic irrational** (catalog
-[49]). -/
+/-- **Problem 1 ⟺ `y = ?⁻¹(x₂) = [0; 1, r₁, r₂, …]` is not a quadratic irrational**. -/
 theorem problem1_iff_minkowski_not_quadratic : Rule30Prize.Problem1 ↔
     ¬ ∃ A B C : ℤ, (A, B, C) ≠ (0, 0, 0) ∧ (A : ℝ) * yMink ^ 2 + B * yMink + C = 0 := by
   have hpos : cfValue yDigits ≠ 0 := by linarith [one_le_cfValue one_le_yDigits]

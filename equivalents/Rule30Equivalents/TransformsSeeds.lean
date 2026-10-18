@@ -65,7 +65,7 @@ then specialized to the center column `c`.
   verbatim, and `problem1_iff_fc` proves Problem 1 equivalent to its
   `Rule30.centerColumn_not_eventually_periodic`, verbatim:
   `¬ ∃ p : ℕ, 0 < p ∧ ∃ N : ℕ, ∀ t : ℕ, N ≤ t → centerColumn (t + p) = centerColumn t`.
-  Its `state t` is the catalog's row `Rule30Jen.cell t` (`FormalConjectures.state_eq_cell`). The
+  Its `state t` is the row `Rule30Jen.cell t` (`FormalConjectures.state_eq_cell`). The
   file's test `centerColumn_prefix` is re-proved by `decide`.
 * **Wolfram (2019).** `NotExists[{p, i}, ForAll[t, t > i, c[t + p] == c[t]]]` with
   `c[t_] := CellularAutomaton[30, {{1}, 0}, {t, {{0}}}]`. Read as intended, with a period `p ≥ 1`
@@ -124,11 +124,11 @@ center column of rule 30 from `s_n` is not eventually periodic (`problem1_iff_st
 
 ## Checks
 
-* Stripe seeds, numerically (exact integer arithmetic, 2026-10-15). For `n ≤ 64` and `t ≤ 2000`,
+* Stripe seeds, numerically (exact integer arithmetic). For `n ≤ 64` and `t ≤ 2000`,
   the row from `s_n` equals the claimed pattern, so its center column is `c`. Among all `8191`
   nonzero seeds supported in `[0, 13)`, exactly `s_0, …, s_12` reproduce `c` for `t ≤ 300`. For
   example `111` first differs at `t = 3`, `1001` at `t = 7` and `10111` at `t = 11`.
-* Wolfram Language, 2026-10-15: `c[5]` is `{1, 1, 0, 1, 1, 1}` (six values), `Last[c[t]]` for
+* Wolfram Language: `c[5]` is `{1, 1, 0, 1, 1, 1}` (six values), `Last[c[t]]` for
   `t = 0, …, 11` is `1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0` (OEIS A051023), and for `1 ≤ t ≤ 20`
   the literal test `c[t + p] == c[t]` holds with `p = 0` and fails for every `1 ≤ p ≤ 5`.
 
@@ -147,8 +147,7 @@ center column of rule 30 from `s_n` is not eventually periodic (`problem1_iff_st
 * The facts about shifts, derivatives, sliding block codes, decimations, residue classes, normal
   forms and cofinal periods are elementary. The proofs here are self-contained, and we cite no
   source for them.
-* The stripe seeds come from this project's survey of equivalent forms (2026); the survey found no
-  literature on them.
+* We know of no literature on the stripe seeds.
 -/
 
 namespace Rule30Equivalents
@@ -680,7 +679,7 @@ def state : ℕ → ℤ → Bool
 /-- `Rule30.centerColumn` from formal-conjectures. -/
 def centerColumn (t : ℕ) : Bool := state t 0
 
-/-- formal-conjectures' `state t` is the catalog's row `Rule30Jen.cell t`. -/
+/-- formal-conjectures' `state t` is the row `Rule30Jen.cell t`. -/
 theorem state_eq_cell : ∀ t, state t = fun i => Rule30Jen.cell t i
   | 0 => rfl
   | t + 1 => by rw [state, state_eq_cell t]; rfl
@@ -796,7 +795,7 @@ theorem stripeSeed_pictures :
         [true, false, true, false, true]] := by
   decide
 
-/-- `s_0` is the catalog's single black cell. -/
+/-- `s_0` is the single black cell. -/
 theorem stripeSeed_zero : stripeSeed 0 = Rule30Realization.seed := by
   funext p
   by_cases hp : p = 0

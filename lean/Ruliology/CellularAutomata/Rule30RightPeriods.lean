@@ -51,10 +51,7 @@ when it is black it lies inside the first period `2^{e_t}` of that diagonal (`ce
 The proved bounds leave the growth of the period `2^{e_j}` between linear (`j + 2 ≤ 2^{e_j + 1}`)
 and `2^{(2j+1)/3}`; numerically `e_j ≈ 0.43 j`.
 
-Sources: the Rule 30 Prize project (2026), right-diagonal analysis; the general-period
-monotonicity, the exact doubling rule, the input periods and the rows at powers of two were
-added by its independent verification passes. The diagonals and their recurrence are in
-`Rule30Diagonals`.
+The diagonals and their recurrence are in `Rule30Diagonals`.
 -/
 
 namespace Ruliology.CellularAutomata

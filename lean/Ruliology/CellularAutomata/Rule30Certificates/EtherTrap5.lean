@@ -7,9 +7,6 @@ Data for `Rule30EtherTrapWidth20`: kernel-checked certificates for `0111` (data:
 `B-edge-trap/cert_0111_20.txt`, converted to column-`21` inputs): from each pure-ether node of
 width `20`, a path to a node with two closed walks of equal length whose white-phase outputs
 differ (`certOK`, `decide +kernel`): `cert_0111_2_0` – `cert_0111_2_3` (phases `0` – `3`).
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 3); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata.Rule30EtherTrap

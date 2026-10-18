@@ -11,8 +11,7 @@ import Mathlib.Probability.ConditionalProbability
 /-!
 # Random configurations
 
-Catalog Section 7, item 11, in measure: the measure-theoretic counterpart of
-[Genericity](Genericity.lean). Start rule 30 from independent fair coins on `ℤ` (`coins ℤ`, the
+The measure-theoretic counterpart of `Genericity`. Start rule 30 from independent fair coins on `ℤ` (`coins ℤ`, the
 uniform Bernoulli product measure).
 
 * `measurePreserving_trace`: the center trace `x ↦ (evol x t 0)ₜ` pushes `coins ℤ` to `coins ℕ`,
@@ -689,7 +688,7 @@ theorem tendstoInDistribution_count :
 the first `n` cells of the center trace is `n/2 + √n · Z / 2` in the limit, with `Z` standard
 normal: `(count - n/2) / √n` converges in distribution to the normal law with variance `1/4`.
 For the single seed, Wolfram's `10⁹` bits show `500,025,038` black cells, `1.6` such standard
-deviations above `n/2` (catalog Section 6.1). -/
+deviations above `n/2`. -/
 theorem tendstoInDistribution_count_trace :
     TendstoInDistribution
       (fun (n : ℕ) (x : ℤ → Bool) =>

@@ -16,8 +16,6 @@ excludes, for example, every period `P ≤ 16358 - T`. Distinctness is certified
 factor start positions sorted by factor value (`permAt`, packed 14 bits per entry): the kernel
 checks that the list covers `0, …, 16358` (`cover_ok`) and that the factor values strictly
 increase along it (`sorted_ok`).
-
-Source: the Rule 30 Prize project (2026), complexity analysis.
 -/
 
 namespace Ruliology.CellularAutomata

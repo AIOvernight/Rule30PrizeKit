@@ -7,7 +7,7 @@ import Mathlib.Data.Nat.Bitwise
 /-!
 # The graph of the center column is Diophantine
 
-Catalog entry [14](c): there is a polynomial equation in `n`, `y` and further unknowns that has a
+There is a polynomial equation in `n`, `y` and further unknowns that has a
 solution exactly when `y = c(n)`. So Problem 1, a `Π⁰₂` sentence, is a `∀∃` sentence about
 polynomial equations. The proof does not need the DPRM theorem. It uses Matiyasevich's
 exponentiation (`Dioph.pow_dioph`) and Mathlib's `Dioph` closure properties.
@@ -19,15 +19,15 @@ exponentiation (`Dioph.pow_dioph`) and Mathlib's `Dioph` closure properties.
   `z + x + y = 2 (x ∨ y)` (`xor_iff`), from the half adder `x + y = (x ⊕ y) + 2 (x ∧ y)`. So one rule
   30 step `Φ(x) = x ⊕ (2x ∨ 4x)` is Diophantine (`Φ_iff`).
 * The whole history up to time `n` is one number `H` with blocks of width `w = 2n + 4`: block `t` is
-  row `a(t)` of rule 30 as an integer ([25]). The conditions `H mod 2^w = 1` and
+  row `a(t)` of rule 30 as an integer (`IntegerRows`). The conditions `H mod 2^w = 1` and
   `⌊H / 2^w⌋ = Φ(H mod 2^{nw})` force these blocks by induction (`mod_eq_blocks`), because rows stay
   below `2^{2t+1}` and so `Φ` acts block by block (`Φ_blocks`). Then `c(n)` is bit `nw + n` of `H`
   (`center_iff`).
-* `center_diophFn` (catalog [14](c)).
+* `center_diophFn`.
 
 Sources: Y. Matiyasevich, *Enumerable sets are Diophantine*, Soviet Math. Dokl. 11 (1970) 354–358;
 M. Davis, *Hilbert's tenth problem is unsolvable*, Amer. Math. Monthly 80 (1973) 233–269;
-É. Lucas (1878); E. Kummer (1852). Catalog entry [14](c).
+É. Lucas (1878); E. Kummer (1852).
 -/
 
 namespace Rule30Equivalents.DiophantineGraph
@@ -394,7 +394,7 @@ theorem sub_dioph {α : Type} {f g : (α → ℕ) → ℕ} (df : Dioph.DiophFn f
 
 /-! ### The graph of the center column -/
 
-/-- **The graph of the center column is Diophantine** (catalog [14](c)): `y = c(n)` iff a fixed
+/-- **The graph of the center column is Diophantine**: `y = c(n)` iff a fixed
 polynomial equation in `n`, `y` and further unknowns has a solution. -/
 theorem center_diophFn :
     Dioph.DiophFn fun v : Fin 1 → ℕ => if Rule30Prize.center (v 0) then 1 else 0 := by

@@ -7,9 +7,6 @@ Data for `Rule30ZeroBoundaryStripeFamily`: kernel-checked front-window cycles (w
 post-arrival horizon `31`), as `Rule30ZeroBoundaryStripeFront.Cycle` certificates whose
 segments are checked by `seg` with `decide +kernel` and joined by `seg_sound` and `path_append`:
 `cyc_4_1` (length `65536`), in four `seg` checks of `16384` steps.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 2); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront.StripeCycles1

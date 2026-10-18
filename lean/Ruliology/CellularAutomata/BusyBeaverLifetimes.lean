@@ -1,8 +1,6 @@
 /-!
 # Busy-beaver lifetimes of cellular automata
 
-Catalog entry `ca-busy-beaver-lifetimes`.
-
 Wolfram, *Why Does Biological Evolution Work? A Minimal Model for Biological Evolution and Other
 Adaptive Processes* (2024), section "Computation Theoretic Perspectives and Busy Beavers":
 <https://writings.stephenwolfram.com/2024/05/why-does-biological-evolution-work-a-minimal-model-for-biological-evolution-and-other-adaptive-processes/>

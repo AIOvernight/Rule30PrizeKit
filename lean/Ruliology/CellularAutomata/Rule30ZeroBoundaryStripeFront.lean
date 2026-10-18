@@ -22,9 +22,6 @@ time `d - 1` at once (`front_sound`).
 * `row3`, `devB`, `family_of_class`: the family `S[1..m] · b₀ b₁ b₂ · 0^∞` reduces to its class
   data; `Rule30ZeroBoundaryStripeFamily` finishes it with the cycles of
   `Rule30Certificates.ZeroBoundaryStripeCycles0` – `ZeroBoundaryStripeCycles2`.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 2), stripe-prefix family; adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

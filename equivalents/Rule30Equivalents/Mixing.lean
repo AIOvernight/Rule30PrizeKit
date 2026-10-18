@@ -12,7 +12,7 @@ import Mathlib.Dynamics.Ergodic.Function
 /-!
 # Rule 30 preserves the fair-coin measure and is mixing
 
-Catalog Section 7, item 11, continued: rule 30 as a measure-preserving dynamical system on
+Rule 30 as a measure-preserving dynamical system on
 `{0,1}^ℤ` with the fair-coin measure `coins ℤ`. Everything comes from left-permutivity: flipping
 the coin at `a - t` flips the cell `(t, a)` (`Genericity.evol_flip_at`), preserves the measure, and
 changes no cell `(t, i)` with `i > a`. Adding the cells of a finite window `I` from the left, each

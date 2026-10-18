@@ -44,7 +44,7 @@ shift `β^t x_0 = N_t + x_t` (`pow_mul_value`, with `N_t = lead β b t`), the ge
 (`mem_of_eventuallyPeriodic`: an eventually periodic `b` has its value in every subfield of `ℝ`
 containing `β`) and the pigeonhole step (`eventuallyPeriodic_of_finite_tails`: finitely many tail
 values give eventual periodicity once the tail value determines the digit).
-[PisotNumbers](PisotNumbers.lean) uses them for Pisot bases.
+`PisotNumbers` uses them for Pisot bases.
 
 The case split takes care of double expansions. In base 2, `0.0111…₂ = 0.1000…₂`: equal tail
 values need not have equal digits. That only happens for eventually constant sequences, and when

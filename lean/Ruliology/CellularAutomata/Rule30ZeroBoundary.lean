@@ -49,9 +49,6 @@ system, the **zero-boundary left half** (ZBL), in one encoding: `zrow L t k` is 
 `alternating_right_col1_clock`, and `free_bits_no00_no11111`: under an alternating center the free
 bits `cell (T + 2 k + 1) (-1)` contain neither `00` (`Rule30PeriodTwo.golden`) nor `11111`
 (`col1_black_among_five`, a kernel check over the light cone of columns `1..11`).
-
-Sources: the Rule 30 Prize project (2026), period-2 program, rounds 1 and 2 (backward determinism,
-reconstruction map, monovariant and reformulation studies, consolidated here).
 -/
 
 namespace Ruliology.CellularAutomata

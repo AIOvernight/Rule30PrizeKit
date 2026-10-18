@@ -45,10 +45,9 @@ its start after `m · |w|` steps is proved once for all certificates (`Cert.iter
 More instances: `Rule30StripCertificateTable` (30 words of length `8 … 13`, bitmask
 certificates). The rank-certificate words `0^6 1 1` and `0^9 1 0 1` are not in that table.
 
-Sources: the Rule 30 Prize project (2026): bitmask certificates from its generalization of Jen's
-argument, rank certificates and their data from its trap search (exported by a script and
-checked here by the kernel). Both rest on E. Jen, *Global properties of cellular automata*,
-J. Stat. Phys. 43 (1986) 219–242.
+The certificates were found by computer search and are checked here by the kernel. Source: E. Jen,
+*Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, whose argument the
+bitmask certificates generalize.
 -/
 
 namespace Ruliology.CellularAutomata

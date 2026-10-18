@@ -19,8 +19,7 @@ Then column `1` is eventually periodic, which Jen's theorem forbids.
   `u = 0, 00, 000, 0000, 0100` and `r ≥ 18`, and for `u = 010, 0010, 0110` and `r ≥ 27`.
 * `no_period_black_run_then_white`: the instance `1^r 0`, `r ≥ 18`, spelled out.
 
-Source: the Rule 30 Prize project's right-half absorption analysis (2026); the blocks and their
-`j0` were found by a SAT search and are checked here by the kernel.
+The blocks and their `j0` were found by a SAT search and are checked here by the kernel.
 -/
 
 namespace Ruliology.CellularAutomata

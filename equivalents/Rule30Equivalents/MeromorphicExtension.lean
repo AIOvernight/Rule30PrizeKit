@@ -8,7 +8,7 @@ import Mathlib.Analysis.Calculus.Deriv.Polynomial
 /-!
 # No meromorphic extension beyond the unit disk
 
-Catalog entry [41], disk form. Let `f(z) = ∑ c(t) zᵗ` on the unit disk. **Problem 1 holds iff `f`
+Let `f(z) = ∑ c(t) zᵗ` on the unit disk. **Problem 1 holds iff `f`
 extends meromorphically to no disk `‖z‖ < R` with `R > 1`**: there is no nonzero polynomial `Q`
 for which `Q · f` extends holomorphically to such a disk (`problem1_iff_no_meromorphic_extension`).
 
@@ -235,9 +235,9 @@ theorem exists_meromorphicOn_of_eventuallyPeriodic {b : ℕ → Bool} (h : Event
     show _ / _ = _
     rw [div_eq_iff hne, mul_comm, mul_genFun_eq hTP hz]
 
-/-- **[41], disk form, with Mathlib's `MeromorphicOn`.** Problem 1 holds iff the generating function
-of the center column agrees on the unit disk with no function that is meromorphic on a disk of
-radius `R > 1`. -/
+/-- **No meromorphic extension, with Mathlib's `MeromorphicOn`.** Problem 1 holds iff the
+generating function of the center column agrees on the unit disk with no function that is
+meromorphic on a disk of radius `R > 1`. -/
 theorem problem1_iff_no_meromorphicOn : Rule30Prize.Problem1 ↔
     ∀ R : ℝ, 1 < R → ¬ ∃ g : ℂ → ℂ, MeromorphicOn g (Metric.ball 0 R) ∧
       ∀ z : ℂ, ‖z‖ < 1 → g z = genFun c z := by
@@ -247,8 +247,8 @@ theorem problem1_iff_no_meromorphicOn : Rule30Prize.Problem1 ↔
   obtain ⟨g, hg, hgb⟩ := exists_meromorphicOn_of_eventuallyPeriodic hep
   exact h 2 one_lt_two ⟨g, fun x _ => hg x (Set.mem_univ x), hgb⟩
 
-/-- **[41], disk form.** Problem 1 holds iff the generating function of the center column extends
-meromorphically to no disk of radius `R > 1`. -/
+/-- **No meromorphic extension.** Problem 1 holds iff the generating function of the center
+column extends meromorphically to no disk of radius `R > 1`. -/
 theorem problem1_iff_no_meromorphic_extension : Rule30Prize.Problem1 ↔
     ∀ R : ℝ, 1 < R → ¬ HasMeromorphicExtension c R :=
   ⟨fun h1 _ hR hm => h1 (eventuallyPeriodic_of_meromorphicExtension hR hm),

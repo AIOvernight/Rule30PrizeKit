@@ -1,7 +1,7 @@
 /-!
 # Rule 30 on a cyclic register: a corrected Feynman theorem
 
-Catalog entry. Wolfram, *Random Sequence Generation by Cellular Automata* (1986, pp. 150–151),
+Wolfram, *Random Sequence Generation by Cellular Automata* (1986, pp. 150–151),
 reports a result of C. and R. Feynman (private communication) about predecessors under rule 30
 on a cyclic register. The paper prints the condition backwards. The corrected statement, checked
 by brute force for `N ≤ 20` and proved here for every register length `N ≥ 1`, is:

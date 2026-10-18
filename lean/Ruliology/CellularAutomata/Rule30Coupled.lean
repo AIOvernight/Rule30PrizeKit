@@ -20,12 +20,9 @@ two driven neighbours (`coupled_of_evol`). Conversely, gluing two driven halves 
   periodic `ω` with a black cell.
 * `problem1_of_CQ`: the family implies Problem 1.
 
-The period-specific reductions of the catalog drop one half of this system: `Q01` and the period-3
+The period-specific reductions drop one half of this system: `Q01` and the period-3
 statements `Q001`, `C3`, `C3w` and `C3s001` keep the left half; Absorption and `AbsorptionT` keep the
 right half.
-
-Sources: the Rule 30 Prize project (2026); CA-structure survey (the coupled-halves form, catalog
-entry [33]).
 -/
 
 namespace Ruliology.CellularAutomata

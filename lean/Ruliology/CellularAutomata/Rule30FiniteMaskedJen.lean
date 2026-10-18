@@ -19,8 +19,8 @@ a leftmost black cell `lo`. Column `i` of the evolution is `t ↦ evol x t i`.
   `n ≥ T + P` and `m = n + i - lo` contains a time `s` at which column `i` is white and column
   `i + 1` breaks period `P`. For the single seed (`lo = 0`, `i = 0`) this is `[n, 2n)`.
 
-Sources: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
-masked and window forms are from the Rule 30 Prize project (2026), `Rule30MaskedJen`.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
+masked and window forms are those of `Rule30MaskedJen`.
 -/
 
 namespace Ruliology.CellularAutomata

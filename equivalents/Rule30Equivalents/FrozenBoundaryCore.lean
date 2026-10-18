@@ -42,9 +42,8 @@ bit `1` white, bit `0` blinking), and neither has the step `(1,1,1)`. Earlier co
 matched diagonal pairs with finite seeds, suggest that a further 3/16 of the residues of `(1,0,1)`
 reduce at greater depth. That has not been proved.
 
-Sources: the Rule 30 Prize project (2026), frozen-boundary study of 2026-10-17. The shift identities
-explain the numerical classification there: every residue of these three steps matched a finite
-seed at depth at most 2.
+Numerically, every residue of these three steps matches a finite seed at depth at most 2, and the
+shift identities explain why.
 -/
 
 namespace Rule30Equivalents.FrozenBoundaryCore

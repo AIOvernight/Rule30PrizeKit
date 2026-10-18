@@ -20,8 +20,8 @@ Two single-seed patterns are column `-1` of the usual rule-30 pattern in disguis
 By mirror symmetry, rule 86 (the mirror image of rule 30) and rule 149 (that of rule 135) have
 the same single-seed center columns as rules 30 and 135; this is not formalized here.
 
-Sources: the Rule 30 Prize project (2026); the reduction to columns `0` and `-1` is E. Jen,
-*Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for the
+reduction to columns `0` and `-1`.
 -/
 
 namespace Ruliology.CellularAutomata

@@ -25,13 +25,11 @@ ether column keeps its periodic values forever (`trap_invariant`).
 * `drv`: the right half driven by a prescribed column `0`; `cell_eq_drv`: the true right half
   from time `T` is the half driven by the true center column.
 * `never_enters_S0001`, `never_enters_S0011`, `never_enters_S0111`: explicit finitely supported
-  right halves that never enter the round-1 certified traps `S_w`; they stay in deeper members of
+  right halves that never enter the certified traps `S_w`; they stay in deeper members of
   the family forever (`config_pure_ether`).
 * `Absorption` (an open conjecture, stated as a `Prop`), `absorption_excludes` and
   `least_period_four_of_absorption`: absorption into the family for every finite right half
   excludes `w^∞` as a tail of the center column, for every transient.
-
-Sources: the Rule 30 Prize project (2026), least-period-4 program, round 2 (edge-trap study).
 -/
 
 namespace Ruliology.CellularAutomata
@@ -461,7 +459,7 @@ theorem config_pure_ether (w : List Bool) (j0 s k b : Nat) (hal : aligned w j0 s
   rw [Nat.zero_add, hE' (i + 1) (by omega)]
   exact ether_congr rfl (by omega)
 
-/-- The certified trap of round 1 (`newideas/trap_0001_16.txt`), 109 states of width 16. -/
+/-- A certified trap: 109 states of width 16. -/
 def S0001 : List (Nat × List Bool) := [
   (0, [false, false, true, false, false, false, true, false, true, false, true, false, false, false, false, false]),
   (0, [false, false, true, false, false, false, true, false, true, false, true, false, false, false, false, true]),
@@ -574,7 +572,7 @@ def S0001 : List (Nat × List Bool) := [
   (3, [true, false, true, true, true, false, true, false, true, false, true, true, true, true, true, true])
 ]
 
-/-- The certified trap of round 1 (`newideas/trap_0011_16.txt`), 188 states of width 16. -/
+/-- A certified trap: 188 states of width 16. -/
 def S0011 : List (Nat × List Bool) := [
   (0, [false, true, false, false, false, true, false, true, false, true, false, false, false, false, false, false]),
   (0, [false, true, false, false, false, true, false, true, false, true, false, false, false, false, false, true]),
@@ -766,7 +764,7 @@ def S0011 : List (Nat × List Bool) := [
   (3, [false, true, true, true, false, true, false, true, false, true, true, true, true, true, true, true])
 ]
 
-/-- The certified trap of round 1 (`newideas/trap_0111_14.txt`), 188 states of width 14. -/
+/-- A certified trap: 188 states of width 14. -/
 def S0111 : List (Nat × List Bool) := [
   (0, [false, false, true, false, false, true, false, true, false, false, false, false, false, false]),
   (0, [false, false, true, false, false, true, false, true, false, false, false, false, false, true]),
@@ -983,8 +981,8 @@ theorem never_enters_aux (w : List Bool) (j0 s k b : Nat) (hal : aligned w j0 s 
   exact hS (t % 4) (Nat.mod_lt _ (by decide))
 
 /-- **Refutation of fixed-trap entry, w = 0001.** The finite right half `x` (ether columns 1..17,
-a wall state in columns 18..30, white beyond) driven by `0001^∞` never enters the round-1 trap
-`S0001` (width 16). -/
+a wall state in columns 18..30, white beyond) driven by `0001^∞` never enters the trap `S0001`
+(width 16). -/
 theorem never_enters_S0001 (t : Nat) : node w0001 (config 6 0 17 ws0) t 16 ∉ S0001 :=
   never_enters_aux w0001 6 0 17 16 aligned_0001_6 (by decide) (by decide) ws0 ws0_mem rfl S0001
     pure_not_in_S0001 t

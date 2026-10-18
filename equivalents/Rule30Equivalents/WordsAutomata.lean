@@ -33,8 +33,8 @@ Mathlib's vocabulary for eventual periodicity:
   `c T, c (T + 1), …, c (T + n - 1)` has period `P` (Mathlib's `List.HasPeriod`).
 
 Eventual words:
-* `problem1_iff_no_word`: the catalog's `Rule30StripCertificates.problem1_iff_no_word`: no nonempty
-  word `w` has `c` equal to `w w w …` from some time on. The catalog's `EventuallyWord w` is
+* `problem1_iff_no_word`, as `Rule30StripCertificates.problem1_iff_no_word`: no nonempty word `w`
+  has `c` equal to `w w w …` from some time on. `Rule30StripCertificates.EventuallyWord w` is
   `EventuallyWord c` here (`eventuallyWord_center_iff`), and
   `eventuallyPeriodic_iff_exists_eventuallyWord` is the statement for every `b`.
 * `problem1_iff_no_eventual_word`: for every nonempty `w` and every `T`, some `n` has
@@ -282,7 +282,7 @@ theorem problem1_iff_no_hasPeriod_tail : Rule30Prize.Problem1 ↔
 /-! ### Eventual words -/
 
 /-- `b` is the word `w` repeated forever from some time `T` on: `b t = w[(t - T) mod |w|]` for
-`t ≥ T`. For `b = c` this is the catalog's `Rule30StripCertificates.EventuallyWord`. -/
+`t ≥ T`. For `b = c` this is `Rule30StripCertificates.EventuallyWord`. -/
 def EventuallyWord (b : ℕ → Bool) (w : List Bool) : Prop :=
   ∃ T, ∀ t, T ≤ t → b t = w.getD ((t - T) % w.length) false
 
@@ -333,12 +333,12 @@ theorem eventuallyPeriodic_iff_exists_eventuallyWord (b : ℕ → Bool) :
   ⟨exists_eventuallyWord_of_eventuallyPeriodic,
     fun ⟨_, hw, h⟩ => eventuallyPeriodic_of_eventuallyWord hw h⟩
 
-/-- The catalog's `Rule30StripCertificates.EventuallyWord` is `EventuallyWord c`. -/
+/-- `Rule30StripCertificates.EventuallyWord` is `EventuallyWord c`. -/
 theorem eventuallyWord_center_iff (w : List Bool) :
     Rule30StripCertificates.EventuallyWord w ↔ EventuallyWord c w := Iff.rfl
 
-/-- **Problem 1 as the exclusion of every word**, the catalog's form
-(`Rule30StripCertificates.problem1_iff_no_word`). -/
+/-- **Problem 1 as the exclusion of every word**, as in
+`Rule30StripCertificates.problem1_iff_no_word`. -/
 theorem problem1_iff_no_word : Rule30Prize.Problem1 ↔
     ∀ w : List Bool, w ≠ [] → ¬ Rule30StripCertificates.EventuallyWord w :=
   Rule30StripCertificates.problem1_iff_no_word
@@ -1386,7 +1386,7 @@ theorem lt_maxOrderComplexity_iff (b : ℕ → Bool) (n m : ℕ) :
   · intro h m' hm' hc
     exact h (hc.mono hm')
 
-/-- **Problem 1, maximum-order complexity** (catalog [28]): Problem 1 holds iff the maximum-order
+/-- **Problem 1, maximum-order complexity**: Problem 1 holds iff the maximum-order
 complexity of the prefixes of the center column tends to infinity. -/
 theorem problem1_iff_maxOrderComplexity_tendsto : Rule30Prize.Problem1 ↔
     Filter.Tendsto (maxOrderComplexity c) Filter.atTop Filter.atTop := by
@@ -1412,7 +1412,7 @@ theorem problem1_iff_maxOrderComplexity_tendsto : Rule30Prize.Problem1 ↔
     have := (lt_maxOrderComplexity_iff c n m).1 (by have := hn n le_rfl; omega)
     exact this fun i j _ _ hw => hm i j hw
 
-/-- **Problem 1, no feedback shift register from the start** (catalog [28]). -/
+/-- **Problem 1, no feedback shift register from the start**. -/
 theorem problem1_iff_no_feedback_from_zero : Rule30Prize.Problem1 ↔
     ∀ m, ¬ ∃ F : (Fin m → Bool) → Bool, ∀ i, c (i + m) = F fun k => c (i + k) := by
   rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_feedback_from_zero]

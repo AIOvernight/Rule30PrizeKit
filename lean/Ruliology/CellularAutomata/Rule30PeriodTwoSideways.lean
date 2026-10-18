@@ -48,10 +48,7 @@ of steps (the cut ether `Rule30ZeroBoundaryBarriers.c7cut`). So
 decreases at every double step over which the center flips twice. This is the two-sided form of
 barrier B1 (`Rule30ZeroBoundaryBarriers.no_finite_abstract_ranking`).
 
-Sources: the Rule 30 Prize project (2026). The finite-configuration form is from the equivalents
-survey (2026-10-15). The sideways form, the exact-death identity and the `R = ∅` milestone are
-from the deep dive of 2026-10-17, where the identity was first observed numerically for
-`R = ∅` and widths up to 300.
+The exact-death identity was first observed numerically, for `R = ∅` and widths up to `300`.
 -/
 
 namespace Ruliology.CellularAutomata

@@ -11,10 +11,8 @@ step is a bit operation on the packed row (`step_toFun`).
   even step `< 34`. So no start of width `≤ 16` is constrained forever (`Q01` for these widths).
 * `q01_width_le_15_odd`: the other phase, for widths `≤ 15`.
 
-These are kernel-checked instances of `Q01` at small sizes. Exhaustive searches outside Lean (Rule 30
-Prize project) go further, but are not kernel-checked; `Q01` itself is open.
-
-Sources: the Rule 30 Prize project (2026), period-2 program, round 2 (monovariant study).
+These are kernel-checked instances of `Q01` at small sizes. Exhaustive searches outside Lean go
+further, but are not kernel-checked; `Q01` itself is open.
 -/
 
 namespace Ruliology.CellularAutomata

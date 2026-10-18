@@ -117,8 +117,7 @@ Special cases:
 ## Sources
 
 * The `𝔽₂` case of the rational and recurrence forms is `Rule30Equivalents.PowerSeriesF2`, with
-  sources there. The window argument follows that file, and also the survey's scratch proof
-  `R30Test.problem1_iff_no_recurrence`, which proved the `LinearRecurrence` form over any field.
+  sources there. The window argument follows that file.
 * Kronecker's theorem says that an infinite Hankel matrix `(s_{i+j})` has finite rank `r` iff
   `D_r ≠ 0` and `D_j = 0` for all `j > r`, where `D_j` is its leading `j × j` minor. A companion
   theorem says that the matrix has finite rank iff `∑ⱼ sⱼ z^{-j-1}` is a rational function. Both are
@@ -126,15 +125,13 @@ Special cases:
   arXiv:1005.3032 (2010). Tyaglov attributes the first to L. Kronecker, *Algebraische Reduction der
   Schaaren bilinearer Formen*, S.-B. Akad. Berlin (1890), and the second to F. R. Gantmacher,
   *The Theory of Matrices*, vol. 2, Chelsea (1959). The proofs here are self-contained and work over
-  any field. The determinant-free rank argument is standard linear algebra; the critic's note in the
-  catalog survey sketches it.
+  any field. The determinant-free rank argument is standard linear algebra.
 * The Skolem–Mahler–Lech theorem gives the converse of `problem1_of_not_zero_set` over `ℚ`; it is
   proved in `SkolemMahlerLech`.
   It says that over a field of characteristic `0`, the zero set of a linear recurrence sequence is a
   finite set plus finitely many arithmetic progressions; see C. Lech, *A note on recurring series*,
   Ark. Mat. 2 (1953) 417–421. The theorem is not in Mathlib, and this file does not prove it.
-* `H₁, …, H₁₂` are the values in the `hankel` entry of the catalog survey. They were recomputed
-  exactly from the first 23 cells of the center column.
+* `H₁, …, H₁₂` were computed exactly from the first 23 cells of the center column.
 -/
 
 namespace Rule30Equivalents.LinearRelations

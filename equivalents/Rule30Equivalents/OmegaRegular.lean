@@ -12,7 +12,7 @@ infinitely often. A set of infinite words is ω-regular when a Büchi automaton 
 
 * `eventuallyPeriodic_iff_omegaRegular_singleton`: the singleton `{b}` is ω-regular iff `b` is
   eventually periodic.
-* `problem1_iff_not_omega_regular` (catalog [36], Büchi form): Problem 1 holds iff no Büchi
+* `problem1_iff_not_omega_regular`: Problem 1 holds iff no Büchi
   automaton accepts exactly the center column.
 
 **Proof.** If `b` has period `P` from `T`, the lasso automaton with states `0, …, T + P - 1` and a
@@ -27,7 +27,6 @@ By Büchi's theorem the ω-regular sets are the sets definable in monadic second
 
 Sources: J. R. Büchi, *On a decision method in restricted second order arithmetic* (1962);
 W. Thomas, *Automata on infinite objects*, Handbook of Theoretical Computer Science B (1990).
-Catalog entry [36].
 -/
 
 namespace Rule30Equivalents.OmegaRegular
@@ -238,7 +237,7 @@ theorem eventuallyPeriodic_iff_omegaRegular_singleton (b : ℕ → Bool) :
   refine ⟨fun ⟨T, P, hP, hper⟩ => ⟨lasso b T P hP, lasso_accepts_iff b T P hP hper⟩,
     fun ⟨B, hB⟩ => eventuallyPeriodic_of_accepts_iff B hB⟩
 
-/-- **Problem 1 ⟺ no Büchi automaton accepts exactly the center column** (catalog [36]). -/
+/-- **Problem 1 ⟺ no Büchi automaton accepts exactly the center column**. -/
 theorem problem1_iff_not_omega_regular : Rule30Prize.Problem1 ↔
     ¬ ∃ B : Buchi Bool, ∀ w, B.Accepts w ↔ w = Rule30Prize.center :=
   problem1_iff_not_eventuallyPeriodic.trans (not_congr (eventuallyPeriodic_iff_omegaRegular_singleton c))

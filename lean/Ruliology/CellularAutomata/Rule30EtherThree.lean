@@ -21,16 +21,13 @@ every finite right half into the family excludes `w^∞` as a tail of the center
 
 Unlike period 4, no wall is known: `no_wall_le_12` (`Rule30EtherThreeNoWall`) proves (kernel
 certificate) that no attachment column has a wall of width `≤ 12`, and an exhaustive C search
-(Rule 30 Prize project, period-3 study) finds none at widths `≤ 23`. The statements here are
+finds none at widths `≤ 23`. The statements here are
 therefore a framework, conditional on a wall; with an empty `W`, `Absorption3` is false and the
 theorems are vacuous. For `001` a different trap exists (`Rule30EtherThreeTrap`).
 
 The period-3 study spans the modules `Rule30EtherThree`, `Rule30EtherThreeNoWall`,
 `Rule30EtherThreeTrap`, `Rule30EtherThreeReach`, `Rule30EtherThreeLeft` and
 `Rule30EtherThreeSkeleton`, all in the namespace `Rule30EtherThree`.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): period-3 study
-(`p3-ether`); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

@@ -18,7 +18,7 @@ first) as input:
 `2`-kernel, and reading the digit `b` moves from `g` to `n ↦ g(2n + b)`. So Problem 3, even in the
 verbal reading, implies that `c` is not `2`-automatic (`not_isAutomatic_of_problem3Verbal`), hence
 Problem 1 (`problem1_of_problem3Verbal`). This is the chain "Problem 3 ⟹ no polylog-time digit
-extraction ⟹ c is not automatic ⟹ Problem 1" of catalog Section 6.2.
+extraction ⟹ c is not automatic ⟹ Problem 1".
 -/
 
 namespace Rule30Equivalents.ProblemThree

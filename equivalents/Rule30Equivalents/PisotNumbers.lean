@@ -7,7 +7,7 @@ import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 /-!
 # Problem 1 in every Pisot base `β > 2`
 
-Catalog entry [48]. Read the center column as the digits of `x_β = ∑ c(t) β^-(t+1)`. **For every
+Read the center column as the digits of `x_β = ∑ c(t) β^-(t+1)`. **For every
 Pisot number `β > 2`, Problem 1 holds iff `x_β ∉ ℚ(β)`** (`problem1_iff_not_mem_adjoin`); more
 generally, a `Bool` sequence is eventually periodic iff its value in base `β` lies in `ℚ(β)`
 (`eventuallyPeriodic_iff_mem_adjoin`). A Pisot number is a real algebraic integer `β > 1` whose
@@ -221,7 +221,7 @@ theorem eventuallyPeriodic_iff_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) (b : 
       (IntermediateField.mem_adjoin_simple_self ℚ β) h,
     eventuallyPeriodic_of_mem_adjoin hP hβ⟩
 
-/-- **[48] for every Pisot number `β > 2`.** Problem 1 holds iff `x_β = ∑ c(t) β^-(t+1)` does not
+/-- **Every Pisot base `β > 2`.** Problem 1 holds iff `x_β = ∑ c(t) β^-(t+1)` does not
 lie in `ℚ(β)`. -/
 theorem problem1_iff_not_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) :
     Rule30Prize.Problem1 ↔ value β c ∉ IntermediateField.adjoin ℚ ({β} : Set ℝ) :=

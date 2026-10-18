@@ -39,9 +39,6 @@ from a finite row whose leftmost black cell is at `-T`.
 `Q01` is not proved here. As numerical evidence only: exhaustive searches in the Rule 30 Prize
 project found that for every start of support width `W ≤ 39`, column `-1` turns white at some
 even step, within roughly `1.25 W` to `2 W` steps.
-
-Sources: the Rule 30 Prize project (2026), period-2 analysis; the effective boundary and the
-reduction are from its left-half analysis.
 -/
 
 namespace Ruliology.CellularAutomata

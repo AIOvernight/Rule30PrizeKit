@@ -9,28 +9,28 @@ import Mathlib.NumberTheory.Real.GoldenRatio
 /-!
 # Problem 1 for words: certificates, gaps, run lengths, repetitions and borders
 
-* `problem1_iff_prefix_certificates` (catalog [24]): for every `N` some finite prefix has more than
+* `problem1_iff_prefix_certificates`: for every `N` some finite prefix has more than
   `N` distinct factors of one length. For a fixed `N` the condition is a finite search
   (`prefixFactors` is a `Finset`); `Rule30FactorWindow` is the kernel-checked instance
   `N = 16358`.
-* `problem1_iff_black_gaps`, `problem1_iff_white_gaps`, `problem1_iff_run_lengths` (catalog [29]):
+* `problem1_iff_black_gaps`, `problem1_iff_white_gaps`, `problem1_iff_run_lengths`:
   the gaps between consecutive black cells, the gaps between consecutive white cells, and the
   lengths of the runs are not eventually periodic. The general fact is
   `eventuallyPeriodic_iff_gap`: a `Bool` sequence with infinitely many `true` values is eventually
   periodic iff the gaps between its `true` values are.
 
-* `problem1_iff_late_long_unbordered_factors` (catalog [51]): Problem 1 holds iff every tail has
+* `problem1_iff_late_long_unbordered_factors`: Problem 1 holds iff every tail has
   unbordered factors of unbounded length. The sufficient direction is
   `problem1_of_late_long_unbordered_factors`. The converse is the Ehrenfeucht–Silberger theorem for
   infinite words, `Lyndon.eventuallyPeriodic_of_bordered`, proved through the Lyndon factorization.
 
-* `problem1_iff_infinitely_many_prefixes_without_golden_power` (catalog [47]): Problem 1 holds iff
+* `problem1_iff_infinitely_many_prefixes_without_golden_power`: Problem 1 holds iff
   infinitely many prefixes end with no repetition of exponent at least `φ²`. The sufficient
   direction is `problem1_of_infinitely_many_prefixes_without_golden_power`. The converse is the
   theorem of Mignosi, Restivo and Salemi (1998), `GoldenPowers.eventuallyPeriodic_of_gp`.
 
 One sufficient condition:
-* `problem1_of_lz_unbounded` (catalog [37]): if the Lempel–Ziv (1976) complexity of the prefixes is
+* `problem1_of_lz_unbounded`: if the Lempel–Ziv (1976) complexity of the prefixes is
   unbounded, Problem 1 holds (`lzComplexity_le_of_eventuallyPeriodic`). The equivalence is proved in
   `LempelZiv`.
 -/
@@ -39,7 +39,7 @@ namespace Rule30Equivalents.WordForms
 
 open Ruliology.CellularAutomata
 
-/-! ### [24] Finite certificates -/
+/-! ### Finite certificates -/
 
 /-- The distinct factors of length `n` that start below `M`, as lists. -/
 def prefixFactors (b : ℕ → Bool) (n M : ℕ) : Finset (List Bool) :=
@@ -89,14 +89,14 @@ theorem unbounded_iff_prefix_certificates (b : ℕ → Bool) :
     obtain ⟨n, M, hM⟩ := h C
     exact ⟨n, lt_of_lt_of_le hM (card_prefixFactors_le b n M)⟩
 
-/-- **Problem 1 by finite certificates** (catalog [24]): for every `N`, some prefix has more than
+/-- **Problem 1 by finite certificates**: for every `N`, some prefix has more than
 `N` distinct factors of one length. -/
 theorem problem1_iff_prefix_certificates : Rule30Prize.Problem1 ↔
     ∀ N : ℕ, ∃ n M : ℕ, N < ((Finset.range M).image
       fun i => List.ofFn fun j : Fin n => Rule30Prize.center (i + j)).card :=
   ShiftOrbit.problem1_iff_ncard_factors_unbounded.trans (unbounded_iff_prefix_certificates c)
 
-/-! ### [29] Gaps and run lengths -/
+/-! ### Gaps and run lengths -/
 
 /-- The `k`-th time, counting from `0`, at which `b` is `true`. -/
 noncomputable def trueTime (b : ℕ → Bool) (k : ℕ) : ℕ := Nat.nth (fun t => b t = true) k
@@ -247,7 +247,7 @@ noncomputable def blackGap (n : ℕ) : ℕ :=
   Nat.nth (fun t => Rule30Prize.center t = true) (n + 1) -
     Nat.nth (fun t => Rule30Prize.center t = true) n
 
-/-- **Problem 1 ⟺ the gaps between black cells are not eventually periodic** (catalog [29]). -/
+/-- **Problem 1 ⟺ the gaps between black cells are not eventually periodic**. -/
 theorem problem1_iff_black_gaps : Rule30Prize.Problem1 ↔
     ¬ ∃ T P, 0 < P ∧ ∀ n, T ≤ n → blackGap (n + P) = blackGap n :=
   problem1_iff_not_eventuallyPeriodic.trans (not_congr (eventuallyPeriodic_iff_gap infinite_black))
@@ -274,14 +274,14 @@ theorem runLength_eq : runLength = gap (TransformsSeeds.xorDeriv c) := by
   unfold runLength gap trueTime
   rw [hp]
 
-/-- **Problem 1 ⟺ the run lengths are not eventually periodic** (catalog [29]). -/
+/-- **Problem 1 ⟺ the run lengths are not eventually periodic**. -/
 theorem problem1_iff_run_lengths : Rule30Prize.Problem1 ↔
     ¬ ∃ T P, 0 < P ∧ ∀ k, T ≤ k → runLength (k + P) = runLength k := by
   rw [runLength_eq]
   exact TransformsSeeds.problem1_iff_xor_derivative.trans
     (not_congr (eventuallyPeriodic_iff_gap infinite_changes))
 
-/-! ### [47] Repetitions of exponent `φ²`: the sufficient direction -/
+/-! ### Repetitions of exponent `φ²`: the sufficient direction -/
 
 /-- The prefix of length `n` ends with a repetition of exponent at least `φ²`: a suffix of length
 `ℓ ≥ φ² p` with period `p`. -/
@@ -300,7 +300,7 @@ theorem eventually_endsWithGoldenPower {b : ℕ → Bool} (h : EventuallyPeriodi
   have h3 : (0 : ℝ) ≤ P := Nat.cast_nonneg P
   nlinarith
 
-/-- **A sufficient condition** (catalog [47]): if infinitely many prefixes of the center column end
+/-- **A sufficient condition**: if infinitely many prefixes of the center column end
 with no repetition of exponent at least `φ²`, Problem 1 holds. -/
 theorem problem1_of_infinitely_many_prefixes_without_golden_power :
     (∀ N, ∃ n, N ≤ n ∧ ¬ EndsWithGoldenPower c n) → Rule30Prize.Problem1 := by
@@ -315,8 +315,8 @@ theorem gp_of_endsWithGoldenPower {b : ℕ → Bool} {n : ℕ} (h : EndsWithGold
   have hneed : GoldenPowers.need p ≤ ℓ := Nat.ceil_le.2 hφ
   exact ⟨p, hp, by omega, fun i h1 h2 => hper i (by omega) h2⟩
 
-/-- **Problem 1 ⟺ infinitely many prefixes end with no repetition of exponent `φ²`** (catalog
-[47]). The converse direction is the theorem of Mignosi, Restivo and Salemi
+/-- **Problem 1 ⟺ infinitely many prefixes end with no repetition of exponent `φ²`**. The
+converse direction is the theorem of Mignosi, Restivo and Salemi
 (`GoldenPowers.eventuallyPeriodic_of_gp`). -/
 theorem problem1_iff_infinitely_many_prefixes_without_golden_power : Rule30Prize.Problem1 ↔
     ∀ N, ∃ n, N ≤ n ∧ ¬ EndsWithGoldenPower c n := by
@@ -325,7 +325,7 @@ theorem problem1_iff_infinitely_many_prefixes_without_golden_power : Rule30Prize
   push Not at hall
   exact hP (GoldenPowers.eventuallyPeriodic_of_gp fun n hn => gp_of_endsWithGoldenPower (hall n hn))
 
-/-! ### [51] Unbordered factors: the sufficient direction -/
+/-! ### Unbordered factors: the sufficient direction -/
 
 open Lyndon (Bordered)
 
@@ -342,7 +342,7 @@ theorem bordered_of_periodic {b : ℕ → Bool} {T P : ℕ} (hP : 0 < P)
     rw [show ℓ - (ℓ - P) + j = j + P by omega, show i + (j + P) = i + j + P by omega,
       h _ (by omega)]
 
-/-- **A sufficient condition** (catalog [51]): if every tail of the center column has unbordered
+/-- **A sufficient condition**: if every tail of the center column has unbordered
 factors of unbounded length, Problem 1 holds. -/
 theorem problem1_of_late_long_unbordered_factors :
     (∀ n L : ℕ, ∃ i ℓ : ℕ, n ≤ i ∧ L ≤ ℓ ∧
@@ -352,7 +352,7 @@ theorem problem1_of_late_long_unbordered_factors :
   obtain ⟨i, ℓ, hi, hℓ, hnb⟩ := h T (P + 1)
   exact hnb (bordered_of_periodic hP hper hi (by omega))
 
-/-- **Problem 1 ⟺ every tail has unbordered factors of unbounded length** (catalog [51]). The
+/-- **Problem 1 ⟺ every tail has unbordered factors of unbounded length**. The
 converse direction is the Ehrenfeucht–Silberger theorem for infinite words. -/
 theorem problem1_iff_late_long_unbordered_factors : Rule30Prize.Problem1 ↔
     ∀ n L : ℕ, ∃ i ℓ : ℕ, n ≤ i ∧ L ≤ ℓ ∧
@@ -368,7 +368,7 @@ theorem problem1_iff_late_long_unbordered_factors : Rule30Prize.Problem1 ↔
     have := hper (t - n) (by omega)
     simpa [show n + (t - n + P) = t + P by omega, show n + (t - n) = t by omega] using this⟩
 
-/-! ### [37] Lempel–Ziv complexity: the sufficient direction -/
+/-! ### Lempel–Ziv complexity: the sufficient direction -/
 
 /-- A Lempel–Ziv (1976) history of the prefix of length `n` of `b`: cut points
 `0 = x₀ < x₁ < ⋯ < x_r = n`, where each component `[xᵢ, xᵢ₊₁)` is a single letter or, apart from its
@@ -437,7 +437,7 @@ theorem lzComplexity_le_of_eventuallyPeriodic {b : ℕ → Bool} (h : Eventually
         rw [show T + P + j = (T + j) + P by omega, hper _ (by omega)]⟩)
     exact Nat.sInf_le ⟨_, hist, by simp⟩
 
-/-- **A sufficient condition** (catalog [37]): if the Lempel–Ziv complexity of the prefixes of the
+/-- **A sufficient condition**: if the Lempel–Ziv complexity of the prefixes of the
 center column is unbounded, Problem 1 holds. -/
 theorem problem1_of_lz_unbounded :
     (∀ K, ∃ n, K < lzComplexity c n) → Rule30Prize.Problem1 := by
@@ -446,7 +446,7 @@ theorem problem1_of_lz_unbounded :
   obtain ⟨n, hn⟩ := h K
   exact absurd (hK n) (by omega)
 
-/-! ### Return words ([29], the derived sequence) -/
+/-! ### Return words and the derived sequence -/
 
 /-- `u` occurs in `b` at position `t`. -/
 def OccursAt (b : ℕ → Bool) (u : List Bool) (t : ℕ) : Prop :=
@@ -566,7 +566,7 @@ theorem eventuallyPeriodic_iff_returnWord {b : ℕ → Bool} {u : List Bool}
     have := hword k hkK (t - occ k) (by show t - occ k < occ (k + 1) - occ k; omega)
     rwa [show occ k + (t - occ k) = t by omega] at this
 
-/-- **[29], return words.** For a word `u` that occurs infinitely often in the center column,
+/-- **Return words.** For a word `u` that occurs infinitely often in the center column,
 Problem 1 holds iff the sequence of return words to `u` is not eventually periodic. -/
 theorem problem1_iff_returnWords {u : List Bool} (hu : {t | occInd c u t = true}.Infinite) :
     Rule30Prize.Problem1 ↔ ¬ EventuallyPeriodicSeq (returnWord c u) :=
@@ -576,7 +576,7 @@ theorem occInd_single_true (b : ℕ → Bool) (t : ℕ) : occInd b [true] t = b 
   unfold occInd OccursAt
   cases hb : b t <;> simp [hb]
 
-/-- **[29], return words, for some word**: Problem 1 holds iff for some word that occurs infinitely
+/-- **Return words, for some word**: Problem 1 holds iff for some word that occurs infinitely
 often (equivalently, for every one) the sequence of return words is not eventually periodic. -/
 theorem problem1_iff_returnWords_exists : Rule30Prize.Problem1 ↔
     ∃ u : List Bool, {t | occInd c u t = true}.Infinite ∧

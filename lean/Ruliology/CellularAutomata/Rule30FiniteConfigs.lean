@@ -6,7 +6,7 @@ import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
 `Rule30Jen` and `Rule30Prize` prove Jen's theorem and the period-1 case for the single black cell.
 Those proofs use the seed only through its left edge, which moves one cell to the left per step.
 So they hold for every configuration with a leftmost black cell. These are the uniform statements
-that the catalog calls FinConf and NumberLike, at periods 1 and 2.
+FinConf and NumberLike, at periods 1 and 2.
 
 * `jen`, `periodic_column_unique`: in the evolution of any configuration with a leftmost black cell
   (left-finite and nonzero), no two different columns are both eventually periodic.

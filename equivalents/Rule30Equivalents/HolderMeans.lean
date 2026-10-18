@@ -4,7 +4,7 @@ import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 /-!
 # Iterated Cesàro means and Hardy's Tauberian theorem
 
-Catalog Section 6.1. Write `mean u n = (u 0 + ⋯ + u (n-1)) / n` for the Cesàro mean (Mathlib's
+Write `mean u n = (u 0 + ⋯ + u (n-1)) / n` for the Cesàro mean (Mathlib's
 convention in `Filter.Tendsto.cesaro`) and `holder k u = mean^[k] u` for the `k`-fold iterated
 mean, Hölder's mean of order `k`.
 

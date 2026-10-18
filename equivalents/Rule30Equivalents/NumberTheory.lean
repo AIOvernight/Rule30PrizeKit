@@ -122,7 +122,7 @@ every digit sequence, and then specializes them to the center column.
   `AddCircle.not_isOfFinAddOrder_iff_forall_rat_ne_div`
   (`Mathlib/Topology/Instances/AddCircle/Defs.lean`) and `AddCircle.denseRange_zsmul_coe_iff`
   (`Mathlib/Topology/Instances/AddCircle/DenseSubgroup.lean`, "irrational rotation is minimal").
-* The classical facts, as stated on Wikipedia (checked 2026-10-15): "Simple continued fraction"
+* The classical facts, as stated on Wikipedia: "Simple continued fraction"
   (the expansion is finite iff the number is rational; for rationals it is Euclid's algorithm);
   "Dirichlet's approximation theorem" (an irrational `α` has infinitely many `p/q` with
   `|α - p/q| < 1/q²`); "Irrationality measure" (every irrational number has irrationality exponent
@@ -131,8 +131,6 @@ every digit sequence, and then specializes them to the center column.
   rational points have eventually periodic orbits, irrational points do not); "Repeating decimal"
   (long division: only finitely many remainders occur, so one repeats, and then the digits repeat;
   a terminating expansion has a second one ending in repeated `9`s).
-* The survey entries `continued-fraction`, `dirichlet-liouville`, `circle-rotation` and
-  `integer-digits` of the catalog survey, which proposed these statements.
 -/
 
 namespace Rule30Equivalents.NumberTheory

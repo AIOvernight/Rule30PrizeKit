@@ -4,7 +4,7 @@ import Mathlib.Probability.Independence.ZeroOne
 /-!
 # Fluctuations of the center column of a random configuration
 
-Catalog Section 6.1 and Section 7, item 11. For a fair-coin configuration the center trace is a
+For a fair-coin configuration the center trace is a
 sequence of fair coins (`RandomConfigurations.measurePreserving_trace`), so its discrepancy
 `N(n) - n/2`, the number of black cells among the first `n` minus `n/2`, is a simple random walk
 with steps `±1/2` (`imbalance`).

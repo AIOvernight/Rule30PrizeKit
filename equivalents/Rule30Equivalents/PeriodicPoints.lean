@@ -4,7 +4,7 @@ import Rule30Equivalents.AlgebraicDegree
 /-!
 # Periodic points of rule 30
 
-Catalog Section 7, item 11. Say that `x` recurs if `F^k x = σ^d x` for some `k ≥ 1` and `d`: it
+Say that `x` recurs if `F^k x = σ^d x` for some `k ≥ 1` and `d`: it
 comes back after `k` steps moved `d` cells to the left (`Recurs`), a pattern travelling at the
 velocity `-d/k`. Periodic configurations are the case `d = 0`.
 

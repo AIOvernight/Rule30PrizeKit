@@ -8,7 +8,8 @@ import Mathlib.Topology.Constructions
 /-!
 # The profinite integers
 
-Catalog Section 5, "no eventual period `2^k`": replacing `ℤ₂` by the profinite integers `Ẑ` gives
+In the 2-adic form of "no eventual period `2^k`" (`TwoAdicPeriods`), replacing `ℤ₂` by the
+profinite integers `Ẑ` gives
 back Problem 1. Mathlib has no `Ẑ`, so here it is the inverse limit of the rings `ℤ/(k+1)!ℤ`
 (`Zhat`), a cofinal subsystem of all `ℤ/nℤ`: compatible sequences `x k < (k+1)!` with
 `x (k+1) ≡ x k mod (k+1)!`, inside the product of the finite discrete spaces `Fin (k+1)!`. The

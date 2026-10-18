@@ -8,9 +8,6 @@ post-arrival horizon `31`), as `Rule30ZeroBoundaryStripeFront.Cycle` certificate
 segments are checked by `seg` with `decide +kernel` and joined by `seg_sound` and `path_append`:
 `cyc_0_1`, `cyc_1_0`, `cyc_6_1` (length `4096`) and `cyc_2_1`, `cyc_3_0`, `cyc_7_0` (length
 `16384`), one `seg` check each.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 2); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront.StripeCycles0

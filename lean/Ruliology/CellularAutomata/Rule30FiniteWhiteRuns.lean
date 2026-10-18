@@ -25,8 +25,8 @@ cell moves one cell right per step.
 * `no_white_run_11_finite`: **every column of every nonzero finite configuration**: no column is
   eventually `0^r 1 1` repeated, for `r ≥ 8`.
 
-Sources: the Rule 30 Prize project (2026), as in `Rule30WhiteRunEight`; E. Jen, *Global properties
-of cellular automata*, J. Stat. Phys. 43 (1986) 219–242.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
+exclusion is that of `Rule30WhiteRunEight`.
 -/
 
 namespace Ruliology.CellularAutomata

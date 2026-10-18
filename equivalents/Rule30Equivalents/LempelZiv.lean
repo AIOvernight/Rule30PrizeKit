@@ -9,7 +9,7 @@ from its last letter, a copy of an earlier stretch.
 
 * `eventuallyPeriodic_iff_lz_bounded`: a `Bool` sequence is eventually periodic iff the Lempel–Ziv
   complexity of its prefixes is bounded.
-* `problem1_iff_lz_unbounded` (catalog [37]): Problem 1 holds iff the Lempel–Ziv complexity of the
+* `problem1_iff_lz_unbounded`: Problem 1 holds iff the Lempel–Ziv complexity of the
   prefixes of the center column is unbounded.
 
 **Proof of the converse.** Suppose every prefix has a history with at most `K + 1` cut points.
@@ -21,11 +21,10 @@ from its last letter, a copy of an earlier stretch.
   sources, so one `s` works for arbitrarily long components, and `b(s + j) = b(p + j)` for every `j`:
   `b` has period `p - s` from `s`.
 
-This is the critic's argument from the catalog, reorganized to avoid extracting subsequences, and
-it needs no optimality theorem of Lempel and Ziv.
+The argument avoids extracting subsequences, and it needs no optimality theorem of Lempel and Ziv.
 
 Sources: A. Lempel and J. Ziv, *On the complexity of finite sequences*, IEEE Trans. Inform. Theory
-22 (1976) 75–81. Catalog entry [37].
+22 (1976) 75–81.
 -/
 
 namespace Rule30Equivalents.LempelZiv
@@ -196,8 +195,7 @@ theorem eventuallyPeriodic_iff_lz_bounded (b : ℕ → Bool) :
     EventuallyPeriodic b ↔ ∃ K, ∀ n, lzComplexity b n ≤ K :=
   ⟨lzComplexity_le_of_eventuallyPeriodic, fun ⟨_, hK⟩ => eventuallyPeriodic_of_lz_bounded hK⟩
 
-/-- **Problem 1 ⟺ the Lempel–Ziv complexity of the prefixes of the center column is unbounded**
-(catalog [37]). -/
+/-- **Problem 1 ⟺ the Lempel–Ziv complexity of the prefixes of the center column is unbounded**. -/
 theorem problem1_iff_lz_unbounded :
     Rule30Prize.Problem1 ↔ ∀ K, ∃ n, K < lzComplexity c n := by
   rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_lz_bounded]

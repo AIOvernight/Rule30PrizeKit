@@ -14,7 +14,7 @@ import Mathlib.Order.Interval.Finset.Nat
 
 An eventually periodic sequence is as simple as possible for finite automata in two senses.
 
-* **Automatic complexity** (catalog [52]). `AutComplexityLE x K` says that some DFA with `K` states
+* **Automatic complexity**. `AutComplexityLE x K` says that some DFA with `K` states
   accepts `x` and no other word of the same length (Shallit and Wang).
   `problem1_iff_automaticComplexity_tendsto_top`: **Problem 1 holds iff the automatic complexity of
   the prefixes of the center column tends to infinity.**
@@ -27,7 +27,7 @@ An eventually periodic sequence is as simple as possible for finite automata in 
     length, so `B ++ A = A ++ B`. Reading the first `|B|` letters, `b(t₀ + j) = b(t₁ + j)` for
     `j < |B|`, and `|B|` is unbounded: `b` has period `t₁ - t₀` from `t₀`. No Lyndon–Schützenberger
     theorem is needed.
-* **k-automatic sequences** (catalog [42]), one direction. `IsAutomatic k f` says that the k-kernel
+* **k-automatic sequences**, one direction. `IsAutomatic k f` says that the k-kernel
   `{n ↦ f(kᵉ n + r) : r < kᵉ}` is finite (Eilenberg's criterion).
   `isAutomatic_of_eventuallyPeriodic`: an eventually periodic sequence is k-automatic for every
   `k ≥ 2`. So `problem1_of_not_automatic`: if the center column is not k-automatic for some `k ≥ 2`,
@@ -37,7 +37,7 @@ An eventually periodic sequence is as simple as possible for finite automata in 
 Sources: J. Shallit and M.-w. Wang, *Automatic complexity of strings*, J. Autom. Lang. Comb. 6
 (2001) 537–554; A. Cobham, *On the base-dependence of sets of numbers recognizable by finite
 automata*, Math. Systems Theory 3 (1969) 186–192; S. Eilenberg, *Automata, Languages, and Machines*
-A (1974). Catalog entries [42] and [52].
+A (1974).
 -/
 
 namespace Rule30Equivalents.Automatic
@@ -111,13 +111,13 @@ theorem isAutomatic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeri
       congr 1
       simp [Nat.add_mod, Nat.mul_mod]
 
-/-- **A sufficient condition** (catalog [42]): if the center column is not k-automatic for some
+/-- **A sufficient condition**: if the center column is not k-automatic for some
 `k ≥ 2`, Problem 1 holds. -/
 theorem problem1_of_not_automatic {k : ℕ} (hk : 2 ≤ k) (h : ¬ IsAutomatic k c) :
     Rule30Prize.Problem1 :=
   fun hep => h (isAutomatic_of_eventuallyPeriodic hep hk)
 
-/-- **A sufficient condition** (catalog [42]): if the center column is not both 2-automatic and
+/-- **A sufficient condition**: if the center column is not both 2-automatic and
 3-automatic, Problem 1 holds. The converse is Cobham's theorem. -/
 theorem problem1_of_not_two_three_automatic
     (h : ¬ (IsAutomatic 2 Rule30Prize.center ∧ IsAutomatic 3 Rule30Prize.center)) :
@@ -203,7 +203,7 @@ theorem autComplexityLE_of_eventuallyPeriodic {b : ℕ → Bool} (h : Eventually
   obtain ⟨T, P, hP, hper⟩ := h
   exact ⟨T + P + 1, fun n => ⟨lassoDFA b T P hP n, lassoDFA_uniquelyAccepts b T P hP hper n⟩⟩
 
-/-- **A sufficient condition** (catalog [52]): if the automatic complexity of the prefixes of the
+/-- **A sufficient condition**: if the automatic complexity of the prefixes of the
 center column tends to infinity, Problem 1 holds. -/
 theorem problem1_of_automaticComplexity_tendsto_top
     (h : ∀ K : ℕ, ∀ᶠ n in Filter.atTop,
@@ -335,7 +335,7 @@ theorem eventuallyPeriodic_of_frequently_autComplexityLE {b : ℕ → Bool} {K :
   exact this.symm
 
 /-- **Problem 1 ⟺ the automatic complexity of the prefixes of the center column tends to
-infinity** (catalog [52]). -/
+infinity**. -/
 theorem problem1_iff_automaticComplexity_tendsto_top : Rule30Prize.Problem1 ↔
     ∀ K : ℕ, ∀ᶠ n in Filter.atTop,
       ¬ AutComplexityLE ((List.range n).map Rule30Prize.center) K := by

@@ -12,7 +12,7 @@ import Mathlib.Tactic.Ring
 /-!
 # Two exact formulas for the center column
 
-Catalog Section 6.3 (round-1 research claims). Both express `c(t)` over `𝔽₂`.
+Both express `c(t)` over `𝔽₂`.
 
 * `toF_center_eq_sum` (**the center from the right half**): for `t ≥ 1` and every period `K ≥ t`
   of the diagonal `t` (for example `K = 2^t`),

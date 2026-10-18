@@ -31,8 +31,7 @@ Some of these also follow from general theorems: `0 1^k` with `k ≥ 9` from
 `Rule30BlackRuns.not_eventually_zero_ones`, `0^r 1 1` with `r ≥ 10` from
 `Rule30BlackRuns.no_white_run_11`.
 
-Source: the Rule 30 Prize project (2026), generalization of Jen's argument; the table was found
-by a search and is checked here by the kernel.
+The table was found by a search and is checked here by the kernel.
 -/
 
 namespace Ruliology.CellularAutomata

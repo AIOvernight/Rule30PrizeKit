@@ -3,7 +3,7 @@ import Rule30Equivalents.BuchiArithmetic
 /-!
 # `k`-automatic sets are definable in Büchi arithmetic
 
-Catalog entry [42] and the ladder of logics (Section 7). `BuchiArithmetic` proves that a set
+`BuchiArithmetic` proves that a set
 definable in `(ℕ, 0, 1, +, V_k)` is `k`-automatic. This file proves the converse, completing the
 Büchi–Bruyère theorem for sets of naturals (`definable_iff_isAutomatic`): non-definability in
 `(ℕ, +, V_k)` is exactly "not `k`-automatic".

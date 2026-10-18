@@ -16,9 +16,6 @@ that no path inside the bad class reads the listed column-`1` words at consecuti
 
 Width `5` is the smallest strip width whose bad class forbids more than `11` and `00000`
 (computation). The constraints are conditional on an eventual period `2`; they do not exclude it.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 4); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

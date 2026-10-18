@@ -7,7 +7,7 @@ import Mathlib.Data.Nat.Log
 /-!
 # One-tape Turing machines: the `n log n` gap for unary input
 
-Catalog entry [43], the time form. **Hennie's theorem** (Trakhtenbrot 1964, Hennie 1965): a
+**Hennie's theorem** (Trakhtenbrot 1964, Hennie 1965): a
 deterministic one-tape Turing machine that decides a language in time `o(n log n)` decides a
 regular language. For unary input this means the language is eventually periodic, so Problem 1
 holds iff no one-tape machine decides `{1ⁿ : c(n) = 1}` in time `o(n log n)`
@@ -35,8 +35,7 @@ holds iff no one-tape machine decides `{1ⁿ : c(n) = 1}` in time `o(n log n)`
   `(n / 4) · log_{q+1} (n / 4)`, which time `o(n log n)` rules out for large `K`.
 * `periodicTM`: an eventually periodic `f` is decided in `n + 1` steps.
 
-The proof never uses that the tape alphabet is finite. The space form of [43] is in
-`OfflineGap`.
+The proof never uses that the tape alphabet is finite. The space version is in `OfflineGap`.
 -/
 
 namespace Rule30Equivalents.OneTapeGap
@@ -1097,7 +1096,7 @@ theorem isLittleO_succ_mul_log :
     linarith
   simpa using h2.mul_isLittleO h1
 
-/-! ### Catalog entry [43], time form -/
+/-! ### Problem 1 in small time -/
 
 /-- A unary language is decided by a one-tape machine in time `o(n log n)` iff it is eventually
 periodic (Hennie–Trakhtenbrot; the fast direction takes `n + 1` steps). -/
@@ -1111,7 +1110,7 @@ theorem eventuallyPeriodic_iff_exists_fast_decider (f : ℕ → Bool) : Eventual
   · rintro ⟨M, T, hT, hM⟩
     exact hM.eventuallyPeriodic hT
 
-/-- **[43], time form.** Problem 1 holds iff no deterministic one-tape Turing machine decides
+/-- **Small time.** Problem 1 holds iff no deterministic one-tape Turing machine decides
 `L₁ = {1ⁿ : c(n) = 1}` in time `o(n log n)`. -/
 theorem problem1_iff_no_fast_one_tape_decider : Rule30Prize.Problem1 ↔
     ¬ ∃ (M : TM) (T : ℕ → ℕ),

@@ -3,7 +3,7 @@ import Rule30Equivalents.AlgebraicDegree
 /-!
 # Query complexity of rule 30's `t`-step map
 
-Catalog Section 6.2. A decision tree computes a Boolean function of a configuration by querying
+A decision tree computes a Boolean function of a configuration by querying
 cells one at a time, each query chosen from the answers so far; its depth is the largest number of
 queries on one run. This is the query model of computational effort.
 

@@ -27,7 +27,8 @@ For Rule 30 (`problem1_iff_no_fast_digit_deciders`): the black times read in bas
 significant digit first (`digitLang`), form a regular language iff `c` is `k`-automatic
 (`isRegular_digitLang_iff`). With Cobham's theorem, **Problem 1 holds iff no one-tape machines
 decide `c(n)` from the base-`2` and the base-`3` digits of `n` in time `o(ℓ log ℓ)`**, where `ℓ`
-is the number of digits. This is the analogue for digit input of the time form of [43].
+is the number of digits. This is the analogue for digit input of
+`OneTapeGap.problem1_iff_no_fast_one_tape_decider`.
 -/
 
 namespace Rule30Equivalents.OneTapeRegular

@@ -5,7 +5,7 @@ import Rule30Equivalents.RandomConfigurations
 /-!
 # Bounded remainder
 
-Catalog Section 4. Let `N(n)` be the number of black cells among the first `n` cells of a bit
+Let `N(n)` be the number of black cells among the first `n` cells of a bit
 sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α n + O(1)`, with
 `α` the density of black cells in a period (`exists_abs_ones_sub_le_of_eventuallyPeriodic`).
 

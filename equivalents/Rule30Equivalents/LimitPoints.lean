@@ -10,8 +10,8 @@ import Mathlib.Topology.Separation.Hausdorff
 /-!
 # The right halves of rule 30 have infinitely many limit points
 
-Catalog Section 6.3, a proved related result (Kopra, *Rapid left expansivity, a commonality
-between Wolfram's Rule 30 and powers of p/q*, Theorems 4.6 and 4.7). Read the cells `p ≥ 0` of
+Theorems 4.6 and 4.7 of J. Kopra, *Rapid left expansivity, a commonality between Wolfram's
+Rule 30 and powers of p/q*, for rule 30. Read the cells `p ≥ 0` of
 row `t` as a point of `{0,1}^ℕ`, the right half of the row. Then:
 
 * `exists_periodic_window` (Kopra's Theorem 4.6, for radius-1 automata): if the right halves have

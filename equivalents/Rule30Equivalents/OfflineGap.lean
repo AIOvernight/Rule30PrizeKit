@@ -5,7 +5,7 @@ import Mathlib.Analysis.Complex.ExponentialBounds
 /-!
 # Offline Turing machines: the `log log n` space gap
 
-Catalog entry [43], the space form. **Stearns, Hartmanis and Lewis** (1965): a deterministic
+**Stearns, Hartmanis and Lewis** (1965): a deterministic
 Turing machine with a read-only input tape and a work tape that decides a language in space
 `o(log log n)` decides a regular language (`DecidesInSpace.isRegular`), for every input alphabet.
 Conversely a finite automaton is such a machine that uses no work space, so a language is regular
@@ -647,7 +647,7 @@ theorem decidesInSpace_dfaOTM : (dfaOTM D).DecidesInSpace D.accepts fun _ => 0 :
 
 end DFA
 
-/-! ### Catalog entry [43], space form -/
+/-! ### Problem 1 in small space -/
 
 /-- **Regular ⟺ decided in space `o(log log n)`** by an offline machine (Stearns, Hartmanis and
 Lewis; the converse uses no work space). -/
@@ -670,7 +670,7 @@ theorem eventuallyPeriodic_iff_exists_small_space_decider (f : ℕ → Bool) :
   rw [LogicAutomata.eventuallyPeriodic_iff_unary_isRegular,
     isRegular_iff_exists_small_space_decider]
 
-/-- **[43], space form.** Problem 1 holds iff no deterministic Turing machine with a read-only input
+/-- **Small space.** Problem 1 holds iff no deterministic Turing machine with a read-only input
 tape decides `L₁ = {1ⁿ : c(n) = 1}` in space `o(log log n)`. -/
 theorem problem1_iff_no_small_space_decider : Rule30Prize.Problem1 ↔
     ¬ ∃ (M : OTM Unit) (s : ℕ → ℕ),
@@ -678,7 +678,7 @@ theorem problem1_iff_no_small_space_decider : Rule30Prize.Problem1 ↔
       M.DecidesInSpace (LogicAutomata.unaryLang c) s := by
   rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_exists_small_space_decider]
 
-/-- **[43], space form for digit input.** Problem 1 holds iff no offline machines decide `c(n)`
+/-- **Small space, digit input.** Problem 1 holds iff no offline machines decide `c(n)`
 from the base-`2` and from the base-`3` digits of `n` (least significant first) in space
 `o(log log ℓ)`, where `ℓ` is the number of digits. -/
 theorem problem1_iff_no_small_space_digit_deciders : Rule30Prize.Problem1 ↔

@@ -2,9 +2,9 @@ import Rule30Equivalents.Cobham
 import Rule30Equivalents.LogicAutomata
 
 /-!
-# Büchi arithmetic: the last form of [42]
+# Büchi arithmetic
 
-Catalog entry [42], the Büchi-arithmetic form. `(ℕ, 0, 1, +, V_k)`, where `V_k x` is the largest
+`(ℕ, 0, 1, +, V_k)`, where `V_k x` is the largest
 power of `k` dividing `x`, defines exactly the `k`-automatic sets (Büchi; Bruyère). With Cobham's
 theorem, Problem 1 holds iff the black times are not definable both in `(ℕ, +, V₂)` and in
 `(ℕ, +, V₃)` (`problem1_iff_not_buchi_definable`).
@@ -500,7 +500,7 @@ theorem eventuallyPeriodic_of_definable {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤ b
   Cobham.eventuallyPeriodic_of_isAutomatic ha hb hab (isAutomatic_of_definable ha hfa)
     (isAutomatic_of_definable hb hfb)
 
-/-! ### Catalog entry [42], Büchi-arithmetic form -/
+/-! ### Problem 1 in Büchi arithmetic -/
 
 /-- A sequence is eventually periodic iff its set of `true` times is definable both in
 `(ℕ, +, V₂)` and in `(ℕ, +, V₃)`, with any parameters. -/
@@ -511,7 +511,7 @@ theorem eventuallyPeriodic_iff_buchi_definable (f : ℕ → Bool) (A : Set ℕ) 
     fun ⟨h2, h3⟩ => eventuallyPeriodic_of_definable le_rfl (by norm_num)
       (fun _ _ hm _ => Cobham.two_pow_ne_three_pow hm) h2 h3⟩
 
-/-- **[42], Büchi-arithmetic form.** Problem 1 holds iff the black times are not definable both in
+/-- **Büchi arithmetic.** Problem 1 holds iff the black times are not definable both in
 `(ℕ, +, V₂)` and in `(ℕ, +, V₃)`, with any parameters `A`. -/
 theorem problem1_iff_not_buchi_definable (A : Set ℕ) : Rule30Prize.Problem1 ↔
     ¬ (A.Definable₁ (buchi 2) {t | c t = true} ∧ A.Definable₁ (buchi 3) {t | c t = true}) := by

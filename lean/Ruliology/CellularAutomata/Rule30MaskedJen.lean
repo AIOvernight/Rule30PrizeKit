@@ -34,9 +34,8 @@ when column `i` is white. This module states the sharper forms that follow.
 * `finitary_jen`: for `0 < P ≤ n`, the center column and `orCol 0` are never both `P`-periodic
   on the whole interval `[n - P, 2n]`.
 
-Sources: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242,
-for the adjacent-column argument. The masked, effective-boundary and window forms are
-refinements of that argument worked out in the Rule 30 Prize project (2026).
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for the
+adjacent-column argument; the masked, effective-boundary and window forms refine it.
 -/
 
 namespace Ruliology.CellularAutomata

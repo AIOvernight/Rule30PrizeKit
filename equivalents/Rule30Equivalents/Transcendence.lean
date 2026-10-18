@@ -9,10 +9,10 @@ eventually periodic, `C(X)` would be a rational function, hence algebraic over `
 
 * `isAlgebraic_of_eventuallyPeriodic`: for every field `K`, an eventually periodic `b` has a
   generating function that is algebraic (indeed of degree `1`) over `K(X)`.
-* `problem1_of_transcendental` (catalog [38]): if `C(X)` is transcendental over `ℚ(X)`, or over
+* `problem1_of_transcendental`: if `C(X)` is transcendental over `ℚ(X)`, or over
   `K(X)` for any field `K`, Problem 1 holds. The converse over `ℚ` is Fatou's theorem (1906); the
-  library proves it instead through "algebraic ⟹ D-finite" and [31], in `AlgebraicDFinite`.
-* `problem1_of_transcendental_F2_or_F3` (catalog [42]): the same if `C(X)` is transcendental over
+  library proves it instead through "algebraic ⟹ D-finite" and `DFinite`, in `AlgebraicDFinite`.
+* `problem1_of_transcendental_F2_or_F3`: the same if `C(X)` is transcendental over
   `F₂(X)` or over `F₃(X)`. By Christol's theorem the converse needs Cobham's theorem.
 
 Over `F_p`, algebraic means p-automatic (Christol), so transcendence over `F_p(X)` is strictly
@@ -20,7 +20,7 @@ stronger than Problem 1; over `ℚ` it is equivalent (Fatou).
 
 Sources: P. Fatou, *Séries trigonométriques et séries de Taylor*, Acta Math. 30 (1906) 335–400;
 G. Christol, *Ensembles presque périodiques k-reconnaissables*, Theoret. Comput. Sci. 9 (1979)
-141–145. Catalog entries [38] and [42].
+141–145.
 -/
 
 namespace Rule30Equivalents.Transcendence
@@ -44,14 +44,14 @@ theorem isAlgebraic_of_eventuallyPeriodic {K : Type*} [Field K] {b : ℕ → Boo
         (RatFunc.coe_coe P).symm,
       ← map_mul, hPQ, sub_self]
 
-/-- **A sufficient condition** (catalog [38]): if the generating function of the center column is
+/-- **A sufficient condition**: if the generating function of the center column is
 transcendental over `K(X)` for some field `K`, for example `ℚ`, Problem 1 holds. -/
 theorem problem1_of_transcendental {K : Type*} [Field K]
     (h : Transcendental (RatFunc K) ((LinearRelations.series K c : PowerSeries K) : K⸨X⸩)) :
     Rule30Prize.Problem1 :=
   fun hep => h (isAlgebraic_of_eventuallyPeriodic hep)
 
-/-- **A sufficient condition** (catalog [42]): if the generating function of the center column is
+/-- **A sufficient condition**: if the generating function of the center column is
 transcendental over `F₂(X)` or over `F₃(X)`, Problem 1 holds. -/
 theorem problem1_of_transcendental_F2_or_F3
     (h : Transcendental (RatFunc (ZMod 2))

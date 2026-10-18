@@ -6,7 +6,7 @@ import Mathlib.Topology.Baire.BaireMeasurable
 /-!
 # Generic configurations
 
-Catalog Section 7, item 11. Let `trace x = (t ↦ cell (t, 0))` be the center column of rule 30 from
+Let `trace x = (t ↦ cell (t, 0))` be the center column of rule 30 from
 a configuration `x : ℤ → Bool`.
 
 * `continuous_trace`, `isOpenMap_trace`, `surjective_trace`: the trace map is continuous, open and
@@ -365,8 +365,7 @@ theorem image_omegaLimit_eq {X Y : Type*} [TopologicalSpace X] [CompactSpace X]
   simp only [mem_setOf_eq, hsemi]
 
 /-- **The omega-limit set of the center column is the trace of that of the seed**: `ω_σ(c)` is
-the image under the center trace of the omega-limit set of the single black cell under rule 30
-(the catalog's width-1 trace view of [34]). -/
+the image under the center trace of the omega-limit set of the single black cell under rule 30. -/
 theorem image_trace_omegaLimit_seed :
     trace '' omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed} =
       omegaLimit atTop (fun (n : ℕ) (b : ℕ → Bool) => fun t => b (n + t)) {c} := by

@@ -11,7 +11,7 @@ whose coefficients are polynomials in the index, not all zero:
 
 * `eventuallyPeriodic_iff_pRecursive`: a `Bool` sequence is P-recursive iff it is eventually
   periodic.
-* `problem1_iff_not_pRecursive` (catalog [31]): Problem 1 holds iff the center column is not
+* `problem1_iff_not_pRecursive`: Problem 1 holds iff the center column is not
   P-recursive.
 
 **Proof.** An eventual period gives the recurrence `b(n + P) - b(n) = 0`. Conversely
@@ -30,7 +30,7 @@ The D-finite form is proved in `DFinite`.
 
 Sources: A. J. van der Poorten and I. E. Shparlinski, *On linear recurrence sequences with
 polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155; R. P. Stanley, *Differentiably
-finite power series*, European J. Combin. 1 (1980) 175–188. Catalog entry [31].
+finite power series*, European J. Combin. 1 (1980) 175–188.
 -/
 
 namespace Rule30Equivalents.Holonomic
@@ -173,8 +173,7 @@ theorem eventuallyPeriodic_iff_pRecursive (b : ℕ → Bool) : EventuallyPeriodi
   obtain ⟨d, N, q, hq, hrel⟩ := exists_const_relation h
   exact eventuallyPeriodic_of_const_relation q hq hrel
 
-/-- **Problem 1 ⟺ the center column satisfies no recurrence with polynomial coefficients**
-(catalog [31]). -/
+/-- **Problem 1 ⟺ the center column satisfies no recurrence with polynomial coefficients**. -/
 theorem problem1_iff_not_pRecursive : Rule30Prize.Problem1 ↔
     ¬ ∃ (d N : ℕ) (p : Fin (d + 1) → Polynomial ℤ), (∃ i, p i ≠ 0) ∧
       ∀ n, N ≤ n → ∑ i : Fin (d + 1),

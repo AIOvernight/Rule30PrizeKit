@@ -9,9 +9,7 @@ Data for `Rule30ZeroBoundaryWidth52`: the kernel checks `check 52 97 18 c = true
 `C11`, `16` chunks each; each of these namespaces combines its chunks into
 `range : ChunksOK 52 97 18 lo 16`.
 
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 1); the `16` generated chunk files (`gen.py`)
-are regrouped here, four to a module; adversarially verified.
+The `16` chunks are regrouped here, four to a module.
 -/
 
 namespace Ruliology.CellularAutomata.Rule30ZeroBoundaryWidth52

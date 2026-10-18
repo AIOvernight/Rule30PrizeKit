@@ -4,9 +4,9 @@ import Rule30Equivalents.LogicAutomata
 /-!
 # Problem 1 and context-free languages
 
-Catalog entry [40]. The unary language `{1ⁿ : c(n) = 1}` and the language of prefixes of the
-center column are context-free only when they are regular, so by [18] Problem 1 holds iff neither
-is context-free.
+The unary language `{1ⁿ : c(n) = 1}` and the language of prefixes of the center column are
+context-free only when they are regular, so by the regular-language forms (`LogicAutomata`)
+Problem 1 holds iff neither is context-free.
 
 Mathlib defines context-free grammars, but it has neither the pumping lemma nor the fact that
 regular languages are context-free. Both are proved here for every grammar.
@@ -29,13 +29,12 @@ regular languages are context-free. Both are proved here for every grammar.
 * `eventuallyPeriodic_iff_prefLang_isContextFree`: the prefix language of `b` is context-free iff
   `b` is eventually periodic (Book 1977). Pumping one long prefix makes every `u vⁱ` a prefix of
   `b`, so `b` is periodic after `u`.
-* `problem1_iff_unary_not_contextFree` and `problem1_iff_prefixes_not_contextFree`: the two forms
-  of [40].
+* `problem1_iff_unary_not_contextFree` and `problem1_iff_prefixes_not_contextFree`.
 
 Sources: Y. Bar-Hillel, M. Perles, E. Shamir, *On formal properties of simple phrase structure
 grammars*, Z. Phonetik Sprachwiss. Kommunikationsforsch. 14 (1961) 143–172; S. Ginsburg, H. G. Rice,
 *Two families of languages related to ALGOL*, J. ACM 9 (1962) 350–371; R. V. Book, *On languages
-with a certain prefix property*, Math. Systems Theory 10 (1977) 229–237. Catalog entry [40].
+with a certain prefix property*, Math. Systems Theory 10 (1977) 229–237.
 -/
 
 universe u
@@ -533,7 +532,7 @@ theorem eventuallyPeriodic_iff_unary_isContextFree (b : ℕ → Bool) :
     ((LogicAutomata.eventuallyPeriodic_iff_unary_isRegular b).1 h),
     eventuallyPeriodic_of_unary_isContextFree⟩
 
-/-- **Problem 1 ⟺ the unary language `{1ⁿ : c(n) = 1}` is not context-free** (catalog [40]). -/
+/-- **Problem 1 ⟺ the unary language `{1ⁿ : c(n) = 1}` is not context-free**. -/
 theorem problem1_iff_unary_not_contextFree :
     Rule30Prize.Problem1 ↔ ¬ (LogicAutomata.unaryLang c).IsContextFree :=
   not_congr (eventuallyPeriodic_iff_unary_isContextFree c)
@@ -607,8 +606,7 @@ theorem eventuallyPeriodic_iff_prefLang_isContextFree (b : ℕ → Bool) :
     ((LogicAutomata.eventuallyPeriodic_iff_prefLang_isRegular b).1 h),
     eventuallyPeriodic_of_prefLang_isContextFree⟩
 
-/-- **Problem 1 ⟺ the language of prefixes of the center column is not context-free** (catalog
-[40]). -/
+/-- **Problem 1 ⟺ the language of prefixes of the center column is not context-free**. -/
 theorem problem1_iff_prefixes_not_contextFree :
     Rule30Prize.Problem1 ↔ ¬ (LogicAutomata.prefLang c).IsContextFree :=
   not_congr (eventuallyPeriodic_iff_prefLang_isContextFree c)

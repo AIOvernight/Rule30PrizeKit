@@ -34,9 +34,8 @@ cell is at `-m`, `m ≥ 1`, and everything further left is white.
   black center column would force, since a black center cell makes column `-1` the negation of
   the next center cell.)
 
-Sources: the Rule 30 Prize project (2026), left-half analysis; the argument is Jen's
-(E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242) run inside
-the half-line.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
+argument here is Jen's, run inside the half-line.
 -/
 
 namespace Ruliology.CellularAutomata

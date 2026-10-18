@@ -36,10 +36,8 @@ on, and the transient `T` is arbitrary.
 
 Theorem B′, the block-specific sharpening of Theorem B, is in `Rule30BlackRunBlocks`.
 
-Sources: Lemma A, Theorems B, D and the words `0^r 1 1` come from the Rule 30 Prize project's
-right-half absorption analysis (2026); the long-run theorem from its generalization of Jen's
-argument. Both rest on E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43
-(1986) 219–242.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, whose
+adjacent-column argument these results extend.
 -/
 
 namespace Ruliology.CellularAutomata

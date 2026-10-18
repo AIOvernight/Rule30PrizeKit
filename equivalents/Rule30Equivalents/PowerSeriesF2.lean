@@ -43,7 +43,7 @@ should not lie in `𝔽₂(X)`.
 ## Proof idea
 
 The general statements are proved over any field, or any commutative ring, in
-[LinearRelations](LinearRelations.lean); the theorems here are their instances for `K = 𝔽₂`
+`LinearRelations`; the theorems here are their instances for `K = 𝔽₂`
 (`bit b = toK (ZMod 2) b` by definition). The arguments:
 
 * Periodic ⇒ rational: if `b(t + p) = b(t)` for `t ≥ T`, the coefficients of `(1 - Xᵖ) · series b`

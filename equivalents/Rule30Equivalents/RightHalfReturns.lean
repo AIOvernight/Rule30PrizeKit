@@ -5,8 +5,8 @@ import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
 /-!
 # The right half returns to its start only finitely often
 
-Catalog Section 6.3 (Kopra, *Rapid left expansivity, a commonality between Wolfram's Rule 30 and
-powers of p/q*, Theorem 4.5). Run rule 30 from a configuration `x` with a leftmost black cell,
+Theorem 4.5 of J. Kopra, *Rapid left expansivity, a commonality between Wolfram's Rule 30 and
+powers of p/q*, for rule 30. Run rule 30 from a configuration `x` with a leftmost black cell,
 possibly with infinitely many black cells to its right. Then the right half of row `t`, its cells
 `p ≥ 0`, equals that of `x` for only finitely many `t` (`finite_returns`). For the single seed
 this is `LimitPoints.half_cell_eq_zero_iff`.

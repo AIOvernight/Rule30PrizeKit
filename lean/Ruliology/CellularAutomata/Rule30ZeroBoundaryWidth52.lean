@@ -12,17 +12,14 @@ depth `1` (column `-1`) at some even time `≤ 96`. The 256 chunk checks are in 
 `Rule30Certificates.ZeroBoundaryWidth52Chunks0` – `ZeroBoundaryWidth52Chunks3` (64 chunks each);
 soundness is `Rule30ZeroBoundaryLanes.q01_of_chunks`.
 
-* `q01_width_le_52`: the bound `96`, which is `D(52)` of the round-2 death-time table (its
+* `q01_width_le_52`: the bound `96`, which is `D(52)` of the death-time table (its
   tightness is observed, not proved).
 * `q01_width_le_52_linear`: the bound `2 W + 8`.
 * `not_inX_of_width_le_52`: `Q01` restricted to widths `≤ 52` (`¬ Rule30ZeroBoundary.InX x`).
 
 `W ≤ 56` was also kernel-checked (`KC.Q01W56.q01_width_le_56`, bound `100`; `1024` chunks in `64`
-files, about `345` s of kernel time). That run, with its build scripts, is not part of this kit:
-it is not in the catalog because of build cost.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 1); adversarially verified.
+files, about `345` s of kernel time). It is not part of this kit because of
+its build cost.
 -/
 
 namespace Ruliology.CellularAutomata

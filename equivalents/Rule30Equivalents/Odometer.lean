@@ -7,9 +7,9 @@ import Mathlib.NumberTheory.Padics.ProperSpace
 /-!
 # The right edge of rule 30 is a 2-adic odometer
 
-Catalog Section 3.3 ([25], [26]) and Section 7, items 8 and 9, which cite Coven, Pivato and
-Yassawi [CPY07]: in the frame of the right edge, the orbit closure of the single seed is the 2-adic
-odometer. This holds for every nonzero finite configuration, not only the seed.
+In the frame of the right edge, the orbit closure of the single seed is the 2-adic odometer
+(E. M. Coven, M. Pivato and R. Yassawi, *Prevalence of odometers in cellular automata*, Proc.
+Amer. Math. Soc. 135 (2007) 815–821). This holds for every nonzero finite configuration, not only the seed.
 
 `TFunction` writes rule 30 on finite configurations, in the frame of the right edge, as the map
 `Φ` on `ℕ`: row `t` of `TFunction.row a`, read leftward from its right edge, is the binary

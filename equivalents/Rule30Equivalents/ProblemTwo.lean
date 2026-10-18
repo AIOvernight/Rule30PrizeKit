@@ -7,7 +7,7 @@ import Rule30Equivalents.Symmetry
 /-!
 # Prize Problem 2: density 1/2
 
-Catalog Section 6.1. `Rule30Prize.Problem2` says that the black cells have density `1/2` in the
+`Rule30Prize.Problem2` says that the black cells have density `1/2` in the
 center column, stated with integers: for every `k > 0`, eventually `k |2 b(n) - n| ≤ n`, where
 `b(n)` counts the black cells among `c(0), …, c(n - 1)`. Two equivalent forms:
 
@@ -23,7 +23,7 @@ center column, stated with integers: for every `k > 0`, eventually `k |2 b(n) - 
 Also `problem2_of_isNormal` (normality of `x₂` gives Problem 2, from `halfDensity_of_isNormal` for
 every bit sequence) and
 `problem1_of_density_on_progressions`: density `1/2` along every arithmetic progression rules out
-an eventually constant residue class, hence gives Problem 1 (anti-Toeplitz, catalog Section 4).
+an eventually constant residue class, hence gives Problem 1 (the anti-Toeplitz statement).
 -/
 
 namespace Rule30Equivalents.ProblemTwo

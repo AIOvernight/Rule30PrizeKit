@@ -5,7 +5,7 @@ import Mathlib.ModelTheory.Definability
 /-!
 # The black times are not first-order definable in `(ℕ, <)`
 
-Catalog Section 5, a proved weaker statement: the set `S` of black times of the center column is
+A statement weaker than Problem 1, and proved: the set `S` of black times of the center column is
 not definable in first-order logic over `(ℕ, ≤)`, even with parameters
 (`not_definable_order`). The sets definable there are exactly the finite and the cofinite ones
 (`eventually_const_of_definable`), and the center column is not eventually constant
@@ -276,7 +276,7 @@ theorem not_definable (A : Set ℕ) :
   · exact Rule30Prize.center_not_eventually_constant ⟨N, true, fun t ht => hN t ht⟩
   · exact Rule30Prize.center_not_eventually_constant ⟨N, false, fun t ht => by simpa using hN t ht⟩
 
-/-- The catalog's statement (Section 5), with `orderStructure` given explicitly. -/
+/-- **`S` is not definable in `(ℕ, ≤)`**, with `orderStructure` given explicitly. -/
 theorem not_definable_order :
     letI := Language.orderStructure (M := ℕ)
     ¬ (Set.univ : Set ℕ).Definable₁ Language.order {t | Rule30Prize.center t = true} :=

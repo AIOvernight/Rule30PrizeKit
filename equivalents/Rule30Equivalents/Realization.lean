@@ -9,16 +9,16 @@ import Mathlib.Analysis.Real.Cardinality
 * `problem1_iff_realization`: **Problem 1 as an inverse problem.** Keep the right half of the initial
   row white. Rule 30 is affine in its left cell, so every column `u : ℕ → Bool` is the centre
   column of exactly one such row, `Rule30Realization.conf seed u`. Problem 1 says that no
-  eventually periodic column is realized by the single seed. Catalog entry [22].
+  eventually periodic column is realized by the single seed.
 * `problem1_or_column`, `problem1_iff_column_iff_both`: **why other columns are not equivalent
   forms.** By Jen's theorem at most one column of the pattern is eventually periodic, so for every
   column `j ≠ 0`, Problem 1 or "column `j` is not eventually periodic" holds. Hence a proof that
   Problem 1 is *equivalent* to the same question for column `j` would prove both statements
   outright: no such equivalence can be proved without solving the problem.
 * `problem1_iff_irrational_ofDigits`: Problem 1 in Mathlib's `Real.ofDigits` vocabulary, in every
-  base `b ≥ 2`, through `BinaryIrrational.problem1_iff_irrational_base`. Catalog entry [2].
+  base `b ≥ 2`, through `BinaryIrrational.problem1_iff_irrational_base`.
 * `problem1_iff_irrational_cantorFunction`: the same with Mathlib's `Cardinal.cantorFunction` at
-  `1/b`, which is `b` times the base-`b` value. Catalog entry [2].
+  `1/b`, which is `b` times the base-`b` value.
 -/
 
 namespace Rule30Equivalents.Realization

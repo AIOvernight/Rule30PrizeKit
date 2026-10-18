@@ -19,8 +19,6 @@ Space", STOC 2025) passes to the tree evaluation algorithm of J. Cook and I. Mer
 Tree evaluation needs about `(h + v) log v` bits for height `h` and node size `v`; here `h = n / b`
 and `v = b`, so `b ≈ √n` gives the center cell at time `n` in about `√n · log n` bits of memory. Neither algorithm is formalized here. Nothing in this module is specific to rule 30
 beyond its radius `1`.
-
-Sources: the Rule 30 Prize project (2026), deep dive of 2026-10-17 (the memory bound).
 -/
 
 namespace Ruliology.CellularAutomata

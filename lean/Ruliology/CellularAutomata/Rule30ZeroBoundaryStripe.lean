@@ -38,9 +38,6 @@ deviations from the stripe.
   except depth `1`, which ends up alternating.
 * `Theta_eventually_stripe_iff`: **the constrained start `Theta f` is eventually the stripe iff the
   free bits `f` are eventually `1`.**
-
-Sources: the Rule 30 Prize project (2026), period-2 program, round 2 (epoch, monovariant and
-reconstruction-map studies, consolidated here).
 -/
 
 namespace Ruliology.CellularAutomata

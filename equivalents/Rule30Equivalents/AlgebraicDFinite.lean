@@ -4,10 +4,10 @@ import Rule30Equivalents.Transcendence
 /-!
 # Problem 1 ⟺ the generating function is transcendental over `ℚ(X)`
 
-Catalog entry [38]. Let `C(X) = ∑ c(t) Xᵗ`. The library already shows that Problem 1 holds when
+Let `C(X) = ∑ c(t) Xᵗ`. The library already shows that Problem 1 holds when
 `C(X)` is transcendental (`Transcendence.problem1_of_transcendental`). The converse follows from a
 classical fact: an algebraic power series is D-finite (Abel; Comtet 1964; Stanley 1980). The D-finite
-form [31] (`DFinite.eventuallyPeriodic_of_dFinite`) then gives eventual periodicity. Fatou's
+form (`DFinite.eventuallyPeriodic_of_dFinite`) then gives eventual periodicity. Fatou's
 theorem is not needed.
 
 * `exists_dfinite_of_isAlgebraic`: over a field `K` of characteristic zero, a power series `F`
@@ -24,11 +24,11 @@ theorem is not needed.
     they are linearly dependent over `K[X]`.
 * `isAlgebraic_polynomial_of_isAlgebraic`: algebraic over `K(X)` (as a Laurent series) implies
   algebraic over `K[X]` (as a power series).
-* `eventuallyPeriodic_iff_isAlgebraic` and `problem1_iff_transcendental` (catalog [38]).
+* `eventuallyPeriodic_iff_isAlgebraic` and `problem1_iff_transcendental`.
 
 Sources: L. Comtet, *Calcul pratique des coefficients de Taylor d'une fonction algébrique*,
 Enseign. Math. 10 (1964) 267–270; R. P. Stanley, *Differentiably finite power series*, European J.
-Combin. 1 (1980) 175–188, Theorem 2.1. Catalog entry [38].
+Combin. 1 (1980) 175–188, Theorem 2.1.
 -/
 
 namespace Rule30Equivalents.AlgebraicDFinite
@@ -258,7 +258,7 @@ theorem eventuallyPeriodic_iff_isAlgebraic (b : ℕ → Bool) : EventuallyPeriod
   ⟨Transcendence.isAlgebraic_of_eventuallyPeriodic,
     fun h => DFinite.eventuallyPeriodic_of_dFinite (isDFinite_of_isAlgebraic h)⟩
 
-/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is transcendental over `ℚ(X)`** (catalog [38]). -/
+/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is transcendental over `ℚ(X)`**. -/
 theorem problem1_iff_transcendental : Rule30Prize.Problem1 ↔
     Transcendental (RatFunc ℚ) ((LinearRelations.series ℚ c : PowerSeries ℚ) : ℚ⸨X⸩) :=
   not_congr (eventuallyPeriodic_iff_isAlgebraic c)

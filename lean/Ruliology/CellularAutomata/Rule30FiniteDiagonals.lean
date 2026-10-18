@@ -25,7 +25,7 @@ the same period bounds.
 In bitwise form (`Rule30Equivalents.TFunction`), `Rd_periodic` says that for every natural number
 `a`, bit `j` of `Φ^t(a)` has period dividing `2^j` in `t`, where `Φ(x) = x ⊕ (2x ∨ 4x)`.
 
-So the periodic right diagonals behind the 2-adic odometer of the right edge (catalog [26]) are
+So the periodic right diagonals behind the 2-adic odometer of the right edge are
 not special to the seed: a proof of Problem 1 cannot get anything from them that it would not
 also get for every finite configuration.
 

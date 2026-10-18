@@ -20,9 +20,6 @@ cell at depth `r + 3`, holds at every period start, column `1` reads `0^(r+1) 1`
 (`period_z2`). Otherwise the period starts eventually stay in the two classes, and column `1`
 eventually reads `1^(r+1) 0` or `0 1^r 0` in every period. In each case column `1` is eventually
 periodic, and so is column `0`, against Jen's theorem (`Rule30Jen.not_adjacent`).
-
-Sources: the Rule 30 Prize project (2026), round 1: the verifier of the white-run exclusion
-(`verify-white0r11-rigor`) extended the agent's `r ≥ 10` proof to `r ≥ 8`.
 -/
 
 namespace Ruliology.CellularAutomata

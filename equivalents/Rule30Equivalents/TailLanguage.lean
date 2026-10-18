@@ -11,7 +11,7 @@ often, the tail language `L∞(b)`; write `p∞(n)` for its size.
 * `eventuallyPeriodic_iff_tail_flat`: `b` is eventually periodic iff `p∞` has a flat step,
   `p∞(m + 1) ≤ p∞(m)` for some `m`. A flat step is a flat step of the factor complexity of a tail
   of `b`, so Morse–Hedlund applies (`ShiftOrbit.eventuallyPeriodic_of_ncard_factors_succ_le`).
-* `problem1_iff_tail_strictMono` (catalog [35], Rauzy form): Problem 1 holds iff `p∞` is strictly
+* `problem1_iff_tail_strictMono`: Problem 1 holds iff `p∞` is strictly
   increasing.
 * `tailSubshift b`: the two-sided subshift with language `L∞(b)`, the sequences `ℤ → Bool` all of
   whose windows occur in `b` infinitely often. `exists_mem_tailSubshift`: every word of `L∞(b)` is
@@ -19,7 +19,7 @@ often, the tail language `L∞(b)`; write `p∞(n)` for its size.
   `infinite_tailSubshift_iff`: the subshift is infinite iff `b` is not eventually periodic. If `b`
   has period `P` from some time on, every point has period `P`. Otherwise `p∞(n) > n` for every
   `n`, and distinct words of `L∞(b)` extend to distinct points.
-* `problem1_iff_tailSubshift_infinite` (catalog [35], subshift form).
+* `problem1_iff_tailSubshift_infinite`.
 
 The Rauzy graph `Γ_m` of `L∞(c)` has the words of `L∞(c)` of length `m` as vertices and one edge
 `u → v` for each word of `L∞(c)` of length `m + 1` with prefix `u` and suffix `v`. Every vertex has
@@ -30,7 +30,7 @@ formalized here.
 
 Sources: G. Rauzy, *Suites à termes dans un alphabet fini*, Sém. Théorie des Nombres de Bordeaux
 (1983); J. Cassaigne and F. Nicolas, *Factor complexity*, in Combinatorics, Automata and Number
-Theory (2010). Catalog entry [35].
+Theory (2010).
 -/
 
 namespace Rule30Equivalents.TailLanguage
@@ -92,7 +92,7 @@ theorem eventuallyPeriodic_iff_tail_flat (b : ℕ → Bool) :
     rw [h₁ _ (le_max_left _ _), h₂ _ (le_max_right _ _)]
     exact hm
 
-/-- **Problem 1 ⟺ the tail complexity of the center column is strictly increasing** (catalog [35]):
+/-- **Problem 1 ⟺ the tail complexity of the center column is strictly increasing**:
 no Rauzy graph of its tail language is a single cycle. -/
 theorem problem1_iff_tail_strictMono :
     Rule30Prize.Problem1 ↔ ∀ m, (tailFactors c m).ncard < (tailFactors c (m + 1)).ncard := by
@@ -216,8 +216,7 @@ theorem infinite_tailSubshift_iff (b : ℕ → Bool) :
     have hle := Set.ncard_le_ncard_of_injOn f (fun w hw => (hf w hw).1) hinj hfin
     omega
 
-/-- **Problem 1 ⟺ the subshift of the tail language of the center column is infinite** (catalog
-[35], subshift form). -/
+/-- **Problem 1 ⟺ the subshift of the tail language of the center column is infinite**. -/
 theorem problem1_iff_tailSubshift_infinite :
     Rule30Prize.Problem1 ↔ (tailSubshift c).Infinite := by
   rw [infinite_tailSubshift_iff]

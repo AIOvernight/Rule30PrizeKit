@@ -14,11 +14,8 @@ and the center is updated from its two neighbours. So the center column solves t
 * `center_solves`: the center column solves it.
 * `eq_center_of_solves`: it is the only solution. The driven halves are causal (`L_causal`,
   `drv_causal`): at time `t` they read the driver only up to time `t`.
-* `problem1_iff_coupled_halves` (catalog [33]): Problem 1 holds iff no solution of the system is
+* `problem1_iff_coupled_halves`: Problem 1 holds iff no solution of the system is
   eventually periodic.
-
-Sources: the Rule 30 Prize project (2026), CA-structure survey (the coupled-halves form). Catalog
-entry [33].
 -/
 
 namespace Rule30Equivalents.CoupledHalves
@@ -111,8 +108,7 @@ theorem eq_center_of_solves {u : Nat → Bool} (h : Solves u) : u = c := by
   funext t
   exact key t t (Nat.le_refl t)
 
-/-- **Problem 1 ⟺ no solution of the coupled-halves system is eventually periodic** (catalog
-[33]). -/
+/-- **Problem 1 ⟺ no solution of the coupled-halves system is eventually periodic**. -/
 theorem problem1_iff_coupled_halves : Rule30Prize.Problem1 ↔
     ∀ u : Nat → Bool, u 0 = true →
       (∀ t, u (t + 1) = Rule30Jen.rule (Rule30DrivenLeft.L u (fun _ => false) t (-1)) (u t)

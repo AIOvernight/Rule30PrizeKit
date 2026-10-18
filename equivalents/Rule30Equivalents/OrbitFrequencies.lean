@@ -3,7 +3,7 @@ import Rule30Equivalents.EmpiricalMeasures
 /-!
 # Pattern frequencies along rule 30 orbits
 
-Catalog Section 7, item 11, continued: a pointwise ergodic theorem for rule 30 and local
+A pointwise ergodic theorem for rule 30 and local
 patterns, proved from independence alone. Mathlib has no pointwise ergodic theorem, but it has
 Etemadi's strong law of large numbers, which needs only pairwise independence.
 
@@ -20,7 +20,7 @@ Etemadi's strong law of large numbers, which needs only pairwise independence.
   `2^-(2n+1)`.**
 * `ae_orbit_frequency_progression`: the same along every arithmetic progression `a + Ps` of times,
   by splitting it into `2n + 1` sub-progressions of step `(2n + 1) P`. Wolfram asks whether the
-  right halves `y_{Pk+r}` of the rows of the seed are equidistributed [W19]; at the level of
+  right halves `y_{Pk+r}` of the rows of the seed are equidistributed; at the level of
   digits, this is the answer for almost every configuration.
 * `ae_tendsto_orbit_empirical`: so **almost every configuration is generic** for the fair-coin
   measure under rule 30: the empirical measures of its orbit converge weakly to it (the window
@@ -107,7 +107,7 @@ theorem ae_tendsto_residue (I : Finset ℤ) (w : ℤ → Bool) (g r : ℕ)
 every pattern `v` on every window `[-n, n]` appears in the rows `a, a + P, a + 2P, …` of the
 space-time diagram of `x` with frequency `2^-(2n+1)`. Split the progression into `2n + 1`
 sub-progressions of step `(2n + 1) P`, along which the events are pairwise independent. Wolfram
-asks whether the right halves `y_{Pk+r}` of the rows of the single seed are equidistributed [W19];
+asks whether the right halves `y_{Pk+r}` of the rows of the single seed are equidistributed;
 at the level of digits, this answers it for almost every configuration. -/
 theorem ae_orbit_frequency_progression :
     ∀ᵐ x ∂(coins ℤ), ∀ (P a n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool), 0 < P →

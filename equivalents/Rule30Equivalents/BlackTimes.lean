@@ -4,7 +4,7 @@ import Rule30Equivalents.WordForms
 /-!
 # Problem 2 through the times of the black cells
 
-Catalog Section 6.1. Let `τ k` be the time of the `k`-th black cell of a bit sequence
+Let `τ k` be the time of the `k`-th black cell of a bit sequence
 (`WordForms.trueTime`, Mathlib's `Nat.nth`) and `C n` the number of black cells before `n`
 (Mathlib's `Nat.count`). They are inverse to each other (`Nat.gc_count_nth`), so a density `L > 0`
 of black cells is the same as `τ k / k → 1 / L`:

@@ -32,12 +32,11 @@ only for the center column of the seed.
 * `not_eventuallyPeriodic_of_long_one_runs_finite`, `no_long_black_run_finite`,
   `no_black_white_run_finite`: the same for every nonzero finite configuration.
 
-So the black-run exclusions are uniform in the sense of the catalog (FinConf and NumberLike): they
+So the black-run exclusions are uniform (FinConf and NumberLike): they
 say nothing that singles out the seed.
 
-Sources: the Rule 30 Prize project's right-half absorption analysis (2026), as in
-`Rule30BlackRuns`; E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986)
-219–242.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
+exclusions are those of `Rule30BlackRuns`.
 -/
 
 namespace Ruliology.CellularAutomata

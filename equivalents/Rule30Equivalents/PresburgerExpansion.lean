@@ -5,7 +5,7 @@ import Mathlib.ModelTheory.Arithmetic.Presburger.Definability
 /-!
 # Multiplication in Presburger arithmetic with the black times
 
-Catalog Section 4, the logic rung "Th(ℕ, +, S) is undecidable", in a definable form. Let
+A definable form of "Th(ℕ, +, S) is undecidable". Let
 `S = {t : c(t) = 1}`. **If multiplication is first-order definable in `(ℕ, 0, 1, +, S)`, with any
 parameters, then Problem 1 holds** (`problem1_of_mul_definable`).
 
@@ -19,8 +19,7 @@ parameters, then Problem 1 holds** (`problem1_of_mul_definable`).
 * The graph of multiplication is not semilinear (Mathlib's `presburger.mul_not_definable`).
 
 Conversely, **if every finite word occurs in `c`, multiplication is definable in `(ℕ, +, S)`**,
-without parameters (`mul_definable_of_center_disjunctive`), the first-order core of catalog
-Section 4, "Undecidability from disjunctiveness". A window `{i | x + i ∈ S}` can hold any finite
+without parameters (`mul_definable_of_center_disjunctive`). A window `{i | x + i ∈ S}` can hold any finite
 set. `SqPred y z` says that some window contains `0`, `1` and `z`, that the gaps between its
 consecutive elements up to `z` grow by `2`, and that the last gap is `2y - 1`; for a disjunctive
 `S` this holds iff `z = y²` (`sqPred_iff`), and `ab = c` iff `(a + b)² = a² + b² + 2c`.
@@ -511,7 +510,7 @@ end Squares
 
 /-- **If every finite word occurs in the center column, multiplication is definable in
 `(ℕ, 0, 1, +, S)`**, `S` the black times. With `problem1_of_mul_definable` this is the chain
-"disjunctive ⟹ `(ℕ, +, S)` defines multiplication ⟹ Problem 1" of catalog Section 4. -/
+"disjunctive ⟹ `(ℕ, +, S)` defines multiplication ⟹ Problem 1". -/
 theorem mul_definable_of_center_disjunctive
     (h : ∀ n (w : Fin n → Bool), ∃ i, ∀ j : Fin n, c (i + j) = w j) :
     SDef {t | c t = true} {v : Fin 3 → ℕ | v 0 = v 1 * v 2} :=

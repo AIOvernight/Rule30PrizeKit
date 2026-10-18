@@ -3,7 +3,7 @@ import Rule30Equivalents.ProblemTwo
 /-!
 # Cesàro means of every order
 
-Catalog Section 6.1. Write `S⁽ᵏ⁾` for the `k`-fold iterated partial sums of a sequence `a`
+Write `S⁽ᵏ⁾` for the `k`-fold iterated partial sums of a sequence `a`
 (`iterSum`), so that `S⁽¹⁾ n = a 0 + ⋯ + a n`, and `σᵏ n = S⁽ᵏ⁾ n / C(n + k, k)` for its Cesàro
 mean of order `k` (`cesaroMean`; `σ¹ n` is the average of `a 0, …, a n`).
 

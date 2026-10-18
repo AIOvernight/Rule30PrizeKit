@@ -24,9 +24,6 @@ even level `k`.
 * `q01_of_chunks`: the same from a combined range certificate `ChunksOK`.
 
 `Rule30ZeroBoundaryWidth52` runs the checker at width `52`: all `256` chunks pass with `97` levels.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 1), bit-sliced `Q01` checker; adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

@@ -46,8 +46,8 @@ the column next to an alternating readout is not, numerically, a finite-seed col
 period-2 question is a coupled question of its own: it is implied by `Q01`, but no reduction to
 `CQ01` is known.
 
-Sources: the Rule 30 Prize project (2026), frozen-boundary study of 2026-10-17. The forced seed of
-each right part was computed for all 8 steps up to depth 1200; none is finite.
+Numerically, the forced seed of each right part, computed for all 8 steps up to depth 1200, is
+never finite.
 -/
 
 namespace Rule30Equivalents.FrozenBoundaryPeriodTwo

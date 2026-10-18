@@ -17,15 +17,11 @@ Jen (`Rule30MaskedJen`): if the true right half enters a trap, the center column
   differ contains a path whose white-phase output is not eventually periodic. (Two closed walks
   `c₁`, `c₂` with non-commuting outputs give the equal-length walks `c₁c₂` and `c₂c₁`.)
 * `certOK`, `escapes_of_certOK`: a Boolean certificate check, sound by `word_lemma`.
-* `Rule30Certificates.EtherTrap0` – `EtherTrap5`: kernel checks of the round-2 certificates
-  (`B-edge-trap/cert_*_20.txt`) for every pure-ether node of width `20` of `0001`, `0011`, `0111`;
-  `Rule30EtherTrapWidth20` combines them.
+* `Rule30Certificates.EtherTrap0` – `EtherTrap5`: kernel checks of certificates for every
+  pure-ether node of width `20` of `0001`, `0011`, `0111`; `Rule30EtherTrapWidth20` combines them.
 * `stepW_take`, `escapes_take`: a closed set of width `b ≤ 20` lifts to width `20`.
 * `node_succ`, `node_traj`: the driven right half (`Rule30Ether.node`) is a path of the
   relaxation along column `b + 1`, so the trap notion here is the one masked Jen uses.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 3), ether traps; adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

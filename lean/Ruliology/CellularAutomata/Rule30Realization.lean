@@ -27,8 +27,8 @@ Two barriers for proofs of Problem 1.
   left edge and Jen's theorem cannot by themselves imply Problem 1, not even its period-1 case;
   a proof must use something specific to rule 30's `or` together with the finite seed.
 
-Sources: the Rule 30 Prize project (2026), complexity and barrier analysis. Jen's argument is
-E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242.
+Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for
+Jen's argument.
 -/
 
 namespace Ruliology.CellularAutomata

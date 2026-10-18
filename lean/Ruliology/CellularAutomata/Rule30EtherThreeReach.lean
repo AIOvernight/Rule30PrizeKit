@@ -10,9 +10,6 @@ the conclusion of `AbsorptionT t001` for this one start (`absorbed_empty`).
 * `stepN`, `rowN`: the driven right half of a finitely supported start as bit masks
   (bit `i` = column `i + 1`); `rowN_eq_drv` identifies it with `Rule30Ether.drv`.
 * `t001_reached`: kernel computation of `1270` steps, then a lookup in the trap.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): period-3 study
-(`p3-ether`); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

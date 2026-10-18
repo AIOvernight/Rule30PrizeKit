@@ -6,7 +6,7 @@ import Mathlib.FieldTheory.Finite.Basic
 /-!
 # Christol's theorem: `p`-automatic iff algebraic over `𝔽_p(X)`
 
-Catalog entry [42], the `F₂`/`F₃` form. Let `p` be a prime. If the generating function
+Let `p` be a prime. If the generating function
 `∑ b(n) Xⁿ` of a `Bool` sequence `b`, read in `𝔽_p`, is algebraic over `𝔽_p(X)`, then `b` is
 `p`-automatic. With Cobham's theorem (`Cobham`), Problem 1 holds iff `∑ c(t) Xᵗ` is transcendental
 over `F₂(X)` or over `F₃(X)`.
@@ -26,13 +26,13 @@ over `F₂(X)` or over `F₃(X)`.
   span of their `p`-th powers, since `g = ∑_{r < p} X^r (Λ_r g)^p` (`eq_sum_cartier`), and the
   latter has no larger dimension; so the span is closed under `p`-th powers, and
   `F, F^p, …, F^(p^d)` are dependent. Together: `isAutomatic_iff_isAlgebraic`, and for the center
-  column `not_isAutomatic_iff_transcendental` (catalog Section 4).
-* `problem1_iff_transcendental_F2_or_F3` (catalog [42]).
+  column `not_isAutomatic_iff_transcendental`.
+* `problem1_iff_transcendental_F2_or_F3`.
 
 Sources: G. Christol, *Ensembles presque périodiques k-reconnaissables*, Theoret. Comput. Sci. 9
 (1979) 141–145; G. Christol, T. Kamae, M. Mendès France, G. Rauzy, *Suites algébriques, automates
 et substitutions*, Bull. Soc. Math. France 108 (1980) 401–419; J.-P. Allouche, J. Shallit,
-*Automatic Sequences* (2003), Theorem 12.2.5. Catalog entry [42].
+*Automatic Sequences* (2003), Theorem 12.2.5.
 -/
 
 namespace Rule30Equivalents.Christol
@@ -518,16 +518,16 @@ theorem isAutomatic_iff_isAlgebraic (f : ℕ → Bool) : IsAutomatic p f ↔
   ⟨isAlgebraic_of_isAutomatic, fun h =>
     isAutomatic_of_isAlgebraic (AlgebraicDFinite.isAlgebraic_polynomial_of_isAlgebraic h)⟩
 
-/-- For the center column (catalog Section 4): `c` is not `p`-automatic iff `∑ c(t) Xᵗ` is
+/-- For the center column: `c` is not `p`-automatic iff `∑ c(t) Xᵗ` is
 transcendental over `𝔽_p(X)`. -/
 theorem not_isAutomatic_iff_transcendental :
     ¬ IsAutomatic p c ↔ Transcendental (RatFunc (ZMod p))
       ((LinearRelations.series (ZMod p) c : PowerSeries (ZMod p)) : (ZMod p)⸨X⸩) :=
   not_congr (isAutomatic_iff_isAlgebraic c)
 
-/-! ### Catalog entry [42], the `F₂`/`F₃` form -/
+/-! ### Problem 1 over `F₂` and `F₃` -/
 
-/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is transcendental over `F₂(X)` or over `F₃(X)`** (catalog [42]):
+/-- **Problem 1 ⟺ `∑ c(t) Xᵗ` is transcendental over `F₂(X)` or over `F₃(X)`**:
 Christol's theorem and Cobham's theorem. -/
 theorem problem1_iff_transcendental_F2_or_F3 : Rule30Prize.Problem1 ↔
     Transcendental (RatFunc (ZMod 2))

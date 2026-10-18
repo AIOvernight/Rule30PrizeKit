@@ -24,12 +24,9 @@ forced at the black phases of the center by left permutivity.
   `not_eventually_011_of_C3w`. Finiteness is essential here too: the left part of the
   period-3 ether is a solution for ever (`C3w_011_ether`).
 
-Both statements are open. Evidence (C, not kernel-checked, Rule 30 Prize project period-3 study):
+Both statements are open. Evidence (a C search, not kernel-checked):
 every start of width `W ≤ 37` violates `Q001`'s constraint by time `94`, and every start of width
 `W ≤ 70` violates the `011` constraint by time `99` (all three phases).
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): period-3 study
-(`p3-ether`); adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

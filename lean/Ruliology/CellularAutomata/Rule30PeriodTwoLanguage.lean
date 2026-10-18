@@ -13,9 +13,6 @@ white phases (subset simulation over bitmasks of strips, `simMask`). `no_pattern
 eventually, column `1` at the white times never spells `pat`.
 
 `Rule30PeriodTwoWidth5` and `Rule30PeriodTwoWidth6` apply it at the strip widths `5` and `6`.
-
-Sources: the Rule 30 Prize project (2026), final batch (2026-10-15): kernel certification,
-round 2 (`kernel-certify-r2`, target 4), period-2 right half; adversarially verified.
 -/
 
 namespace Ruliology.CellularAutomata

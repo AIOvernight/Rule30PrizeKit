@@ -15,6 +15,9 @@ the compact space of probability measures (Mathlib's Prokhorov theorem). Its mas
   iff `g x = L` at every cluster point `x` of `(u N)`.
 * `halfDensity_iff_mapClusterPt`, `problem2_iff_mapClusterPt`: **Problem 2 holds iff every limit
   point of the empirical measures of the center column gives the cylinder `[1]` mass `1/2`.**
+* `map_shift_of_mapClusterPt`: **Krylov–Bogolyubov**, every such limit point is shift-invariant.
+  The function `μ ↦ ∫ f ∘ σ dμ - ∫ f dμ` is continuous and equals
+  `(f(σᴺ⁺¹b) - f(b)) / (N + 1)` at the `N`-th empirical measure (`integral_empiricalOf`).
 * `isNormal_iff_tendsto_empirical`: **a bit sequence is normal iff its empirical measures converge
   weakly to the fair-coin measure** (normal sequences are the generic points of the fair coin).
   Cylinders are clopen (portmanteau) and form a π-system of arbitrarily small neighbourhoods
@@ -24,7 +27,7 @@ the compact space of probability measures (Mathlib's Prokhorov theorem). Its mas
 
 namespace Rule30Equivalents.EmpiricalMeasures
 
-open MeasureTheory Filter Topology Finset Ruliology.CellularAutomata
+open MeasureTheory Filter Topology Finset Ruliology.CellularAutomata BoundedContinuousFunction
 
 /-- The cylinder of sequences starting with `1`. -/
 def one : Set (ℕ → Bool) := {v | v 0 = true}
@@ -141,6 +144,69 @@ theorem problem2_iff_mapClusterPt : Rule30Prize.Problem2 ↔
     ∀ ν : ProbabilityMeasure (ℕ → Bool), MapClusterPt ν atTop (empirical c) →
       (ν one : ℝ) = 1 / 2 :=
   halfDensity_iff_mapClusterPt c
+
+/-! ### Krylov–Bogolyubov -/
+
+theorem continuous_shift : Continuous Mixing.shift :=
+  continuous_pi fun t => continuous_apply (A := fun _ : ℕ => Bool) (t + 1)
+
+/-- The integral of a bounded continuous function against an empirical measure is its average
+along the points. -/
+theorem integral_empiricalOf {X : Type*} [MeasurableSpace X] [MeasurableSingletonClass X]
+    [TopologicalSpace X] [OpensMeasurableSpace X] (u : ℕ → X) (N : ℕ) (f : X →ᵇ ℝ) :
+    ∫ x, f x ∂(empiricalOf u N : Measure X) = (∑ n ∈ range (N + 1), f (u n)) / (N + 1) := by
+  show ∫ x, f x ∂(((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1), Measure.dirac (u n)) = _
+  rw [integral_smul_measure, integral_finsetSum_measure fun n _ => f.integrable _]
+  simp only [integral_dirac, smul_eq_mul]
+  rw [ENNReal.toReal_inv, ENNReal.toReal_add (by simp) (by simp), ENNReal.toReal_natCast,
+    ENNReal.toReal_one, inv_mul_eq_div]
+
+/-- **Krylov–Bogolyubov**: every limit point of the empirical measures of a bit sequence is
+invariant under the shift. -/
+theorem map_shift_of_mapClusterPt {b : ℕ → Bool} {ν : ProbabilityMeasure (ℕ → Bool)}
+    (hν : MapClusterPt ν atTop (empirical b)) :
+    (ν : Measure (ℕ → Bool)).map Mixing.shift = ν := by
+  have hσ := continuous_shift
+  refine ext_of_forall_integral_eq_of_IsFiniteMeasure fun f => ?_
+  have hint : ∀ g : (ℕ → Bool) →ᵇ ℝ,
+      Continuous fun μ : ProbabilityMeasure (ℕ → Bool) => ∫ x, g x ∂(μ : Measure (ℕ → Bool)) :=
+    fun g => continuous_iff_continuousAt.2 fun μ =>
+      (ProbabilityMeasure.tendsto_iff_forall_integral_tendsto.1 tendsto_id) g
+  let fσ : (ℕ → Bool) →ᵇ ℝ := f.compContinuous ⟨Mixing.shift, hσ⟩
+  -- `Φ μ = ∫ f ∘ σ dμ - ∫ f dμ` is continuous and tends to `0` along the empirical measures
+  let Φ : ProbabilityMeasure (ℕ → Bool) → ℝ := fun μ =>
+    ∫ x, fσ x ∂(μ : Measure (ℕ → Bool)) - ∫ x, f x ∂(μ : Measure (ℕ → Bool))
+  have hΦ : Continuous Φ := (hint fσ).sub (hint f)
+  have hcomp : ∀ N : ℕ, Φ (empirical b N) =
+      (f (Mixing.shift^[N + 1] b) - f b) / ((N : ℝ) + 1) := by
+    intro N
+    simp only [Φ, empirical]
+    rw [integral_empiricalOf, integral_empiricalOf, ← sub_div, ← Finset.sum_sub_distrib]
+    congr 1
+    have hterm : ∀ n, fσ (Mixing.shift^[n] b) - f (Mixing.shift^[n] b) =
+        f (Mixing.shift^[n + 1] b) - f (Mixing.shift^[n] b) := fun n => by
+      simp only [fσ, BoundedContinuousFunction.compContinuous_apply, ContinuousMap.coe_mk,
+        Function.iterate_succ_apply']
+    rw [Finset.sum_congr rfl fun n _ => hterm n,
+      Finset.sum_range_sub (fun n => f (Mixing.shift^[n] b)), Function.iterate_zero_apply]
+  have hlim : Tendsto (Φ ∘ empirical b) atTop (𝓝 0) := by
+    refine squeeze_zero_norm (a := fun N : ℕ => 2 * ‖f‖ / ((N : ℝ) + 1)) (fun N => ?_) ?_
+    · simp only [Function.comp, hcomp, norm_div]
+      have hN : (0 : ℝ) < (N : ℝ) + 1 := by positivity
+      rw [Real.norm_of_nonneg hN.le]
+      refine div_le_div_of_nonneg_right ?_ hN.le
+      calc ‖f (Mixing.shift^[N + 1] b) - f b‖ ≤ ‖f (Mixing.shift^[N + 1] b)‖ + ‖f b‖ :=
+            norm_sub_le _ _
+        _ ≤ ‖f‖ + ‖f‖ := add_le_add (f.norm_coe_le_norm _) (f.norm_coe_le_norm _)
+        _ = 2 * ‖f‖ := by ring
+    · exact tendsto_const_nhds.div_atTop
+        (tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds)
+  have h0 := (tendsto_comp_iff_forall_mapClusterPt hΦ).1 hlim ν hν
+  have h0' : ∫ x, f (Mixing.shift x) ∂(ν : Measure (ℕ → Bool)) -
+      ∫ x, f x ∂(ν : Measure (ℕ → Bool)) = 0 := by
+    simpa [Φ, fσ] using h0
+  rw [integral_map hσ.measurable.aemeasurable f.continuous.aestronglyMeasurable]
+  exact sub_eq_zero.1 h0'
 
 /-! ### Normal sequences are the generic points of the fair coin -/
 

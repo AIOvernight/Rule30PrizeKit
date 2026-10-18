@@ -2414,7 +2414,8 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
   `EmpiricalMeasures.problem2_iff_mapClusterPt`). The space of probability measures on {0,1}^ℕ is
   compact (Mathlib's Prokhorov theorem), ν ↦ ν[1] is continuous because [1] is clopen
   (portmanteau), and the mass of [1] under the N-th empirical measure is the proportion of black
-  cells. In the same terms, c is normal iff its empirical measures converge weakly to the
+  cells. Every such limit point is shift-invariant (Krylov–Bogolyubov,
+  `EmpiricalMeasures.map_shift_of_mapClusterPt`). In the same terms, c is normal iff its empirical measures converge weakly to the
   fair-coin measure (`EmpiricalMeasures.isNormal_iff_tendsto_empirical`; cylinders form a
   π-system of small clopen neighbourhoods), and the trace of almost every configuration is
   generic for the fair coin (`ae_tendsto_empirical_trace`).

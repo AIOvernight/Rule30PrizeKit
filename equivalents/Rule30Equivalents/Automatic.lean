@@ -8,6 +8,7 @@ import Mathlib.Data.Fintype.Powerset
 import Mathlib.Data.Finite.Prod
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Data.Set.Countable
 
 /-!
 # Automatic sequences and automatic complexity
@@ -69,6 +70,51 @@ theorem mem_kernel_step {k : ℕ} {f g : ℕ → Bool} (hg : g ∈ kernel k f) {
     rw [Nat.mul_add, ← Nat.mul_assoc, ← pow_succ]
     congr 1
     omega
+
+/-- **`k`-automatic sequences are countably many**, for `k ≥ 2`: such a sequence is determined by
+the automaton of its kernel. Number the kernel `g 0, …, g (N - 1)`, with `f = g i₀`; then
+`g i (k n + r) = g (δ i r) n` and `g i 0 = o i`, and these determine every `g i n` by strong
+induction, since `n = k ⌊n/k⌋ + n % k` with `⌊n/k⌋ < n` for `n ≥ 1`. -/
+theorem countable_setOf_isAutomatic {k : ℕ} (hk : 2 ≤ k) :
+    {f : ℕ → Bool | IsAutomatic k f}.Countable := by
+  let S : (Σ N : ℕ, (Fin N → Fin k → Fin N) × (Fin N → Bool) × Fin N) → Set (ℕ → Bool) :=
+    fun d => {f | ∃ g : Fin d.1 → ℕ → Bool,
+      (∀ i (r : Fin k) n, g i (k * n + r) = g (d.2.1 i r) n) ∧ (∀ i, g i 0 = d.2.2.1 i) ∧
+        g d.2.2.2 = f}
+  have hS : ∀ d, (S d).Subsingleton := by
+    rintro d f ⟨g, hg, hg0, rfl⟩ f' ⟨g', hg', hg0', rfl⟩
+    have key : ∀ n i, g i n = g' i n := by
+      intro n
+      induction n using Nat.strong_induction_on with
+      | _ n ih =>
+        intro i
+        rcases Nat.eq_zero_or_pos n with rfl | hn
+        · rw [hg0, hg0']
+        · have hlt : n / k < n := Nat.div_lt_self hn (by omega)
+          have hr : n % k < k := Nat.mod_lt n (by omega)
+          have h1 := hg i ⟨n % k, hr⟩ (n / k)
+          have h2 := hg' i ⟨n % k, hr⟩ (n / k)
+          simp only at h1 h2
+          calc g i n = g i (k * (n / k) + n % k) := by rw [Nat.div_add_mod]
+            _ = g (d.2.1 i ⟨n % k, hr⟩) (n / k) := h1
+            _ = g' (d.2.1 i ⟨n % k, hr⟩) (n / k) := ih _ hlt _
+            _ = g' i (k * (n / k) + n % k) := h2.symm
+            _ = g' i n := by rw [Nat.div_add_mod]
+    funext n
+    exact key n _
+  refine (Set.countable_iUnion fun d => (hS d).countable).mono fun f hf => ?_
+  -- number the kernel
+  let K := Set.Finite.toFinset (s := kernel k f) hf
+  let e := K.equivFin
+  let g : Fin K.card → ℕ → Bool := fun i => (e.symm i : ℕ → Bool)
+  have hg : ∀ i, g i ∈ kernel k f := fun i => (Set.Finite.mem_toFinset hf).1 (e.symm i).2
+  let δ : Fin K.card → Fin k → Fin K.card := fun i r =>
+    e ⟨fun n => g i (k * n + r), (Set.Finite.mem_toFinset hf).2 (mem_kernel_step (hg i) r.2)⟩
+  refine Set.mem_iUnion.2 ⟨⟨K.card, δ, fun i => g i 0,
+    e ⟨f, (Set.Finite.mem_toFinset hf).2 (self_mem_kernel k f)⟩⟩, g, fun i r n => ?_,
+    fun i => rfl, ?_⟩
+  · simp only [g, δ, Equiv.symm_apply_apply]
+  · simp only [g, Equiv.symm_apply_apply]
 
 /-- On the periodic part, the value depends only on the residue mod `P`. -/
 theorem eq_of_mod_eq {b : ℕ → Bool} {T P : ℕ} (hper : ∀ t, T ≤ t → b (t + P) = b t)

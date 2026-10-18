@@ -228,6 +228,36 @@ theorem eventuallyPeriodic_of_finite_tails {b : ℕ → Bool} (f : ℝ → Bool)
 
 end RealBase
 
+/-- **For `β > 2` the value is one-to-one**: the digit `b t` is `1` iff `β · 0.b(t) b(t+1)… ≥ 1`,
+since every tail value is at most `1/(β - 1) < 1`. -/
+theorem value_injective {β : ℝ} (hβ : 2 < β) : Function.Injective (value β) := by
+  have hβ1 : 1 < β := by linarith
+  have hsmall : ∀ b : ℕ → Bool, value β b < 1 := fun b =>
+    (value_le hβ1 b).trans_lt (by rw [div_lt_one (by linarith)]; linarith)
+  -- the digit is read off the tail value
+  have hdig : ∀ (b : ℕ → Bool) t, b t = true ↔ 1 ≤ β * value β (tail b t) := fun b t => by
+    rw [mul_value hβ1, tail_tail_one, tail_zero_apply]
+    have h0 := value_nonneg hβ1 (tail b (t + 1))
+    have h1 := hsmall (tail b (t + 1))
+    cases b t
+    · simp only [Bool.false_eq_true, if_false, zero_add, false_iff, not_le]
+      exact h1
+    · simp only [if_true, true_iff]
+      linarith
+  intro b b' h
+  have hval : ∀ t, value β (tail b t) = value β (tail b' t) := by
+    intro t
+    induction t with
+    | zero =>
+      have e : ∀ v : ℕ → Bool, tail v 0 = v := fun v => funext fun s => by simp [tail]
+      rw [e, e]
+      exact h
+    | succ t ih =>
+      rw [tailValue_succ hβ1, tailValue_succ hβ1, ih,
+        show b t = b' t from Bool.eq_iff_iff.2 (by rw [hdig, hdig, ih])]
+  funext t
+  exact Bool.eq_iff_iff.2 (by rw [hdig, hdig, hval])
+
 /-! ### Integer bases -/
 
 /-- The real number `0.b(0) b(1) b(2) …` written in the integer base `B`. -/

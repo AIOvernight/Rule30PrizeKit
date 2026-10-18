@@ -2306,7 +2306,14 @@ periodic, and Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplex
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal
-cells (`measure_not_defectBound_trace`).
+cells (`measure_not_defectBound_trace`). The sufficient conditions proved in other files hold almost
+surely too ([TypicalConditions](Rule30Equivalents/TypicalConditions.lean),
+`ae_sufficientConditions_trace`): unbounded remainders N(n) − αn for every α, an oscillating
+discrepancy, unpredictability, a non-atomic limit of the empirical measures, not k-automatic (the
+k-automatic sequences are countably many, `Automatic.countable_setOf_isAutomatic`), automatic
+complexity → ∞, multiplication definable in (ℕ, +, S), density 1/2 along every progression, a
+transcendental generating function over 𝔽_p(X) (Christol), the golden-power, unbordered-factor and
+Lempel–Ziv forms, and x_β ∉ ℚ(β) for every real β > 2 (`ae_value_not_mem_adjoin_trace`).
 
 ---
 

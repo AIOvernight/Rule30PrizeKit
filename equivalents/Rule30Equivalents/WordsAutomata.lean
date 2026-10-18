@@ -1323,5 +1323,101 @@ theorem problem1_iff_no_regular_predictor : Rule30Prize.Problem1 ↔
       ∀ N, ∃ n, N ≤ n ∧ ((List.range n).map c ∈ L ↔ c n = false) :=
   not_eventuallyPeriodic_iff_regular c
 
+/-! ### Maximum-order complexity -/
+
+/-- An eventually periodic sequence is generated from the start by a feedback shift register: with
+transient `T` and period `P`, the window of length `T + P` at `i` determines the letter after it,
+since that letter and the one at `i + T` lie in the periodic part at the same phase. -/
+theorem windowDetermined_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriodic b) :
+    ∃ m, ∀ i j, (∀ k < m, b (i + k) = b (j + k)) → b (i + m) = b (j + m) := by
+  obtain ⟨T, P, hP, hper⟩ := h
+  refine ⟨T + P, fun i j hw => ?_⟩
+  rw [show i + (T + P) = i + T + P by omega, show j + (T + P) = j + T + P by omega,
+    hper _ (by omega), hper _ (by omega)]
+  exact hw T (by omega)
+
+/-- **Feedback from the start**: `b` is eventually periodic iff some feedback shift register
+generates it from position `0`. -/
+theorem eventuallyPeriodic_iff_feedback_from_zero (b : ℕ → Bool) :
+    EventuallyPeriodic b ↔ ∃ (m : ℕ) (F : (Fin m → Bool) → Bool),
+      ∀ i, b (i + m) = F fun k => b (i + k) := by
+  classical
+  constructor
+  · intro h
+    obtain ⟨m, hm⟩ := windowDetermined_of_eventuallyPeriodic h
+    -- the feedback reads the successor of any position with the given window
+    refine ⟨m, fun w => if hw : ∃ i, ∀ k : Fin m, b (i + k) = w k then b (hw.choose + m) else false,
+      fun i => ?_⟩
+    have hex : ∃ i', ∀ k : Fin m, b (i' + k) = b (i + k) := ⟨i, fun _ => rfl⟩
+    simp only [dif_pos hex]
+    exact hm i hex.choose fun k hk => (hex.choose_spec ⟨k, hk⟩).symm
+  · rintro ⟨m, F, hF⟩
+    exact (eventuallyPeriodic_iff_feedback b).2 ⟨m, F, 0, fun t _ => hF t⟩
+
+/-- Inside the prefix of length `n`, equal windows of length `m` have equal successors. -/
+def PrefixConsistent (b : ℕ → Bool) (n m : ℕ) : Prop :=
+  ∀ i j, i + m < n → j + m < n → (∀ k < m, b (i + k) = b (j + k)) → b (i + m) = b (j + m)
+
+theorem prefixConsistent_self (b : ℕ → Bool) (n : ℕ) : PrefixConsistent b n n :=
+  fun i _ hi _ _ => absurd hi (by omega)
+
+/-- Consistency at order `m` gives consistency at every larger order. -/
+theorem PrefixConsistent.mono {b : ℕ → Bool} {n m m' : ℕ} (h : PrefixConsistent b n m)
+    (hm : m ≤ m') : PrefixConsistent b n m' := by
+  intro i j hi hj hw
+  have := h (i + (m' - m)) (j + (m' - m)) (by omega) (by omega) fun k hk => by
+    rw [Nat.add_assoc, Nat.add_assoc]
+    exact hw _ (by omega)
+  rwa [show i + (m' - m) + m = i + m' by omega, show j + (m' - m) + m = j + m' by omega] at this
+
+/-- **Maximum-order complexity** of the prefix of length `n`: the length of the shortest feedback
+shift register that generates it, the least `m` at which the prefix is consistent. -/
+noncomputable def maxOrderComplexity (b : ℕ → Bool) (n : ℕ) : ℕ := by
+  classical exact Nat.find ⟨n, prefixConsistent_self b n⟩
+
+theorem lt_maxOrderComplexity_iff (b : ℕ → Bool) (n m : ℕ) :
+    m < maxOrderComplexity b n ↔ ¬ PrefixConsistent b n m := by
+  classical
+  unfold maxOrderComplexity
+  rw [Nat.lt_find_iff]
+  constructor
+  · intro h hc
+    exact h m le_rfl hc
+  · intro h m' hm' hc
+    exact h (hc.mono hm')
+
+/-- **Problem 1, maximum-order complexity** (catalog [28]): Problem 1 holds iff the maximum-order
+complexity of the prefixes of the center column tends to infinity. -/
+theorem problem1_iff_maxOrderComplexity_tendsto : Rule30Prize.Problem1 ↔
+    Filter.Tendsto (maxOrderComplexity c) Filter.atTop Filter.atTop := by
+  rw [problem1_iff_not_eventuallyPeriodic]
+  constructor
+  · intro hne
+    refine Filter.tendsto_atTop.2 fun m => ?_
+    -- some equal windows of length `m` have different successors
+    have hnd : ¬ ∀ i j, (∀ k < m, c (i + k) = c (j + k)) → c (i + m) = c (j + m) :=
+      fun hd => hne (eventuallyPeriodic_of_determined (n := m) (T := 0) fun i j _ _ hw => hd i j hw)
+    push Not at hnd
+    obtain ⟨i, j, hw, hne'⟩ := hnd
+    refine Filter.eventually_atTop.2 ⟨i + j + m + 1, fun n hn => ?_⟩
+    by_contra hlt
+    push Not at hlt
+    have hc : PrefixConsistent c n m := by
+      by_contra hc
+      exact absurd ((lt_maxOrderComplexity_iff c n m).2 hc) (by omega)
+    exact hne' (hc i j (by omega) (by omega) hw)
+  · intro htend hep
+    obtain ⟨m, hm⟩ := windowDetermined_of_eventuallyPeriodic hep
+    obtain ⟨n, hn⟩ := Filter.eventually_atTop.1 (Filter.tendsto_atTop.1 htend (m + 1))
+    have := (lt_maxOrderComplexity_iff c n m).1 (by have := hn n le_rfl; omega)
+    exact this fun i j _ _ hw => hm i j hw
+
+/-- **Problem 1, no feedback shift register from the start** (catalog [28]). -/
+theorem problem1_iff_no_feedback_from_zero : Rule30Prize.Problem1 ↔
+    ∀ m, ¬ ∃ F : (Fin m → Bool) → Bool, ∀ i, c (i + m) = F fun k => c (i + k) := by
+  rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_feedback_from_zero]
+  push Not
+  rfl
+
 end WordsAutomata
 end Rule30Equivalents

@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 197 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 199 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -173,7 +173,7 @@ files. The rows follow the order of Section 3.
 | 45 | skolem-mahler-lech | algebra | S is not the zero set of a linear recurrence sequence over ℚ | Proved (library) | `SkolemMahlerLech.problem1_iff_not_LRS_zero_set`, `SkolemMahlerLech.skolem_mahler_lech`, `Strassmann.strassmann` |
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
-| 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
+| 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register`, `WordsAutomata.problem1_iff_maxOrderComplexity_tendsto`, `WordsAutomata.problem1_iff_no_feedback_from_zero` |
 | 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
@@ -1177,8 +1177,13 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Difficulty.* Easy.
 - *Data* (algebra survey). M_n = 37 at n = 10⁶ and 44 at n = 10⁷; for random bits 2·log₂ n ≈ 40
   and 46.5.
-- *Lean.* Proved in the library (batch 2: `WordsAutomata.problem1_iff_no_feedback_shift_register`). Before
-  batch 2 it was stated. A k-th order version, if formalized, must quantify k ≥ 1.
+- *Lean.* Proved in the library (batch 2: `WordsAutomata.problem1_iff_no_feedback_shift_register`,
+  from some time on). The first two bullets are proved as stated:
+  `problem1_iff_no_feedback_from_zero` (an eventually periodic sequence is generated from position 0
+  by a register of length T + P) and `problem1_iff_maxOrderComplexity_tendsto`, with
+  `maxOrderComplexity b n` the least m at which equal windows of length m inside the prefix of
+  length n have equal successors (consistency is upward closed, `PrefixConsistent.mono`). A k-th
+  order version, if formalized, must quantify k ≥ 1.
 
   ```lean
   theorem problem1_iff_no_nlfsr : Rule30Prize.Problem1 ↔

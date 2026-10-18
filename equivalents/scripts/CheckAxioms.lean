@@ -202,3 +202,5 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_unpredictable
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_no_feedback_shift_register
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_no_regular_predictor
+#print axioms Rule30Equivalents.WordsAutomata.problem1_iff_maxOrderComplexity_tendsto
+#print axioms Rule30Equivalents.WordsAutomata.problem1_iff_no_feedback_from_zero

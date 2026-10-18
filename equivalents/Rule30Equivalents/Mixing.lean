@@ -2,6 +2,7 @@ import Rule30Equivalents.RandomConfigurations
 import Mathlib.MeasureTheory.Measure.MeasuredSets
 import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
 import Mathlib.Dynamics.Ergodic.Ergodic
+import Mathlib.Dynamics.TopologicalEntropy.Semiconj
 
 /-!
 # Rule 30 preserves the fair-coin measure and is mixing
@@ -34,6 +35,9 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   the rows (for the seed, Kopra's theorem gives infinitely many limit points).
 * `evol_flip_front`, `sensitive`: the right front of a perturbation moves at speed one, and rule 30
   is sensitive to initial conditions.
+* `log_two_le_coverEntropy`: **rule 30 has topological entropy at least `log 2`** (Mathlib's
+  `coverEntropy`): the center trace is a uniformly continuous factor map onto the full shift on
+  `{0,1}^ℕ`, whose entropy is at least `log 2` (`log_two_le_coverEntropy_shift`).
 * `ae_isNormal_columns`, `ae_isNormal_rows`: for almost every configuration, every column of the
   space-time diagram is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`), and
   so is the right half of every row (every iterate preserves the measure).
@@ -501,5 +505,69 @@ theorem ae_rightHalves_frequently (v : ℕ → Bool) :
       (isOpen_discrete {v n}).preimage (continuous_apply (A := fun _ : ℤ => Bool) (n : ℤ))
   obtain ⟨t, ht, hmem⟩ := hx _ hU ⟨fun p => v p.toNat, fun n _ => by simp⟩ T
   exact ⟨t, ht, hmem⟩
+
+/-! ### Topological entropy -/
+
+section Entropy
+
+open Dynamics Uniformity
+
+/-- The shift on `{0,1}^ℕ`. -/
+def shift (v : ℕ → Bool) : ℕ → Bool := fun t => v (t + 1)
+
+theorem shift_iterate (k : ℕ) (v : ℕ → Bool) : shift^[k] v = fun t => v (t + k) := by
+  induction k generalizing v with
+  | zero => rfl
+  | succ k ih =>
+    rw [Function.iterate_succ_apply, ih]
+    funext t
+    simp only [shift]
+    congr 1
+
+/-- The full shift on `{0,1}^ℕ` has topological entropy at least `log 2`: a dynamical cover for
+the first coordinate over `n` steps must show every word of length `n`. -/
+theorem log_two_le_coverEntropy_shift :
+    ENNReal.log 2 ≤ coverEntropy shift (Set.univ : Set (ℕ → Bool)) := by
+  let V : SetRel (ℕ → Bool) (ℕ → Bool) := {p | p.1 0 = p.2 0}
+  have hV : V ∈ 𝓤 (ℕ → Bool) :=
+    (Pi.uniformContinuous_proj (fun _ : ℕ => Bool) 0)
+      (UniformSpace.uniformSpace_eq_bot.mp rfl : SetRel.id ∈ 𝓤 Bool)
+  refine le_trans ?_ (coverEntropyEntourage_le_coverEntropy shift Set.univ hV)
+  rw [← ExpGrowth.expGrowthSup_pow]
+  refine ExpGrowth.expGrowthSup_monotone fun n => ?_
+  -- a dynamical cover shows every word of length `n`
+  have key : ∀ s : Finset (ℕ → Bool), IsDynCoverOf shift Set.univ V n s → 2 ^ n ≤ s.card := by
+    intro s hs
+    have hsurj : (s.image fun y => fun k : Fin n => y k) = Finset.univ := by
+      refine Finset.eq_univ_of_forall fun w => ?_
+      obtain ⟨y, hy, hxy⟩ := hs (x := fun t => if h : t < n then w ⟨t, h⟩ else false)
+        (Set.mem_univ _)
+      refine Finset.mem_image.2 ⟨y, hy, funext fun k => ?_⟩
+      simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
+        Prod.map_apply, shift_iterate, V, Set.mem_setOf_eq, zero_add] at hxy
+      have hk := hxy k k.2
+      simp only [dif_pos k.2] at hk
+      exact hk.symm
+    calc 2 ^ n = (Finset.univ : Finset (Fin n → Bool)).card := by simp
+      _ = (s.image fun y => fun k : Fin n => y k).card := by rw [hsurj]
+      _ ≤ s.card := Finset.card_image_le
+  have hmin : ((2 ^ n : ℕ) : ℕ∞) ≤ coverMincard shift Set.univ V n :=
+    le_iInf₂ fun s hs => by exact_mod_cast key s hs
+  have := ENat.toENNReal_le.2 hmin
+  simpa using this
+
+/-- **Rule 30 has topological entropy at least `log 2`**: the center trace is a uniformly
+continuous factor map onto the full shift on `{0,1}^ℕ` (`RandomConfigurations.trace_evol_one`,
+`Genericity.surjective_trace`). -/
+theorem log_two_le_coverEntropy :
+    ENNReal.log 2 ≤ coverEntropy (fun x : ℤ → Bool => evol x 1) Set.univ := by
+  have hsemi : Function.Semiconj trace (fun x : ℤ → Bool => evol x 1) shift := fun x =>
+    trace_evol_one x
+  have h := coverEntropy_image_le_of_uniformContinuous hsemi
+    (CompactSpace.uniformContinuous_of_continuous continuous_trace) Set.univ
+  rw [Set.image_univ_of_surjective surjective_trace] at h
+  exact log_two_le_coverEntropy_shift.trans h
+
+end Entropy
 
 end Rule30Equivalents.Mixing

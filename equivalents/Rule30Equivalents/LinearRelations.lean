@@ -3,7 +3,13 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Matrix.Rank
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 import Mathlib.Order.Filter.AtTopBot.Basic
-import Rule30Equivalents.PowerSeriesF2
+import Mathlib.Algebra.Field.ZMod
+import Mathlib.Algebra.Polynomial.Degree.TrailingDegree
+import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Data.Fintype.Pigeonhole
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.PowerSeries.Trunc
+import Rule30Equivalents.Basic
 import Rule30Equivalents.ShiftOrbit
 import Rule30Equivalents.WordsAutomata
 
@@ -165,6 +171,31 @@ section CommRing
 
 variable {K : Type*} [CommRing K]
 
+/-- Coefficient `t + deg Q` of `Q · φ` for a polynomial `Q`. -/
+theorem coeff_coe_mul_add_natDegree {R : Type*} [CommSemiring R] (Q : Polynomial R)
+    (φ : PowerSeries R) (t : ℕ) :
+    PowerSeries.coeff (t + Q.natDegree) ((Q : PowerSeries R) * φ) =
+      ∑ m ∈ range (Q.natDegree + 1),
+        Q.coeff (Q.natDegree - m) * PowerSeries.coeff (t + m) φ := by
+  rw [PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
+    (fun i j => PowerSeries.coeff i (Q : PowerSeries R) * PowerSeries.coeff j φ),
+    show (t + Q.natDegree).succ = (Q.natDegree + 1) + t by omega, Finset.sum_range_add]
+  have hz : ∑ x ∈ range t, PowerSeries.coeff (Q.natDegree + 1 + x) (Q : PowerSeries R) *
+      PowerSeries.coeff (t + Q.natDegree - (Q.natDegree + 1 + x)) φ = 0 :=
+    Finset.sum_eq_zero fun x _ => by
+      rw [Polynomial.coeff_coe, Polynomial.coeff_eq_zero_of_natDegree_lt (by omega), zero_mul]
+  rw [hz, add_zero]
+  refine Finset.sum_nbij' (fun m => Q.natDegree - m) (fun m => Q.natDegree - m) ?_ ?_ ?_ ?_ ?_
+  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
+  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
+  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
+  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
+  · intro m hm
+    simp only [Finset.mem_range] at hm
+    rw [Polynomial.coeff_coe, show Q.natDegree - (Q.natDegree - m) = m by omega,
+      show t + (Q.natDegree - m) = t + Q.natDegree - m by omega]
+
+
 /-- The generating function `∑ₜ b(t) Xᵗ ∈ K⟦X⟧`. -/
 noncomputable def series (K : Type*) [CommRing K] (b : ℕ → Bool) : PowerSeries K :=
   PowerSeries.mk (toK K b)
@@ -215,7 +246,7 @@ theorem eventuallyPeriodic_of_mul_eq {b : ℕ → Bool} {P Q : K[X]} (hQ : Q ≠
     have h0 : PowerSeries.coeff (t + d) ((Q : PowerSeries K) * series K b) = 0 := by
       rw [h, Polynomial.coeff_coe]
       exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
-    rw [PowerSeriesF2.coeff_coe_mul_add_natDegree, show d + 1 = (w + 1) + i₀ by omega,
+    rw [coeff_coe_mul_add_natDegree, show d + 1 = (w + 1) + i₀ by omega,
       Finset.sum_range_add, Finset.sum_range_succ] at h0
     have hz : ∑ m ∈ range i₀, Q.coeff (d - (w + 1 + m)) *
         PowerSeries.coeff (t + (w + 1 + m)) (series K b) = 0 :=

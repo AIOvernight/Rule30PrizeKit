@@ -5,6 +5,7 @@ import Mathlib.Data.Fintype.Pigeonhole
 import Mathlib.RingTheory.PowerSeries.Inverse
 import Mathlib.RingTheory.PowerSeries.Trunc
 import Rule30Equivalents.Basic
+import Rule30Equivalents.LinearRelations
 
 /-!
 # Problem 1 over `𝔽₂`: rational generating function, linear recurrences, linear complexity
@@ -40,6 +41,10 @@ irrationality of the binary number `0.c(0)c(1)c(2)…₂`: `series c` is a forma
 should not lie in `𝔽₂(X)`.
 
 ## Proof idea
+
+The general statements are proved over any field, or any commutative ring, in
+[LinearRelations](LinearRelations.lean); the theorems here are their instances for `K = 𝔽₂`
+(`bit b = toK (ZMod 2) b` by definition). The arguments:
 
 * Periodic ⇒ rational: if `b(t + p) = b(t)` for `t ≥ T`, the coefficients of `(1 - Xᵖ) · series b`
   vanish from degree `T + p` on, so that product is a polynomial `P`, and `Q = 1 - Xᵖ` has
@@ -88,33 +93,8 @@ noncomputable def series (b : ℕ → Bool) : PowerSeries (ZMod 2) :=
     PowerSeries.coeff n (series b) = bit b n := by
   simp only [series, PowerSeries.coeff_mk, bit]
 
-theorem bit_eq_bit_iff {b b' : ℕ → Bool} {t t' : ℕ} : bit b t = bit b' t' ↔ b t = b' t' := by
-  unfold bit
-  cases b t <;> cases b' t' <;> decide
-
-/-- Coefficient `t + deg Q` of `Q · φ` for a polynomial `Q`. -/
-theorem coeff_coe_mul_add_natDegree {R : Type*} [CommSemiring R] (Q : Polynomial R)
-    (φ : PowerSeries R) (t : ℕ) :
-    PowerSeries.coeff (t + Q.natDegree) ((Q : PowerSeries R) * φ) =
-      ∑ m ∈ range (Q.natDegree + 1),
-        Q.coeff (Q.natDegree - m) * PowerSeries.coeff (t + m) φ := by
-  rw [PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (fun i j => PowerSeries.coeff i (Q : PowerSeries R) * PowerSeries.coeff j φ),
-    show (t + Q.natDegree).succ = (Q.natDegree + 1) + t by omega, Finset.sum_range_add]
-  have hz : ∑ x ∈ range t, PowerSeries.coeff (Q.natDegree + 1 + x) (Q : PowerSeries R) *
-      PowerSeries.coeff (t + Q.natDegree - (Q.natDegree + 1 + x)) φ = 0 :=
-    Finset.sum_eq_zero fun x _ => by
-      rw [Polynomial.coeff_coe, Polynomial.coeff_eq_zero_of_natDegree_lt (by omega), zero_mul]
-  rw [hz, add_zero]
-  refine Finset.sum_nbij' (fun m => Q.natDegree - m) (fun m => Q.natDegree - m) ?_ ?_ ?_ ?_ ?_
-  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
-  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
-  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
-  · intro m hm; simp only [Finset.mem_range] at hm ⊢; omega
-  · intro m hm
-    simp only [Finset.mem_range] at hm
-    rw [Polynomial.coeff_coe, show Q.natDegree - (Q.natDegree - m) = m by omega,
-      show t + (Q.natDegree - m) = t + Q.natDegree - m by omega]
+theorem bit_eq_bit_iff {b b' : ℕ → Bool} {t t' : ℕ} : bit b t = bit b' t' ↔ b t = b' t' :=
+  LinearRelations.toK_eq_toK_iff (K := ZMod 2)
 
 /-! ### Eventually periodic ⇒ linear recurrence ⇒ rational -/
 
@@ -139,61 +119,21 @@ theorem linearRecurrence_from_zero_of_eventuallyPeriodic {b : ℕ → Bool}
 `Q = 1 - Xᵖ` for a period `p`; in particular `Q(0) ≠ 0`. -/
 theorem exists_mul_eq_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriodic b) :
     ∃ P Q : Polynomial (ZMod 2), Q.coeff 0 ≠ 0 ∧
-      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) := by
-  obtain ⟨T, p, hp, hper⟩ := h
-  refine ⟨PowerSeries.trunc (T + p)
-    (((1 - Polynomial.X ^ p : Polynomial (ZMod 2)) : PowerSeries (ZMod 2)) * series b),
-    1 - Polynomial.X ^ p, ?_, ?_⟩
-  · rw [Polynomial.coeff_sub, Polynomial.coeff_one_zero, Polynomial.coeff_X_pow,
-      if_neg (by omega), sub_zero]
-    exact one_ne_zero
-  · refine PowerSeries.ext fun n => ?_
-    rw [Polynomial.coeff_coe, PowerSeries.coeff_trunc]
-    split_ifs with hn
-    · rfl
-    · rw [Polynomial.coe_sub, Polynomial.coe_one, Polynomial.coe_pow, Polynomial.coe_X, sub_mul,
-        one_mul, map_sub, PowerSeries.coeff_X_pow_mul', if_pos (by omega), coeff_series,
-        coeff_series]
-      have hn' := hper (n - p) (by omega)
-      rw [Nat.sub_add_cancel (by omega)] at hn'
-      unfold bit
-      rw [hn', sub_self]
+      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) :=
+  LinearRelations.exists_mul_eq_of_eventuallyPeriodic (K := ZMod 2) h
 
 /-! ### Rational ⇒ linear recurrence -/
 
 /-- If `Q · series b = P` with `Q ≠ 0`, then `b` satisfies an eventual linear recurrence over
-`𝔽₂` of order `deg Q - ord Q`. Its coefficients are read off from `Q`, normalized by the lowest
-nonzero coefficient of `Q` (which is `1` over `𝔽₂`). -/
+`𝔽₂`: `b` is eventually periodic (`LinearRelations.eventuallyPeriodic_of_mul_eq`, over any
+commutative ring), hence a register from time `0` on. -/
 theorem linearRecurrence_of_mul_eq {b : ℕ → Bool} {P Q : Polynomial (ZMod 2)} (hQ : Q ≠ 0)
     (h : (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2))) :
     ∃ (d : ℕ) (a : Fin d → ZMod 2) (T : ℕ),
       ∀ t, T ≤ t → bit b (t + d) = ∑ i, a i * bit b (t + i) := by
-  have hkD : Q.natTrailingDegree ≤ Q.natDegree := Polynomial.natTrailingDegree_le_natDegree Q
-  have hlow : Q.coeff Q.natTrailingDegree = 1 := by
-    have h1 : Q.trailingCoeff ≠ 0 := Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr hQ
-    have h2 : ∀ x : ZMod 2, x ≠ 0 → x = 1 := by decide
-    exact h2 _ h1
-  refine ⟨Q.natDegree - Q.natTrailingDegree, fun i => Q.coeff (Q.natDegree - i),
-    P.natDegree + 1, fun t ht => ?_⟩
-  have h0 : PowerSeries.coeff (t + Q.natDegree)
-      ((Q : PowerSeries (ZMod 2)) * series b) = 0 := by
-    rw [h, Polynomial.coeff_coe]
-    exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
-  rw [coeff_coe_mul_add_natDegree, show Q.natDegree + 1 =
-      (Q.natDegree - Q.natTrailingDegree + 1) + Q.natTrailingDegree by omega,
-    Finset.sum_range_add, Finset.sum_range_succ] at h0
-  have hz : ∑ m ∈ range Q.natTrailingDegree,
-      Q.coeff (Q.natDegree - (Q.natDegree - Q.natTrailingDegree + 1 + m)) *
-        PowerSeries.coeff (t + (Q.natDegree - Q.natTrailingDegree + 1 + m)) (series b) = 0 :=
-    Finset.sum_eq_zero fun m hm => by
-      rw [Finset.mem_range] at hm
-      rw [Polynomial.coeff_eq_zero_of_lt_natTrailingDegree (by omega), zero_mul]
-  rw [hz, add_zero, show Q.natDegree - (Q.natDegree - Q.natTrailingDegree) =
-      Q.natTrailingDegree by omega, hlow, one_mul] at h0
-  simp only [coeff_series] at h0
-  rw [Fin.sum_univ_eq_sum_range (fun i => Q.coeff (Q.natDegree - i) * bit b (t + i))]
-  exact (eq_neg_iff_add_eq_zero.mpr (by rw [add_comm]; exact h0)).trans
-    (ZMod.neg_eq_self_mod_two _)
+  obtain ⟨d, a, h'⟩ := linearRecurrence_from_zero_of_eventuallyPeriodic
+    (LinearRelations.eventuallyPeriodic_of_mul_eq (K := ZMod 2) hQ h)
+  exact ⟨d, a, 0, fun t _ => h' t⟩
 
 /-! ### Linear recurrence ⇒ eventually periodic -/
 
@@ -203,46 +143,16 @@ then `b` is eventually periodic with period `t₂ - t₁`. -/
 theorem eventuallyPeriodic_of_window_eq {b : ℕ → Bool} {d : ℕ} {a : Fin d → ZMod 2} {T : ℕ}
     (h : ∀ t, T ≤ t → bit b (t + d) = ∑ i, a i * bit b (t + i)) {t₁ t₂ : ℕ}
     (h₁ : T ≤ t₁) (h₁₂ : t₁ < t₂) (h0 : ∀ i < d, b (t₁ + i) = b (t₂ + i)) :
-    EventuallyPeriodic b := by
-  have step : ∀ n, (∀ i < d, b (t₁ + n + i) = b (t₂ + n + i)) →
-      b (t₁ + n + d) = b (t₂ + n + d) := by
-    intro n hn
-    rw [← bit_eq_bit_iff, h _ (by omega), h _ (by omega)]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    unfold bit
-    rw [hn j j.isLt]
-  have all : ∀ n, ∀ i < d, b (t₁ + n + i) = b (t₂ + n + i) := by
-    intro n
-    induction n with
-    | zero => simpa using h0
-    | succ n ih =>
-      intro i hi
-      rcases Nat.lt_or_ge (i + 1) d with h' | h'
-      · have := ih (i + 1) h'
-        rwa [show t₁ + (n + 1) + i = t₁ + n + (i + 1) by omega,
-          show t₂ + (n + 1) + i = t₂ + n + (i + 1) by omega]
-      · have := step n ih
-        rwa [show t₁ + (n + 1) + i = t₁ + n + d by omega,
-          show t₂ + (n + 1) + i = t₂ + n + d by omega]
-  refine ⟨t₁ + d, t₂ - t₁, by omega, fun t ht => ?_⟩
-  have := step (t - (t₁ + d)) (all _)
-  rw [show t₁ + (t - (t₁ + d)) + d = t by omega,
-    show t₂ + (t - (t₁ + d)) + d = t + (t₂ - t₁) by omega] at this
-  exact this.symm
+    EventuallyPeriodic b :=
+  LinearRelations.eventuallyPeriodic_of_window_eq (K := ZMod 2) h h₁ h₁₂ h0
 
 /-- A sequence satisfying an eventual linear recurrence over `𝔽₂` is eventually periodic: the
 window of the last `d` bits moves through the finite set `Fin d → Bool`, so two windows repeat
 (pigeonhole), and from then on the recurrence repeats everything. -/
 theorem eventuallyPeriodic_of_linearRecurrence {b : ℕ → Bool} {d : ℕ} {a : Fin d → ZMod 2}
     {T : ℕ} (h : ∀ t, T ≤ t → bit b (t + d) = ∑ i, a i * bit b (t + i)) :
-    EventuallyPeriodic b := by
-  obtain ⟨x, y, hxy, hw⟩ :=
-    Finite.exists_ne_map_eq_of_infinite (fun n : ℕ => fun i : Fin d => b (T + n + i))
-  rcases Nat.lt_or_gt_of_ne hxy with hlt | hlt
-  · exact eventuallyPeriodic_of_window_eq h (t₁ := T + x) (t₂ := T + y) (by omega) (by omega)
-      fun i hi => congrFun hw ⟨i, hi⟩
-  · exact eventuallyPeriodic_of_window_eq h (t₁ := T + y) (t₂ := T + x) (by omega) (by omega)
-      fun i hi => (congrFun hw ⟨i, hi⟩).symm
+    EventuallyPeriodic b :=
+  LinearRelations.eventuallyPeriodic_of_recurrence (K := ZMod 2) h
 
 /-! ### The equivalences for an arbitrary bit sequence -/
 
@@ -250,25 +160,15 @@ theorem eventuallyPeriodic_of_linearRecurrence {b : ℕ → Bool} {d : ℕ} {a :
 function over `𝔽₂` is rational: `Q · ∑ₜ b(t) Xᵗ = P` for polynomials `P, Q` with `Q ≠ 0`. -/
 theorem eventuallyPeriodic_iff_rational (b : ℕ → Bool) :
     EventuallyPeriodic b ↔ ∃ P Q : Polynomial (ZMod 2), Q ≠ 0 ∧
-      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) := by
-  constructor
-  · intro h
-    obtain ⟨P, Q, hQ, hPQ⟩ := exists_mul_eq_of_eventuallyPeriodic h
-    exact ⟨P, Q, fun h0 => hQ (by rw [h0, Polynomial.coeff_zero]), hPQ⟩
-  · rintro ⟨P, Q, hQ, hPQ⟩
-    obtain ⟨d, a, T, h⟩ := linearRecurrence_of_mul_eq hQ hPQ
-    exact eventuallyPeriodic_of_linearRecurrence h
+      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) :=
+  LinearRelations.eventuallyPeriodic_iff_rational (K := ZMod 2) b
 
 /-- **Rational generating function, invertible denominator.** The same with `Q(0) ≠ 0`, so
 that `Q` is a unit of `𝔽₂⟦X⟧` and `series b = P · Q⁻¹`. -/
 theorem eventuallyPeriodic_iff_rational_coeff_zero (b : ℕ → Bool) :
     EventuallyPeriodic b ↔ ∃ P Q : Polynomial (ZMod 2), Q.coeff 0 ≠ 0 ∧
-      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) := by
-  constructor
-  · exact exists_mul_eq_of_eventuallyPeriodic
-  · rintro ⟨P, Q, hQ, hPQ⟩
-    exact (eventuallyPeriodic_iff_rational b).2
-      ⟨P, Q, fun h0 => hQ (by rw [h0, Polynomial.coeff_zero]), hPQ⟩
+      (Q : PowerSeries (ZMod 2)) * series b = (P : PowerSeries (ZMod 2)) :=
+  LinearRelations.eventuallyPeriodic_iff_rational_coeff_zero (K := ZMod 2) b
 
 /-- **`series b = P / Q`.** A bit sequence is eventually periodic iff its generating function is
 a quotient `P · Q⁻¹` of polynomials in `𝔽₂⟦X⟧` with `Q(0) ≠ 0` (so that `Q` is a unit). -/

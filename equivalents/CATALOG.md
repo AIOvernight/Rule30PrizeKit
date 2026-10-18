@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 199 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 201 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -182,7 +182,7 @@ files. The rows follow the order of Section 3.
 | 24 | finite-certificates | words, computation | for every N, some prefix has more than N distinct factors of one length | Proved (library) | `WordForms.problem1_iff_prefix_certificates` |
 | 34 | omega-limit | topological dynamics | the ω-limit set of c under the shift is infinite | Proved (library) | `WordsAutomata.problem1_iff_omegaLimit_infinite` |
 | 35 | tail-language | words | the words that occur infinitely often number at least n + 1 for each length n | Proved (library), all three forms | `WordsAutomata.problem1_iff_tail_complexity`, `TailLanguage.problem1_iff_tail_strictMono`, `TailLanguage.problem1_iff_tailSubshift_infinite` |
-| 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths` |
+| 29 | return-words | words | the gaps between black cells, and the run lengths, are not EP | Proved (library) | `WordForms.problem1_iff_black_gaps`, `WordForms.problem1_iff_white_gaps`, `WordForms.problem1_iff_run_lengths`, `WordForms.problem1_iff_returnWords` |
 | 47 | golden-power | words | infinitely many prefixes have no suffix of exponent ≥ φ² | Proved (library) | `WordForms.problem1_iff_infinitely_many_prefixes_without_golden_power`, `GoldenPowers.eventuallyPeriodic_of_gp` |
 | 51 | unbordered-factors | words | every tail of c has unbordered factors of unbounded length | Proved (library) | `WordForms.problem1_iff_late_long_unbordered_factors`, `Lyndon.eventuallyPeriodic_of_bordered` |
 | 19 | simple-transforms | words | ¬c, the shifts of c, the XOR derivative and the running parity are not EP | Proved (library) | `Symmetry.problem1_iff_complement`, `TransformsSeeds.problem1_iff_xor_derivative` |
@@ -1423,7 +1423,11 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Lean.* Proved in the library: `WordForms.problem1_iff_black_gaps`, `problem1_iff_white_gaps` and
   `problem1_iff_run_lengths`, all from `WordForms.eventuallyPeriodic_iff_gap` (a sequence with
   infinitely many `true` values is EP iff the gaps between them are). The return-word form is
-  stated.
+  proved too: `problem1_iff_returnWords` for every word u that occurs infinitely often, and
+  `problem1_iff_returnWords_exists`, from `eventuallyPeriodic_iff_returnWord`. If b has period P
+  from T, the occurrences of u past T shift by P after a fixed number N of them, so the return
+  words repeat with period N; conversely equal return words at k and k + Q make b repeat with the
+  total length of Q of them.
 
   ```lean
   noncomputable def blackGap (n : ℕ) : ℕ :=

@@ -446,4 +446,144 @@ theorem problem1_of_lz_unbounded :
   obtain ⟨n, hn⟩ := h K
   exact absurd (hK n) (by omega)
 
+/-! ### Return words ([29], the derived sequence) -/
+
+/-- `u` occurs in `b` at position `t`. -/
+def OccursAt (b : ℕ → Bool) (u : List Bool) (t : ℕ) : Prop :=
+  ∀ j (hj : j < u.length), b (t + j) = u[j]
+
+instance (b : ℕ → Bool) (u : List Bool) : DecidablePred (OccursAt b u) := fun _ =>
+  Nat.decidableBallLT _ _
+
+/-- The occurrences of `u` in `b`, as a `Bool` sequence. -/
+def occInd (b : ℕ → Bool) (u : List Bool) (t : ℕ) : Bool := decide (OccursAt b u t)
+
+/-- The `k`-th return word to `u`: the factor of `b` from the `k`-th occurrence of `u` to the
+next. The derived sequence of `b` codes these words. -/
+noncomputable def returnWord (b : ℕ → Bool) (u : List Bool) (k : ℕ) : List Bool :=
+  (List.range (gap (occInd b u) k)).map fun j => b (trueTime (occInd b u) k + j)
+
+/-- A sequence in any type is eventually periodic. -/
+def EventuallyPeriodicSeq {α : Type*} (s : ℕ → α) : Prop :=
+  ∃ T P, 0 < P ∧ ∀ k, T ≤ k → s (k + P) = s k
+
+theorem getElem_returnWord (b : ℕ → Bool) (u : List Bool) (k j : ℕ)
+    (hj : j < (returnWord b u k).length) :
+    (returnWord b u k)[j] = b (trueTime (occInd b u) k + j) := by
+  simp [returnWord]
+
+theorem length_returnWord (b : ℕ → Bool) (u : List Bool) (k : ℕ) :
+    (returnWord b u k).length = gap (occInd b u) k := by
+  simp [returnWord]
+
+/-- **Return words** (Durand): for a word `u` that occurs infinitely often in `b`, the sequence `b`
+is eventually periodic iff the sequence of its return words to `u` is. -/
+theorem eventuallyPeriodic_iff_returnWord {b : ℕ → Bool} {u : List Bool}
+    (hinf : {t | occInd b u t = true}.Infinite) :
+    EventuallyPeriodic b ↔ EventuallyPeriodicSeq (returnWord b u) := by
+  have hmono : StrictMono (trueTime (occInd b u)) := Nat.nth_strictMono hinf
+  constructor
+  · rintro ⟨T, P, hP, h⟩
+    -- the occurrences are periodic from `T` on
+    have hocc : ∀ t, T ≤ t → occInd b u (t + P) = occInd b u t := fun t ht => by
+      unfold occInd OccursAt
+      congr 1
+      refine propext (forall_congr' fun j => forall_congr' fun hj => ?_)
+      rw [show t + P + j = (t + j) + P by omega, h _ (by omega)]
+    set N := Nat.count (fun j => occInd b u (T + j) = true) P
+    let K := Nat.count (fun t => occInd b u t = true) T
+    have hK : ∀ k, K ≤ k → T ≤ trueTime (occInd b u) k := fun k hk =>
+      (Nat.le_nth_count hinf T).trans (hmono.monotone hk)
+    have key : ∀ k, K ≤ k → trueTime (occInd b u) (k + N) = trueTime (occInd b u) k + P :=
+      fun k hk => trueTime_add_of_periodic hinf hP hocc k (hK k hk)
+    have hN : 0 < N := by
+      refine Nat.pos_of_ne_zero fun h0 => ?_
+      have := key K le_rfl
+      rw [h0, Nat.add_zero] at this
+      omega
+    refine ⟨K, N, hN, fun k hk => ?_⟩
+    have hlen : gap (occInd b u) (k + N) = gap (occInd b u) k := by
+      unfold gap
+      rw [show k + N + 1 = (k + 1) + N by omega, key (k + 1) (by omega), key k hk]
+      omega
+    apply List.ext_getElem (by rw [length_returnWord, length_returnWord, hlen])
+    intro j hj hj'
+    rw [getElem_returnWord, getElem_returnWord, key k hk, show
+      trueTime (occInd b u) k + P + j = (trueTime (occInd b u) k + j) + P by omega,
+      h _ (by have := hK k hk; omega)]
+  · rintro ⟨K, Q, hQ, h⟩
+    set occ := trueTime (occInd b u)
+    have hgap : ∀ k, K ≤ k → gap (occInd b u) (k + Q) = gap (occInd b u) k := fun k hk => by
+      rw [← length_returnWord, ← length_returnWord, h k hk]
+    set L := occ (K + Q) - occ K
+    have hL : 0 < L := by have := hmono (show K < K + Q by omega); omega
+    have hshift : ∀ k, K ≤ k → occ (k + Q) = occ k + L := by
+      intro k hk
+      induction k, hk using Nat.le_induction with
+      | base => have := hmono (show K < K + Q by omega); omega
+      | succ k hk ih =>
+        have g := hgap k hk
+        unfold gap at g
+        have m1 : occ (k + Q) < occ (k + Q + 1) := hmono (by omega)
+        have m2 : occ k < occ (k + 1) := hmono (by omega)
+        rw [show k + 1 + Q = k + Q + 1 by omega]
+        show occ (k + Q + 1) = occ (k + 1) + L
+        have : occ (k + Q + 1) - occ (k + Q) = occ (k + 1) - occ k := g
+        omega
+    -- inside the `k`-th return word, `b` repeats after `L`
+    have hword : ∀ k, K ≤ k → ∀ j, j < gap (occInd b u) k →
+        b (occ k + j + L) = b (occ k + j) := by
+      intro k hk j hj
+      have hw := h k hk
+      have hj1 : j < (returnWord b u (k + Q)).length := by
+        rw [length_returnWord, hgap k hk]; exact hj
+      have hj2 : j < (returnWord b u k).length := by rw [length_returnWord]; exact hj
+      have := congrArg (fun l : List Bool => l[j]?) hw
+      simp only [List.getElem?_eq_getElem hj1, List.getElem?_eq_getElem hj2, Option.some.injEq,
+        getElem_returnWord] at this
+      rw [← this, show trueTime (occInd b u) (k + Q) = occ k + L from hshift k hk]
+      congr 1
+      omega
+    refine ⟨occ K, L, hL, fun t ht => ?_⟩
+    -- the return word around `t`
+    have hex : ∃ k, t < occ (k + 1) := ⟨t, by
+      have := hmono.id_le (t + 1)
+      simp only [id] at this
+      omega⟩
+    set k := Nat.find hex
+    have hk1 : t < occ (k + 1) := Nat.find_spec hex
+    have hk0 : occ k ≤ t := by
+      rcases Nat.eq_zero_or_pos k with h0 | h0
+      · rw [h0]; exact le_trans (hmono.monotone (Nat.zero_le K)) ht
+      · have := Nat.find_min hex (show k - 1 < k by omega)
+        rw [show k - 1 + 1 = k by omega] at this
+        omega
+    have hkK : K ≤ k := by
+      by_contra hlt
+      push Not at hlt
+      have := hmono.monotone (show k + 1 ≤ K by omega)
+      omega
+    have := hword k hkK (t - occ k) (by show t - occ k < occ (k + 1) - occ k; omega)
+    rwa [show occ k + (t - occ k) = t by omega] at this
+
+/-- **[29], return words.** For a word `u` that occurs infinitely often in the center column,
+Problem 1 holds iff the sequence of return words to `u` is not eventually periodic. -/
+theorem problem1_iff_returnWords {u : List Bool} (hu : {t | occInd c u t = true}.Infinite) :
+    Rule30Prize.Problem1 ↔ ¬ EventuallyPeriodicSeq (returnWord c u) :=
+  problem1_iff_not_eventuallyPeriodic.trans (not_congr (eventuallyPeriodic_iff_returnWord hu))
+
+theorem occInd_single_true (b : ℕ → Bool) (t : ℕ) : occInd b [true] t = b t := by
+  unfold occInd OccursAt
+  cases hb : b t <;> simp [hb]
+
+/-- **[29], return words, for some word**: Problem 1 holds iff for some word that occurs infinitely
+often (equivalently, for every one) the sequence of return words is not eventually periodic. -/
+theorem problem1_iff_returnWords_exists : Rule30Prize.Problem1 ↔
+    ∃ u : List Bool, {t | occInd c u t = true}.Infinite ∧
+      ¬ EventuallyPeriodicSeq (returnWord c u) := by
+  have hone : {t | occInd c [true] t = true}.Infinite := by
+    simpa only [occInd_single_true] using infinite_black
+  exact ⟨fun h => ⟨[true], hone, (problem1_iff_returnWords hone).1 h⟩,
+    fun ⟨u, hu, h⟩ => (problem1_iff_returnWords hu).2 h⟩
+
 end Rule30Equivalents.WordForms

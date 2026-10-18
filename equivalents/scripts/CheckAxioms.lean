@@ -183,6 +183,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.WordForms.problem1_of_late_long_unbordered_factors
 #print axioms Rule30Equivalents.WordForms.problem1_iff_late_long_unbordered_factors
 #print axioms Rule30Equivalents.WordForms.problem1_of_lz_unbounded
+#print axioms Rule30Equivalents.WordForms.problem1_iff_returnWords
+#print axioms Rule30Equivalents.WordForms.problem1_iff_returnWords_exists
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_filter
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_frequently_ne
 #print axioms Rule30Equivalents.WordsAutomata.problem1_iff_no_hasPeriod_tail

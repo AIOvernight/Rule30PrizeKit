@@ -2686,7 +2686,13 @@ with Turing machines reading n. Notes:
     m are independent fair words, and the strong law of large numbers applies), the trace is
     normal for μ-almost every configuration (`ae_isNormal_trace`), so it has density 1/2, is
     disjunctive and is not eventually periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`,
-    `ae_not_eventuallyPeriodic_trace`).
+    `ae_not_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
+    measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves
+    μ (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window
+    I of its t-th image are independent once t > max I − min J
+    (`measure_window_inter_window`), so rule 30 is topologically mixing too
+    (`exists_mem_evol_mem`); and for μ-almost every configuration every column of the space-time
+    diagram is normal (`ae_isNormal_columns`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

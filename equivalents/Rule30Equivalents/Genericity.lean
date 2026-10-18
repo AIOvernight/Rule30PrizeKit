@@ -42,16 +42,20 @@ theorem continuous_evol : ∀ (t : ℕ) (p : ℤ), Continuous fun x : ℤ → Bo
 
 theorem continuous_trace : Continuous trace := continuous_pi fun t => continuous_evol t 0
 
+/-- Flipping the cell `p - t` flips the cell `(t, p)` (left-permutivity). -/
+theorem evol_flip_at (x : ℤ → Bool) (t : ℕ) (p : ℤ) :
+    evol (Function.update x (p - t) (!x (p - t))) t p = !evol x t p := by
+  have h := AlgebraicDegree.evol_update_left x t p
+  cases hx : x (p - t)
+  · rw [Bool.not_false, h, Function.update_eq_self_iff.2 hx.symm]
+  · have e : Function.update x (p - t) true = x := Function.update_eq_self_iff.2 hx.symm
+    rw [e] at h
+    rw [Bool.not_true, h, Bool.not_not]
+
 /-- **Left-permutivity**: flipping the cell `-m` flips the center at time `m`. -/
 theorem evol_flip (x : ℤ → Bool) (m : ℕ) :
     evol (Function.update x (-(m : ℤ)) (!x (-(m : ℤ)))) m 0 = !evol x m 0 := by
-  have h := AlgebraicDegree.evol_update_left x m 0
-  rw [zero_sub] at h
-  cases hx : x (-(m : ℤ))
-  · rw [Bool.not_false, h, Function.update_eq_self_iff.2 hx.symm]
-  · have e : Function.update x (-(m : ℤ)) true = x := Function.update_eq_self_iff.2 hx.symm
-    rw [e] at h
-    rw [Bool.not_true, h, Bool.not_not]
+  simpa using evol_flip_at x m 0
 
 /-- **Every continuation of a trace prefix is realized**, by changing only the cells left of
 `-n`. -/

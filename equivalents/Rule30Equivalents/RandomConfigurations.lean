@@ -15,8 +15,9 @@ uniform Bernoulli product measure).
 * `measurePreserving_trace`: the center trace `x ↦ (evol x t 0)ₜ` pushes `coins ℤ` to `coins ℕ`,
   so the trace of a random configuration is a sequence of independent fair coins. Flipping the coin
   at `-(n+1)` preserves the measure (`map_flip`), fixes the trace up to time `n` and flips it at
-  time `n + 1` (left-permutivity), so every prefix of length `n + 1` has probability `2^-(n+1)`
-  (`measure_prefix`); cylinders over initial segments then determine the measure.
+  time `n + 1` (left-permutivity), so it halves the prefix event (`two_mul_measure_flip`) and
+  every prefix of length `n + 1` has probability `2^-(n+1)` (`measure_prefix`); cylinders over
+  initial segments then determine the measure.
 * `ae_isNormal`: **Borel's normal number theorem** for fair coins. For a word `u` of length `m`
   and a residue `r`, the blocks `v(r + k m), …, v(r + k m + m - 1)` are independent fair words
   (`map_blocks`, by reindexing and currying the product measure), so by the strong law of large
@@ -101,8 +102,46 @@ theorem measurableSet_prefix (w : ℕ → Bool) (n : ℕ) :
   exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
     measurable_evol t 0 (measurableSet_singleton (w t))
 
-theorem two_mul_inv_two_pow (n : ℕ) : 2 * (2⁻¹ : ENNReal) ^ (n + 1) = 2⁻¹ ^ n := by
-  rw [pow_succ, mul_comm, mul_assoc, ENNReal.inv_mul_cancel two_ne_zero ENNReal.ofNat_ne_top,
+/-- **Flip halving**: if flipping the coin at `j` preserves `A` and flips `f` on `A`, then `f`
+takes each value on half of `A`. -/
+theorem two_mul_measure_flip {A : Set (ℤ → Bool)} (hA : MeasurableSet A)
+    {f : (ℤ → Bool) → Bool} (hf : Measurable f) (j : ℤ)
+    (hAj : ∀ x, Function.update x j (!x j) ∈ A ↔ x ∈ A)
+    (hfj : ∀ x ∈ A, f (Function.update x j (!x j)) = !f x) (b : Bool) :
+    2 * coins ℤ (A ∩ {x | f x = b}) = coins ℤ A := by
+  have hB : ∀ b, MeasurableSet (A ∩ {x | f x = b}) := fun b =>
+    hA.inter (hf (measurableSet_singleton b))
+  have hφ : ∀ b, (fun x => Function.update x j (!x j)) ⁻¹' (A ∩ {x | f x = b}) =
+      A ∩ {x | f x = !b} := by
+    intro b
+    ext x
+    simp only [Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq, hAj]
+    constructor
+    · rintro ⟨hx, h⟩
+      refine ⟨hx, ?_⟩
+      rw [← h, hfj x hx, Bool.not_not]
+    · rintro ⟨hx, h⟩
+      refine ⟨hx, ?_⟩
+      rw [hfj x hx, h, Bool.not_not]
+  have heq : coins ℤ (A ∩ {x | f x = b}) = coins ℤ (A ∩ {x | f x = !b}) := by
+    rw [← hφ b, ← Measure.map_apply (measurable_flip j) (hB b), map_flip]
+  have hsum : coins ℤ (A ∩ {x | f x = b}) + coins ℤ (A ∩ {x | f x = !b}) = coins ℤ A := by
+    rw [← measure_union _ (hB _)]
+    · congr 1
+      ext x
+      simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq]
+      cases f x <;> cases b <;> simp
+    · rw [Set.disjoint_left]
+      rintro x ⟨-, h1⟩ ⟨-, h2⟩
+      simp only [Set.mem_setOf_eq] at h1 h2
+      rw [h1] at h2
+      cases b <;> simp at h2
+  rw [two_mul]
+  nth_rewrite 2 [heq]
+  exact hsum
+
+theorem eq_mul_inv_of_two_mul {X Y : ENNReal} (h : 2 * X = Y) : X = Y * 2⁻¹ := by
+  rw [← h, mul_comm 2 X, mul_assoc, ENNReal.mul_inv_cancel two_ne_zero ENNReal.ofNat_ne_top,
     mul_one]
 
 /-- **Every prefix of the trace has probability `2^-(n+1)`.** Flipping the coin at `-(n+1)`
@@ -122,47 +161,23 @@ theorem measure_prefix (w : ℕ → Bool) :
     rw [this, ← Measure.map_apply (measurable_pi_apply 0) (measurableSet_singleton _),
       coins_map_eval, coin_singleton, zero_add, pow_one]
   | n + 1 => by
-    have ih := measure_prefix w n
-    set A : Set (ℤ → Bool) := {x | ∀ t ≤ n, trace x t = w t} with hA
-    let B : Bool → Set (ℤ → Bool) := fun b => A ∩ {x | trace x (n + 1) = b}
-    have hB : ∀ b, MeasurableSet (B b) := fun b =>
-      (hA ▸ measurableSet_prefix w n).inter
-        (measurable_evol (n + 1) 0 (measurableSet_singleton b))
-    -- flipping the coin at `-(n+1)` exchanges `B b` and `B !b`
-    have hφ : ∀ b, (fun x => Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ)))) ⁻¹'
-        B b = B (!b) := by
-      intro b
+    -- the prefix up to time `n` does not see the coin at `-(n+1)`
+    have hinv : ∀ x, Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))) ∈
+        {x : ℤ → Bool | ∀ t ≤ n, trace x t = w t} ↔ x ∈ {x | ∀ t ≤ n, trace x t = w t} := by
+      intro x
+      simp only [Set.mem_setOf_eq]
+      refine forall_congr' fun t => imp_congr_right fun ht => ?_
+      rw [show trace (Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ)))) t =
+        trace x t from AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by
+          rw [Function.update_of_ne (by omega)]]
+    have h : 2 * coins ℤ ({x | ∀ t ≤ n, trace x t = w t} ∩ {x | evol x (n + 1) 0 = w (n + 1)}) =
+        coins ℤ {x | ∀ t ≤ n, trace x t = w t} :=
+      two_mul_measure_flip (measurableSet_prefix w n) (measurable_evol (n + 1) 0) _ hinv
+        (fun x _ => evol_flip x (n + 1)) (w (n + 1))
+    have htarget : {x : ℤ → Bool | ∀ t ≤ n + 1, trace x t = w t} =
+        {x | ∀ t ≤ n, trace x t = w t} ∩ {x | evol x (n + 1) 0 = w (n + 1)} := by
       ext x
-      have hlow : ∀ t ≤ n, trace (Function.update x (-((n + 1 : ℕ) : ℤ))
-          (!x (-((n + 1 : ℕ) : ℤ)))) t = trace x t := fun t ht =>
-        AlgebraicDegree.evol_congr t 0 fun k hk1 _ => by
-          rw [Function.update_of_ne (by omega)]
-      have htop : trace (Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))))
-          (n + 1) = !trace x (n + 1) := evol_flip x (n + 1)
-      simp only [B, A, Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq, htop]
-      constructor
-      · rintro ⟨h1, h2⟩
-        refine ⟨fun t ht => (hlow t ht).symm.trans (h1 t ht), ?_⟩
-        rw [← h2, Bool.not_not]
-      · rintro ⟨h1, h2⟩
-        refine ⟨fun t ht => (hlow t ht).trans (h1 t ht), ?_⟩
-        rw [h2, Bool.not_not]
-    have heq : ∀ b, coins ℤ (B b) = coins ℤ (B (!b)) := fun b => by
-      rw [← hφ b, ← Measure.map_apply (measurable_flip _) (hB b), map_flip]
-    have hsum : coins ℤ (B true) + coins ℤ (B false) = coins ℤ A := by
-      rw [← measure_union _ (hB false)]
-      · congr 1
-        ext x
-        simp only [B, Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq]
-        cases trace x (n + 1) <;> simp
-      · rw [Set.disjoint_left]
-        intro x h1 h2
-        simp only [B, Set.mem_inter_iff, Set.mem_setOf_eq] at h1 h2
-        rw [h1.2] at h2
-        exact Bool.noConfusion h2.2
-    have htarget : {x : ℤ → Bool | ∀ t ≤ n + 1, trace x t = w t} = B (w (n + 1)) := by
-      ext x
-      simp only [B, A, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [Set.mem_inter_iff, Set.mem_setOf_eq]
       constructor
       · intro h
         exact ⟨fun t ht => h t (by omega), h (n + 1) le_rfl⟩
@@ -171,19 +186,7 @@ theorem measure_prefix (w : ℕ → Bool) :
         · exact h1 t (by omega)
         · obtain rfl : t = n + 1 := by omega
           exact h2
-    have hhalf : coins ℤ (B true) = 2⁻¹ ^ (n + 1 + 1) := by
-      have h2 : 2 * coins ℤ (B true) = 2 * 2⁻¹ ^ (n + 1 + 1) := by
-        calc 2 * coins ℤ (B true) = coins ℤ (B true) + coins ℤ (B false) := by
-              rw [two_mul]
-              nth_rewrite 2 [heq true]
-              rfl
-          _ = 2⁻¹ ^ (n + 1) := by rw [hsum, ih]
-          _ = 2 * 2⁻¹ ^ (n + 1 + 1) := (two_mul_inv_two_pow (n + 1)).symm
-      exact (ENNReal.mul_right_inj two_ne_zero ENNReal.ofNat_ne_top).1 h2
-    rw [htarget]
-    cases hw : w (n + 1)
-    · rw [heq false, Bool.not_false, hhalf]
-    · exact hhalf
+    rw [htarget, eq_mul_inv_of_two_mul h, measure_prefix w n, ← pow_succ]
 
 /-- **The trace of a random configuration is a random sequence**: the trace map pushes the
 fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/

@@ -23,6 +23,12 @@ neither statement says anything about the center column `c` itself.
 
 Rule 30 itself is onto (`surjective_evol_one`: on each window a preimage is solved from right to
 left, and compactness gives a global one) and not one-to-one (`not_injective_evol_one`).
+
+The trace carries the omega-limit set of the single black cell under rule 30 onto the
+omega-limit set `ω(c)` of the center column under the shift (`image_trace_omegaLimit_seed`, from
+`image_omegaLimit_eq` for continuous semiconjugacies of compact spaces), so **Problem 1 holds iff
+the trace of the seed's omega-limit set is infinite**
+(`problem1_iff_trace_omegaLimit_seed_infinite`).
 -/
 
 namespace Rule30Equivalents.Genericity
@@ -309,5 +315,58 @@ theorem not_injective_evol_one : ¬ Function.Injective fun x : ℤ → Bool => e
   intro h
   have := congrFun (@h (fun _ => true) (fun _ => false) (funext fun p => rfl)) 0
   exact absurd this (by decide)
+
+/-! ### The omega-limit set of the seed -/
+
+/-- A continuous semiconjugacy `π` from a compact space carries the omega-limit set of a point onto
+the omega-limit set of its image. A limit point `z` of the images comes from a limit point of the
+orbit along the finer filter on which the images tend to `z`. -/
+theorem image_omegaLimit_eq {X Y : Type*} [TopologicalSpace X] [CompactSpace X]
+    [TopologicalSpace Y] [T2Space Y] {π : X → Y} (hπ : Continuous π) {ϕ : ℕ → X → X}
+    {ψ : ℕ → Y → Y} (hsemi : ∀ t x, π (ϕ t x) = ψ t (π x)) (x : X) :
+    π '' omegaLimit atTop ϕ {x} = omegaLimit atTop ψ {π x} := by
+  refine Subset.antisymm (mapsTo_omegaLimit {x} (s' := {π x}) (fun y hy => by
+    rw [mem_singleton_iff.1 hy]; rfl) hsemi hπ).image_subset fun z hz => ?_
+  rw [mem_omegaLimit_singleton_iff_mapClusterPt] at hz
+  -- the times at which the images approach `z`
+  set G := atTop ⊓ comap (fun t => ψ t (π x)) (𝓝 z) with hG
+  haveI : NeBot G := by
+    rw [hG, inf_comm]
+    exact neBot_inf_comap_iff_map'.2 hz.neBot
+  obtain ⟨y, -, hy⟩ := isCompact_univ.exists_clusterPt (f := map (fun t => ϕ t x) G)
+    (le_principal_iff.2 univ_mem)
+  refine ⟨y, (mem_omegaLimit_singleton_iff_mapClusterPt atTop ϕ x y).2
+    (hy.mono (map_mono inf_le_left)), ?_⟩
+  -- `π y` is a cluster point of a filter that converges to `z`
+  have h1 : ClusterPt (π y) (map (fun t => ψ t (π x)) G) := by
+    have := hy.map hπ.continuousAt (tendsto_map)
+    rw [map_map] at this
+    simpa [Function.comp_def, hsemi] using this
+  have h2 : map (fun t => ψ t (π x)) G ≤ 𝓝 z := by
+    rw [hG, map_le_iff_le_comap]
+    exact inf_le_right
+  exact eq_of_nhds_neBot (h1.neBot.mono (inf_le_inf_left _ h2))
+
+/-- **The omega-limit set of the center column is the trace of that of the seed**: `ω_σ(c)` is
+the image under the center trace of the omega-limit set of the single black cell under rule 30
+(the catalog's width-1 trace view of [34]). -/
+theorem image_trace_omegaLimit_seed :
+    trace '' omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed} =
+      omegaLimit atTop (fun (n : ℕ) (b : ℕ → Bool) => fun t => b (n + t)) {c} := by
+  have hc : trace seed = c := funext fun t => by
+    show evol seed t 0 = Rule30Prize.center t
+    rw [evol_seed]
+    rfl
+  rw [← hc]
+  refine image_omegaLimit_eq continuous_trace (fun n x => funext fun t => ?_) seed
+  show evol (evol x n) t 0 = evol x (n + t) 0
+  exact Rule30ZeroBoundaryBarriers.evol_restart x n t 0
+
+/-- **Problem 1 through the omega-limit set of the seed**: Problem 1 holds iff the center trace of
+the omega-limit set of the single black cell under rule 30 is infinite. -/
+theorem problem1_iff_trace_omegaLimit_seed_infinite : Rule30Prize.Problem1 ↔
+    (trace '' omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed}).Infinite := by
+  rw [image_trace_omegaLimit_seed]
+  exact WordsAutomata.problem1_iff_omegaLimit_infinite
 
 end Rule30Equivalents.Genericity

@@ -35,7 +35,9 @@ uniform Bernoulli product measure).
   (`isMeagre_and_ae_halfDensity_trace`).
 
 So the analogues of Problems 1 and 2 hold for almost every initial configuration. The single black
-cell is one configuration, a null set, so neither statement says anything about `c` itself.
+cell is one configuration, a null set, so neither statement says anything about `c` itself. The
+configurations with an eventually periodic trace are dense, meager and null
+(`dense_isMeagre_null_eventuallyPeriodic_trace`).
 -/
 
 namespace Rule30Equivalents.RandomConfigurations
@@ -499,5 +501,29 @@ theorem isMeagre_and_ae_halfDensity_trace :
     IsMeagre {x : ℤ → Bool | Symmetry.HalfDensity (trace x)} ∧
       ∀ᵐ x ∂(coins ℤ), Symmetry.HalfDensity (trace x) :=
   ⟨isMeagre_halfDensity_trace, ae_halfDensity_trace⟩
+
+/-- **Eventually periodic traces are dense, meager and null**: every nonempty open set contains a
+configuration whose trace is eventually periodic (keep a window, then make the trace eventually
+white, `Genericity.exists_extend`), yet these configurations form a meager set of measure zero. -/
+theorem dense_isMeagre_null_eventuallyPeriodic_trace :
+    Dense {x : ℤ → Bool | EventuallyPeriodic (trace x)} ∧
+      IsMeagre {x : ℤ → Bool | EventuallyPeriodic (trace x)} ∧
+        coins ℤ {x : ℤ → Bool | EventuallyPeriodic (trace x)} = 0 := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [dense_iff_inter_open]
+    rintro U hU ⟨x, hx⟩
+    obtain ⟨n, hn⟩ := exists_window_subset (hU.mem_nhds hx)
+    obtain ⟨y, hy, hyw⟩ := exists_extend x n (fun t => if t ≤ n then trace x t else false)
+      fun t ht => by simp [ht]
+    refine ⟨y, hn fun p hp1 _ => hy p hp1, ?_⟩
+    show EventuallyPeriodic (trace y)
+    rw [hyw]
+    exact ⟨n + 1, 1, one_pos, fun t ht => by
+      simp [show ¬ (t + 1 ≤ n) by omega, show ¬ (t ≤ n) by omega]⟩
+  · show {x : ℤ → Bool | EventuallyPeriodic (trace x)}ᶜ ∈ residual (ℤ → Bool)
+    exact Filter.mem_of_superset residual_disjunctive_trace fun x hx =>
+      StrongerStatements.not_eventuallyPeriodic_of_disjunctive hx
+  · have h := ae_iff.1 ae_not_eventuallyPeriodic_trace
+    simpa only [not_not] using h
 
 end Rule30Equivalents.RandomConfigurations

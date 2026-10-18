@@ -2679,33 +2679,33 @@ with Turing machines reading n. Notes:
     proved for rule 30 (Section 6.3). Mahler's Z-number problem and the equidistribution of
     (3/2)ⁿ mod 1 remain the open counterparts [Mah68], [FLP95]. Theorem numbers refer to the arXiv
     version of [Kop23].
-11. **Generic versus special points.** For μ-almost every configuration, with μ the uniform Bernoulli
-    measure, the center trace is normal. The trace map Tr₀ pushes μ forward to μ, because
+11. **Generic versus special points.** For μ-almost every configuration, with μ the uniform
+    Bernoulli measure, the center trace is normal. The trace map Tr₀ pushes μ forward to μ, because
     c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the cell x_{−t} is used by no earlier c(s). In finite
     form this is proved (`AlgebraicDegree.card_trace`): each word w(0), …, w(n) is the center trace
     of exactly 2ⁿ of the 2^(2n+1) configurations on [−n, n]. In measure form it is proved too
-    ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure
-    preserving from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ
-    (`measurePreserving_trace`; flipping x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1),
-    so every prefix has probability 2^−(n+1), `measure_prefix`). With Borel's normal number
-    theorem for fair coins (`ae_isNormal`: along each residue class modulo m the blocks of length
-    m are independent fair words, and the strong law of large numbers applies), the trace is
-    normal for μ-almost every configuration (`ae_isNormal_trace`); the right half does not
-    matter, since for every fixed right half R (all white, as for the seed) a fair-coin left half
-    gives a normal trace almost surely (`ae_isNormal_trace_glue`). So the trace has density 1/2, is
-    disjunctive and is not eventually periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`,
-    `ae_not_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
-    measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves
-    μ (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window
-    I of its t-th image are independent once t > max I − min J
-    (`measure_window_inter_window`); approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) →
-    μ(A)μ(B) for all measurable A, B (`tendsto_measure_inter_preimage`), so rule 30 is mixing and
-    ergodic (`ergodic_evol_one`, Mathlib's `Ergodic`), and topologically mixing
-    (`exists_mem_evol_mem`). For μ-almost every configuration, and for a comeager set of them,
-    the orbit enters every nonempty open set at arbitrarily large times (`ae_frequently_mem`,
-    `residual_frequently_mem`); and for μ-almost every configuration every column of the
-    space-time diagram is normal, and so is the right half of every row (`ae_isNormal_columns`,
-    `ae_isNormal_rows`).
+    ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure preserving
+    from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ (`measurePreserving_trace`; flipping
+    x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1), so every prefix has probability
+    2^−(n+1), `measure_prefix`). With Borel's normal number theorem for fair coins (`ae_isNormal`:
+    along each residue class modulo m the blocks of length m are independent fair words, and the
+    strong law of large numbers applies), the trace is normal for μ-almost every configuration
+    (`ae_isNormal_trace`); the right half does not matter, since for every fixed right half R (all
+    white, as for the seed) a fair-coin left half gives a normal trace almost surely
+    (`ae_isNormal_trace_glue`). So the trace has density 1/2, is disjunctive and is not eventually
+    periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`).
+    The configurations with an eventually periodic trace are dense, meager and null
+    (`dense_isMeagre_null_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
+    measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ
+    (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window I of
+    its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
+    approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
+    (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
+    Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). For μ-almost every
+    configuration, and for a comeager set of them, the orbit enters every nonempty open set at
+    arbitrarily large times (`ae_frequently_mem`, `residual_frequently_mem`); and for μ-almost every
+    configuration every column of the space-time diagram is normal, and so is the right half of
+    every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

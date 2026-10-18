@@ -2538,8 +2538,13 @@ with Turing machines reading n. Notes:
 - **The project's period reductions**: Q01, CQ01, Q001, C3, C3w, C3s001, Absorption and AbsorptionT.
   Each is uniform over finite rows, and each is used to exclude one period or one word. Problem 1
   implies none of them.
-- **Finite rings.** Rule 30 on a ring of n cells has periods of about 2^(0.61n) to 2^(0.63n). The
-  ring's center agrees with c only for t ≤ (n − 1)/2. No implication is known [W86], [W19]. Wolfram
+- **Finite rings.** Rule 30 on a ring of n cells has periods of about 2^(0.61n) to 2^(0.63n).
+  Started from one black cell, the ring's center agrees with c(t) for every t < n, because the cell
+  (t, 0) sees only the cells −t, …, t, and the whole light cone agrees while 2t < n
+  ([FiniteRings](Rule30Equivalents/FiniteRings.lean): `evol_ringSeed_eq_center`,
+  `evol_ringSeed_eq_cell`). *Correction:* an earlier version gave t ≤ (n − 1)/2 for the center,
+  which is the bound for the whole cone. For n = 3 the ring's center is 1, 1, 0, 0 against c = 1, 1,
+  0, 1, so t < n cannot be improved in general. No implication is known [W86], [W19]. Wolfram
   (2019): "I, at least, don't immediately see."
 - **Other rules.** Rule 45, code 10, rule 22 with two seeds, and the 4-color code 150898, which has a
   long transient. Rules 161 and 69540422 have non-periodic center columns that are nonetheless

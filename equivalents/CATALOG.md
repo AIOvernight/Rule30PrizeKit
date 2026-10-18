@@ -1972,7 +1972,14 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   a subset of the finite kernel of R. The graphs of =, +, V_k and the constants have at most a
   handful of sections, so by induction every term graph and every formula is recognizable.
   Together with Cobham's theorem this gives `eventuallyPeriodic_of_definable` for any
-  multiplicatively independent pair of bases.
+  multiplicatively independent pair of bases. The converse, "k-automatic ⟹ definable", is proved
+  in [BuchiConverse](Rule30Equivalents/BuchiConverse.lean), which completes the Büchi–Bruyère
+  theorem for sets of naturals (`definable_iff_isAutomatic`, with any parameters). The formula
+  reads the base-k digits of n through the automaton whose states are the k-kernel: the run is
+  coded by one number per state, with digit 1 at the positions kⁱ where the run is in that
+  state. "y is a power of k" (V_k y = y ≥ 1) and "the digit of x at y is j" (x = a + j y + b with
+  a < y and b = 0 or k y ≤ V_k b) are definable through Mathlib's definable functions, and the
+  conditions on the codes are definable by finite Boolean combinations and quantifiers.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=
@@ -2451,7 +2458,8 @@ with Turing machines reading n. Notes:
    normal ⟹ Problem 2. Problems 1 and 2 are independent as properties of sequences.
 3. **A ladder of logics** (critic). FO(ℕ, <): S is not definable, which is proved (Section 5).
    Presburger arithmetic, which here coincides with MSO(ℕ, <) on unary sets: non-definability is
-   Problem 1 ([9], [36]). (ℕ, +, V_k): non-definability means "not k-automatic", which is stronger.
+   Problem 1 ([9], [36]). (ℕ, +, V_k): non-definability means "not k-automatic", which is stronger
+   (`BuchiConverse.not_definable_iff_not_isAutomatic`, both directions of Büchi–Bruyère).
    Undecidability of Th(ℕ, +, S) is stronger still (Section 4).
 4. **The digits-of-π analogy** [W19]. Problem 1 corresponds to irrationality, Problem 2 to simple
    normality (the block version to normality), and Problem 3 to the absence of BBP-type digit

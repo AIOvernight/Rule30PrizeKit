@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 174 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 175 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃) | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
-| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), both forms | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OfflineGap.problem1_iff_no_small_space_decider` |
+| 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider` |
 
 **Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
 batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
@@ -2032,6 +2032,17 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   regular languages [Tra64], [Hen65], [Har68], and space o(log log n) decides only regular
   languages [SHL65]. Regular languages are decided in real time.
 - *Difficulty.* Hard: it needs the gap theorems and a machine model. Both forms are proved here.
+- *Digit input* (proved). The Hennie–Trakhtenbrot theorem holds for every finite input alphabet
+  ([OneTapeRegular](Rule30Equivalents/OneTapeRegular.lean), `DecidesLang.isRegular`,
+  `isRegular_iff_exists_fast_decider`): a language decided by a one-tape machine in time
+  o(n log n) is regular. Splicing at equal crossing sequences bounds them as for unary input, and
+  then a prefix has a finite type (the crossing sequences it shows at its right end, and the
+  outcome for the even ones) that determines its left quotient (Myhill–Nerode). The base-k digit
+  language of c, least significant digit first, is regular iff c is k-automatic (its left
+  quotients are the digit languages of the k-kernel). With Cobham's theorem:
+  Problem 1 ⟺ c(n) is not decided both from the base-2 and from the base-3 digits of n by
+  one-tape machines in time o(ℓ log ℓ), ℓ the number of digits
+  (`problem1_iff_no_fast_digit_deciders`). Problem 3 asks for time n, exponentially more.
 - *Lean.* The time form is proved in [OneTapeGap](Rule30Equivalents/OneTapeGap.lean):
   `problem1_iff_no_fast_one_tape_decider`, from `eventuallyPeriodic_iff_exists_fast_decider`.
   The machine model is the textbook one: finitely many states, a finite tape alphabet, a two-way

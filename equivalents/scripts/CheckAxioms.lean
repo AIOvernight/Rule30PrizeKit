@@ -71,6 +71,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.OfflineGap.problem1_iff_no_small_space_decider
 #print axioms Rule30Equivalents.OmegaRegular.problem1_iff_not_omega_regular
 #print axioms Rule30Equivalents.OneTapeGap.problem1_iff_no_fast_one_tape_decider
+#print axioms Rule30Equivalents.OneTapeRegular.problem1_iff_no_fast_digit_deciders
 #print axioms Rule30Equivalents.PisotBase.problem1_iff_not_mem_Q_sqrt_two
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational_coeff_zero

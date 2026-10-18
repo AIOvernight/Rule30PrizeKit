@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 221 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 222 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -666,7 +666,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   ```
 
 - *Note.* The statement that the irrationality exponent μ(x₂) is 2 is a stronger open statement
-  (Section 4).
+  (Section 4). It implies Problem 1 (`IrrationalityExponent.problem1_of_exponentTwo`) and holds for
+  almost every configuration (`IrrationalityExponent.ae_exponentTwo_trace`).
 - *Sources.* [Bug12]; [Mathlib] (NumberTheory/DiophantineApproximation/Basic.lean,
   NumberTheory/Transcendental/Liouville/LiouvilleWith.lean).
 
@@ -2197,7 +2198,7 @@ so they are strictly stronger.
 | **Disjunctive**: every finite word occurs in c | p_c(n) = 2ⁿ eventually exceeds T + P | Every word of length ≤ 22 occurs within the first 58,671,803 steps [W19]. | [W19], project data |
 | **Normality** of x₂ in base 2 (⟺ finite-state dimension 1); the seed is generic for (rule 30, Bernoulli) | normal ⟹ disjunctive. Normality also gives Problem 2. | 500,025,038 ones in the first 10⁹ bits [W19]. | [Bor09], [Wal49], [DLLM04], [W19] |
 | **x₂ is transcendental** (likewise x_B) | transcendental ⟹ irrational | Conditional only: if c were automatic, [AB07] would apply. | [AB07] |
-| **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. | [Bug11], [BHWY16]; number-theory survey (data) |
+| **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. Holds for almost every configuration (`IrrationalityExponent.ae_exponentTwo_trace`). | [Bug11], [BHWY16]; number-theory survey (data) |
 | **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not k-regular, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
 | **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. For almost every sequence abs(2L_n − n) ≤ 2⌊log₂ n⌋ + 2 from some n on, by two first-moment bounds and Borel–Cantelli (`LinearComplexity.ae_eventually_linComplexity`), so the statement holds almost surely (`ae_tendsto_linComplexity_trace`). | [Nie88], [MeWi17]; algebra survey (data) |
 | **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). | algebra survey, [WM86] |
@@ -2306,7 +2307,11 @@ periodic, Lₙ/n → 1/2 ([LinearComplexity](Rule30Equivalents/LinearComplexity.
 k-Mahler for every k ≥ 2 (a solution of a Mahler equation is determined by finitely many
 coefficients, `StrongerStatements.countable_setOf_isMahler`; every series is 1-Mahler), and
 unbounded expansion complexity (a nonzero g(X, Y) over 𝔽₂ has finitely many roots in 𝔽₂⟦X⟧,
-`finite_roots_series`). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
+`finite_roots_series`). Most follow from disjunctivity alone. It also has μ(x₂) = 2
+([IrrationalityExponent](Rule30Equivalents/IrrationalityExponent.lean), `ae_exponentTwo_trace`,
+Khinchin's theorem): the first k digits determine ⌊2ᵏx₂⌋ up to one, so x₂ lies within ℓ of a
+given point with probability at most 8ℓ, and for p > 2 the rationals m/n within C/n^p of x₂ have
+summable probabilities (Borel–Cantelli). Transcendence uses that the binary value separates
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
 (`RandomConfigurations.coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal

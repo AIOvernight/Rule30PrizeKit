@@ -5,6 +5,7 @@ import Mathlib.Probability.Independence.InfinitePi
 import Mathlib.Probability.StrongLaw
 import Mathlib.Probability.Distributions.Uniform
 import Mathlib.Probability.CentralLimitTheorem
+import Mathlib.Probability.Moments.SubGaussian
 
 /-!
 # Random configurations
@@ -30,6 +31,9 @@ uniform Bernoulli product measure).
 * `tendstoInDistribution_count_trace`: **the central limit theorem** for the trace (Mathlib's
   `tendstoInDistribution_inv_sqrt_mul_sum_sub`): `(black cells among the first n - n/2) / √n`
   converges in distribution to the normal law with variance `1/4`.
+* `measureReal_abs_count_trace_ge_le`: **Hoeffding's inequality** for the trace (Mathlib's
+  `HasSubgaussianMGF.measure_sum_range_ge_le_of_iIndepFun`): among the first `n` cells, at least
+  `n/2 + n δ` or at most `n/2 - n δ` black ones has probability at most `2 exp(-2 n δ²)`.
 * `ae_isNormal_trace_glue`: **the right half does not matter**. The same holds for the map
   `x ↦ glue R x` that keeps the cells `p ≤ 0` of `x` and puts a fixed right half `R` beside them
   (white, say, as for the single seed): the prefix argument only flips cells left of `1`
@@ -539,6 +543,97 @@ theorem tendstoInDistribution_count_trace :
   rw [← measurePreserving_trace.map_eq, Measure.map_map (measurable_centeredSum n)
     measurable_trace]
   rfl
+
+/-! ### Large deviations: Hoeffding's inequality -/
+
+/-- A centered fair coin `black b - 1/2` is sub-Gaussian with parameter `1/4` (Hoeffding's
+lemma). -/
+theorem hasSubgaussianMGF_black (k : ℕ) :
+    HasSubgaussianMGF (fun v : ℕ → Bool => black (v k) - 1 / 2) (1 / 4) (coins ℕ) := by
+  have hm : AEMeasurable (fun v : ℕ → Bool => black (v k)) (coins ℕ) :=
+    (measurable_black.comp (measurable_pi_apply k)).aemeasurable
+  have hb : ∀ᵐ v ∂(coins ℕ), black (v k) ∈ Set.Icc (0 : ℝ) 1 := Eventually.of_forall fun v => by
+    simp only [black, Set.mem_Icc]
+    split_ifs <;> norm_num
+  have hmean : (coins ℕ)[fun v : ℕ → Bool => black (v k)] = 1 / 2 := by
+    rw [← integral_map (measurable_pi_apply k).aemeasurable
+      measurable_black.aestronglyMeasurable, coins_map_eval, integral_black]
+  have h := hasSubgaussianMGF_of_mem_Icc hm hb
+  rw [hmean] at h
+  convert h using 1
+  rw [sub_zero, nnnorm_one]
+  norm_num
+
+/-- **Hoeffding's inequality for fair coins**: among the first `n` coins, the probability of at
+least `n/2 + ε` black ones is at most `exp(-2ε²/n)`. -/
+theorem measureReal_sum_ge_le (n : ℕ) {ε : ℝ} (hε : 0 ≤ ε) :
+    (coins ℕ).real {v | ε ≤ ∑ k ∈ Finset.range n, (black (v k) - 1 / 2)} ≤
+      Real.exp (-2 * ε ^ 2 / n) := by
+  have hind : iIndepFun (fun k (v : ℕ → Bool) => black (v k) - 1 / 2) (coins ℕ) :=
+    iIndepFun_infinitePi (X := fun _ b => black b - 1 / 2) fun _ =>
+      measurable_black.sub measurable_const
+  have h := HasSubgaussianMGF.measure_sum_range_ge_le_of_iIndepFun hind (c := 1 / 4) (n := n)
+    (fun k _ => hasSubgaussianMGF_black k) hε
+  refine h.trans_eq (congrArg Real.exp ?_)
+  push_cast
+  ring
+
+/-- The same bound for at most `n/2 - ε` black coins. -/
+theorem measureReal_sum_le_le (n : ℕ) {ε : ℝ} (hε : 0 ≤ ε) :
+    (coins ℕ).real {v | ε ≤ ∑ k ∈ Finset.range n, (1 / 2 - black (v k))} ≤
+      Real.exp (-2 * ε ^ 2 / n) := by
+  have hind : iIndepFun (fun k (v : ℕ → Bool) => 1 / 2 - black (v k)) (coins ℕ) :=
+    iIndepFun_infinitePi (X := fun _ b => 1 / 2 - black b) fun _ =>
+      measurable_const.sub measurable_black
+  have hsub : ∀ k < n, HasSubgaussianMGF (fun v : ℕ → Bool => 1 / 2 - black (v k)) (1 / 4)
+      (coins ℕ) := fun k _ =>
+    (hasSubgaussianMGF_black k).neg.congr (Eventually.of_forall fun v => by simp)
+  have h :=
+    HasSubgaussianMGF.measure_sum_range_ge_le_of_iIndepFun hind (c := 1 / 4) (n := n) hsub hε
+  refine h.trans_eq (congrArg Real.exp ?_)
+  push_cast
+  ring
+
+/-- **Large deviations of the density for a random configuration** (Hoeffding's inequality): the
+probability that the number of black cells among the first `n` cells of the center trace is off
+from `n/2` by at least `n δ` is at most `2 exp(-2 n δ²)`. So the exceptional configurations of
+each length are exponentially rare. -/
+theorem measureReal_abs_count_trace_ge_le (n : ℕ) {δ : ℝ} (hδ : 0 ≤ δ) :
+    (coins ℤ).real {x | n * δ ≤ |∑ k ∈ Finset.range n, black (trace x k) - n / 2|} ≤
+      2 * Real.exp (-2 * n * δ ^ 2) := by
+  have hε : (0 : ℝ) ≤ n * δ := mul_nonneg n.cast_nonneg hδ
+  have hexp : Real.exp (-2 * (n * δ) ^ 2 / n) = Real.exp (-2 * n * δ ^ 2) := by
+    rcases Nat.eq_zero_or_pos n with h0 | hn
+    · subst h0
+      simp
+    · congr 1
+      field_simp
+  let S : Set (ℕ → Bool) := {v | n * δ ≤ |∑ k ∈ Finset.range n, black (v k) - n / 2|}
+  have hS : MeasurableSet S :=
+    measurableSet_le measurable_const
+      (((Finset.measurable_sum _ fun k _ => measurable_black.comp (measurable_pi_apply k)).sub
+        measurable_const).abs)
+  have hsplit : S ⊆ {v | n * δ ≤ ∑ k ∈ Finset.range n, (black (v k) - 1 / 2)} ∪
+      {v | n * δ ≤ ∑ k ∈ Finset.range n, (1 / 2 - black (v k))} := by
+    intro v hv
+    have e1 : ∑ k ∈ Finset.range n, (black (v k) - 1 / 2) =
+        ∑ k ∈ Finset.range n, black (v k) - n / 2 := by
+      rw [Finset.sum_sub_distrib]
+      simp [div_eq_mul_inv]
+    have e2 : ∑ k ∈ Finset.range n, (1 / 2 - black (v k)) =
+        -(∑ k ∈ Finset.range n, black (v k) - n / 2) := by
+      rw [Finset.sum_sub_distrib]
+      simp [div_eq_mul_inv]
+    simp only [Set.mem_union, Set.mem_setOf_eq, e1, e2]
+    exact (le_abs'.1 hv).symm.imp_right fun h => le_neg_of_le_neg h
+  calc (coins ℤ).real {x | n * δ ≤ |∑ k ∈ Finset.range n, black (trace x k) - n / 2|}
+      = (coins ℕ).real S := measurePreserving_trace.measureReal_preimage hS.nullMeasurableSet
+    _ ≤ (coins ℕ).real {v | n * δ ≤ ∑ k ∈ Finset.range n, (black (v k) - 1 / 2)} +
+        (coins ℕ).real {v | n * δ ≤ ∑ k ∈ Finset.range n, (1 / 2 - black (v k))} :=
+      (measureReal_mono hsplit).trans (measureReal_union_le _ _)
+    _ ≤ Real.exp (-2 * (n * δ) ^ 2 / n) + Real.exp (-2 * (n * δ) ^ 2 / n) :=
+      add_le_add (measureReal_sum_ge_le n hε) (measureReal_sum_le_le n hε)
+    _ = 2 * Real.exp (-2 * n * δ ^ 2) := by rw [hexp, two_mul]
 
 /-! ### The right half does not matter -/
 

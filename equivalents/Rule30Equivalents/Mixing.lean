@@ -524,7 +524,8 @@ theorem log_two_le_coverEntropy_shift :
   rw [← ExpGrowth.expGrowthSup_pow]
   refine ExpGrowth.expGrowthSup_monotone fun n => ?_
   -- a dynamical cover shows every word of length `n`
-  have key : ∀ s : Finset (ℕ → Bool), IsDynCoverOf ShiftOrbit.shift Set.univ V n s → 2 ^ n ≤ s.card := by
+  have key : ∀ s : Finset (ℕ → Bool), IsDynCoverOf ShiftOrbit.shift Set.univ V n s →
+      2 ^ n ≤ s.card := by
     intro s hs
     have hsurj : (s.image fun y => fun k : Fin n => y k) = Finset.univ := by
       refine Finset.eq_univ_of_forall fun w => ?_

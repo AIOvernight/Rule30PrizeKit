@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 205 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 206 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2397,6 +2397,11 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
   mean of a bounded sequence has increments O(1/n), and Hardy's Tauberian theorem
   (`tendsto_of_tendsto_mean`: Cesàro limit plus increments O(1/n) give convergence) removes one
   mean at a time;
+- the Cesàro means (C, k) of c tend to 1/2, for every k ≥ 1 (proved:
+  `CesaroMeans.problem2_iff_cesaroMean`). By Toeplitz's lemma for regular weighted means
+  (`tendsto_weighted`), (C, k) gives (C, k + 1) (hockey-stick weights) and the Abel mean (weights
+  (1 − x)^(k+1) C(n + k, k) xⁿ, through ∑ aₙxⁿ = (1 − x)ᵏ ∑ S⁽ᵏ⁾ₙ xⁿ), and the
+  Hardy–Littlewood–Karamata theorem returns from the Abel mean to (C, 1);
 - the k-th black cell of c occurs at time 2k + o(k), equivalently the mean gap between
   consecutive black cells tends to 2 (proved: `BlackTimes.problem2_iff_trueTime`,
   `problem2_iff_mean_gap`). The time of the k-th black cell (`Nat.nth`) and the number of black

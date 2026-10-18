@@ -21,6 +21,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BlackTimes.problem2_iff_trueTime
 #print axioms Rule30Equivalents.BlackTimes.problem2_iff_mean_gap
 #print axioms Rule30Equivalents.BuchiArithmetic.problem1_iff_not_buchi_definable
+#print axioms Rule30Equivalents.CesaroMeans.problem2_iff_cesaroMean
 #print axioms Rule30Equivalents.Christol.problem1_iff_transcendental_F2_or_F3
 #print axioms Rule30Equivalents.Cobham.problem1_iff_not_two_three_automatic
 #print axioms Rule30Equivalents.Cobham.problem1_iff_exists_not_automatic

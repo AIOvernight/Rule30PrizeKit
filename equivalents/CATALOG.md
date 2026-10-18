@@ -2733,24 +2733,27 @@ with Turing machines reading n. Notes:
     its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
     approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
     (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
-    Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). For μ-almost every
-    configuration, and for a comeager set of them, the orbit enters every nonempty open set at
-    arbitrarily large times (`ae_frequently_mem`, `residual_frequently_mem`), and every pattern on
-    every window [−n, n] appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem
-    for local patterns proved from Etemadi's strong law, since rows far apart in time are
-    independent on a window ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean),
-    `ae_orbit_frequency`), and so along every arithmetic progression of times
-    (`ae_orbit_frequency_progression`; at the level of digits, Wolfram's question on the
-    equidistribution of y_{Pk+r} [W19] has a positive answer for almost every configuration); so
-    almost every configuration is generic, the empirical measures of its orbit converging weakly to
-    μ (`ae_tendsto_orbit_empirical`), and the right halves of its rows have every sequence as a
-    limit point (`ae_rightHalves_frequently`; for the seed, Kopra's theorem gives infinitely many);
-    rule 30 is sensitive to initial conditions, and the right front of a perturbation moves at speed
-    one (`sensitive`, `evol_flip_front`); rule 30 has topological entropy at least log 2, since the
-    trace is a factor map onto the full shift (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`;
-    the trace intertwines rule 30 with the shift, `RandomConfigurations.trace_evol_one`); and for
-    μ-almost every configuration every column of the space-time diagram is normal, and so is the
-    right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
+    Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). It is even mixing of all
+    orders: cylinders at times whose gaps exceed the width of their windows are independent
+    (`measure_biInter_preimage_cylinder`), so μ(F^{−t₀}A₀ ∩ ⋯ ∩ F^{−t_{n−1}}A_{n−1}) →
+    μ(A₀)⋯μ(A_{n−1}) as the gaps grow (`mixing_all_orders`). For μ-almost every configuration, and
+    for a comeager set of them, the orbit enters every nonempty open set at arbitrarily large times
+    (`ae_frequently_mem`, `residual_frequently_mem`), and every pattern on every window [−n, n]
+    appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem for local patterns
+    proved from Etemadi's strong law, since rows far apart in time are independent on a window
+    ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean), `ae_orbit_frequency`), and so
+    along every arithmetic progression of times (`ae_orbit_frequency_progression`; at the level of
+    digits, Wolfram's question on the equidistribution of y_{Pk+r} [W19] has a positive answer for
+    almost every configuration); so almost every configuration is generic, the empirical measures of
+    its orbit converging weakly to μ (`ae_tendsto_orbit_empirical`), and the right halves of its
+    rows have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed, Kopra's
+    theorem gives infinitely many); rule 30 is sensitive to initial conditions, and the right front
+    of a perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological
+    entropy at least log 2, since the trace is a factor map onto the full shift
+    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`; the trace intertwines rule 30 with the
+    shift, `RandomConfigurations.trace_evol_one`); and for μ-almost every configuration every column
+    of the space-time diagram is normal, and so is the right half of every row
+    (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

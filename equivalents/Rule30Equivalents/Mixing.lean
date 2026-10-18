@@ -26,6 +26,9 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   their windows (`measure_inter_preimage_cylinder`), and every measurable set is close to a
   cylinder (`exists_cylinder_approx`, from Mathlib's approximation by a generating ring of sets).
   Hence `ergodic_evol_one`: rule 30 is ergodic, in Mathlib's sense of `Ergodic`.
+* `mixing_all_orders`: **rule 30 is mixing of all orders**: cylinders at times whose gaps exceed
+  the width of their windows are independent (`measure_biInter_preimage_cylinder`), so
+  `μ(F^{-t₀} A₀ ∩ ⋯ ∩ F^{-tₙ₋₁} Aₙ₋₁) → μ(A₀) ⋯ μ(Aₙ₋₁)` as the gaps between the times grow.
 * `ae_frequently_mem`, `residual_frequently_mem`: for almost every configuration, and for a
   comeager set of configurations, the orbit enters every nonempty open set at arbitrarily large
   times, so its omega-limit set is all of `{0,1}^ℤ` (by ergodicity, and by topological mixing and
@@ -378,6 +381,154 @@ theorem ergodic_evol_one : Ergodic (fun x : ℤ → Bool => evol x 1) (coins ℤ
     have hc : (coins ℤ).real sᶜ = 0 := by
       rw [measureReal_compl hs, probReal_univ, h1, sub_self]
     exact ae_iff.2 ((measureReal_eq_zero_iff (measure_ne_top _ _)).1 hc)
+
+/-! ### Mixing of all orders -/
+
+/-- With gaps of at least `G` between consecutive times, each time trails every later one by at
+least `G`. -/
+theorem add_le_of_gaps {t : ℕ → ℕ} {G : ℕ} :
+    ∀ {n : ℕ}, (∀ j, j + 1 < n + 1 → t j + G ≤ t (j + 1)) → ∀ j < n, t j + G ≤ t n
+  | 0, _, j, hj => absurd hj (Nat.not_lt_zero j)
+  | n + 1, ht, j, hj => by
+    have hn : t n + G ≤ t (n + 1) := ht n (by omega)
+    rcases Nat.lt_succ_iff_lt_or_eq.1 hj with hj | rfl
+    · have := add_le_of_gaps (n := n) (fun i hi => ht i (by omega)) j hj
+      omega
+    · exact hn
+
+/-- **Cylinders at well-separated times are independent**: if the windows `I j` lie in `[a, b]`
+and consecutive times differ by more than `b - a`, the cylinders over the windows `I j` of the
+images at the times `t j` are independent. Each new cylinder sits beyond the light cone of the
+earlier ones (`measure_inter_preimage_cylinder`). -/
+theorem measure_biInter_preimage_cylinder {I : ℕ → Finset ℤ} {S : ∀ j, Set (I j → Bool)}
+    (hS : ∀ j, MeasurableSet (S j)) {a b : ℤ} {G : ℕ} (hG : b - a < G) (t : ℕ → ℕ) :
+    ∀ n : ℕ, (∀ j < n, ∀ i ∈ I j, a ≤ i ∧ i ≤ b) → (∀ j, j + 1 < n → t j + G ≤ t (j + 1)) →
+      coins ℤ (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' cylinder (I j) (S j)) =
+        ∏ j ∈ Finset.range n, coins ℤ (cylinder (I j) (S j))
+  | 0, _, _ => by simp
+  | n + 1, hI, ht => by
+    have ih := measure_biInter_preimage_cylinder hS hG t n (fun j hj => hI j (by omega))
+      fun j hj => ht j (by omega)
+    have hlag := add_le_of_gaps ht
+    set E := ⋂ j ∈ Finset.range n, (fun x : ℤ → Bool => evol x (t j)) ⁻¹' cylinder (I j) (S j)
+      with hE
+    have hEm : MeasurableSet E := Finset.measurableSet_biInter _ fun j _ =>
+      measurable_evol_all (t j) (MeasurableSet.cylinder (I j) (hS j))
+    -- `E` does not see the coins left of `b - t n + 1`
+    have hEinv : ∀ x p, p < b - t n + 1 → (Function.update x p (!x p) ∈ E ↔ x ∈ E) := by
+      intro x p hp
+      simp only [hE, Set.mem_iInter, Set.mem_preimage, mem_cylinder]
+      refine forall₂_congr fun j hj => ?_
+      have hj' := Finset.mem_range.1 hj
+      have hres : (I j).restrict (evol (Function.update x p (!x p)) (t j)) =
+          (I j).restrict (evol x (t j)) := funext fun i => by
+        have hi := hI j (by omega) i i.2
+        have := hlag j hj'
+        exact AlgebraicDegree.evol_update_of_far (Or.inl (by omega)) x _
+      rw [hres]
+    have hsep : ∀ i ∈ I n, i - (t n : ℤ) < b - t n + 1 := fun i hi => by
+      have := (hI n (by omega) i hi).2
+      omega
+    rw [Finset.range_add_one, Finset.set_biInter_insert, Set.inter_comm,
+      Finset.prod_insert Finset.notMem_range_self,
+      measure_inter_preimage_cylinder hEm hEinv (t n) hsep (hS n), ih, mul_comm]
+
+theorem symmDiff_biInter_subset {X Y : ℕ → Set (ℤ → Bool)} (s : Finset ℕ) :
+    symmDiff (⋂ j ∈ s, X j) (⋂ j ∈ s, Y j) ⊆ ⋃ j ∈ s, symmDiff (X j) (Y j) := by
+  intro x hx
+  simp only [Set.mem_symmDiff, Set.mem_iInter, Set.mem_iUnion, not_forall] at hx ⊢
+  rcases hx with ⟨hX, j, hj, hjY⟩ | ⟨hY, j, hj, hjX⟩
+  · exact ⟨j, hj, Or.inl ⟨hX j hj, hjY⟩⟩
+  · exact ⟨j, hj, Or.inr ⟨hY j hj, hjX⟩⟩
+
+theorem abs_prod_sub_prod_le {x y : ℕ → ℝ} (hx : ∀ j, 0 ≤ x j ∧ x j ≤ 1)
+    (hy : ∀ j, 0 ≤ y j ∧ y j ≤ 1) (n : ℕ) :
+    |∏ j ∈ Finset.range n, x j - ∏ j ∈ Finset.range n, y j| ≤
+      ∑ j ∈ Finset.range n, |x j - y j| := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [Finset.prod_range_succ, Finset.prod_range_succ, Finset.sum_range_succ]
+    set P := ∏ j ∈ Finset.range n, x j
+    set Q := ∏ j ∈ Finset.range n, y j
+    have h0 : 0 ≤ P := Finset.prod_nonneg fun j _ => (hx j).1
+    have h1 : P ≤ 1 := Finset.prod_le_one (fun j _ => (hx j).1) fun j _ => (hx j).2
+    rw [show P * x n - Q * y n = P * (x n - y n) + (P - Q) * y n by ring]
+    calc |P * (x n - y n) + (P - Q) * y n| ≤ |P * (x n - y n)| + |(P - Q) * y n| :=
+          abs_add_le _ _
+      _ = P * |x n - y n| + |P - Q| * y n := by
+          rw [abs_mul, abs_mul, abs_of_nonneg h0, abs_of_nonneg (hy n).1]
+      _ ≤ 1 * |x n - y n| + |P - Q| * 1 :=
+          add_le_add (mul_le_mul_of_nonneg_right h1 (abs_nonneg _))
+            (mul_le_mul_of_nonneg_left (hy n).2 (abs_nonneg _))
+      _ ≤ _ := by linarith
+
+/-- **Rule 30 is mixing of all orders** for the fair-coin measure: for measurable sets
+`A 0, …, A (n - 1)` and times `t 0, …, t (n - 1)` with large enough gaps, the events
+`F^(t j) x ∈ A j` are almost independent. For cylinders they are independent once the gaps
+exceed the width of the windows (`measure_biInter_preimage_cylinder`); every measurable set is close
+to a cylinder, and `F^t` preserves the measure. -/
+theorem mixing_all_orders {A : ℕ → Set (ℤ → Bool)} (hA : ∀ j, MeasurableSet (A j)) (n : ℕ)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ G : ℕ, ∀ t : ℕ → ℕ, (∀ j, j + 1 < n → t j + G ≤ t (j + 1)) →
+      |(coins ℤ).real (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' A j) -
+        ∏ j ∈ Finset.range n, (coins ℤ).real (A j)| < ε := by
+  set δ := ε / (2 * (n + 1)) with hδ
+  have hδ0 : 0 < δ := by positivity
+  choose I S hS happrox using fun j => exists_cylinder_approx (hA j) hδ0
+  obtain ⟨a, ha⟩ := ((Finset.range n).biUnion I).bddBelow
+  obtain ⟨b, hb⟩ := ((Finset.range n).biUnion I).bddAbove
+  refine ⟨(b - a + 1).toNat, fun t ht => ?_⟩
+  have hG : b - a < ((b - a + 1).toNat : ℤ) := by
+    have := Int.self_le_toNat (b - a + 1)
+    omega
+  have hab : ∀ j < n, ∀ i ∈ I j, a ≤ i ∧ i ≤ b := fun j hj i hi => by
+    have hmem : i ∈ (Finset.range n).biUnion I :=
+      Finset.mem_biUnion.2 ⟨j, Finset.mem_range.2 hj, hi⟩
+    exact ⟨ha (Finset.mem_coe.2 hmem), hb (Finset.mem_coe.2 hmem)⟩
+  have hcyl : (coins ℤ).real
+      (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' cylinder (I j) (S j)) =
+        ∏ j ∈ Finset.range n, (coins ℤ).real (cylinder (I j) (S j)) := by
+    rw [measureReal_def, measure_biInter_preimage_cylinder hS hG t n hab ht, ENNReal.toReal_prod]
+    rfl
+  -- replacing each `A j` by its cylinder
+  have e1 : |(coins ℤ).real (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' A j) -
+      (coins ℤ).real (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' cylinder (I j) (S j))| ≤
+        n * δ := by
+    refine (abs_measureReal_sub_le _ _ _).trans ?_
+    refine (measureReal_mono (symmDiff_biInter_subset _) (measure_ne_top _ _)).trans
+      ((measureReal_biUnion_finset_le _ _).trans ?_)
+    calc ∑ j ∈ Finset.range n, (coins ℤ).real (symmDiff ((fun x => evol x (t j)) ⁻¹' A j)
+          ((fun x => evol x (t j)) ⁻¹' cylinder (I j) (S j)))
+        ≤ ∑ _j ∈ Finset.range n, δ := Finset.sum_le_sum fun j _ => by
+          rw [← Set.preimage_symmDiff, (measurePreserving_evol (t j)).measureReal_preimage
+            ((hA j).symmDiff (MeasurableSet.cylinder _ (hS j))).nullMeasurableSet, symmDiff_comm]
+          exact (happrox j).le
+      _ = n * δ := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  have e2 : |∏ j ∈ Finset.range n, (coins ℤ).real (cylinder (I j) (S j)) -
+      ∏ j ∈ Finset.range n, (coins ℤ).real (A j)| ≤ n * δ := by
+    refine (abs_prod_sub_prod_le (fun j => ⟨measureReal_nonneg, measureReal_le_one⟩)
+      (fun j => ⟨measureReal_nonneg, measureReal_le_one⟩) n).trans ?_
+    calc ∑ j ∈ Finset.range n, |(coins ℤ).real (cylinder (I j) (S j)) - (coins ℤ).real (A j)|
+        ≤ ∑ _j ∈ Finset.range n, δ := Finset.sum_le_sum fun j _ =>
+          (abs_measureReal_sub_le _ _ _).trans (happrox j).le
+      _ = n * δ := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  have hn1 : (0 : ℝ) < n + 1 := by positivity
+  have hfin : 2 * (n * δ) < ε := by
+    rw [hδ, show 2 * ((n : ℝ) * (ε / (2 * (n + 1)))) = ε * n / (n + 1) by field_simp,
+      div_lt_iff₀ hn1]
+    linarith
+  calc |(coins ℤ).real (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' A j) -
+        ∏ j ∈ Finset.range n, (coins ℤ).real (A j)|
+      ≤ |(coins ℤ).real (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' A j) -
+          (coins ℤ).real
+            (⋂ j ∈ Finset.range n, (fun x => evol x (t j)) ⁻¹' cylinder (I j) (S j))| +
+        |∏ j ∈ Finset.range n, (coins ℤ).real (cylinder (I j) (S j)) -
+          ∏ j ∈ Finset.range n, (coins ℤ).real (A j)| := by
+        rw [← hcyl]
+        exact abs_sub_le _ _ _
+    _ ≤ n * δ + n * δ := add_le_add e1 e2
+    _ < ε := by linarith
 
 /-! ### Orbits that return to every open set -/
 

@@ -42,6 +42,7 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function.
 * `problem1_of_expansionComplexity_unbounded`: the expansion complexity of `∑ c(t) Xᵗ` over `𝔽₂`
   is unbounded.
+* `problem1_of_not_isMorphic`: `c` is not morphic.
 -/
 
 namespace Rule30Equivalents.StrongerStatements
@@ -430,5 +431,130 @@ theorem problem1_of_expansionComplexity_unbounded
   · simp only [g, Polynomial.eval₂_sub, Polynomial.eval₂_mul, Polynomial.eval₂_C,
       Polynomial.eval₂_X, Polynomial.coeToPowerSeries.ringHom_apply, hPQ, sub_self,
       map_zero]
+
+/-- `b` is morphic: a coding `τ` of a fixed point `x` of a non-erasing morphism `σ` of a finite
+alphabet. `x` is a fixed point: reading `σ(x 0) σ(x 1) σ(x 2) …` gives `x` back, so the block
+`σ(x n)` sits at the position `∑_{i < n} |σ(x i)|`. -/
+def IsMorphic (b : ℕ → Bool) : Prop :=
+  ∃ (A : Type) (_ : Fintype A) (σ : A → List A) (x : ℕ → A) (τ : A → Bool),
+    (∀ a, σ a ≠ []) ∧
+    (∀ n (j : ℕ) (hj : j < (σ (x n)).length),
+      x (∑ i ∈ Finset.range n, (σ (x i)).length + j) = (σ (x n))[j]) ∧
+    ∀ n, b n = τ (x n)
+
+/-- The position of time `n` in a transient of length `T` followed by a period `Q`. -/
+def posOf (T Q n : ℕ) : ℕ := if n < T + Q then n else T + (n - T) % Q
+
+/-- The position after the position `i`. -/
+def nxtOf (T Q i : ℕ) : ℕ := if i + 1 < T + Q then i + 1 else T
+
+theorem posOf_lt {T Q : ℕ} (hQ : 0 < Q) (n : ℕ) : posOf T Q n < T + Q := by
+  unfold posOf
+  split_ifs
+  · assumption
+  · have := Nat.mod_lt (n - T) hQ; omega
+
+theorem posOf_succ {T Q : ℕ} (hQ : 0 < Q) (n : ℕ) :
+    posOf T Q (n + 1) = nxtOf T Q (posOf T Q n) := by
+  unfold posOf nxtOf
+  by_cases h1 : n + 1 < T + Q
+  · rw [if_pos h1, if_pos (show n < T + Q by omega), if_pos h1]
+  · rw [if_neg h1]
+    by_cases h2 : n < T + Q
+    · rw [if_pos h2, if_neg h1, show n + 1 - T = Q by omega, Nat.mod_self, Nat.add_zero]
+    · rw [if_neg h2]
+      have hlt := Nat.mod_lt (n - T) hQ
+      have e : (n + 1 - T) % Q = ((n - T) % Q + 1) % Q := by
+        rw [show n + 1 - T = (n - T) + 1 by omega, Nat.add_mod (n - T)]
+        rcases Nat.lt_or_ge 1 Q with hQ1 | hQ1
+        · rw [Nat.mod_eq_of_lt hQ1]
+        · obtain rfl : Q = 1 := by omega
+          simp
+      rw [e]
+      by_cases h3 : (n - T) % Q + 1 < Q
+      · rw [Nat.mod_eq_of_lt h3, if_pos (by omega)]
+        omega
+      · rw [show (n - T) % Q + 1 = Q by omega, Nat.mod_self, if_neg (by omega), Nat.add_zero]
+
+/-- **Eventually periodic sequences are morphic.** The alphabet is the positions `0, …, T + Q - 1`
+of a transient and a period, `σ(0) = 0 1` and `σ(i) = i + 1` for `i ≠ 0`, wrapping from the last
+position back to the start `T ≥ 1` of the period. -/
+theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriodic b) :
+    IsMorphic b := by
+  obtain ⟨T₀, P, hP, hper⟩ := h
+  -- a transient `T ≥ 1` and a period `Q ≥ 2`
+  set T := T₀ + 1
+  set Q := 2 * P
+  have hQ : 0 < Q := by omega
+  have hperQ : ∀ t, T ≤ t → b (t + Q) = b t := fun t ht => by
+    rw [show Q = P + P by omega, ← add_assoc, hper (t + P) (by omega), hper t (by omega)]
+  set N := T + Q
+  have hN : 3 ≤ N := by omega
+  have hpos0 : ∀ n, posOf T Q n = 0 ↔ n = 0 := fun n => by
+    unfold posOf
+    split_ifs <;> omega
+  let σ : Fin N → List (Fin N) := fun i =>
+    if (i : ℕ) = 0 then [⟨0, by omega⟩, ⟨1, by omega⟩]
+    else [⟨nxtOf T Q i, by unfold nxtOf; split_ifs <;> omega⟩]
+  let x : ℕ → Fin N := fun n => ⟨posOf T Q n, posOf_lt hQ n⟩
+  have hlen : ∀ n, ∑ i ∈ Finset.range n, (σ (x i)).length = if n = 0 then 0 else n + 1 := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      rw [Finset.sum_range_succ, ih]
+      have : (σ (x n)).length = if n = 0 then 2 else 1 := by
+        simp only [σ, x]
+        by_cases hn : n = 0
+        · rw [if_pos ((hpos0 n).2 hn), if_pos hn]; rfl
+        · rw [if_neg (fun h => hn ((hpos0 n).1 h)), if_neg hn]; rfl
+      rw [this]
+      split_ifs <;> omega
+  refine ⟨Fin N, inferInstance, σ, x, fun i => b i, fun a => ?_, fun n j hj => ?_, fun n => ?_⟩
+  · simp only [σ]
+    split_ifs <;> simp
+  · rw [hlen]
+    by_cases hn : n = 0
+    · subst hn
+      have hx0 : (x 0 : ℕ) = 0 := (hpos0 0).2 rfl
+      have hσ : σ (x 0) = [⟨0, by omega⟩, ⟨1, by omega⟩] := by simp only [σ, if_pos hx0]
+      rw [if_pos rfl, Nat.zero_add]
+      simp only [hσ, List.length_cons, List.length_nil] at hj
+      apply Fin.ext
+      simp only [hσ, x]
+      interval_cases j
+      · simp [posOf]
+      · simp [posOf]
+        omega
+    · have hxn : (x n : ℕ) ≠ 0 := fun h => hn ((hpos0 n).1 h)
+      have hσ : σ (x n) = [⟨nxtOf T Q (x n), by unfold nxtOf; split_ifs <;> omega⟩] := by
+        simp only [σ, if_neg hxn]
+      simp only [hσ, List.length_cons, List.length_nil] at hj
+      obtain rfl : j = 0 := by omega
+      rw [if_neg hn, Nat.add_zero]
+      apply Fin.ext
+      simp only [hσ, List.getElem_cons_zero, x]
+      exact posOf_succ hQ n
+  · -- the coding: `b n = b (posOf n)`
+    show b n = b (posOf T Q n)
+    unfold posOf
+    split_ifs with h
+    · rfl
+    · have key : ∀ k t, T ≤ t → b (t + k * Q) = b t := fun k => by
+        induction k with
+        | zero => intro t _; simp
+        | succ k ih =>
+          intro t ht
+          rw [Nat.succ_mul, ← add_assoc, hperQ _ (by nlinarith), ih t ht]
+      have hdiv := Nat.mod_add_div (n - T) Q
+      have := key ((n - T) / Q) (T + (n - T) % Q) (by omega)
+      rw [← this]
+      congr 1
+      rw [mul_comm]
+      omega
+
+/-- **Not morphic.** If `c` is not morphic, Problem 1 holds. -/
+theorem problem1_of_not_isMorphic (h : ¬ IsMorphic c) : Rule30Prize.Problem1 :=
+  fun hep => h (isMorphic_of_eventuallyPeriodic hep)
 
 end Rule30Equivalents.StrongerStatements

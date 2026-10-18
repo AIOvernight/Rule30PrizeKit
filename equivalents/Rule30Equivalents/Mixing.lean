@@ -49,9 +49,14 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
 * `log_two_le_coverEntropy`: **rule 30 has topological entropy at least `log 2`** (Mathlib's
   `coverEntropy`): the center trace is a uniformly continuous factor map onto the full shift on
   `{0,1}^ℕ`, whose entropy is at least `log 2` (`log_two_le_coverEntropy_shift`).
-* `ae_isNormal_columns`, `ae_isNormal_rows`: for almost every configuration, every column of the
-  space-time diagram is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`), and
-  so is the right half of every row (every iterate preserves the measure).
+* `measurePreserving_path`: along any path that never moves right, `p (t + 1) ≤ p t`, the cells
+  `F^t(x)_{p t}` are independent fair coins (`measure_prefix_path`); so for almost every
+  configuration they form a normal sequence (`ae_isNormal_path`). Columns are the constant paths
+  (`ae_isNormal_columns`), and the left edge of the light cone is `p t = -t`. Along a right
+  diagonal the cells are not fair coins: `(t, a)` and `(t + 1, a + 1)` agree with probability
+  `1/4` (`measure_diag_eq`).
+* `ae_isNormal_rows`: for almost every configuration the right half of every row is normal (every
+  iterate preserves the measure).
 -/
 
 namespace Rule30Equivalents.Mixing
@@ -188,23 +193,94 @@ theorem exists_mem_evol_mem {U V : Set (ℤ → Bool)} (hU : IsOpen U) (hV : IsO
   exact ⟨x, hn₁ fun p hp1 hp2 => hxJ p (Finset.mem_Icc.2 ⟨by omega, by omega⟩),
     hn₂ fun p hp1 hp2 => hxI p (Finset.mem_Icc.2 ⟨by omega, by omega⟩)⟩
 
+/-! ### Cells along paths -/
+
+/-- **Along a path that never moves right, every prefix has probability `2^-(n+1)`**: for
+`p (t + 1) ≤ p t`, the cells `F^t(x)_{p t}` up to time `n` do not see the coins left of
+`p n - n`, and the cell at time `n + 1` sits beyond their light cone (`measure_inter_window`). -/
+theorem measure_prefix_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) (w : ℕ → Bool) :
+    ∀ n : ℕ, coins ℤ {x | ∀ t ≤ n, evol x t (p t) = w t} = 2⁻¹ ^ (n + 1)
+  | 0 => by
+    have h := measure_window 0 {p 0} fun _ => w 0
+    rw [Finset.card_singleton] at h
+    rw [← h]
+    congr 1
+    ext x
+    simp only [Set.mem_setOf_eq, Finset.mem_singleton, forall_eq]
+    constructor
+    · intro hx
+      exact hx 0 le_rfl
+    · intro hx t ht
+      obtain rfl : t = 0 := by omega
+      exact hx
+  | n + 1 => by
+    have hanti : Antitone p := antitone_nat_of_succ_le hp
+    set A := {x : ℤ → Bool | ∀ t ≤ n, evol x t (p t) = w t} with hAdef
+    have hA : MeasurableSet A := by
+      simp only [hAdef, Set.setOf_forall]
+      exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
+        measurable_evol t (p t) (measurableSet_singleton _)
+    have hAm : ∀ x q, q < p n - n → (Function.update x q (!x q) ∈ A ↔ x ∈ A) := by
+      intro x q hq
+      simp only [hAdef, Set.mem_setOf_eq]
+      refine forall₂_congr fun t ht => ?_
+      have := hanti ht
+      rw [AlgebraicDegree.evol_update_of_far (Or.inl (by omega))]
+    have h := measure_inter_window hA hAm (n + 1) (fun _ => w (n + 1)) {p (n + 1)}
+      fun i hi => by
+        rw [Finset.mem_singleton] at hi
+        have := hp n
+        push_cast
+        omega
+    have hset : {x : ℤ → Bool | ∀ t ≤ n + 1, evol x t (p t) = w t} =
+        A ∩ {x | ∀ i ∈ ({p (n + 1)} : Finset ℤ), evol x (n + 1) i = w (n + 1)} := by
+      ext x
+      simp only [hAdef, Set.mem_inter_iff, Set.mem_setOf_eq, Finset.mem_singleton, forall_eq]
+      constructor
+      · intro hx
+        exact ⟨fun t ht => hx t (by omega), hx (n + 1) le_rfl⟩
+      · rintro ⟨h1, h2⟩ t ht
+        rcases Nat.lt_or_ge t (n + 1) with h' | h'
+        · exact h1 t (by omega)
+        · obtain rfl : t = n + 1 := by omega
+          exact h2
+    rw [hset, h, measure_prefix_path hp w n, Finset.card_singleton, pow_one, ← pow_succ]
+
+/-- **The cells along a path that never moves right are independent fair coins**: for
+`p (t + 1) ≤ p t`, the map `x ↦ (F^t(x)_{p t})ₜ` carries `coins ℤ` to `coins ℕ`. Columns are the
+constant paths; the left edge of the light cone is `p t = -t`. -/
+theorem measurePreserving_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) :
+    MeasurePreserving (fun (x : ℤ → Bool) (t : ℕ) => evol x t (p t)) (coins ℤ) (coins ℕ) :=
+  measurePreserving_of_measure_prefix (measurable_pi_lambda _ fun t => measurable_evol t (p t))
+    (measure_prefix_path hp)
+
+/-- For almost every configuration, the cells along a given path that never moves right form a
+normal sequence. -/
+theorem ae_isNormal_path {p : ℕ → ℤ} (hp : ∀ t, p (t + 1) ≤ p t) :
+    ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal fun t => evol x t (p t) :=
+  (measurePreserving_path hp).quasiMeasurePreserving.ae ae_isNormal
+
+/-- **Right diagonals are not fair coins**: the cells `(t, a)` and `(t + 1, a + 1)` agree with
+probability `1/4`, not `1/2`, because `F^(t+1)(x)_{a+1} = F^t(x)_a ⊕ (F^t(x)_{a+1} ∨ F^t(x)_{a+2})`
+and the cells `a + 1`, `a + 2` of `F^t(x)` are white together with probability `1/4`. -/
+theorem measure_diag_eq (t : ℕ) (a : ℤ) :
+    coins ℤ {x | evol x (t + 1) (a + 1) = evol x t a} = 4⁻¹ := by
+  have hset : {x : ℤ → Bool | evol x (t + 1) (a + 1) = evol x t a} =
+      {x | ∀ i ∈ ({a + 1, a + 2} : Finset ℤ), evol x t i = (fun _ => false) i} := by
+    ext x
+    simp only [Set.mem_setOf_eq, Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp,
+      forall_eq]
+    rw [AlgebraicDegree.evol_succ, show a + 1 - 1 = a by ring, show a + 1 + 1 = a + 2 by ring]
+    cases evol x t a <;> cases evol x t (a + 1) <;> cases evol x t (a + 2) <;> decide
+  rw [hset, measure_window t {a + 1, a + 2} (fun _ => false),
+    Finset.card_pair (by omega : a + 1 ≠ a + 2), ← ENNReal.inv_pow]
+  norm_num
+
 /-- **Normal columns almost surely**: for almost every configuration, every column of its
-space-time diagram is normal. -/
+space-time diagram is normal (columns are constant paths). -/
 theorem ae_isNormal_columns :
-    ∀ᵐ x ∂(coins ℤ), ∀ p : ℤ, StrongerStatements.IsNormal fun t => evol x t p := by
-  refine ae_all_iff.2 fun p => ?_
-  have hshift : MeasurePreserving (fun (x : ℤ → Bool) (q : ℤ) => x (q + p)) (coins ℤ)
-      (coins ℤ) :=
-    ⟨by fun_prop, Measure.map_infinitePi_infinitePi_of_inj (add_left_injective p)⟩
-  filter_upwards [hshift.quasiMeasurePreserving.ae ae_isNormal_trace] with x hx
-  have hcol : (fun t => evol x t p) = trace fun q => x (q + p) := by
-    funext t
-    have := Rule30ZeroBoundaryBarriers.evol_shift_all (x := fun q => x (q + p)) (x' := x)
-      (d := p) (fun q => rfl) t 0
-    rw [zero_add] at this
-    exact this
-  rw [hcol]
-  exact hx
+    ∀ᵐ x ∂(coins ℤ), ∀ p : ℤ, StrongerStatements.IsNormal fun t => evol x t p :=
+  ae_all_iff.2 fun p => ae_isNormal_path (p := fun _ => p) fun _ => le_rfl
 
 /-- **Normal rows almost surely**: for almost every configuration, the right half of every row
 of its space-time diagram is normal. Restricting to the cells `n ≥ 0` maps the fair-coin measure to

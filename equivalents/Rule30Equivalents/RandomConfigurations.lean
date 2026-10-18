@@ -233,14 +233,13 @@ theorem measure_prefix (w : ℕ → Bool) (n : ℕ) :
     coins ℤ {x | ∀ t ≤ n, trace x t = w t} = 2⁻¹ ^ (n + 1) :=
   measure_prefix_of_flipsLeft measurable_id flipsLeft_id w n
 
-/-- The center trace of `G x` is a fair-coin sequence, for `G` commuting with the flips left
-of `1`: cylinders over initial segments determine the measure. -/
-theorem measurePreserving_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
-    (hflip : FlipsLeft G) : MeasurePreserving (fun x => trace (G x)) (coins ℤ) (coins ℕ) := by
-  have hT : Measurable fun x => trace (G x) := measurable_trace.comp hG
-  refine ⟨hT, ?_⟩
-  have : IsProbabilityMeasure ((coins ℤ).map fun x => trace (G x)) :=
-    Measure.isProbabilityMeasure_map hT.aemeasurable
+/-- A measurable map to `{0,1}^ℕ` whose prefix events all have probability `2^-(n+1)` carries
+`coins ℤ` to `coins ℕ`: cylinders over initial segments determine the measure. -/
+theorem measurePreserving_of_measure_prefix {g : (ℤ → Bool) → (ℕ → Bool)} (hg : Measurable g)
+    (hpre : ∀ (w : ℕ → Bool) (n : ℕ), coins ℤ {x | ∀ t ≤ n, g x t = w t} = 2⁻¹ ^ (n + 1)) :
+    MeasurePreserving g (coins ℤ) (coins ℕ) := by
+  refine ⟨hg, ?_⟩
+  have : IsProbabilityMeasure ((coins ℤ).map g) := Measure.isProbabilityMeasure_map hg.aemeasurable
   refine ext_of_generate_finite _ generateFrom_measurableCylinders.symm
     isPiSystem_measurableCylinders (fun s hs => ?_) (by rw [measure_univ, measure_univ])
   rw [measurableCylinders_nat] at hs
@@ -248,15 +247,14 @@ theorem measurePreserving_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bo
   obtain ⟨a, S, hS, rfl⟩ := hs
   rw [cylinder, ← Measure.map_apply (Finset.measurable_restrict _) hS,
     ← Measure.map_apply (Finset.measurable_restrict _) hS, coins_map_restrict,
-    Measure.map_map (Finset.measurable_restrict _) hT]
+    Measure.map_map (Finset.measurable_restrict _) hg]
   congr 1
   refine Measure.ext_iff_singleton.2 fun v => ?_
-  rw [Measure.map_apply ((Finset.measurable_restrict _).comp hT) (measurableSet_singleton v),
+  rw [Measure.map_apply ((Finset.measurable_restrict _).comp hg) (measurableSet_singleton v),
     Measure.pi_singleton]
-  -- the event is a prefix of the trace
+  -- the event is a prefix
   let w : ℕ → Bool := fun t => if h : t ≤ a then v ⟨t, Finset.mem_Iic.2 h⟩ else false
-  have hset : ((Finset.Iic a).restrict ∘ fun x => trace (G x)) ⁻¹' {v} =
-      {x | ∀ t ≤ a, trace (G x) t = w t} := by
+  have hset : ((Finset.Iic a).restrict ∘ g) ⁻¹' {v} = {x | ∀ t ≤ a, g x t = w t} := by
     ext x
     simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff, Set.mem_setOf_eq]
     constructor
@@ -269,8 +267,15 @@ theorem measurePreserving_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bo
       have := h i.1 (Finset.mem_Iic.1 i.2)
       simp only [w, dif_pos (Finset.mem_Iic.1 i.2)] at this
       exact this
-  rw [hset, measure_prefix_of_flipsLeft hG hflip, Finset.prod_congr rfl fun i _ =>
-    coin_singleton (v i), Finset.prod_const, Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
+  rw [hset, hpre, Finset.prod_congr rfl fun i _ => coin_singleton (v i), Finset.prod_const,
+    Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
+
+/-- The center trace of `G x` is a fair-coin sequence, for `G` commuting with the flips left
+of `1`. -/
+theorem measurePreserving_trace_of_flipsLeft {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G)
+    (hflip : FlipsLeft G) : MeasurePreserving (fun x => trace (G x)) (coins ℤ) (coins ℕ) :=
+  measurePreserving_of_measure_prefix (measurable_trace.comp hG)
+    (measure_prefix_of_flipsLeft hG hflip)
 
 /-- **The trace of a random configuration is a random sequence**: the trace map pushes the
 fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/

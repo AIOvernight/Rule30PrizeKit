@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 186 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 188 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃); c is not both 2- and 3-regular | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic`, `RegularSequences.problem1_iff_not_regularSeq_two_three` |
-| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (α, β = 2, 3) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three` |
+| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (integer bases) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
 **Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
@@ -243,7 +243,7 @@ Hartmanis and Lewis, with the same splicing on the input tape of an offline mach
 ([OfflineGap](Rule30Equivalents/OfflineGap.lean)). 1 form is stated,
 [41], and its direction "the form implies Problem 1" is proved, as is its disk form (no
 meromorphic extension to a disk of radius > 1). 1 form is a sketch, [46]; its
-uniform case (bases 2 and 3, uniform substitutions) is proved.
+uniform case (integer bases, uniform substitutions) is proved.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -820,8 +820,9 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   x_t = βᵗx_β − Σ_{s<t} c(s)β^(t−1−s) lie in (1/q)ℤ[β]. Each x_t lies in [0, 1/(β − 1)] and its
   conjugates are bounded, so only finitely many values occur, and c(t) = ⌊βx_t⌋.
 - *Caution.* For 1 < β < 2, for example the golden ratio, 0/1 expansions are not unique and the
-  equivalence fails. For a Salem number β > 2, x_β ∉ ℚ(β) still implies Problem 1, but the converse
-  is open (Schmidt's conjecture).
+  equivalence fails. For a Salem number β > 2, x_β ∉ ℚ(β) still implies Problem 1
+  (`PisotNumbers.problem1_of_not_mem_adjoin`, for every real β > 2), but the converse is open
+  (Schmidt's conjecture).
 - *Difficulty.* Moderate.
 - *Lean.* Proved in the library for every Pisot number β > 2, in
   [PisotNumbers](Rule30Equivalents/PisotNumbers.lean): `problem1_iff_not_mem_adjoin`, from
@@ -2043,7 +2044,7 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   fixed point of a k-uniform morphism; the alphabet is kernel → Bool, the letter at n the column
   g ↦ g(n) of the kernel), so with Cobham's theorem
   `problem1_iff_not_uniformMorphic_two_three`: Problem 1 ⟺ c is not both 2- and 3-uniformly
-  morphic. The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's
+  morphic, and `problem1_iff_not_uniformMorphic` for any multiplicatively independent a, b ≥ 2. The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's
   theorem (and, for the easy direction, Lind's theorem that every Perron number is the dominant
   eigenvalue of a primitive substitution).
 - *Known.* No data exist for non-integer Perron bases; the kernel bounds of [42] cover only the
@@ -2235,8 +2236,9 @@ approximations of order 3/2) and "not a k-Mahler function" (`problem1_of_not_isM
 satisfies P(z^k)Q(z)F(z) − P(z)Q(z^k)F(z^k) = 0) and unbounded expansion complexity
 (`problem1_of_expansionComplexity_unbounded`: Q(X)Y − P(X) vanishes at C exactly), and "not
 morphic" (`problem1_of_not_isMorphic`: an EP sequence is a coding of the fixed point of σ(0) = 0 1,
-σ(i) = i + 1 on its positions), and "not k-regular over some field"
-(`RegularSequences.problem1_of_not_regularSeq`). For a density or a distance the
+σ(i) = i + 1 on its positions), "not k-regular over some field"
+(`RegularSequences.problem1_of_not_regularSeq`), and "x_β ∉ ℚ(β) for some real β > 2", for
+example a Salem number (`PisotNumbers.problem1_of_not_mem_adjoin`). For a density or a distance the
 hypothesis used is the weaker "infinitely many". The others are proved elsewhere: no column EP and
 FinConf through Jen's theorem, the frozen-boundary conjecture
 (`AutomatonGroup.problem1_of_frozenBoundaryConjecture`), not 2-automatic

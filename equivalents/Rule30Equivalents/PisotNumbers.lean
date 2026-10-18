@@ -357,4 +357,11 @@ theorem problem1_iff_not_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) :
     Rule30Prize.Problem1 ↔ value β c ∉ IntermediateField.adjoin ℚ ({β} : Set ℝ) :=
   not_congr (eventuallyPeriodic_iff_mem_adjoin hP hβ c)
 
+/-- **Any base `β > 2`**, for example a Salem number: if `x_β ∉ ℚ(β)`, Problem 1 holds. For a Salem
+number the converse is open (Schmidt's conjecture). -/
+theorem problem1_of_not_mem_adjoin (hβ : 2 < β)
+    (h : value β c ∉ IntermediateField.adjoin ℚ ({β} : Set ℝ)) : Rule30Prize.Problem1 :=
+  fun hep => h (mem_of_eventuallyPeriodic hβ (IntermediateField.adjoin ℚ ({β} : Set ℝ)).toSubfield
+    (IntermediateField.mem_adjoin_simple_self ℚ β) hep)
+
 end Rule30Equivalents.PisotNumbers

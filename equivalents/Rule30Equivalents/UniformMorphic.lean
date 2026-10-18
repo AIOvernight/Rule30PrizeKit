@@ -13,9 +13,9 @@ a coding `τ ∘ x` of a fixed point `x` of a `k`-uniform morphism `σ` of a fin
   `h ∘ x` for some `h : A → Bool`, and there are finitely many of those.
 
 With Cobham's theorem, **Problem 1 holds iff `c` is not both a `2`-uniformly morphic and a
-`3`-uniformly morphic sequence** (`problem1_iff_not_uniformMorphic_two_three`). This is [46] for
-the integer Perron numbers `2` and `3` and uniform substitutions; the general form needs Durand's
-theorem.
+`3`-uniformly morphic sequence** (`problem1_iff_not_uniformMorphic_two_three`), and likewise for
+any multiplicatively independent `a, b ≥ 2` (`problem1_iff_not_uniformMorphic`). This is [46] for
+integer Perron numbers and uniform substitutions; the general form needs Durand's theorem.
 -/
 
 namespace Rule30Equivalents.UniformMorphic
@@ -73,6 +73,24 @@ theorem isAutomatic_iff_isUniformMorphic (hk : 2 ≤ k) (f : ℕ → Bool) :
     funext n
     simp only [Function.comp]
     rw [hf, apply_pow_mul_add hk0 hx e n r hr]
+
+/-- **Cobham's theorem for uniform morphisms.** A sequence that is `a`-uniformly and `b`-uniformly
+morphic, for multiplicatively independent `a, b ≥ 2`, is eventually periodic. -/
+theorem eventuallyPeriodic_of_isUniformMorphic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤ b)
+    (hab : ∀ m n, 0 < m → 0 < n → a ^ m ≠ b ^ n) {f : ℕ → Bool} (hfa : IsUniformMorphic a f)
+    (hfb : IsUniformMorphic b f) : EventuallyPeriodic f :=
+  Cobham.eventuallyPeriodic_of_isAutomatic ha hb hab
+    ((isAutomatic_iff_isUniformMorphic ha f).2 hfa) ((isAutomatic_iff_isUniformMorphic hb f).2 hfb)
+
+/-- **[46] for uniform substitutions, any pair of bases.** For multiplicatively independent
+`a, b ≥ 2`, Problem 1 holds iff the center column is not both `a`- and `b`-uniformly morphic. -/
+theorem problem1_iff_not_uniformMorphic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤ b)
+    (hab : ∀ m n, 0 < m → 0 < n → a ^ m ≠ b ^ n) : Rule30Prize.Problem1 ↔
+    ¬ (IsUniformMorphic a Rule30Prize.center ∧ IsUniformMorphic b Rule30Prize.center) :=
+  ⟨fun h1 h => h1 (eventuallyPeriodic_of_isUniformMorphic ha hb hab h.1 h.2),
+    fun h hep => h ⟨(isAutomatic_iff_isUniformMorphic ha _).1
+      (isAutomatic_of_eventuallyPeriodic hep ha),
+      (isAutomatic_iff_isUniformMorphic hb _).1 (isAutomatic_of_eventuallyPeriodic hep hb)⟩⟩
 
 /-- **[46] for uniform substitutions.** Problem 1 holds iff the center column is not both a
 `2`-uniformly morphic and a `3`-uniformly morphic sequence. -/

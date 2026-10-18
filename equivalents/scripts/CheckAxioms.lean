@@ -76,6 +76,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.OneTapeRegular.problem1_iff_no_fast_digit_deciders
 #print axioms Rule30Equivalents.PisotBase.problem1_iff_not_mem_Q_sqrt_two
 #print axioms Rule30Equivalents.PisotNumbers.problem1_iff_not_mem_adjoin
+#print axioms Rule30Equivalents.PisotNumbers.problem1_of_not_mem_adjoin
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_not_rational_coeff_zero
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_series_ne_mul_inv
@@ -162,6 +163,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_padic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity
 #print axioms Rule30Equivalents.TwoAdic.problem1_iff_two_adic_complexity_odd
+#print axioms Rule30Equivalents.UniformMorphic.problem1_iff_not_uniformMorphic
 #print axioms Rule30Equivalents.UniformMorphic.problem1_iff_not_uniformMorphic_two_three
 #print axioms Rule30Equivalents.WordForms.problem1_iff_prefix_certificates
 #print axioms Rule30Equivalents.WordForms.problem1_iff_black_gaps

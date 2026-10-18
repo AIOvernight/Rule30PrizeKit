@@ -18,6 +18,10 @@ Etemadi's strong law of large numbers, which needs only pairwise independence.
   (`RandomConfigurations.tendsto_average_of_residues`), **for almost every configuration, every
   pattern on every window `[-n, n]` appears in the rows of the space-time diagram with frequency
   `2^-(2n+1)`.**
+* `ae_orbit_frequency_progression`: the same along every arithmetic progression `a + Ps` of times,
+  by splitting it into `2n + 1` sub-progressions of step `(2n + 1) P`. Wolfram asks whether the
+  right halves `y_{Pk+r}` of the rows of the seed are equidistributed [W19]; at the level of
+  digits, this is the answer for almost every configuration.
 * `ae_tendsto_orbit_empirical`: so **almost every configuration is generic** for the fair-coin
   measure under rule 30: the empirical measures of its orbit converge weakly to it (the window
   patterns form a π-system of small neighbourhoods,
@@ -99,6 +103,59 @@ theorem ae_tendsto_residue (I : Finset ℤ) (w : ℤ → Bool) (g r : ℕ)
   refine hx.congr fun K => ?_
   rw [smul_eq_mul, inv_mul_eq_div]
 
+/-- **Pattern frequencies along every progression of times**: for almost every configuration `x`,
+every pattern `v` on every window `[-n, n]` appears in the rows `a, a + P, a + 2P, …` of the
+space-time diagram of `x` with frequency `2^-(2n+1)`. Split the progression into `2n + 1`
+sub-progressions of step `(2n + 1) P`, along which the events are pairwise independent. Wolfram
+asks whether the right halves `y_{Pk+r}` of the rows of the single seed are equidistributed [W19];
+at the level of digits, this answers it for almost every configuration. -/
+theorem ae_orbit_frequency_progression :
+    ∀ᵐ x ∂(coins ℤ), ∀ (P a n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool), 0 < P →
+      Tendsto (fun T : ℕ => (∑ s ∈ range T, ({y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n,
+        evol y (a + P * s) i = extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x)) / T) atTop
+          (𝓝 ((2 : ℝ)⁻¹ ^ (2 * n + 1))) := by
+  refine ae_all_iff.2 fun P => ae_all_iff.2 fun a => ae_all_iff.2 fun n =>
+    ae_all_iff.2 fun v => ?_
+  rcases Nat.eq_zero_or_pos P with rfl | hP
+  · exact Eventually.of_forall fun x h => absurd h (lt_irrefl 0)
+  have hcard : (Finset.Icc (-(n : ℤ)) n).card = 2 * n + 1 := by
+    rw [Int.card_Icc]
+    omega
+  have hG : 2 * n + 1 ≤ (2 * n + 1) * P := Nat.le_mul_of_pos_right _ hP
+  have hres : ∀ᵐ x ∂(coins ℤ), ∀ r : Fin (2 * n + 1), Tendsto (fun K : ℕ => (∑ k ∈ range K,
+      ({y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y ((a + P * r) + k * ((2 * n + 1) * P)) i =
+        extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x)) / K) atTop
+          (𝓝 ((2 : ℝ)⁻¹ ^ (Finset.Icc (-(n : ℤ)) n).card)) := by
+    refine ae_all_iff.2 fun r => ae_tendsto_residue _ _ ((2 * n + 1) * P) (a + P * r)
+      fun j k hjk => ?_
+    refine ⟨-(n : ℤ) - ((a + P * r) + j * ((2 * n + 1) * P) : ℕ), fun i hi => ?_,
+      fun i hi => ?_⟩
+    · have := (Finset.mem_Icc.1 hi).1
+      omega
+    · have hi2 := (Finset.mem_Icc.1 hi).2
+      have hkj : (j + 1) * ((2 * n + 1) * P) ≤ k * ((2 * n + 1) * P) :=
+        Nat.mul_le_mul_right _ hjk
+      have hkj' : ((j * ((2 * n + 1) * P) : ℕ) : ℤ) + ((2 * n + 1) * P : ℕ) ≤
+          ((k * ((2 * n + 1) * P) : ℕ) : ℤ) := by
+        rw [add_mul, one_mul] at hkj
+        exact_mod_cast hkj
+      have hG' : ((2 * n + 1 : ℕ) : ℤ) ≤ (((2 * n + 1) * P : ℕ) : ℤ) := by exact_mod_cast hG
+      push_cast at hkj' hG' ⊢
+      omega
+  filter_upwards [hres] with x hx hP'
+  rw [← hcard]
+  refine tendsto_average_of_residues (m := 2 * n + 1) (Nat.succ_pos _)
+    (a := fun s => {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y (a + P * s) i =
+      extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x)
+    (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num)
+    (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num) fun r hr => ?_
+  refine (hx ⟨r, hr⟩).congr fun K => ?_
+  congr 1
+  refine Finset.sum_congr rfl fun k _ => ?_
+  show _ = {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y (a + P * (r + k * (2 * n + 1))) i =
+      extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x
+  rw [show a + P * (r + k * (2 * n + 1)) = (a + P * r) + k * ((2 * n + 1) * P) by ring]
+
 /-- **Pattern frequencies along almost every orbit** (a pointwise ergodic theorem for local
 patterns): for almost every configuration `x`, every pattern `v` on every window `[-n, n]`
 appears in the rows of the space-time diagram of `x` with frequency `2^-(2n+1)`. -/
@@ -107,32 +164,10 @@ theorem ae_orbit_frequency :
       Tendsto (fun T : ℕ => (∑ t ∈ range T, ({y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n,
         evol y t i = extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x)) / T) atTop
           (𝓝 ((2 : ℝ)⁻¹ ^ (2 * n + 1))) := by
-  refine ae_all_iff.2 fun n => ae_all_iff.2 fun v => ?_
-  have hcard : (Finset.Icc (-(n : ℤ)) n).card = 2 * n + 1 := by
-    rw [Int.card_Icc]
-    omega
-  have hres : ∀ᵐ x ∂(coins ℤ), ∀ r : Fin (2 * n + 1), Tendsto (fun K : ℕ => (∑ k ∈ range K,
-      ({y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y (r + k * (2 * n + 1)) i =
-        extend v i}.indicator (1 : (ℤ → Bool) → ℝ) x)) / K) atTop
-          (𝓝 ((2 : ℝ)⁻¹ ^ (Finset.Icc (-(n : ℤ)) n).card)) := by
-    refine ae_all_iff.2 fun r => ae_tendsto_residue _ _ (2 * n + 1) r fun j k hjk => ?_
-    refine ⟨-(n : ℤ) - (r + j * (2 * n + 1) : ℕ), fun i hi => ?_, fun i hi => ?_⟩
-    · have := (Finset.mem_Icc.1 hi).1
-      omega
-    · have hi2 := (Finset.mem_Icc.1 hi).2
-      have hkj : (j + 1) * (2 * n + 1) ≤ k * (2 * n + 1) := Nat.mul_le_mul_right _ hjk
-      have hkj' : ((j * (2 * n + 1) : ℕ) : ℤ) + (2 * n + 1) ≤ ((k * (2 * n + 1) : ℕ) : ℤ) := by
-        rw [add_mul, one_mul] at hkj
-        exact_mod_cast hkj
-      push_cast at hkj' ⊢
-      omega
-  filter_upwards [hres] with x hx
-  rw [← hcard]
-  refine tendsto_average_of_residues (Nat.succ_pos _)
-    (a := fun t => {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y t i = extend v i}.indicator
-      (1 : (ℤ → Bool) → ℝ) x)
-    (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num)
-    (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num) fun r hr => hx ⟨r, hr⟩
+  filter_upwards [ae_orbit_frequency_progression] with x hx n v
+  have := hx 1 0 n v one_pos
+  simp only [zero_add, one_mul] at this
+  exact this
 
 /-! ### Generic points -/
 

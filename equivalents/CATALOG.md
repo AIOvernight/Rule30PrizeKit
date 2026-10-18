@@ -2558,7 +2558,8 @@ with Turing machines reading n. Notes:
   at most 4ᵗ factors of length 4ᵗ. Its Lemma 4.4 (`periodic_rows`): rows between two P-periodic
   rows are P-periodic. Infinitely many returns then make two adjacent columns periodic, against
   Jen's theorem for such configurations. Wolfram (2019) plots y_t and asks
-  about the equidistribution of y_{Pk+r} [W19].
+  about the equidistribution of y_{Pk+r} [W19]. For the single seed this is open; at the level of
+  digits it holds for almost every configuration (`OrbitFrequencies.ae_orbit_frequency_progression`).
 - **Recurrence and uniform recurrence of c.** As properties of sequences, these are independent of
   Problem 1. A normal sequence is recurrent but not uniformly recurrent. A recurrent EP sequence is
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).
@@ -2734,16 +2735,18 @@ with Turing machines reading n. Notes:
     every window [−n, n] appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem
     for local patterns proved from Etemadi's strong law, since rows far apart in time are
     independent on a window ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean),
-    `ae_orbit_frequency`); so almost every configuration is generic, the empirical measures of its
-    orbit converging weakly to μ (`ae_tendsto_orbit_empirical`), and the right halves of its rows
-    have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed, Kopra's theorem
-    gives infinitely many); rule 30 is sensitive to initial conditions, and the right front of a
-    perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological
-    entropy at least log 2, since the trace is a factor map onto the full shift
-    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`; the trace intertwines rule 30 with the
-    shift, `RandomConfigurations.trace_evol_one`); and for μ-almost every configuration every column
-    of the space-time diagram is normal, and so is the right half of every row
-    (`ae_isNormal_columns`, `ae_isNormal_rows`).
+    `ae_orbit_frequency`), and so along every arithmetic progression of times
+    (`ae_orbit_frequency_progression`; at the level of digits, Wolfram's question on the
+    equidistribution of y_{Pk+r} [W19] has a positive answer for almost every configuration); so
+    almost every configuration is generic, the empirical measures of its orbit converging weakly to
+    μ (`ae_tendsto_orbit_empirical`), and the right halves of its rows have every sequence as a
+    limit point (`ae_rightHalves_frequently`; for the seed, Kopra's theorem gives infinitely many);
+    rule 30 is sensitive to initial conditions, and the right front of a perturbation moves at speed
+    one (`sensitive`, `evol_flip_front`); rule 30 has topological entropy at least log 2, since the
+    trace is a factor map onto the full shift (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`;
+    the trace intertwines rule 30 with the shift, `RandomConfigurations.trace_evol_one`); and for
+    μ-almost every configuration every column of the space-time diagram is normal, and so is the
+    right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

@@ -32,7 +32,9 @@ every digit sequence, and then specializes them to the center column.
   `y ↦ 2y` of the circle. The doubling map shifts binary digits: its `n`-th iterate sends `x₂` to
   `0.c(n) c(n+1) …₂ mod 1` (`iterate_doubling_centerBinary`). Read the other way, `c(t)` is black
   iff `2^t x₂ mod 1 > 1/2` (`center_iff_fract`), so **Problem 2 holds iff** the doubling orbit of
-  `x₂` lies in `(1/2, 1)` with frequency `1/2` (`problem2_iff_doubling`);
+  `x₂` lies in `(1/2, 1)` with frequency `1/2` (`problem2_iff_doubling`), and **`c` is normal iff**
+  the doubling orbit visits every dyadic interval `[k/2^m, (k+1)/2^m)` with frequency `2^-m`
+  (`isNormal_iff_doubling`, Borel and Wall);
 * `problem1_iff_not_rational_digits` (**no real numbers**): there are no natural numbers `p` and
   `q > 0` with `c(t) = decide (⌊2^(t+1) p / q⌋ mod 2 = 1)` for every `t`, i.e. the center column is
   not the sequence of binary digits of a fraction. `problem1_iff_not_rational_digits_base` says the
@@ -577,19 +579,26 @@ theorem problem1_iff_doubling_not_preperiodic : Rule30Prize.Problem1 ↔
       Function.periodicPts (fun y : AddCircle (1 : ℝ) => 2 • y) :=
   problem1_iff_irrational_binary.trans (irrational_iff_not_preperiodic_mul le_rfl _)
 
-/-- **The doubling map reads the center column**: `c(t)` is black iff `2^t x₂ mod 1` lies in the
-upper half `(1/2, 1)` of the circle. -/
-theorem center_iff_fract (t : ℕ) : c t = true ↔ 1 / 2 < Int.fract (2 ^ t * centerBinary) := by
+/-- **The doubling map shifts the digits of `x₂`**: `2^t x₂ mod 1` is the tail value
+`0.c(t) c(t+1) …₂`, which is below `1` because `c` is not eventually black. -/
+theorem fract_pow_mul_centerBinary (t : ℕ) :
+    Int.fract (2 ^ t * centerBinary) = baseValue 2 (tail c t) := by
   have hpow := pow_mul_baseValue (B := 2) le_rfl c t
   have hlt := tail_lt_one (B := 2) le_rfl center_not_eventually_true t
   have hnn := baseValue_nonneg (B := 2) le_rfl (tail c t)
+  rw [Nat.cast_ofNat] at hpow
+  rw [centerBinary_eq_baseValue, hpow, add_comm, Int.fract_add_natCast,
+    Int.fract_eq_self.2 ⟨hnn, hlt⟩]
+
+/-- **The doubling map reads the center column**: `c(t)` is black iff `2^t x₂ mod 1` lies in the
+upper half `(1/2, 1)` of the circle. -/
+theorem center_iff_fract (t : ℕ) : c t = true ↔ 1 / 2 < Int.fract (2 ^ t * centerBinary) := by
   have hinf : ∀ T, ∃ s, T ≤ s ∧ c s = true := fun T => by
     obtain ⟨s, hs, hTs⟩ := WordForms.infinite_black.exists_gt T
     exact ⟨s, hTs.le, hs⟩
   have hd := digit_iff (B := 2) le_rfl c hinf t
-  rw [Nat.cast_ofNat] at hpow hd
-  rw [centerBinary_eq_baseValue, hpow, add_comm, Int.fract_add_natCast,
-    Int.fract_eq_self.2 ⟨hnn, hlt⟩, hd]
+  rw [Nat.cast_ofNat] at hd
+  rw [fract_pow_mul_centerBinary, hd]
   constructor <;> intro h <;> linarith
 
 open Filter Topology in
@@ -604,6 +613,123 @@ theorem problem2_iff_doubling : Rule30Prize.Problem2 ↔
   rw [show Rule30Prize.blackCount n = ((List.range n).filter c).length from rfl,
     BlackTimes.length_filter_eq_count, Nat.count_eq_card_filter_range]
   exact congrArg Finset.card (Finset.filter_congr fun t _ => center_iff_fract t)
+
+/-! ### Normality and the doubling map -/
+
+/-- A binary numeral of `m` digits is below `2^m`. -/
+theorem lead_lt (b : ℕ → Bool) : ∀ m, lead 2 b m < 2 ^ m
+  | 0 => by simp [lead]
+  | m + 1 => by
+    have := lead_lt b m
+    simp only [lead, pow_succ]
+    split_ifs <;> omega
+
+/-- A binary numeral depends only on its digits. -/
+theorem lead_congr {b b' : ℕ → Bool} : ∀ {m}, (∀ j < m, b j = b' j) → lead 2 b m = lead 2 b' m
+  | 0, _ => rfl
+  | m + 1, h => by
+    simp only [lead]
+    rw [lead_congr fun j hj => h j (by omega), h m (by omega)]
+
+/-- A binary numeral determines its digits. -/
+theorem eq_of_lead_eq {b b' : ℕ → Bool} :
+    ∀ {m}, lead 2 b m = lead 2 b' m → ∀ j < m, b j = b' j
+  | 0, _, j, hj => absurd hj (Nat.not_lt_zero j)
+  | m + 1, h, j, hj => by
+    simp only [lead] at h
+    have hd : b m = b' m := by
+      cases hb : b m <;> cases hb' : b' m
+      · rfl
+      · rw [hb, hb'] at h
+        simp only [Bool.false_eq_true, if_false, if_true, add_zero] at h
+        omega
+      · rw [hb, hb'] at h
+        simp only [Bool.false_eq_true, if_false, if_true, add_zero] at h
+        omega
+      · rfl
+    rw [hd] at h
+    have hl : lead 2 b m = lead 2 b' m := by omega
+    rcases Nat.lt_succ_iff_lt_or_eq.1 hj with hj | rfl
+    · exact eq_of_lead_eq hl j hj
+    · exact hd
+
+/-- The binary numeral `w(0) … w(m-1)` of a word. -/
+def num {m : ℕ} (w : Fin m → Bool) : ℕ :=
+  lead 2 (fun j => if h : j < m then w ⟨j, h⟩ else false) m
+
+theorem num_injective (m : ℕ) : Function.Injective (num (m := m)) := fun w w' h => by
+  funext j
+  have := eq_of_lead_eq h j.1 j.2
+  simpa [j.2] using this
+
+/-- **Words of `c` are dyadic intervals of the doubling orbit**: the word `w` occurs in `c` at `t`
+iff `2^t x₂ mod 1` lies in the dyadic interval `[num w / 2^m, (num w + 1) / 2^m)`. -/
+theorem occurs_iff_fract (t : ℕ) {m : ℕ} (w : Fin m → Bool) :
+    (∀ j : Fin m, c (t + j) = w j) ↔
+      Int.fract (2 ^ t * centerBinary) ∈ Set.Ico ((num w : ℝ) / 2 ^ m) ((num w + 1) / 2 ^ m) := by
+  rw [fract_pow_mul_centerBinary]
+  have hpow := pow_mul_baseValue (B := 2) le_rfl (tail c t) m
+  have htt : tail (tail c t) m = tail c (t + m) := funext fun s => by
+    simp only [tail]
+    congr 1
+    ring
+  have hlt := tail_lt_one (B := 2) le_rfl center_not_eventually_true (t + m)
+  have hnn := baseValue_nonneg (B := 2) le_rfl (tail c (t + m))
+  rw [htt, Nat.cast_ofNat] at hpow
+  have h2m : (0 : ℝ) < 2 ^ m := by positivity
+  rw [Set.mem_Ico, div_le_iff₀ h2m, lt_div_iff₀ h2m, mul_comm, hpow]
+  -- both sides say that the numeral of the next `m` digits is `num w`
+  have hword : (∀ j : Fin m, c (t + j) = w j) ↔ lead 2 (tail c t) m = num w := by
+    constructor
+    · intro h
+      exact lead_congr fun j hj => by
+        simp only [tail, dif_pos hj]
+        rw [add_comm]
+        exact h ⟨j, hj⟩
+    · intro h j
+      have := eq_of_lead_eq h j.1 j.2
+      simp only [tail, dif_pos j.2] at this
+      rw [add_comm]
+      exact this
+  rw [hword]
+  constructor
+  · intro h
+    constructor <;> rw [h] <;> linarith
+  · rintro ⟨h1, h2⟩
+    have h1' : (num w : ℝ) < lead 2 (tail c t) m + 1 := by linarith
+    have h2' : (lead 2 (tail c t) m : ℝ) < num w + 1 := by linarith
+    have h1'' : num w < lead 2 (tail c t) m + 1 := by exact_mod_cast h1'
+    have h2'' : lead 2 (tail c t) m < num w + 1 := by exact_mod_cast h2'
+    omega
+
+open Filter Topology in
+/-- **Normality and the doubling map** (Borel, Wall): the center column is normal iff the orbit of
+`x₂` under the doubling map visits every dyadic interval `[k/2^m, (k+1)/2^m)` with frequency
+`2^-m`. -/
+theorem isNormal_iff_doubling : StrongerStatements.IsNormal c ↔
+    ∀ m k : ℕ, k < 2 ^ m → Tendsto (fun N : ℕ => (((Finset.range N).filter fun t =>
+      Int.fract (2 ^ t * centerBinary) ∈ Set.Ico ((k : ℝ) / 2 ^ m) ((k + 1) / 2 ^ m)).card : ℝ) /
+        N) atTop (𝓝 ((2 : ℝ)⁻¹ ^ m)) := by
+  have hcount : ∀ {m : ℕ} (w : Fin m → Bool) (N : ℕ),
+      ((Finset.range N).filter fun t => ∀ j : Fin m, c (t + j) = w j) =
+        (Finset.range N).filter fun t => Int.fract (2 ^ t * centerBinary) ∈
+          Set.Ico ((num w : ℝ) / 2 ^ m) ((num w + 1) / 2 ^ m) := fun w N =>
+    Finset.filter_congr fun t _ => occurs_iff_fract t w
+  constructor
+  · intro h m k hk
+    -- every `k < 2^m` is the numeral of a word
+    let f : (Fin m → Bool) → Fin (2 ^ m) := fun w => ⟨num w, lead_lt _ m⟩
+    have hf : Function.Bijective f := (Fintype.bijective_iff_injective_and_card f).2
+      ⟨fun w w' hww => num_injective m (congrArg Fin.val hww), by simp⟩
+    obtain ⟨w, hw⟩ := hf.2 ⟨k, hk⟩
+    have hwk : num w = k := congrArg Fin.val hw
+    have := h m w
+    simp only [hcount, hwk] at this
+    exact this
+  · intro h m w
+    have := h m (num w) (lead_lt _ m)
+    simp only [hcount]
+    exact this
 
 /-- **Problem 1 without real numbers**: the center column is not the sequence of binary digits
 `⌊2^(t+1) p / q⌋ mod 2` of a fraction `p / q`. -/

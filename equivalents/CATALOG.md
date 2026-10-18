@@ -2455,7 +2455,10 @@ Relation to Problem 1:
 - As properties of sequences the two are independent: (01)^∞ has density 1/2 and is periodic, and
   non-EP sequences of density 1/3 exist.
 - Normality implies both (`StrongerStatements.problem1_of_isNormal`,
-  `ProblemTwo.problem2_of_isNormal`).
+  `ProblemTwo.problem2_of_isNormal`). In the dynamical reading of Borel and Wall, c is normal iff the
+  orbit of x₂ under the doubling map visits every dyadic interval [k/2^m, (k + 1)/2^m) with
+  frequency 2^−m (`NumberTheory.isNormal_iff_doubling`): the word w occurs at t iff 2ᵗx₂ mod 1 lies
+  in the dyadic interval of the numeral of w (`occurs_iff_fract`).
 - Density 1/2 along every arithmetic progression implies the anti-Toeplitz statement, which implies
   Problem 1 (Section 4; `ProblemTwo.problem1_of_density_on_progressions`).
 - Problem 2 together with an unbounded discrepancy N(n) − n/2 implies Problem 1, because an

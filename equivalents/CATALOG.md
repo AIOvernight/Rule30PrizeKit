@@ -2179,7 +2179,12 @@ second-order logic over (ℕ, +). That logic defines squaring, through the finit
 {0, 1, 4, …, y²}, whose consecutive differences grow by 2. Squaring defines multiplication, so the
 theory is undecidable. The abstract of [KNO26] treats ⟨ℕ; +, P⟩ for linear recurrences, special
 functions and the totient function. It does not confirm that an arbitrary disjunctive S suffices,
-so this argument should not be attributed to [KNO26].
+so this argument should not be attributed to [KNO26]. *Lean* ([PresburgerExpansion](Rule30Equivalents/PresburgerExpansion.lean)): both
+first-order halves are proved. `mul_definable_of_center_disjunctive`: if every finite word occurs
+in c, multiplication is definable in (ℕ, 0, 1, +, S) without parameters; a window encodes
+{0, 1, 4, …, y²} through gaps that grow by 2 (`sqPred_iff`), and ab = c iff
+(a + b)² = a² + b² + 2c. `problem1_of_mul_definable`: if multiplication is definable there,
+Problem 1 holds. The undecidability of the theory itself is not formalized.
 
 Lean definitions for several of these typecheck in scratch files (the merge's `StmtStronger.lean`
 and `StmtReal.lean`, and the critic's `Additions2.lean`):

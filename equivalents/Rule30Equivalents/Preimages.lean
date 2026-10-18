@@ -16,6 +16,12 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   infinitely many `k`, hence everywhere.
 * `preimage_white`: the all-white configuration has exactly two preimages, all white and all
   black.
+* `exists_ne_left_eq`: rule 30 is not injective on left-asymptotic configurations. Black only at
+  `0` on the left, then `(0110)^∞` against `(1000)^∞` from the cell `1` on, have the same
+  image. A preimage can branch only after a black cell, and these two branches run around a cycle
+  of length `4` of pairs of states. So `not_positivelyExpansive`: **rule 30 is not positively
+  expansive**; for every window `[-n, n]` two different configurations have orbits that agree on
+  it at all times.
 -/
 
 namespace Rule30Equivalents.Preimages
@@ -147,5 +153,69 @@ theorem preimage_white (x : ℤ → Bool) :
       rfl
     · funext q
       rfl
+
+/-! ### Left-asymptotic pairs -/
+
+/-- Black only at `0` on the left, then `(0110)^∞` from the cell `1` on. -/
+def pairL (q : ℤ) : Bool := if q ≤ 0 then decide (q = 0) else decide (q % 4 = 2 ∨ q % 4 = 3)
+
+/-- Black only at `0` on the left, then `(1000)^∞` from the cell `1` on. -/
+def pairR (q : ℤ) : Bool := if q ≤ 0 then decide (q = 0) else decide (q % 4 = 1)
+
+theorem evol_one_pairL_eq : evol pairL 1 = evol pairR 1 := by
+  funext q
+  rw [evol_one, evol_one]
+  rcases le_or_gt q (-1) with hq | hq
+  · simp only [pairL, pairR, if_pos (show q - 1 ≤ 0 by omega), if_pos (show q ≤ 0 by omega),
+      if_pos (show q + 1 ≤ 0 by omega)]
+  rcases (show q = 0 ∨ q = 1 ∨ 2 ≤ q by omega) with rfl | rfl | hq2
+  · decide
+  · decide
+  · have h4 : q % 4 = 0 ∨ q % 4 = 1 ∨ q % 4 = 2 ∨ q % 4 = 3 := by omega
+    simp only [pairL, pairR, if_neg (show ¬ q - 1 ≤ 0 by omega), if_neg (show ¬ q ≤ 0 by omega),
+      if_neg (show ¬ q + 1 ≤ 0 by omega)]
+    rcases h4 with h | h | h | h
+    · rw [show (q - 1) % 4 = 3 by omega, show (q + 1) % 4 = 1 by omega, h]
+      decide
+    · rw [show (q - 1) % 4 = 0 by omega, show (q + 1) % 4 = 2 by omega, h]
+      decide
+    · rw [show (q - 1) % 4 = 1 by omega, show (q + 1) % 4 = 3 by omega, h]
+      decide
+    · rw [show (q - 1) % 4 = 2 by omega, show (q + 1) % 4 = 0 by omega, h]
+      decide
+
+/-- **Rule 30 is not injective on left-asymptotic configurations**: two different configurations
+that agree at every cell `q ≤ 0` have the same image. -/
+theorem exists_ne_left_eq :
+    ∃ x y : ℤ → Bool, x ≠ y ∧ (∀ q, q ≤ 0 → x q = y q) ∧ evol x 1 = evol y 1 :=
+  ⟨pairL, pairR, fun h => absurd (congrFun h 1) (by decide), fun q hq => by
+    simp [pairL, pairR, hq], evol_one_pairL_eq⟩
+
+/-- **Rule 30 is not positively expansive**: for every window `[-n, n]`, two different
+configurations have orbits that agree on the window at all times. -/
+theorem not_positivelyExpansive (n : ℕ) :
+    ∃ x y : ℤ → Bool, x ≠ y ∧
+      ∀ (t : ℕ) (p : ℤ), -(n : ℤ) ≤ p → p ≤ n → evol x t p = evol y t p := by
+  obtain ⟨x, y, hne, hleft, himg⟩ := exists_ne_left_eq
+  -- shift the pair `n` cells to the right
+  let x' : ℤ → Bool := fun q => x (q - n)
+  let y' : ℤ → Bool := fun q => y (q - n)
+  have hshift : ∀ (z : ℤ → Bool) (t : ℕ) (q : ℤ),
+      evol (fun q => z (q - n)) t q = evol z t (q - n) := fun z t q => by
+    have := Rule30ZeroBoundaryBarriers.evol_shift_all (x := z) (x' := fun q => z (q - n))
+      (d := n) (fun p => by simp) t (q - n)
+    rwa [sub_add_cancel] at this
+  have h1 : evol x' 1 = evol y' 1 := funext fun q => by
+    rw [hshift x 1 q, hshift y 1 q, himg]
+  refine ⟨x', y', fun h => hne (funext fun q => by
+    have := congrFun h (q + n)
+    simpa [x', y'] using this), fun t p _ hp2 => ?_⟩
+  rcases Nat.eq_zero_or_pos t with rfl | ht
+  · exact hleft (p - n) (by omega)
+  · obtain ⟨s, rfl⟩ : ∃ s, t = 1 + s := ⟨t - 1, by omega⟩
+    rw [← Rule30ZeroBoundaryBarriers.evol_restart x' 1 s p,
+      ← Rule30ZeroBoundaryBarriers.evol_restart y' 1 s p]
+    show evol (fun p => evol x' 1 p) s p = evol (fun p => evol y' 1 p) s p
+    rw [show (fun p => evol x' 1 p) = evol y' 1 from h1]
 
 end Rule30Equivalents.Preimages

@@ -2743,7 +2743,9 @@ with Turing machines reading n. Notes:
     (`surjective_evol_one`); every configuration has at most four preimages, configurations with
     the same image that agree right of some cell are equal, and the white configuration has
     exactly two preimages ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`,
-    `eq_of_evol_one_eq_of_right`, `preimage_white`). Likewise, ergodicity of the doubling map
+    `eq_of_evol_one_eq_of_right`, `preimage_white`); but two different configurations that agree
+    left of a cell can have the same image, so rule 30 is not positively expansive
+    (`exists_ne_left_eq`, `not_positivelyExpansive`). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
     version said that the trace is normal for a comeager set of configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles

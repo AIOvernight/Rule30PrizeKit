@@ -15,6 +15,9 @@ Khinchin's law of the iterated logarithm pins down its fluctuations:
 * `ae_clusterPt_walk_trace`: the limit points of `W(n)/√(2 n log log n)` form exactly `[-1, 1]`.
   The walk moves by `±1` while the scale grows, so the ratio cannot jump over a level between its
   visits near `-1` and near `1` (`mapClusterPt_div`).
+* `residual_limsup_liminf_walk_div_trace`: in the sense of category the picture is different: for
+  a comeager set of configurations `limsup W(n)/n = 1` and `liminf W(n)/n = -1`, the largest
+  possible oscillation (`residual_oscillation`).
 
 The upper half, `ae_eventually_two_mul_imbalance_lt`, sharpens
 `Fluctuations.ae_eventually_imbalance_lt` from the constant `2` to every constant `c > 1`: along
@@ -1075,5 +1078,164 @@ theorem ae_clusterPt_walk_trace :
   measurePreserving_trace.quasiMeasurePreserving.ae (p := fun v => {y | MapClusterPt y atTop
     fun n : ℕ => (walk v n : ℝ) / √(2 * n * Real.log (Real.log n))} = Set.Icc (-1) 1)
     ae_clusterPt_walk
+
+/-! ### In the sense of category -/
+
+theorem count_le_self (v : ℕ → Bool) (n : ℕ) : count v n ≤ n := by
+  unfold count
+  exact (List.length_filter_le _ _).trans (List.length_range).le
+
+theorem count_le_of_false {v : ℕ → Bool} {L : ℕ} (h : ∀ t, L ≤ t → v t = false) :
+    ∀ n, count v n ≤ L
+  | 0 => by simp [count]
+  | n + 1 => by
+    rw [count_succ]
+    by_cases hn : L ≤ n
+    · rw [h n hn]
+      simpa using count_le_of_false h n
+    · have := count_le_self v n
+      split_ifs <;> omega
+
+/-- The walk counts ones minus zeros: `W(n) = 2 N(n) - n`. -/
+theorem walk_eq_count (v : ℕ → Bool) : ∀ n, walk v n = 2 * (count v n : ℤ) - n
+  | 0 => by simp [walk, count]
+  | n + 1 => by
+    rw [walk, Finset.sum_range_succ, ← walk, walk_eq_count v n, count_succ]
+    cases v n <;> simp only [Bool.false_eq_true, if_true, if_false] <;>
+      push_cast <;> ring
+
+/-- **Generic sequences oscillate maximally**: for a comeager set of sequences and every `k`, the
+frequency of ones is at least `k/(k + 1)`, and at most `1/(k + 1)`, at arbitrarily late times. Each
+condition reads finitely many letters, and extending any prefix by a long run of ones, or of zeros,
+satisfies it. -/
+theorem residual_oscillation : {v : ℕ → Bool | ∀ k N : ℕ,
+    (∃ n, N < n ∧ k * n ≤ (k + 1) * count v n) ∧
+    (∃ n, N < n ∧ (k + 1) * count v n ≤ n)} ∈ residual (ℕ → Bool) := by
+  have hset : {v : ℕ → Bool | ∀ k N : ℕ, (∃ n, N < n ∧ k * n ≤ (k + 1) * count v n) ∧
+      (∃ n, N < n ∧ (k + 1) * count v n ≤ n)} =
+      (⋂ k : ℕ, ⋂ N : ℕ, ⋃ n : ℕ, {v | N < n ∧ k * n ≤ (k + 1) * count v n}) ∩
+        ⋂ k : ℕ, ⋂ N : ℕ, ⋃ n : ℕ, {v | N < n ∧ (k + 1) * count v n ≤ n} := by
+    ext v
+    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter, Set.mem_iUnion]
+    exact ⟨fun h => ⟨fun k N => (h k N).1, fun k N => (h k N).2⟩,
+      fun h k N => ⟨h.1 k N, h.2 k N⟩⟩
+  have hopen : ∀ (P : ℕ → ℕ → Prop) (n : ℕ), IsOpen {v : ℕ → Bool | P n (count v n)} :=
+    fun P n => by
+      rw [isOpen_iff_mem_nhds]
+      intro v hv
+      refine Filter.mem_of_superset (prefix_mem_nhds v n) fun u hu => ?_
+      rw [Set.mem_setOf_eq, count_congr fun t ht => hu t ht.le]
+      exact hv
+  rw [hset]
+  refine Filter.inter_mem (countable_iInter_mem.2 fun k => countable_iInter_mem.2 fun N =>
+    residual_of_dense_open (isOpen_iUnion fun n =>
+      hopen (fun n c => N < n ∧ k * n ≤ (k + 1) * c) n) ?_)
+    (countable_iInter_mem.2 fun k => countable_iInter_mem.2 fun N =>
+      residual_of_dense_open (isOpen_iUnion fun n =>
+        hopen (fun n c => N < n ∧ (k + 1) * c ≤ n) n) ?_)
+  · rw [dense_iff_inter_open]
+    rintro U hU ⟨v, hv⟩
+    obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
+    -- copy the prefix of `v`, then only ones
+    refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [if_pos ht], ?_⟩
+    refine Set.mem_iUnion.2 ⟨(k + 1) * (L + N + 1), ?_, ?_⟩
+    · nlinarith
+    · have h1 := le_count (v := fun t => if t < L then v t else true) (L := L)
+        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) ((k + 1) * (L + N + 1))
+      have h2 : (k + 1) * (L + N + 1) ≤
+          count (fun t => if t < L then v t else true) ((k + 1) * (L + N + 1)) + L := by omega
+      have h3 := Nat.mul_le_mul_left (k + 1) h2
+      nlinarith
+  · rw [dense_iff_inter_open]
+    rintro U hU ⟨v, hv⟩
+    obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
+    -- copy the prefix of `v`, then only zeros
+    refine ⟨fun t => if t < L then v t else false, hL fun t ht => by simp only [if_pos ht], ?_⟩
+    refine Set.mem_iUnion.2 ⟨(k + 1) * (L + N + 1), ?_, ?_⟩
+    · nlinarith
+    · have h1 := count_le_of_false (v := fun t => if t < L then v t else false) (L := L)
+        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) ((k + 1) * (L + N + 1))
+      have h2 := Nat.mul_le_mul_left (k + 1) h1
+      nlinarith
+
+/-- **In the sense of category the walk oscillates maximally**: for a comeager set of
+configurations the walk `W(n)` of the center column has `limsup W(n)/n = 1` and
+`liminf W(n)/n = -1`. So `W(n)/√(2 n log log n)` is unbounded above and below, while for almost
+every configuration it has limit points exactly `[-1, 1]` (`ae_clusterPt_walk_trace`). -/
+theorem residual_limsup_liminf_walk_div_trace :
+    {x : ℤ → Bool | limsup (fun n : ℕ => (walk (trace x) n : ℝ) / n) atTop = 1 ∧
+      liminf (fun n : ℕ => (walk (trace x) n : ℝ) / n) atTop = -1} ∈ residual (ℤ → Bool) := by
+  have h : {v : ℕ → Bool | limsup (fun n : ℕ => (walk v n : ℝ) / n) atTop = 1 ∧
+      liminf (fun n : ℕ => (walk v n : ℝ) / n) atTop = -1} ∈ residual (ℕ → Bool) := by
+    refine Filter.mem_of_superset residual_oscillation fun v hv => ?_
+    simp only [Set.mem_setOf_eq] at hv ⊢
+    -- `W(n)/n = 2 N(n)/n - 1` lies in `[-1, 1]`
+    have hW : ∀ n : ℕ, 0 < n → (walk v n : ℝ) / n = 2 * (count v n : ℝ) / n - 1 := fun n hn => by
+      have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+      rw [walk_eq_count]
+      push_cast
+      field_simp
+    have hle : ∀ n : ℕ, (walk v n : ℝ) / n ≤ 1 := fun n => by
+      rcases Nat.eq_zero_or_pos n with rfl | hn
+      · simp
+      · have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+        have hc : (count v n : ℝ) ≤ n := by exact_mod_cast count_le_self v n
+        rw [hW n hn, sub_le_iff_le_add, div_le_iff₀ hn']
+        linarith
+    have hge : ∀ n : ℕ, -1 ≤ (walk v n : ℝ) / n := fun n => by
+      rcases Nat.eq_zero_or_pos n with rfl | hn
+      · simp
+      · have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+        rw [hW n hn, le_sub_iff_add_le, le_div_iff₀ hn']
+        have : (0 : ℝ) ≤ count v n := Nat.cast_nonneg _
+        linarith
+    have hfr : ∀ k : ℕ, ∃ᶠ n : ℕ in atTop, 1 - 2 / ((k : ℝ) + 1) ≤ (walk v n : ℝ) / n := fun k =>
+      frequently_atTop.2 fun N => by
+        obtain ⟨n, hn, hk⟩ := (hv k N).1
+        refine ⟨n, hn.le, ?_⟩
+        have hn' : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
+        have hk' : (k : ℝ) * n ≤ ((k : ℝ) + 1) * count v n := by exact_mod_cast hk
+        rw [hW n (by omega), le_sub_iff_add_le, le_div_iff₀ hn']
+        have e : (1 - 2 / ((k : ℝ) + 1) + 1) * n = 2 * ((k : ℝ) * n) / ((k : ℝ) + 1) := by
+          field_simp
+          ring
+        rw [e, div_le_iff₀ (by positivity)]
+        nlinarith
+    have hfr' : ∀ k : ℕ, ∃ᶠ n : ℕ in atTop, (walk v n : ℝ) / n ≤ -1 + 2 / ((k : ℝ) + 1) :=
+      fun k => frequently_atTop.2 fun N => by
+        obtain ⟨n, hn, hk⟩ := (hv k N).2
+        refine ⟨n, hn.le, ?_⟩
+        have hn' : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
+        have hk' : ((k : ℝ) + 1) * count v n ≤ n := by exact_mod_cast hk
+        rw [hW n (by omega), sub_le_iff_le_add, div_le_iff₀ hn']
+        have h2 : 2 * (count v n : ℝ) ≤ 2 / ((k : ℝ) + 1) * n := by
+          rw [div_mul_eq_mul_div, le_div_iff₀ (by positivity)]
+          nlinarith
+        linarith
+    have hbdd : IsBoundedUnder (· ≤ ·) atTop fun n : ℕ => (walk v n : ℝ) / n :=
+      isBoundedUnder_of_eventually_le (Eventually.of_forall hle)
+    have hbdd' : IsBoundedUnder (· ≥ ·) atTop fun n : ℕ => (walk v n : ℝ) / n :=
+      isBoundedUnder_of_eventually_ge (Eventually.of_forall hge)
+    have hcob : IsCoboundedUnder (· ≤ ·) atTop fun n : ℕ => (walk v n : ℝ) / n :=
+      isCoboundedUnder_le_of_eventually_le atTop (Eventually.of_forall hge)
+    have hcob' : IsCoboundedUnder (· ≥ ·) atTop fun n : ℕ => (walk v n : ℝ) / n :=
+      isCoboundedUnder_ge_of_eventually_le atTop (Eventually.of_forall hle)
+    refine ⟨le_antisymm (limsup_le_of_le hcob (Eventually.of_forall hle)) ?_,
+      le_antisymm ?_ (le_liminf_of_le hcob' (Eventually.of_forall hge))⟩
+    · refine le_of_forall_pos_le_add fun ε hε => ?_
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (half_pos hε)
+      have := le_limsup_of_frequently_le (hfr k) hbdd
+      have h2 : 2 / ((k : ℝ) + 1) < ε := by
+        rw [show 2 / ((k : ℝ) + 1) = 2 * (1 / ((k : ℝ) + 1)) by ring]
+        linarith
+      linarith
+    · refine le_of_forall_pos_le_add fun ε hε => ?_
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (half_pos hε)
+      have := liminf_le_of_frequently_le (hfr' k) hbdd'
+      have h2 : 2 / ((k : ℝ) + 1) < ε := by
+        rw [show 2 / ((k : ℝ) + 1) = 2 * (1 / ((k : ℝ) + 1)) by ring]
+        linarith
+      linarith
+  exact tendsto_residual_of_isOpenMap continuous_trace isOpenMap_trace h
 
 end Rule30Equivalents.IteratedLogarithm

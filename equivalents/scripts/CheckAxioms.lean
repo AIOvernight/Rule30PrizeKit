@@ -20,6 +20,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BinaryIrrational.problem1_iff_irrational_decimal
 #print axioms Rule30Equivalents.BlackTimes.problem2_iff_trueTime
 #print axioms Rule30Equivalents.BlackTimes.problem2_iff_mean_gap
+#print axioms Rule30Equivalents.BoundedRemainder.problem1_of_unbounded_remainder
+#print axioms Rule30Equivalents.BoundedRemainder.problem1_of_problem2_of_unbounded_discrepancy
 #print axioms Rule30Equivalents.BuchiArithmetic.problem1_iff_not_buchi_definable
 #print axioms Rule30Equivalents.CesaroMeans.problem2_iff_cesaroMean
 #print axioms Rule30Equivalents.Christol.problem1_iff_transcendental_F2_or_F3

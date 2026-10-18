@@ -27,7 +27,8 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
 * `evol_one_eq_iff_of_eventually_black`: **a configuration that is black from some cell on has
   exactly three preimages**, repeating `100` in each of the three phases from that cell on
   (`eq_third_of_evol_one_black`). So the counts `1` (almost every configuration), `2` and `3` all
-  occur, and three is the most (`card_le_three`).
+  occur, and three is the most (`card_le_three`); each occurs on a dense set
+  (`dense_two_preimages`, `dense_three_preimages`).
 * `eq_of_evol_one_eq_of_frequently`: **a configuration that shows `010` arbitrarily far to the
   right has exactly one preimage**. An image showing `010` at `q, q + 1, q + 2` forces the
   preimage to be black at `q - 1` (`eq_true_of_window`), and then the image at `q - 1` fixes the
@@ -413,6 +414,60 @@ theorem evol_one_eq_row_iff (t : ℕ) (x : ℤ → Bool) :
       rw [evol_seed, Rule30Diagonals.cell_eq_false_of_gt _ _ (by omega)] at h1
       simp [extendLeft] at h1
   rw [evol_one_eq_iff_of_eventually_white hy, ← hwhite]
+
+/-- The configurations that are constant `b` from some cell on are dense: cut any configuration
+off far to the right. -/
+theorem dense_eventually_const (b : Bool) :
+    Dense {y : ℤ → Bool | ∃ N : ℤ, ∀ q, N < q → y q = b} := by
+  rw [dense_iff_inter_open]
+  rintro U hU ⟨v, hv⟩
+  obtain ⟨n, hn⟩ := Genericity.exists_window_subset (hU.mem_nhds hv)
+  refine ⟨fun q => if q ≤ n then v q else b, hn fun p _ hp => by simp [hp], n, fun q hq => ?_⟩
+  simp [show ¬ q ≤ (n : ℤ) by omega]
+
+/-- **The configurations with exactly two preimages are dense** (the eventually white ones). -/
+theorem dense_two_preimages : Dense {y : ℤ → Bool |
+    ∃ x₀ x₁, x₀ ≠ x₁ ∧ ∀ x, evol x 1 = y ↔ x = x₀ ∨ x = x₁} :=
+  (dense_eventually_const false).mono fun y hy => by
+    obtain ⟨N, hN⟩ := hy
+    exact ⟨_, _, extendLeft_false_ne_true y N, evol_one_eq_iff_of_eventually_white hN⟩
+
+/-- **The configurations with exactly three preimages are dense** (the eventually black ones). So
+each of the counts `1`, `2` and `3` occurs on a dense set; the count `1` on a comeager set of full
+measure (`Mixing.residual_existsUnique_preimage`, `Mixing.ae_existsUnique_preimage`). -/
+theorem dense_three_preimages : Dense {y : ℤ → Bool | ∃ x₀ x₁ x₂, x₀ ≠ x₁ ∧ x₀ ≠ x₂ ∧ x₁ ≠ x₂ ∧
+    ∀ x, evol x 1 = y ↔ x = x₀ ∨ x = x₁ ∨ x = x₂} := by
+  refine (dense_eventually_const true).mono fun y hy => ?_
+  obtain ⟨N, hN⟩ := hy
+  refine ⟨_, _, _, ?_, ?_, ?_, evol_one_eq_iff_of_eventually_black hN⟩
+  all_goals intro h
+  -- the three tails differ at `N` or at `N + 1`
+  · have := congrFun h N
+    rw [show extendLeft y N (third N) N = third N N from if_pos le_rfl,
+      show extendLeft y N (third (N + 1)) N = third (N + 1) N from if_pos le_rfl] at this
+    have h2 : third (N + 1) N = false := by
+      simp only [third, decide_eq_false_iff_not]
+      omega
+    rw [h2] at this
+    simp [third] at this
+  · have := congrFun h N
+    rw [show extendLeft y N (third N) N = third N N from if_pos le_rfl,
+      show extendLeft y N (third (N + 2)) N = third (N + 2) N from if_pos le_rfl] at this
+    have h2 : third (N + 2) N = false := by
+      simp only [third, decide_eq_false_iff_not]
+      omega
+    rw [h2] at this
+    simp [third] at this
+  · have := congrFun h (N + 1)
+    rw [show extendLeft y N (third (N + 1)) (N + 1) = third (N + 1) (N + 1) from
+        if_pos (by omega),
+      show extendLeft y N (third (N + 2)) (N + 1) = third (N + 2) (N + 1) from
+        if_pos (by omega)] at this
+    have h2 : third (N + 2) (N + 1) = false := by
+      simp only [third, decide_eq_false_iff_not]
+      omega
+    rw [h2] at this
+    simp [third] at this
 
 /-! ### Configurations with a unique preimage -/
 

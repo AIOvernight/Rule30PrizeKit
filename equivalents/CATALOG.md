@@ -2819,7 +2819,8 @@ with Turing machines reading n. Notes:
     image that agree right of some cell are equal, and every configuration that is white from some
     cell on (the white configuration, every finite configuration, every row of the seed pattern) has
     exactly two preimages, one white and one black from that cell on, and every configuration that
-    is black from some cell on has exactly three, repeating 100 in its three phases
+    is black from some cell on has exactly three, repeating 100 in its three phases, so the counts 2
+    and 3 each occur on a dense set (`dense_two_preimages`, `dense_three_preimages`)
     ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_three`, `exists_card_eq_three`,
     `eq_of_evol_one_eq_of_right`, `evol_one_eq_iff_of_eventually_white`,
     `evol_one_eq_iff_of_eventually_black`, `preimage_white`; for row t + 1 of the seed pattern the

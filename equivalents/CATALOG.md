@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 147 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 148 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -197,7 +197,7 @@ files. The rows follow the order of Section 3.
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
-| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Proved (library) for the automatic forms; Stated for the F₂/F₃ form, whose sufficient direction is proved | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Cobham.eventuallyPeriodic_of_isAutomatic`; `Transcendence.problem1_of_transcendental_F2_or_F3` |
+| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Proved (library) | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Sketch | `problem1_iff_no_fast_unary_decider` (sketch) |
 
@@ -230,8 +230,8 @@ and [31], without Fatou's theorem ([AlgebraicDFinite](Rule30Equivalents/Algebrai
 proved through the Skolem–Mahler–Lech theorem, which the library proves in the p-adic way, with
 Strassmann's theorem ([Strassmann](Rule30Equivalents/Strassmann.lean),
 [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean)). [42] is proved through Cobham's theorem,
-in Krebs' short proof ([Cobham](Rule30Equivalents/Cobham.lean)); its F₂/F₃ form also needs Christol's
-theorem. 1 form is stated, [41], and its direction "the form implies Problem 1" is proved. 2 forms
+in Krebs' short proof ([Cobham](Rule30Equivalents/Cobham.lean)), and its F₂/F₃ form also through
+Christol's theorem ([Christol](Rule30Equivalents/Christol.lean)). 1 form is stated, [41], and its direction "the form implies Problem 1" is proved. 2 forms
 are sketches.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -1901,7 +1901,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   - Christol 1979 and [CKMR80]: over F_p, p-automatic ⟺ algebraic over F_p(X).
   - Büchi–Bruyère: k-automatic ⟺ definable in (ℕ, +, V_k). Cobham–Semenov gives the two-base
     version.
-- *Difficulty.* Hard: it needs Cobham's and Christol's theorems. Cobham's is proved here.
+- *Difficulty.* Hard: it needs Cobham's and Christol's theorems. Both are proved here (Christol in
+  the direction "algebraic ⟹ automatic", which is the one [42] needs).
 - *Data.* The 2-kernel of c has at least 262,143 elements and the 3-kernel at least 265,720: the
   kernel sequences c(2^e·n + r) with e ≤ 17, and c(3^e·n + r) with e ≤ 11, have pairwise distinct
   40-bit prefixes (number-theory survey, own computation). A minimal LSD-first DFAO for a sequence
@@ -1926,7 +1927,18 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
     p = (u − v)(aᵐ − bⁿ) ≤ bⁿ/6 on an interval of radius 2bⁿ/3 around x bⁿ + bⁿ, for every x with
     their b-signature. `LocPer.glue` (Lemma 7) chains these local periods over consecutive x into
     one period.
-  The F₂/F₃ form still needs Christol's theorem, and the Büchi-arithmetic form is stated in words.
+  The F₂/F₃ form is proved in [Christol](Rule30Equivalents/Christol.lean):
+  `problem1_iff_transcendental_F2_or_F3`, from `isAutomatic_of_isAlgebraic` (Christol's theorem, one
+  direction, for every prime p) and Cobham's theorem.
+  - `pow_eq_expand`: over F_p, h^p = h(X^p) (Mathlib's `map_frobenius_expand`). The Cartier operator
+    Λ_r(Σ aₙXⁿ) = Σ a_{pn+r}Xⁿ satisfies Λ_r(h^p g) = h Λ_r g (`cartier_pow_mul`).
+  - `exists_ore_relation` (Ore): an algebraic F satisfies Σ_{i≤d} cᵢ F^(pⁱ) = 0 with polynomial cᵢ
+    and c₀ ≠ 0. The powers F^(pⁱ) are dependent over F_p[X], and Λ_r moves the lowest nonzero
+    coefficient down to index 0 (`exists_ore`).
+  - The g with c₀g = Σ hᵢ F^(pⁱ), deg hᵢ ≤ D, form a finite set that contains F and is closed under
+    every Λ_r: c₀ Λ_r g = Λ_r(c₀^(p−1)·c₀g), and c₀F is a combination of higher powers. The p-kernel
+    of c is the image of F under the iterated Λ's, so it is finite.
+  The Büchi-arithmetic form is stated in words.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=

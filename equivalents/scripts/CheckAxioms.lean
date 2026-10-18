@@ -84,6 +84,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_no_eventual_linear_recurrence
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_no_lfsr
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_linear_complexity_unbounded
+#print axioms Rule30Equivalents.PresburgerExpansion.problem1_of_mul_definable
 #print axioms Rule30Equivalents.ProblemThree.problem1_of_problem3Verbal
 #print axioms Rule30Equivalents.ProblemThree.problem1_of_problem3
 #print axioms Rule30Equivalents.ProblemTwo.problem2_iff_tendsto

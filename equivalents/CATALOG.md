@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 192 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 193 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2169,7 +2169,7 @@ so they are strictly stronger.
 | **Hypertranscendence** (new): C(z) satisfies no algebraic differential equation P(z, C, C′, …, C⁽ⁿ⁾) = 0 with P ≠ 0 over ℚ | if c is EP, C is rational, hence differentially algebraic | Strictly stronger: Σ z^(n²) is built on the non-EP set of squares, is a theta function, and satisfies an algebraic differential equation [Jac48]. A Mahler function is either rational or hypertranscendental [ADH21], so a non-EP automatic c would give a hypertranscendental C. In general neither "not automatic" nor "hypertranscendental" implies the other. | [ADH21], [Jac48] |
 | **Not a zero set in characteristic p** (new): S is not the zero set of a linear recurrence sequence over an infinite field of characteristic p, such as F_p(x) | if c is EP, S is the zero set of 1 − c, which is EP and so linear-recurrent | Strictly stronger: over F_p(x), u(n) = (x + 1)ⁿ − xⁿ − 1 has the non-EP zero set {pᵏ : k ≥ 0}. Derksen showed that such zero sets are p-automatic of a special form, so "c is not p-automatic" implies this statement. | [Der07] |
 | **Π⁰₁ defect bound**: for all T and P ≥ 1, some t ∈ [T, T + 3·log₂(T + P + 1)] has c(t + P) ≠ c(t) | an EP c has arbitrarily long stretches without a defect | Holds for T + P ≤ 65536, with maximum defect distance 29 (own computation, logic survey). | logic survey |
-| **Th(ℕ, +, S) is undecidable** | if c is EP, S is Presburger-definable and the theory is decidable | It would follow from disjunctiveness (own reasoning, below). | logic survey, critic; [KNO26] |
+| **Th(ℕ, +, S) is undecidable** | if c is EP, S is Presburger-definable and the theory is decidable | It would follow from disjunctiveness (own reasoning, below). In definable form: if multiplication is definable in (ℕ, 0, 1, +, S), with any parameters, Problem 1 holds (`PresburgerExpansion.problem1_of_mul_definable`): for an EP c every set definable in (ℕ, +, S) is semilinear, and the graph of multiplication is not. | logic survey, critic; [KNO26] |
 | **Problem 3 and its relatives**: no polylog-time digit extraction; circuit lower bounds for n ↦ c(n) | EP or automatic ⟹ O(log n) time | Beyond current techniques: the best general-circuit lower bound for any explicit function is about 3.1n. | [W19], [LY22], [FGHK16] |
 
 **Undecidability from disjunctiveness** (logic survey and critic, own reasoning). Suppose every

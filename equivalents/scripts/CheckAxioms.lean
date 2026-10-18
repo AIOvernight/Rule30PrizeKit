@@ -1,6 +1,7 @@
 import Rule30Equivalents
 
-/-! Prints the axioms of every `problem1_iff_*` and `problem1_of_*` theorem in the library.
+/-! Prints the axioms of every `problem1_iff_*`, `problem1_of_*` and `problem2_iff_*` theorem
+in the library.
 Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`.
 Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 
@@ -79,6 +80,8 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.PowerSeriesF2.problem1_iff_linear_complexity_unbounded
 #print axioms Rule30Equivalents.ProblemThree.problem1_of_problem3Verbal
 #print axioms Rule30Equivalents.ProblemThree.problem1_of_problem3
+#print axioms Rule30Equivalents.ProblemTwo.problem2_iff_tendsto
+#print axioms Rule30Equivalents.ProblemTwo.problem2_iff_abel
 #print axioms Rule30Equivalents.Realization.problem1_iff_realization
 #print axioms Rule30Equivalents.Realization.problem1_iff_column_iff_both
 #print axioms Rule30Equivalents.Realization.problem1_iff_irrational_ofDigits

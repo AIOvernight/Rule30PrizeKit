@@ -131,8 +131,8 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 169 library theorems whose names begin with `problem1_iff` or
-  `problem1_of`.
+  prints the axioms of all 171 library theorems whose names begin with `problem1_iff`,
+  `problem1_of` or `problem2_iff`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
 - **Proved (core catalog)**: proved in the core-Lean catalog [`../lean`](../lean).
@@ -2269,7 +2269,12 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
   Hardy–Littlewood–Karamata Tauberian theorem [HL14], [Kar30], which applies because the
   coefficients are nonnegative.
 
-Two Lean forms are stated (merge, `StmtReal.lean`):
+Both Lean forms are proved in [ProblemTwo](Rule30Equivalents/ProblemTwo.lean), the second through
+the Hardy–Littlewood–Karamata theorem, which the kit proves in
+[Tauberian](Rule30Equivalents/Tauberian.lean) (`tendsto_cesaro_of_tendsto_abel`, Karamata's
+proof: polynomial weights, the Weierstrass theorem, and continuous ramps around the indicator of
+[e⁻¹, 1]), together with the Abelian direction for bounded sequences
+(`tendsto_abel_of_tendsto_cesaro`):
 
 ```lean
 theorem problem2_iff_tendsto : Rule30Prize.Problem2 ↔

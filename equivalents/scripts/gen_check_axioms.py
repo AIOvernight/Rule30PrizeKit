@@ -1,5 +1,5 @@
-"""Write scripts/CheckAxioms.lean: `#print axioms` for every `problem1_iff*` and `problem1_of*`
-theorem of the library, Basic first, then the modules in alphabetical order.
+"""Write scripts/CheckAxioms.lean: `#print axioms` for every `problem1_iff*`, `problem1_of*` and
+`problem2_iff*` theorem of the library, Basic first, then the modules in alphabetical order.
 
 Run from the kit root: python3 equivalents/scripts/gen_check_axioms.py
 """
@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LIB = os.path.join(HERE, '..', 'Rule30Equivalents')
 OUT = os.path.join(HERE, 'CheckAxioms.lean')
 
-THEOREM = re.compile(r'^theorem (problem1_(?:iff|of)\w*)')
+THEOREM = re.compile(r'^theorem (problem1_(?:iff|of)\w*|problem2_iff\w*)')
 NAMESPACE = re.compile(r'^namespace (\S+)')
 SECTION = re.compile(r'^section\b')
 END = re.compile(r'^end(\s+\S+)?\s*$')
@@ -44,7 +44,8 @@ for mod in ['Basic.lean'] + modules:
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write('import Rule30Equivalents\n\n')
-    f.write('/-! Prints the axioms of every `problem1_iff_*` and `problem1_of_*` theorem in the library.\n')
+    f.write('/-! Prints the axioms of every `problem1_iff_*`, `problem1_of_*` and `problem2_iff_*` theorem\n')
+    f.write('in the library.\n')
     f.write('Run from the kit root: `lake env lean equivalents/scripts/CheckAxioms.lean`.\n')
     f.write('Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/\n\n')
     for n in lines:

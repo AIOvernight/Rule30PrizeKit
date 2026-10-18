@@ -2716,73 +2716,78 @@ with Turing machines reading n. Notes:
    [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean). The proof and the GAP and word-problem
    computations are in the vibe-proof repository, `research/g2369/`.
 
-   None of this is special to the seed. For every starting value a, Φ^(2^j) is the identity modulo
-   2^(j+1) (`TFunction.orbit_two_pow_mod`). For every configuration that is white right of some
-   cell, the right diagonals have period dividing 2^j (`Rule30FiniteDiagonals.Rd_periodic`). For
-   every configuration that is white left of some cell, the left diagonals are eventually periodic
-   with period 2^j (`Ld_periodic`). Every column reads its array along a line of slope one
-   (`column_reads_periodic_rows`). 10. **Distribution mod 1 and Mahler.** Rows of rule 30 are dyadic
-   numbers, and c(t) is the first binary digit of the right half of row t ([20]). Kopra [Kop23] puts
-   rule 30 and the ×p/q automata in one class, the rapidly left expansive automata (number-like
-   configurations are the nonzero left-finite ones, Def. 2.4). His Thm 3.5 says that such an
-   automaton of width w has no EP width-w trace from a number-like configuration; rule 30 has width
-   2, and the theorem generalizes [Jen90] Prop. 3. The analogues of Dubickas (Thm 4.5) and of
-   Pisot–Vijayaraghavan (Thm 4.7) are proved for rule 30 (Section 6.3). Mahler's Z-number problem
-   and the equidistribution of (3/2)ⁿ mod 1 remain the open counterparts [Mah68], [FLP95]. Theorem
-   numbers refer to the arXiv version of [Kop23]. 11. **Generic versus special points.** For
-   μ-almost every configuration, with μ the uniform Bernoulli measure, the center trace is normal.
-   The trace map Tr₀ pushes μ forward to μ, because c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the
-   cell x_{−t} is used by no earlier c(s). In finite form this is proved
-   (`AlgebraicDegree.card_trace`): each word w(0), …, w(n) is the center trace of exactly 2ⁿ of the
-   2^(2n+1) configurations on [−n, n]. In measure form it is proved too
-   ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure preserving
-   from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ (`measurePreserving_trace`; flipping
-   x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1), so every prefix has probability 2^−(n+1),
-   `measure_prefix`). With Borel's normal number theorem for fair coins (`ae_isNormal`: along each
-   residue class modulo m the blocks of length m are independent fair words, and the strong law of
-   large numbers applies), the trace is normal for μ-almost every configuration
-   (`ae_isNormal_trace`); the right half does not matter, since for every fixed right half R (all
-   white, as for the seed) a fair-coin left half gives a normal trace almost surely
-   (`ae_isNormal_trace_glue`). So the trace has density 1/2, is disjunctive and is not eventually
-   periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`). The
-   configurations with an eventually periodic trace are dense, meager and null
-   (`dense_isMeagre_null_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
-   measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ
-   (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window I of
-   its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
-   approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
-   (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
-   Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). It is even mixing of all
-   orders: cylinders at times whose gaps exceed the width of their windows are independent
-   (`measure_biInter_preimage_cylinder`), so μ(F^{−t₀}A₀ ∩ ⋯ ∩ F^{−t_{n−1}}A_{n−1}) →
-   μ(A₀)⋯μ(A_{n−1}) as the gaps grow (`mixing_all_orders`). For μ-almost every configuration, and
-   for a comeager set of them, the orbit enters every nonempty open set at arbitrarily large times
-   (`ae_frequently_mem`, `residual_frequently_mem`), and every pattern on every window [−n, n]
-   appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem for local patterns
-   proved from Etemadi's strong law, since rows far apart in time are independent on a window
-   ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean), `ae_orbit_frequency`), and so along
-   every arithmetic progression of times (`ae_orbit_frequency_progression`; at the level of digits,
-   Wolfram's question on the equidistribution of y_{Pk+r} [W19] has a positive answer for almost
-   every configuration); so almost every configuration is generic, the empirical measures of its
-   orbit converging weakly to μ (`ae_tendsto_orbit_empirical`), and the right halves of its rows
-   have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed, Kopra's theorem
-   gives infinitely many); rule 30 is sensitive to initial conditions, and the right front of a
-   perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological entropy
-   at least log 2, since the trace is a factor map onto the full shift (`log_two_le_coverEntropy`,
-   Mathlib's `coverEntropy`; the trace intertwines rule 30 with the shift,
-   `RandomConfigurations.trace_evol_one`), and at most 2 log 2, since one configuration per pattern
-   on [−(N + n), N + n] covers agreement on [−N, N] for n steps (`coverEntropy_le_two_mul_log_two`);
-   and for μ-almost every configuration every column of the space-time diagram is normal, and so is
-   the right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`). More generally the cells
-   along any path that never moves right (p(t + 1) ≤ p(t): columns, the left edge of the light cone)
-   are independent fair coins (`measurePreserving_path`, `ae_isNormal_path`), while along a right
-   diagonal they are not: the cells (t, a) and (t + 1, a + 1) agree with probability 1/4
-   (`measure_diag_eq`). Topologically the picture is reversed (critic, own reasoning from standard
-   facts): - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder
-   fixing x[−n, n] is the cylinder fixing c(0..n); - normal sequences form a meager set [Oxt80],
-   [Šal66], so the configurations with a normal trace form a meager set; - disjunctive sequences
-   form a dense G_δ, so the configurations with a disjunctive trace form a comeager set, while those
-   whose trace is even simply normal form a meager set.
+   None of this is special to the seed. For every starting value a, Φ^(2^j) is the identity
+   modulo 2^(j+1) (`TFunction.orbit_two_pow_mod`). For every configuration that is white right
+   of some cell, the right diagonals have period dividing 2^j
+   (`Rule30FiniteDiagonals.Rd_periodic`). For every configuration that is white left of some
+   cell, the left diagonals are eventually periodic with period 2^j (`Ld_periodic`). Every column
+   reads its array along a line of slope one (`column_reads_periodic_rows`).
+10. **Distribution mod 1 and Mahler.** Rows of rule 30 are dyadic numbers, and c(t) is the first
+    binary digit of the right half of row t ([20]). Kopra [Kop23] puts rule 30 and the ×p/q automata
+    in one class, the rapidly left expansive automata (number-like configurations are the nonzero
+    left-finite ones, Def. 2.4). His Thm 3.5 says that such an automaton of width w has no EP
+    width-w trace from a number-like configuration; rule 30 has width 2, and the theorem generalizes
+    [Jen90] Prop. 3. The analogues of Dubickas (Thm 4.5) and of Pisot–Vijayaraghavan (Thm 4.7) are
+    proved for rule 30 (Section 6.3). Mahler's Z-number problem and the equidistribution of
+    (3/2)ⁿ mod 1 remain the open counterparts [Mah68], [FLP95]. Theorem numbers refer to the arXiv
+    version of [Kop23].
+11. **Generic versus special points.** For μ-almost every configuration, with μ the uniform
+    Bernoulli measure, the center trace is normal. The trace map Tr₀ pushes μ forward to μ, because
+    c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the cell x_{−t} is used by no earlier c(s). In finite
+    form this is proved (`AlgebraicDegree.card_trace`): each word w(0), …, w(n) is the center trace
+    of exactly 2ⁿ of the 2^(2n+1) configurations on [−n, n]; likewise each word on m cells of the
+    t-th row comes from exactly 4ᵗ of the 2^(m+2t) configurations under its light cone
+    (`AlgebraicDegree.card_window`, Hedlund's balance for rule 30). In measure form it is proved too
+    ([RandomConfigurations](Rule30Equivalents/RandomConfigurations.lean)): Tr₀ is measure preserving
+    from the fair-coin measure on {0,1}^ℤ to the one on {0,1}^ℕ (`measurePreserving_trace`; flipping
+    x_{−(n+1)} preserves μ, fixes c(0..n) and flips c(n+1), so every prefix has probability
+    2^−(n+1), `measure_prefix`). With Borel's normal number theorem for fair coins (`ae_isNormal`:
+    along each residue class modulo m the blocks of length m are independent fair words, and the
+    strong law of large numbers applies), the trace is normal for μ-almost every configuration
+    (`ae_isNormal_trace`); the right half does not matter, since for every fixed right half R (all
+    white, as for the seed) a fair-coin left half gives a normal trace almost surely
+    (`ae_isNormal_trace_glue`). So the trace has density 1/2, is disjunctive and is not eventually
+    periodic (`ae_halfDensity_trace`, `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`).
+    The configurations with an eventually periodic trace are dense, meager and null
+    (`dense_isMeagre_null_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
+    measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ
+    (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window I of
+    its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
+    approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
+    (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
+    Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). It is even mixing of all
+    orders: cylinders at times whose gaps exceed the width of their windows are independent
+    (`measure_biInter_preimage_cylinder`), so μ(F^{−t₀}A₀ ∩ ⋯ ∩ F^{−t_{n−1}}A_{n−1}) →
+    μ(A₀)⋯μ(A_{n−1}) as the gaps grow (`mixing_all_orders`). For μ-almost every configuration, and
+    for a comeager set of them, the orbit enters every nonempty open set at arbitrarily large times
+    (`ae_frequently_mem`, `residual_frequently_mem`), and every pattern on every window [−n, n]
+    appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem for local patterns
+    proved from Etemadi's strong law, since rows far apart in time are independent on a window
+    ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean), `ae_orbit_frequency`), and so
+    along every arithmetic progression of times (`ae_orbit_frequency_progression`; at the level of
+    digits, Wolfram's question on the equidistribution of y_{Pk+r} [W19] has a positive answer for
+    almost every configuration); so almost every configuration is generic, the empirical measures of
+    its orbit converging weakly to μ (`ae_tendsto_orbit_empirical`), and the right halves of its
+    rows have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed, Kopra's
+    theorem gives infinitely many); rule 30 is sensitive to initial conditions, and the right front
+    of a perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological
+    entropy at least log 2, since the trace is a factor map onto the full shift
+    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`; the trace intertwines rule 30 with the
+    shift, `RandomConfigurations.trace_evol_one`), and at most 2 log 2, since one configuration per
+    pattern on [−(N + n), N + n] covers agreement on [−N, N] for n steps
+    (`coverEntropy_le_two_mul_log_two`); and for μ-almost every configuration every column of the
+    space-time diagram is normal, and so is the right half of every row (`ae_isNormal_columns`,
+    `ae_isNormal_rows`). More generally the cells along any path that never moves right (p(t + 1) ≤
+    p(t): columns, the left edge of the light cone) are independent fair coins
+    (`measurePreserving_path`, `ae_isNormal_path`), while along a right diagonal they are not: the
+    cells (t, a) and (t + 1, a + 1) agree with probability 1/4 (`measure_diag_eq`).
+    Topologically the picture is reversed (critic, own reasoning from standard facts):
+    - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
+      x[−n, n] is the cylinder fixing c(0..n);
+    - normal sequences form a meager set [Oxt80], [Šal66], so the configurations with a normal
+      trace form a meager set;
+    - disjunctive sequences form a dense G_δ, so the configurations with a disjunctive trace form
+      a comeager set, while those whose trace is even simply normal form a meager set.
 
     The single seed lies in the countable, null, meager set of finite configurations, so neither
     statement says anything about it. *Lean* ([Genericity](Rule30Equivalents/Genericity.lean)): the
@@ -2808,37 +2813,39 @@ with Turing machines reading n. Notes:
     `Mixing.exists_injOn_ae`, `Mixing.residual_existsUnique_preimage`,
     `Mixing.ae_injective_iterate`). Likewise, ergodicity of the doubling map
     (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
-    version said that the trace is normal for a comeager set of configurations; that is false. 12.
-    **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
+    version said that the trace is normal for a comeager set of configurations; that is false.
+12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
     neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof
     mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the defect
-    bound of Section 4 (own reasoning, logic survey). 13. **Complexity profiles from cryptography.**
-    For each finite-register model, "profile bounded ⟺ EP" holds: LFSR linear complexity, FCSR
-    2-adic complexity, maximum-order and k-th order complexity (k ≥ 1), finite-state generation, and
-    automatic complexity ([52]). For c, every profile computed so far looks random. As numeric
-    certificates they are weaker per bit than the kernel's factor count: about n/2 for T + P from n
-    bits, against about n (algebra survey). 14. **Mathlib infrastructure.** - Mathlib already has:
-    Presburger definability; Myhill–Nerode; `LinearRecurrence`; AddCircle torsion and density;
-    continued fractions over ordered fields; p-adic numbers and the Mahler basis; `PowerSeries`,
-    `RatFunc`, `LaurentSeries` and `PowerSeries.derivative`; `omegaLimit`; `SymbolicDynamics`;
-    König's lemma; `Dioph` with `Dioph.pow_dioph`; Lucas' theorem
-    (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
-    (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
-    `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`. - Mathlib lacks: an
-    eventually-periodic predicate; the digits-rationality lemma for arbitrary digits; Morse–Hedlund;
-    Kronecker's, Fatou's, Szegő's, Pólya–Carlson's, Euler–Lagrange's and Skolem–Mahler–Lech's
-    theorems; Christol's and Cobham's theorems; Strassmann's theorem; automatic sequences; Büchi
-    automata and MSO; Parikh's theorem; the context-free pumping lemma; the gap theorems; normal
-    numbers; natural density; Tauberian theorems; the pointwise ergodic theorem (Mathlib has
-    Birkhoff sums and the von Neumann mean ergodic theorem); and cellular automata. - This library
-    now proves, in general form: Morse–Hedlund, Euler–Lagrange, Strassmann, Skolem–Mahler–Lech over
-    ℚ, Christol (both directions) and Cobham, Büchi–Bruyère (both directions), automatic and
-    k-regular sequences, Büchi automata and the MSO composition method, the context-free pumping
-    lemma, the time and space gap theorems (Hennie–Trakhtenbrot and Stearns–Hartmanis–Lewis),
-    meromorphic continuation of finite-valued power series (the disk form of Fatou–Szegő), the
-    Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's normal number theorem for fair
-    coins, and, for rule 30, Hedlund's measure preservation, mixing and ergodicity. Szegő's and
-    Pólya–Carlson's theorems are still missing.
+    bound of Section 4 (own reasoning, logic survey).
+13. **Complexity profiles from cryptography.** For each finite-register model, "profile bounded ⟺
+    EP" holds: LFSR linear complexity, FCSR 2-adic complexity, maximum-order and k-th order
+    complexity (k ≥ 1), finite-state generation, and automatic complexity ([52]). For c, every
+    profile computed so far looks random. As numeric certificates they are weaker per bit than the
+    kernel's factor count: about n/2 for T + P from n bits, against about n (algebra survey).
+14. **Mathlib infrastructure.**
+    - Mathlib already has: Presburger definability; Myhill–Nerode; `LinearRecurrence`; AddCircle
+      torsion and density; continued fractions over ordered fields; p-adic numbers and the Mahler
+      basis; `PowerSeries`, `RatFunc`, `LaurentSeries` and `PowerSeries.derivative`; `omegaLimit`;
+      `SymbolicDynamics`; König's lemma; `Dioph` with `Dioph.pow_dioph`; Lucas' theorem
+      (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
+      (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
+      `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`.
+    - Mathlib lacks: an eventually-periodic predicate; the digits-rationality lemma for arbitrary
+      digits; Morse–Hedlund; Kronecker's, Fatou's, Szegő's, Pólya–Carlson's, Euler–Lagrange's and
+      Skolem–Mahler–Lech's theorems; Christol's and Cobham's theorems; Strassmann's theorem;
+      automatic sequences; Büchi automata and MSO; Parikh's theorem; the context-free pumping
+      lemma; the gap theorems; normal numbers; natural density; Tauberian theorems; the pointwise
+      ergodic theorem (Mathlib has Birkhoff sums and the von Neumann mean ergodic theorem); and
+      cellular automata.
+    - This library now proves, in general form: Morse–Hedlund, Euler–Lagrange, Strassmann,
+      Skolem–Mahler–Lech over ℚ, Christol (both directions) and Cobham, Büchi–Bruyère (both
+      directions), automatic and k-regular sequences, Büchi automata and the MSO composition method,
+      the context-free pumping lemma, the time and space gap theorems (Hennie–Trakhtenbrot and
+      Stearns–Hartmanis–Lewis), meromorphic continuation of finite-valued power series (the disk
+      form of Fatou–Szegő), the Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's
+      normal number theorem for fair coins, and, for rule 30, Hedlund's measure preservation,
+      mixing and ergodicity. Szegő's and Pólya–Carlson's theorems are still missing.
 
 ---
 

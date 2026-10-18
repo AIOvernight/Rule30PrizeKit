@@ -35,6 +35,9 @@ the Möbius transform `coef Φ_t S = ∑_{U ⊆ S} Φ_t(1_U)`.
 * `card_trace`: the whole center trace is uniform: each word `w(0), …, w(n)` is the trace of
   exactly `2ⁿ` of the `2^(2n+1)` configurations on `[-n, n]` (cells `±(n+1)` do not affect the
   trace up to time `n`, and flipping `x_{-(n+1)}` flips the center at time `n + 1`).
+* `card_window`: every window of every row is balanced (Hedlund's theorem for rule 30): each word
+  on the cells `a, …, a + m - 1` of the `t`-th row comes from exactly `4^t` of the `2^(m + 2t)`
+  configurations on `[a - t, a + m - 1 + t]`.
 
 The degree does not decide Problem 1: there are rules of maximal degree whose single-seed center
 columns are eventually periodic (catalog Section 6.3).
@@ -780,6 +783,79 @@ theorem card_trace (w : ℕ → Bool) : ∀ n : ℕ,
       Finset.filter_congr fun U _ => hfar U R (Or.inr rfl)
     rw [hR, ih, pow_succ]
     omega
+
+/-- **Every window of every row is balanced** (Hedlund's theorem for rule 30, in counts): each word
+on the cells `a, …, a + m - 1` of the `t`-th row comes from exactly `4^t` of the `2^(m + 2t)`
+configurations on `[a - t, a + m - 1 + t]`. Adding the cell `a - 1` to the window adds the cell
+`a - 1 - t` to the light cone; flipping it flips the new cell (left-permutivity) and no other. -/
+theorem card_window (t : ℕ) (w : ℤ → Bool) : ∀ (m : ℕ) (a : ℤ),
+    ((Icc (a - t) (a + m - 1 + t)).powerset.filter fun U =>
+      ∀ i ∈ Ico a (a + m), evol (ind U) t i = w i).card = 4 ^ t
+  | 0, a => by
+    rw [Finset.filter_true_of_mem fun U _ i hi => absurd hi (by simp),
+      Finset.card_powerset, Int.card_Icc, show a + ((0 : ℕ) : ℤ) - 1 + t + 1 - (a - t) =
+        ((2 * t : ℕ) : ℤ) by push_cast; ring, Int.toNat_natCast, pow_mul]
+    norm_num
+  | m + 1, a => by
+    have ih := card_window t w m (a + 1)
+    set J := Icc (a + 1 - t) (a + 1 + m - 1 + t) with hJ
+    set L : ℤ := a - t
+    have hLJ : L ∉ J := by simp [J, L]
+    have hA : Icc (a - t) (a + ((m + 1 : ℕ) : ℤ) - 1 + t) = insert L J := by
+      ext j
+      simp only [Finset.mem_Icc, Finset.mem_insert, J, L]
+      push_cast
+      omega
+    rw [hA]
+    set P : Finset ℤ → Prop := fun U => ∀ i ∈ Ico (a + 1) (a + 1 + m), evol (ind U) t i = w i
+    -- the old cells do not see the cell `L`
+    have hfar : ∀ U : Finset ℤ, P (insert L U) ↔ P U := by
+      intro U
+      refine forall₂_congr fun i hi => ?_
+      rw [Finset.mem_Ico] at hi
+      rw [evol_congr t i (y := ind U) fun k hk1 _ => ?_]
+      have : k ≠ L := by simp only [L]; omega
+      simp [ind, this]
+    -- flipping `L` flips the cell `a`
+    have hflip : ∀ U : Finset ℤ, L ∉ U → evol (ind (insert L U)) t a = !evol (ind U) t a := by
+      intro U hLU
+      have e0 := evol_update_left (ind U) t a
+      have e1 : ind (insert L U) = Function.update (ind U) L true := by
+        funext k
+        by_cases hk : k = L
+        · subst hk
+          simp [ind]
+        · simp [ind, Function.update, hk]
+      have e2 : Function.update (ind U) L false = ind U :=
+        Function.update_eq_self_iff.2 (by simp [ind, hLU])
+      rw [e1, e0, e2]
+    have hsplit : ∀ U : Finset ℤ, (∀ i ∈ Ico a (a + ((m + 1 : ℕ) : ℤ)),
+        evol (ind U) t i = w i) ↔ P U ∧ evol (ind U) t a = w a := fun U => by
+      simp only [P, Finset.mem_Ico]
+      constructor
+      · intro h
+        exact ⟨fun i hi => h i ⟨by omega, by push_cast; omega⟩,
+          h a ⟨le_rfl, by push_cast; omega⟩⟩
+      · intro h i hi
+        rcases eq_or_lt_of_le hi.1 with rfl | hlt
+        · exact h.2
+        · exact h.1 i ⟨by omega, by push_cast at hi; omega⟩
+    simp only [Finset.filter_congr fun U _ => hsplit U]
+    rw [card_filter_powerset_insert hLJ]
+    -- the half with `L` is the complement of the half without it
+    have hL : (J.powerset.filter fun U => P (insert L U) ∧ evol (ind (insert L U)) t a = w a) =
+        J.powerset.filter fun U => P U ∧ ¬ evol (ind U) t a = w a := by
+      refine Finset.filter_congr fun U hU => ?_
+      rw [Finset.mem_powerset] at hU
+      rw [hfar U, hflip U fun h => hLJ (hU h)]
+      cases evol (ind U) t a <;> cases w a <;> simp
+    rw [hL, ← Finset.card_union_of_disjoint (Finset.disjoint_filter.2 fun U _ h1 h2 => h2.2 h1.2),
+      ← Finset.filter_or]
+    have hP : (J.powerset.filter fun U => (P U ∧ evol (ind U) t a = w a) ∨
+        (P U ∧ ¬ evol (ind U) t a = w a)) = J.powerset.filter P :=
+      Finset.filter_congr fun U _ => by tauto
+    rw [hP]
+    exact ih
 
 /-! ### Feedback functions of bounded algebraic degree (catalog [28]) -/
 

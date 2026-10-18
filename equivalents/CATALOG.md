@@ -2381,7 +2381,9 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
 
 - formal-conjectures: `{t | centerColumn t}.HasDensity (1/2)`, where `Set.HasDensity` comes from
   its own ForMathlib layer [FC];
-- Wolfram: `DiscreteLimit[Total[c[t]]/t, t -> Infinity] == 1/2` [W19];
+- Wolfram: `DiscreteLimit[Total[c[t]]/t, t -> Infinity] == 1/2` [W19] (proved:
+  `ProblemTwo.problem2_iff_tendsto`, the instance for c of `halfDensity_iff_tendsto`, which holds
+  for every bit sequence);
 - x₂ is simply normal in base 2. This uses that c is not eventually constant, so c is the unique
   binary expansion of x₂ (proved: `ProblemTwo.problem2_iff_simplyNormal`, through
   `binDigit_centerBinary`);
@@ -2614,7 +2616,9 @@ with Turing machines reading n. Notes:
    Formalizing each hub once, in Mathlib form, gives most entries cheaply.
 2. **A ladder of randomness criteria** [W19]. Problem 3 ⟹ no polylog digit extraction ⟹ not
    automatic ⟹ Problem 1. Normal ⟹ disjunctive ⟹ positive entropy ⟹ Problem 1, and
-   normal ⟹ Problem 2. Problems 1 and 2 are independent as properties of sequences.
+   normal ⟹ Problem 2 (for every bit sequence: `StrongerStatements.disjunctive_of_isNormal`,
+   `not_eventuallyPeriodic_of_disjunctive`, `ProblemTwo.halfDensity_of_isNormal`). Problems 1 and
+   2 are independent as properties of sequences.
 3. **A ladder of logics** (critic). FO(ℕ, <): S is not definable, which is proved (Section 5).
    Presburger arithmetic, which here coincides with MSO(ℕ, <) on unary sets: non-definability is
    Problem 1 ([9], [36]). (ℕ, +, V_k): non-definability means "not k-automatic", which is stronger
@@ -2735,8 +2739,9 @@ with Turing machines reading n. Notes:
     gives infinitely many); rule 30 is sensitive to initial conditions, and the right front of a
     perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological
     entropy at least log 2, since the trace is a factor map onto the full shift
-    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`); and for μ-almost every configuration
-    every column of the space-time diagram is normal, and so is the right half of every row
+    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`; the trace intertwines rule 30 with the
+    shift, `RandomConfigurations.trace_evol_one`); and for μ-almost every configuration every column
+    of the space-time diagram is normal, and so is the right half of every row
     (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing

@@ -2395,12 +2395,21 @@ with Turing machines reading n. Notes:
   purely periodic, so "c is recurrent" would reduce Problem 1 to the T = 0 case (Section 5).
 - **Kolmogorov complexity.** K(c↾n) = K(n) + O(1), as for every computable sequence, so it cannot
   see Problem 1 [LV19]. The resource-bounded measures of [5], [27], [28], [37] and [52] can.
-- **The algebraic degree of the t-step map.** For t ≥ 2, the center cell after t steps, as a Boolean
-  function of the 2t + 1 initial cells, has algebraic normal form of degree 2t − 1 (a round-1 paper
-  proof, checked numerically for t ≤ 10). The formula fails at t = 1: the local rule
-  l ⊕ c ⊕ r ⊕ cr has degree 2. The degrees for t = 1, …, 7 are 2, 3, 5, 7, 9, 11, 13 (critic;
-  recomputed here for t ≤ 6). The statement concerns all seeds jointly, and rules of maximal degree
-  with EP centers show that it cannot decide Problem 1 (synthesis).
+- **The algebraic degree of the t-step map** (proved). For t ≥ 2, the center cell after t steps, as
+  a Boolean function of the 2t + 1 initial cells, has algebraic normal form of degree 2t − 1, and
+  for t ≥ 3 its only monomial of that degree is x_{2−t} ⋯ x_t. The formula fails at t = 1: the
+  local rule l ⊕ c ⊕ r ⊕ cr has degree 2. The degrees for t = 1, …, 7 are 2, 3, 5, 7, 9, 11, 13
+  (critic; recomputed here for t ≤ 6). The coefficient of x₀ is c(t), so Problem 1 is about the
+  linear part. The statement concerns all seeds jointly, and rules of maximal degree with EP
+  centers show that it cannot decide Problem 1 (synthesis). *Lean:* proved in
+  [AlgebraicDegree](Rule30Equivalents/AlgebraicDegree.lean) (`isGreatest_card_coef_center`,
+  `eq_top_of_coef_center_ne_zero`, `coef_center_singleton`). The coefficient of the monomial S is
+  the Möbius transform Σ_{U ⊆ S} Φ_t(1_U) over 𝔽₂. Upper bound: rule 30 is left-permutive, so the
+  leftmost variable enters linearly, and the derivative along the next one telescopes along the
+  left diagonal into cells that are again linear in their leftmost variable. Lower bound: the
+  coefficient of x_{2−t} ⋯ x_t is the parity of the number of configurations whose cone has a
+  white right diagonal; running rule 30 sideways maps them bijectively to the words w of length
+  t − 1 with f_{2t−2}(w) = 0, and the top coefficient of f_{2m} is 1 by induction on m.
 - **Rowland's Conjecture 1** (rigidity of the right edge) has no known relation to Problem 1. The
   stripe seeds [21] show that the center column does not determine the right edge.
 

@@ -2854,7 +2854,12 @@ with Turing machines reading n. Notes:
     shift, `RandomConfigurations.trace_evol_one`), and at most log 3 (`coverEntropy_le_log_three`):
     by left permutivity the columns N, N + 1 determine everything to their left, and in their words
     a black cell in column N + 1 is followed by the complement of its left neighbor, so each word
-    extends backward in time by at most three of the four letters (`card_pairWords_le`); and for
+    extends backward in time by at most three of the four letters (`card_pairWords_le`). The
+    column pairs are themselves a factor, so the entropy is exactly the growth rate of their
+    words. Numerically it is log 2: over n steps (n ≤ 15) a column-0 word has at most about n²/4
+    column-1 partners (6², 7², 8² for the alternating word at n = 14, 16, 18), so the column-pair
+    words number about 2^n n², not 3^n. Wolfram's notes give evidence that the spacetime
+    entropy is 1 bit ([NKS] note to p. 960). Proving h = log 2 is open (own computation); and for
     μ-almost every configuration every column of the space-time diagram is normal, and so is the
     right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`). More generally, cells
     whose feet i − t are pairwise distinct are independent fair coins (`measure_cells`,
@@ -2971,8 +2976,8 @@ Wolfram, the prize and formal statements
   170–183.
 - [W85c] S. Wolfram, Cryptography with cellular automata, CRYPTO '85, LNCS 218 (1986) 429–432.
 - [Wol83] S. Wolfram, Statistical mechanics of cellular automata, Rev. Mod. Phys. 55 (1983) 601–644.
-- [NKS] S. Wolfram, A New Kind of Science, Wolfram Media (2002); notes to pp. 871, 956, 975, 1087,
-  1149 and 1160.
+- [NKS] S. Wolfram, A New Kind of Science, Wolfram Media (2002); notes to pp. 871, 956, 960, 975,
+  1087, 1149 and 1160.
 - [MW] MathWorld, Rule 30, https://mathworld.wolfram.com/Rule30.html
 - [FC] google-deepmind/formal-conjectures, FormalConjectures/Other/Rule30.lean, commit 7db2ea3
   (2026-10-14).

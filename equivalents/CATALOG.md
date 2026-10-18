@@ -2803,10 +2803,12 @@ with Turing machines reading n. Notes:
     those with a normal trace), which has full measure
     (`RandomConfigurations.isMeagre_and_ae_halfDensity_trace`). Rule 30 itself is onto
     (`surjective_evol_one`); every configuration has at most four preimages, configurations with the
-    same image that agree right of some cell are equal, and the white configuration has exactly two
-    preimages ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`,
-    `eq_of_evol_one_eq_of_right`, `preimage_white`); but two different configurations that agree
-    left of a cell can have the same image, so rule 30 is not positively expansive
+    same image that agree right of some cell are equal, and every configuration that is white from
+    some cell on (the white configuration, every finite configuration, every row of the seed
+    pattern) has exactly two preimages, one white and one black from that cell on
+    ([Preimages](Rule30Equivalents/Preimages.lean): `card_le_four`, `eq_of_evol_one_eq_of_right`,
+    `evol_one_eq_iff_of_eventually_white`, `preimage_white`); but two different configurations that
+    agree left of a cell can have the same image, so rule 30 is not positively expansive
     (`exists_ne_left_eq`, `not_positivelyExpansive`). Still, rule 30 is invertible almost everywhere
     and generically: an image showing 010 at the cells q, q + 1, q + 2 forces the preimage to be
     black at q − 1 (`eq_true_of_window`), so the cell p of a preimage is determined by the image on

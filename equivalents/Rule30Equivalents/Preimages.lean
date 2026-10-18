@@ -15,8 +15,11 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
 * `card_le_four`: **every configuration has at most four preimages** (Hedlund's bound
   `|A|^(2r)` for rule 30). Among five preimages, two agree on the cells `k`, `k + 1` for
   infinitely many `k`, hence everywhere.
-* `preimage_white`: the all-white configuration has exactly two preimages, all white and all
-  black.
+* `evol_one_eq_iff_of_eventually_white`: **a configuration that is white from some cell on has
+  exactly two preimages**, one white and one black from that cell on (`extendLeft`): there the
+  preimage satisfies `x_{q-1} = x_q ∨ x_{q+1}`, which forces it to be constant
+  (`eq_of_evol_one_white`). Every finite configuration is one, such as each row of rule 30 from the
+  single black cell; for the white configuration, `preimage_white`: all white and all black.
 * `eq_of_evol_one_eq_of_frequently`: **a configuration that shows `010` arbitrarily far to the
   right has exactly one preimage**. An image showing `010` at `q, q + 1, q + 2` forces the
   preimage to be black at `q - 1` (`eq_true_of_window`), and then the image at `q - 1` fixes the
@@ -119,56 +122,132 @@ theorem card_le_four (y : ℤ → Bool) (s : Finset (ℤ → Bool)) (hs : ∀ x 
     exact ⟨this, trivial⟩
   exact hne (hinj heq)
 
+/-! ### Configurations that are eventually white -/
+
+/-- Left determinism from a constant tail: the cells `x_{N-k}, x_{N-k+1}` of the configuration that
+is `b` from `N` on and whose image is `y` up to `N`. -/
+def leftPair (y : ℤ → Bool) (N : ℤ) (b : Bool) : ℕ → Bool × Bool
+  | 0 => (b, b)
+  | k + 1 => (xor (y (N - k)) ((leftPair y N b k).1 || (leftPair y N b k).2), (leftPair y N b k).1)
+
+/-- The configuration that is `b` from `N` on and whose image is `y` up to `N`. -/
+def extendLeft (y : ℤ → Bool) (N : ℤ) (b : Bool) (p : ℤ) : Bool :=
+  if N ≤ p then b else (leftPair y N b (N - p).toNat).1
+
+theorem extendLeft_eq (y : ℤ → Bool) (N : ℤ) (b : Bool) (k : ℕ) :
+    extendLeft y N b (N - k) = (leftPair y N b k).1 := by
+  unfold extendLeft
+  rcases Nat.eq_zero_or_pos k with rfl | hk
+  · simp [leftPair]
+  · rw [if_neg (by omega), show (N - (N - k)).toNat = k by omega]
+
+theorem extendLeft_succ (y : ℤ → Bool) (N : ℤ) (b : Bool) (k : ℕ) :
+    extendLeft y N b (N - k + 1) = (leftPair y N b k).2 := by
+  rcases Nat.eq_zero_or_pos k with rfl | hk
+  · simp [extendLeft, leftPair]
+  · obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
+    rw [show N - ((j + 1 : ℕ) : ℤ) + 1 = N - j by push_cast; ring, extendLeft_eq]
+    rfl
+
+/-- `extendLeft y N b` is a preimage of `y` whenever `y` is white right of `N`. -/
+theorem evol_extendLeft {y : ℤ → Bool} {N : ℤ} (hy : ∀ q, N < q → y q = false) (b : Bool) :
+    evol (extendLeft y N b) 1 = y := by
+  funext q
+  rw [evol_one]
+  rcases le_or_gt q N with hq | hq
+  · obtain ⟨k, rfl⟩ : ∃ k : ℕ, q = N - k := ⟨(N - q).toNat, by omega⟩
+    rw [show N - (k : ℤ) - 1 = N - ((k + 1 : ℕ) : ℤ) by push_cast; ring, extendLeft_eq,
+      extendLeft_eq, extendLeft_succ]
+    simp only [leftPair]
+    cases y (N - k) <;> cases (leftPair y N b k).1 || (leftPair y N b k).2 <;> rfl
+  · rw [hy q hq]
+    simp only [extendLeft, if_pos (show N ≤ q - 1 by omega), if_pos hq.le,
+      if_pos (show N ≤ q + 1 by omega)]
+    cases b <;> rfl
+
+/-- If the image is white right of `N`, a preimage is constant from `N` on: there
+`x_{q-1} = x_q ∨ x_{q+1}`, so a white cell makes every later cell white and the cell before it,
+when that is still at least `N`, white too. -/
+theorem eq_of_evol_one_white {x : ℤ → Bool} {N : ℤ}
+    (hy : ∀ q, N < q → evol x 1 q = false) : ∀ p, N ≤ p → x p = x N := by
+  have hrel : ∀ q, N < q → x (q - 1) = (x q || x (q + 1)) := fun q hq => by
+    have := hy q hq
+    rw [evol_one] at this
+    revert this
+    cases x (q - 1) <;> cases x q || x (q + 1) <;> simp
+  -- a white cell at `p ≥ N` makes every later cell white
+  have hfwd : ∀ p, N ≤ p → x p = false → ∀ k : ℕ, x (p + k) = false := by
+    intro p hp h0 k
+    induction k with
+    | zero => simpa using h0
+    | succ k ih =>
+      have := hrel (p + k + 1) (by omega)
+      rw [show p + k + 1 - 1 = p + (k : ℤ) by ring, ih] at this
+      have h' := (Bool.or_eq_false_iff.1 this.symm).1
+      rwa [show p + ((k + 1 : ℕ) : ℤ) = p + k + 1 by push_cast; ring]
+  intro p hp
+  cases hN : x N
+  · obtain ⟨k, rfl⟩ : ∃ k : ℕ, p = N + k := ⟨(p - N).toNat, by omega⟩
+    exact hfwd N le_rfl hN k
+  · by_contra hne
+    have hp0 : x p = false := by simpa using hne
+    -- white cells propagate back down to `N`
+    have hback : ∀ k : ℕ, (k : ℤ) ≤ p - N → x (p - k) = false := by
+      intro k hk
+      induction k with
+      | zero => simpa using hp0
+      | succ k ih =>
+        have h1 := ih (by omega)
+        have h2 : x (p - k + 1) = false := by
+          have := hfwd (p - k) (by omega) h1 1
+          simpa using this
+        have := hrel (p - k) (by push_cast at hk; omega)
+        rw [h1, h2] at this
+        rw [show p - ((k + 1 : ℕ) : ℤ) = p - k - 1 by push_cast; ring]
+        simpa using this
+    have := hback (p - N).toNat (by omega)
+    rw [show p - ((p - N).toNat : ℤ) = N by omega, hN] at this
+    exact absurd this (by decide)
+
+/-- **A configuration that is white from some cell on has exactly two preimages**: one white and
+one black from that cell on (`extendLeft`). This generalizes `preimage_white`, and it applies to
+every finite configuration, such as each row of rule 30 from the single black cell. -/
+theorem evol_one_eq_iff_of_eventually_white {y : ℤ → Bool} {N : ℤ}
+    (hy : ∀ q, N < q → y q = false) (x : ℤ → Bool) :
+    evol x 1 = y ↔ x = extendLeft y N false ∨ x = extendLeft y N true := by
+  constructor
+  · intro hx
+    have hconst := eq_of_evol_one_white (x := x) (N := N) fun q hq => by rw [hx]; exact hy q hq
+    have hagree : ∀ b, x N = b → x = extendLeft y N b := fun b hb =>
+      eq_of_evol_one_eq_of_right (hx.trans (evol_extendLeft hy b).symm) (k := N) fun q hq => by
+        rw [hconst q hq, hb]
+        simp [extendLeft, hq]
+    cases hN : x N
+    · exact Or.inl (hagree false hN)
+    · exact Or.inr (hagree true hN)
+  · rintro (rfl | rfl) <;> exact evol_extendLeft hy _
+
+theorem extendLeft_false_ne_true (y : ℤ → Bool) (N : ℤ) :
+    extendLeft y N false ≠ extendLeft y N true := fun h => by
+  have := congrFun h N
+  simp [extendLeft] at this
+
+/-- For the all-white image, `extendLeft` is constant. -/
+theorem extendLeft_white (N : ℤ) (b : Bool) : extendLeft (fun _ => false) N b = fun _ => b := by
+  have h : ∀ k, leftPair (fun _ => false) N b k = (b, b) := by
+    intro k
+    induction k with
+    | zero => rfl
+    | succ k ih => simp only [leftPair, ih, Bool.or_self, Bool.false_xor]
+  funext p
+  simp only [extendLeft, h]
+  split_ifs <;> rfl
+
 /-- **The all-white configuration has exactly two preimages**: all white and all black. -/
 theorem preimage_white (x : ℤ → Bool) :
     evol x 1 = (fun _ => false) ↔ x = (fun _ => false) ∨ x = (fun _ => true) := by
-  constructor
-  · intro h
-    -- the image is white iff `x_{q-1} = x_q ∨ x_{q+1}` for all `q`
-    have hq : ∀ q, x (q - 1) = (x q || x (q + 1)) := fun q => by
-      have := congrFun h q
-      rw [evol_one] at this
-      cases ha : x (q - 1) <;> cases hb : (x q || x (q + 1)) <;> simp_all
-    by_cases hall : ∀ q, x q = false
-    · exact Or.inl (funext hall)
-    push Not at hall
-    obtain ⟨q₀, hq₀⟩ := hall
-    have hq₀' : x q₀ = true := by simpa using hq₀
-    -- a black cell has a black right neighbour
-    have hright : ∀ q, x q = true → x (q + 1) = true := by
-      intro q hxq
-      by_contra hne
-      have h1 : x (q + 1) = false := by simpa using hne
-      have h2 := hq (q + 1)
-      rw [show q + 1 - 1 = q by ring, hxq, h1, Bool.false_or, show q + 1 + 1 = q + 2 by ring] at h2
-      have h3 := hq (q + 2)
-      rw [show q + 2 - 1 = q + 1 by ring, h1, ← h2, Bool.true_or] at h3
-      exact Bool.false_ne_true h3
-    -- and a black left neighbour
-    have hleft : ∀ q, x q = true → x (q - 1) = true := by
-      intro q hxq
-      rw [hq q, hxq, Bool.true_or]
-    refine Or.inr (funext fun q => ?_)
-    rcases le_or_gt q₀ q with hle | hlt
-    · obtain ⟨n, rfl⟩ : ∃ n : ℕ, q = q₀ + n := ⟨(q - q₀).toNat, by omega⟩
-      induction n with
-      | zero => simpa using hq₀'
-      | succ n ih =>
-        rw [show q₀ + ((n + 1 : ℕ) : ℤ) = q₀ + n + 1 by push_cast; ring]
-        exact hright _ (ih (by omega))
-    · obtain ⟨n, rfl⟩ : ∃ n : ℕ, q = q₀ - n := ⟨(q₀ - q).toNat, by omega⟩
-      induction n with
-      | zero => simpa using hq₀'
-      | succ n ih =>
-        rw [show q₀ - ((n + 1 : ℕ) : ℤ) = q₀ - n - 1 by push_cast; ring]
-        rcases Nat.eq_zero_or_pos n with rfl | hn
-        · simpa using hleft _ hq₀'
-        · exact hleft _ (ih (by omega))
-  · rintro (rfl | rfl)
-    · funext q
-      rfl
-    · funext q
-      rfl
+  rw [evol_one_eq_iff_of_eventually_white (N := 0) (fun _ _ => rfl), extendLeft_white,
+    extendLeft_white]
 
 /-! ### Configurations with a unique preimage -/
 

@@ -2498,7 +2498,8 @@ with Turing machines reading n. Notes:
   3-color, radius-1/2 rules 11736, 11739 and 11742; this was not checked here.
 - **Other seeds and backgrounds**: a single white cell; defects in periodic backgrounds; random
   initial conditions. Under the uniform Bernoulli measure every block occurs in every column with
-  equal frequency [W86], but that says nothing about the single seed.
+  equal frequency [W86] (proved: `Mixing.ae_isNormal_columns`), but that says nothing about the
+  single seed.
 - **Mahler's 3/2 problem, Z-numbers, and Kopra's ×p/q automata.** Wolfram's 1985 list of open
   problems already notes that the leading binary digits of the fractional parts of (3/2)ⁿ form the
   center column of a particular CA [W85]. Rule 30 and the ×p/q automata are both rapidly left
@@ -2695,7 +2696,9 @@ with Turing machines reading n. Notes:
     measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves
     μ (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window
     I of its t-th image are independent once t > max I − min J
-    (`measure_window_inter_window`), so rule 30 is topologically mixing too
+    (`measure_window_inter_window`); approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) →
+    μ(A)μ(B) for all measurable A, B (`tendsto_measure_inter_preimage`), so rule 30 is mixing and
+    ergodic (`ergodic_evol_one`, Mathlib's `Ergodic`), and topologically mixing
     (`exists_mem_evol_mem`); and for μ-almost every configuration every column of the space-time
     diagram is normal (`ae_isNormal_columns`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):

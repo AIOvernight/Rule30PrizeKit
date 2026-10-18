@@ -1,4 +1,7 @@
 import Rule30Equivalents.RandomConfigurations
+import Mathlib.MeasureTheory.Measure.MeasuredSets
+import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
+import Mathlib.Dynamics.Ergodic.Ergodic
 
 /-!
 # Rule 30 preserves the fair-coin measure and is mixing
@@ -15,8 +18,13 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
 * `measurePreserving_evol`: every iterate of rule 30 preserves `coins ℤ` (Hedlund's theorem for
   rule 30).
 * `measure_window_inter_window`: the window `J` of a configuration and the window `I` of its
-  `t`-th image are independent once `t > max I - min J`. So rule 30 is mixing, and topologically
-  mixing (`exists_mem_evol_mem`).
+  `t`-th image are independent once `t > max I - min J`. So rule 30 is topologically mixing
+  (`exists_mem_evol_mem`).
+* `tendsto_measure_inter_preimage`: **rule 30 is mixing**, `μ(A ∩ F^{-t} B) → μ(A) μ(B)` for all
+  measurable `A` and `B`: for cylinders the two sides agree once `t` exceeds the distance between
+  their windows (`measure_inter_preimage_cylinder`), and every measurable set is close to a
+  cylinder (`exists_cylinder_approx`, from Mathlib's approximation by a generating ring of sets).
+  Hence `ergodic_evol_one`: rule 30 is ergodic, in Mathlib's sense of `Ergodic`.
 * `ae_isNormal_columns`: for almost every configuration, every column of the space-time diagram
   is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`).
 -/
@@ -78,35 +86,42 @@ theorem measure_window (t : ℕ) (I : Finset ℤ) (w : ℤ → Bool) :
       omega
   rwa [Set.univ_inter, measure_univ, one_mul] at h
 
+theorem measurable_evol_all (t : ℕ) : Measurable fun x : ℤ → Bool => evol x t :=
+  measurable_pi_lambda _ fun p => measurable_evol t p
+
+/-- A pattern on the window `I`, extended by white cells. -/
+def extend {I : Finset ℤ} (v : I → Bool) (i : ℤ) : Bool := if h : i ∈ I then v ⟨i, h⟩ else false
+
+theorem preimage_restrict_singleton (t : ℕ) (I : Finset ℤ) (v : I → Bool) :
+    (fun x : ℤ → Bool => I.restrict (evol x t)) ⁻¹' {v} =
+      {x | ∀ i ∈ I, evol x t i = extend v i} := by
+  ext x
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_setOf_eq]
+  constructor
+  · rintro h i hi
+    simp only [extend, dif_pos hi]
+    rw [← h]
+    rfl
+  · intro h
+    funext i
+    have := h i.1 i.2
+    simp only [extend, dif_pos i.2] at this
+    exact this
+
 /-- **Rule 30 preserves the fair-coin measure** (Hedlund's theorem for rule 30): every iterate
 maps `coins ℤ` to itself. -/
 theorem measurePreserving_evol (t : ℕ) :
     MeasurePreserving (fun x : ℤ → Bool => evol x t) (coins ℤ) (coins ℤ) := by
-  have hF : Measurable fun x : ℤ → Bool => evol x t :=
-    measurable_pi_lambda _ fun p => measurable_evol t p
+  have hF := measurable_evol_all t
   refine ⟨hF, IsProjectiveLimit.unique (P := fun I : Finset ℤ => Measure.pi fun _ : I => coin)
     (fun I => ?_) (Measure.isProjectiveLimit_infinitePi _)⟩
   rw [Measure.map_map (Finset.measurable_restrict _) hF]
   refine Measure.ext_iff_singleton.2 fun v => ?_
   rw [Measure.map_apply ((Finset.measurable_restrict _).comp hF) (measurableSet_singleton v),
-    Measure.pi_singleton]
-  let w : ℤ → Bool := fun i => if h : i ∈ I then v ⟨i, h⟩ else false
-  have hset : (I.restrict ∘ fun x : ℤ → Bool => evol x t) ⁻¹' {v} =
-      {x | ∀ i ∈ I, evol x t i = w i} := by
-    ext x
-    simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff, Set.mem_setOf_eq]
-    constructor
-    · rintro h i hi
-      simp only [w, dif_pos hi]
-      rw [← h]
-      rfl
-    · intro h
-      funext i
-      have := h i.1 i.2
-      simp only [w, dif_pos i.2] at this
-      exact this
-  rw [hset, measure_window, Finset.prod_congr rfl fun i _ => coin_singleton (v i),
-    Finset.prod_const, Finset.card_univ, Fintype.card_coe]
+    Measure.pi_singleton, show (I.restrict ∘ fun x : ℤ → Bool => evol x t) =
+      fun x => I.restrict (evol x t) from rfl, preimage_restrict_singleton, measure_window,
+    Finset.prod_congr rfl fun i _ => coin_singleton (v i), Finset.prod_const, Finset.card_univ,
+    Fintype.card_coe]
 
 /-- **Rule 30 is mixing**: the window `J` of a random configuration and the window `I` of its
 `t`-th image are independent as soon as some `m` separates them: `m ≤ j` for `j ∈ J` and
@@ -165,5 +180,179 @@ theorem ae_isNormal_columns :
     exact this
   rw [hcol]
   exact hx
+
+/-! ### Mixing for all measurable sets, and ergodicity -/
+
+/-- **The window law given a far event**: restricted to an event `A` that does not depend on the
+coins left of `m`, the window `I` of the `t`-th image has `μ(A)` times the uniform law. -/
+theorem map_restrict_window {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m : ℤ}
+    (hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (t : ℕ) (I : Finset ℤ)
+    (hI : ∀ i ∈ I, i - t < m) :
+    ((coins ℤ).restrict A).map (fun x => I.restrict (evol x t)) =
+      coins ℤ A • Measure.pi fun _ : I => coin := by
+  have hg : Measurable fun x : ℤ → Bool => I.restrict (evol x t) :=
+    (Finset.measurable_restrict I).comp (measurable_evol_all t)
+  refine Measure.ext_iff_singleton.2 fun v => ?_
+  rw [Measure.map_apply hg (measurableSet_singleton v),
+    Measure.restrict_apply (hg (measurableSet_singleton v)), preimage_restrict_singleton,
+    Set.inter_comm, measure_inter_window hA hAm t _ I hI, Measure.smul_apply, smul_eq_mul,
+    Measure.pi_singleton, Finset.prod_congr rfl fun i _ => coin_singleton (v i),
+    Finset.prod_const, Finset.card_univ, Fintype.card_coe]
+
+/-- A far event and a cylinder over the window `I` of the `t`-th image are independent. -/
+theorem measure_inter_preimage_cylinder {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m : ℤ}
+    (hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ A ↔ x ∈ A)) (t : ℕ) {I : Finset ℤ}
+    (hI : ∀ i ∈ I, i - t < m) {S : Set (I → Bool)} (hS : MeasurableSet S) :
+    coins ℤ (A ∩ (fun x => evol x t) ⁻¹' cylinder I S) = coins ℤ A * coins ℤ (cylinder I S) := by
+  have hg : Measurable fun x : ℤ → Bool => I.restrict (evol x t) :=
+    (Finset.measurable_restrict I).comp (measurable_evol_all t)
+  have h := congrArg (fun ν : Measure (I → Bool) => ν S) (map_restrict_window hA hAm t I hI)
+  simp only at h
+  rw [Measure.map_apply hg hS, Measure.restrict_apply (hg hS), Measure.smul_apply,
+    smul_eq_mul] at h
+  rw [Set.inter_comm, Measure.infinitePi_cylinder _ hS]
+  exact h
+
+theorem abs_measureReal_sub_le (μ : Measure (ℤ → Bool)) [IsFiniteMeasure μ]
+    (s t : Set (ℤ → Bool)) : |μ.real s - μ.real t| ≤ μ.real (symmDiff s t) := by
+  have h1 : μ.real s ≤ μ.real t + μ.real (symmDiff s t) := by
+    refine (measureReal_mono fun x hx => ?_).trans (measureReal_union_le _ _)
+    by_cases ht : x ∈ t
+    · exact Or.inl ht
+    · exact Or.inr (Set.mem_symmDiff.2 (Or.inl ⟨hx, ht⟩))
+  have h2 : μ.real t ≤ μ.real s + μ.real (symmDiff s t) := by
+    refine (measureReal_mono fun x hx => ?_).trans (measureReal_union_le _ _)
+    by_cases hs : x ∈ s
+    · exact Or.inl hs
+    · exact Or.inr (Set.mem_symmDiff.2 (Or.inr ⟨hx, hs⟩))
+  rw [abs_sub_le_iff]
+  constructor <;> linarith
+
+/-- Every measurable set is close to a cylinder. -/
+theorem exists_cylinder_approx {s : Set (ℤ → Bool)} (hs : MeasurableSet s) {ε : ℝ} (hε : 0 < ε) :
+    ∃ (I : Finset ℤ) (S : Set (I → Bool)), MeasurableSet S ∧
+      (coins ℤ).real (symmDiff (cylinder I S) s) < ε := by
+  obtain ⟨t, ht, hts⟩ := exists_measure_symmDiff_lt_of_generateFrom_isSetRing (μ := coins ℤ)
+    isSetRing_measurableCylinders ⟨{Set.univ}, Set.countable_singleton _,
+      Set.singleton_subset_iff.2 (univ_mem_measurableCylinders _), by simp⟩
+    generateFrom_measurableCylinders.symm hs (ENNReal.ofReal_pos.2 hε)
+  obtain ⟨I, S, hS, rfl⟩ := (mem_measurableCylinders t).1 ht
+  exact ⟨I, S, hS, ENNReal.toReal_lt_of_lt_ofReal hts⟩
+
+/-- **Rule 30 is mixing** for the fair-coin measure: `μ(A ∩ F^{-t} B) → μ(A) μ(B)` for all
+measurable `A` and `B`. For cylinders the two sides agree once `t` exceeds the distance between
+their windows (`measure_inter_preimage_cylinder`); every measurable set is close to a cylinder. -/
+theorem tendsto_measure_inter_preimage {A B : Set (ℤ → Bool)} (hA : MeasurableSet A)
+    (hB : MeasurableSet B) :
+    Tendsto (fun t : ℕ => (coins ℤ).real (A ∩ (fun x => evol x t) ⁻¹' B)) atTop
+      (𝓝 ((coins ℤ).real A * (coins ℤ).real B)) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨J, SA, hSA, hA'⟩ := exists_cylinder_approx hA (ε := ε / 4) (by positivity)
+  obtain ⟨I, SB, hSB, hB'⟩ := exists_cylinder_approx hB (ε := ε / 4) (by positivity)
+  obtain ⟨m, hm⟩ := J.bddBelow
+  obtain ⟨M, hM⟩ := I.bddAbove
+  refine ⟨(M - m + 1).toNat, fun t ht => ?_⟩
+  have hsep : ∀ i ∈ I, i - t < m := fun i hi => by
+    have := hM (Finset.mem_coe.2 hi)
+    omega
+  -- the cylinder over `J` does not see the coins left of `m`
+  have hAm : ∀ x p, p < m →
+      (Function.update x p (!x p) ∈ cylinder J SA ↔ x ∈ cylinder J SA) := by
+    intro x p hp
+    simp only [mem_cylinder]
+    have : J.restrict (Function.update x p (!x p)) = J.restrict x := funext fun j =>
+      Function.update_of_ne (by have := hm (Finset.mem_coe.2 j.2); omega) _ _
+    rw [this]
+  have hcyl := measure_inter_preimage_cylinder (MeasurableSet.cylinder J hSA) hAm t hsep hSB
+  have hcyl' : (coins ℤ).real (cylinder J SA ∩ (fun x => evol x t) ⁻¹' cylinder I SB) =
+      (coins ℤ).real (cylinder J SA) * (coins ℤ).real (cylinder I SB) := by
+    rw [measureReal_def, hcyl, ENNReal.toReal_mul]
+    rfl
+  have hF := measurePreserving_evol t
+  -- the first error term
+  have hsub : symmDiff (A ∩ (fun x => evol x t) ⁻¹' B)
+      (cylinder J SA ∩ (fun x => evol x t) ⁻¹' cylinder I SB) ⊆
+        symmDiff A (cylinder J SA) ∪ (fun x => evol x t) ⁻¹' symmDiff B (cylinder I SB) := by
+    intro x hx
+    simp only [Set.mem_symmDiff, Set.mem_inter_iff, Set.mem_union, Set.mem_preimage] at hx ⊢
+    tauto
+  have hpre : (coins ℤ).real ((fun x => evol x t) ⁻¹' symmDiff B (cylinder I SB)) =
+      (coins ℤ).real (symmDiff B (cylinder I SB)) := by
+    rw [measureReal_def, measureReal_def, hF.measure_preimage
+      (hB.symmDiff (MeasurableSet.cylinder I hSB)).nullMeasurableSet]
+  have e1 : |(coins ℤ).real (A ∩ (fun x => evol x t) ⁻¹' B) -
+      (coins ℤ).real (cylinder J SA ∩ (fun x => evol x t) ⁻¹' cylinder I SB)| < ε / 2 := by
+    refine (abs_measureReal_sub_le _ _ _).trans_lt ?_
+    refine ((measureReal_mono hsub).trans (measureReal_union_le _ _)).trans_lt ?_
+    rw [hpre, symmDiff_comm A, symmDiff_comm B]
+    linarith
+  -- the second error term
+  have ha := abs_measureReal_sub_le (coins ℤ) (cylinder J SA) A
+  have hb := abs_measureReal_sub_le (coins ℤ) (cylinder I SB) B
+  have e2 : |(coins ℤ).real (cylinder J SA) * (coins ℤ).real (cylinder I SB) -
+      (coins ℤ).real A * (coins ℤ).real B| < ε / 2 := by
+    have h0a : 0 ≤ (coins ℤ).real A := measureReal_nonneg
+    have h1a : (coins ℤ).real A ≤ 1 := measureReal_le_one
+    have h0b : 0 ≤ (coins ℤ).real (cylinder I SB) := measureReal_nonneg
+    have h1b : (coins ℤ).real (cylinder I SB) ≤ 1 := measureReal_le_one
+    rw [show (coins ℤ).real (cylinder J SA) * (coins ℤ).real (cylinder I SB) -
+        (coins ℤ).real A * (coins ℤ).real B =
+      ((coins ℤ).real (cylinder J SA) - (coins ℤ).real A) * (coins ℤ).real (cylinder I SB) +
+        (coins ℤ).real A * ((coins ℤ).real (cylinder I SB) - (coins ℤ).real B) by ring]
+    calc _ ≤ |((coins ℤ).real (cylinder J SA) - (coins ℤ).real A) *
+          (coins ℤ).real (cylinder I SB)| +
+          |(coins ℤ).real A * ((coins ℤ).real (cylinder I SB) - (coins ℤ).real B)| :=
+          abs_add_le _ _
+      _ = |(coins ℤ).real (cylinder J SA) - (coins ℤ).real A| * (coins ℤ).real (cylinder I SB) +
+          (coins ℤ).real A * |(coins ℤ).real (cylinder I SB) - (coins ℤ).real B| := by
+          rw [abs_mul, abs_mul, abs_of_nonneg h0b, abs_of_nonneg h0a]
+      _ ≤ |(coins ℤ).real (cylinder J SA) - (coins ℤ).real A| * 1 +
+          1 * |(coins ℤ).real (cylinder I SB) - (coins ℤ).real B| := by
+          gcongr
+      _ < ε / 2 := by linarith
+  rw [Real.dist_eq]
+  calc |(coins ℤ).real (A ∩ (fun x => evol x t) ⁻¹' B) - (coins ℤ).real A * (coins ℤ).real B|
+      ≤ |(coins ℤ).real (A ∩ (fun x => evol x t) ⁻¹' B) -
+          (coins ℤ).real (cylinder J SA ∩ (fun x => evol x t) ⁻¹' cylinder I SB)| +
+        |(coins ℤ).real (cylinder J SA) * (coins ℤ).real (cylinder I SB) -
+          (coins ℤ).real A * (coins ℤ).real B| := by
+        rw [← hcyl']
+        exact abs_sub_le _ _ _
+    _ < ε / 2 + ε / 2 := add_lt_add e1 e2
+    _ = ε := by ring
+
+/-- **Rule 30 is ergodic** for the fair-coin measure: an invariant measurable set has measure
+`μ(s) = μ(s)²`, so `0` or `1`. -/
+theorem ergodic_evol_one : Ergodic (fun x : ℤ → Bool => evol x 1) (coins ℤ) := by
+  refine ⟨measurePreserving_evol 1, ⟨fun s hs hinv => ?_⟩⟩
+  have hinvt : ∀ t, (fun x : ℤ → Bool => evol x t) ⁻¹' s = s := by
+    intro t
+    induction t with
+    | zero => rfl
+    | succ t ih =>
+      have hcomp : (fun x : ℤ → Bool => evol x (t + 1)) =
+          (fun x => evol x t) ∘ fun x => evol x 1 := by
+        funext x p
+        show evol x (t + 1) p = evol (fun q => evol x 1 q) t p
+        rw [Rule30ZeroBoundaryBarriers.evol_restart, Nat.add_comm]
+      rw [hcomp, Set.preimage_comp, ih, hinv]
+  have h := tendsto_measure_inter_preimage hs hs
+  simp only [hinvt, Set.inter_self] at h
+  have hsq : (coins ℤ).real s = (coins ℤ).real s * (coins ℤ).real s :=
+    tendsto_nhds_unique tendsto_const_nhds h
+  have h01 : (coins ℤ).real s = 0 ∨ (coins ℤ).real s = 1 := by
+    have : (coins ℤ).real s * ((coins ℤ).real s - 1) = 0 := by linarith
+    rcases mul_eq_zero.1 this with h0 | h1
+    · exact Or.inl h0
+    · exact Or.inr (by linarith)
+  rw [Filter.eventuallyConst_set]
+  rcases h01 with h0 | h1
+  · right
+    exact measure_eq_zero_iff_ae_notMem.1 ((measureReal_eq_zero_iff (measure_ne_top _ _)).1 h0)
+  · left
+    have hc : (coins ℤ).real sᶜ = 0 := by
+      rw [measureReal_compl hs, probReal_univ, h1, sub_self]
+    exact ae_iff.2 ((measureReal_eq_zero_iff (measure_ne_top _ _)).1 hc)
 
 end Rule30Equivalents.Mixing

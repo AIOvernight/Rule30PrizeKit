@@ -32,7 +32,8 @@ the trace of the seed's omega-limit set is infinite**
 (`problem1_iff_trace_omegaLimit_seed_infinite`), iff some configuration in it has a center
 column that is not periodic (`problem1_iff_exists_omegaLimit_seed_not_periodic`). The
 omega-limit set itself is infinite (`infinite_omegaLimit_seed`, from Kopra's limit points of the
-right halves of the rows), so Problem 1 is about its trace, not its size.
+right halves of the rows), so Problem 1 is about its trace, not its size. The same holds for every
+configuration with a leftmost black cell (`infinite_omegaLimit`).
 -/
 
 namespace Rule30Equivalents.Genericity
@@ -398,21 +399,25 @@ theorem problem1_iff_exists_omegaLimit_seed_not_periodic : Rule30Prize.Problem1 
   · rintro ⟨y, hy, hz⟩
     exact ⟨trace y, ⟨y, hy, rfl⟩, hz⟩
 
-/-- **The omega-limit set of the seed is infinite**: its right halves are the limit points of the
-right halves of the rows (`image_omegaLimit_eq_mapClusterPt`), and there are infinitely many of
-those (Kopra, `LimitPoints.infinite_limitPoints_cell`). Problem 1 asks whether its center trace
-is infinite too (`problem1_iff_trace_omegaLimit_seed_infinite`). -/
-theorem infinite_omegaLimit_seed :
-    (omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed}).Infinite := by
-  have hR : Continuous fun (x : ℤ → Bool) (p : ℕ) => x p :=
+/-- **The omega-limit set of every configuration with a leftmost black cell is infinite**: its
+right halves are the limit points of the right halves of the rows
+(`image_omegaLimit_eq_mapClusterPt`), and there are infinitely many of those (Kopra,
+`LimitPoints.infinite_limitPoints_evol`). -/
+theorem infinite_omegaLimit {x : ℤ → Bool} {lo : ℤ} (hlo : x lo = true)
+    (hzero : ∀ p, p < lo → x p = false) :
+    (omegaLimit atTop (fun (n : ℕ) (y : ℤ → Bool) => evol y n) {x}).Infinite := by
+  have hR : Continuous fun (y : ℤ → Bool) (p : ℕ) => y p :=
     continuous_pi fun p => continuous_apply _
-  have h := image_omegaLimit_eq_mapClusterPt hR (fun (n : ℕ) (x : ℤ → Bool) => evol x n) seed
-  have hhalf : {z : ℕ → Bool | MapClusterPt z atTop fun t => fun p : ℕ => evol seed t p} =
-      LimitPoints.limitPoints Rule30Jen.cell := by
-    ext z
-    simp only [LimitPoints.limitPoints, mem_setOf_eq, evol_seed]
-    exact Iff.rfl
+  have h := image_omegaLimit_eq_mapClusterPt hR (fun (n : ℕ) (y : ℤ → Bool) => evol y n) x
+  have hhalf : {z : ℕ → Bool | MapClusterPt z atTop fun t => fun p : ℕ => evol x t p} =
+      LimitPoints.limitPoints (evol x) := rfl
   rw [hhalf] at h
-  exact Set.Infinite.of_image _ (h ▸ LimitPoints.infinite_limitPoints_cell)
+  exact Set.Infinite.of_image _ (h ▸ LimitPoints.infinite_limitPoints_evol hlo hzero)
+
+/-- **The omega-limit set of the seed is infinite** (`infinite_omegaLimit`). Problem 1 asks whether
+its center trace is infinite too (`problem1_iff_trace_omegaLimit_seed_infinite`). -/
+theorem infinite_omegaLimit_seed :
+    (omegaLimit atTop (fun (n : ℕ) (x : ℤ → Bool) => evol x n) {seed}).Infinite :=
+  infinite_omegaLimit (lo := 0) (by simp [seed]) fun p hp => by simp [seed]; omega
 
 end Rule30Equivalents.Genericity

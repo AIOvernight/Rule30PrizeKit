@@ -1368,7 +1368,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   a center column that is not periodic
   (`Genericity.problem1_iff_exists_omegaLimit_seed_not_periodic`). The set ω_F(δ₀) itself is
   infinite, since its right halves are Kopra's infinitely many limit points
-  (`Genericity.infinite_omegaLimit_seed`); Problem 1 asks for more, an infinite trace.
+  (`Genericity.infinite_omegaLimit_seed`; the same holds for every configuration with a leftmost
+  black cell, `Genericity.infinite_omegaLimit`); Problem 1 asks for more, an infinite trace.
 - *Proof route.* If c is EP, ω(c) is one periodic orbit. Conversely, a finite ω(c) is invariant, so
   it consists of periodic points. Choose L so that the length-(L − 1) prefixes separate those
   points. Eventually σᵗc shares its length-L prefix with some z_t ∈ ω(c), and this forces

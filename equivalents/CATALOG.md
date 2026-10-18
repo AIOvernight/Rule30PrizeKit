@@ -2206,7 +2206,7 @@ so they are strictly stronger.
 | **Not a zero set in characteristic p** (new): S is not the zero set of a linear recurrence sequence over an infinite field of characteristic p, such as F_p(x) | if c is EP, S is the zero set of 1 − c, which is EP and so linear-recurrent | Strictly stronger: over F_p(x), u(n) = (x + 1)ⁿ − xⁿ − 1 has the non-EP zero set {pᵏ : k ≥ 0}. Derksen showed that such zero sets are p-automatic of a special form, so "c is not p-automatic" implies this statement. Over F_p(x), and over every countable field, it holds for almost every configuration, since such zero sets are countably many (`TypicalConditions.ae_not_zero_set_ratFunc_trace`). | [Der07] |
 | **Π⁰₁ defect bound**: for all T and P ≥ 1, some t ∈ [T, T + 3·log₂(T + P + 1)] has c(t + P) ≠ c(t) | an EP c has arbitrarily long stretches without a defect | Holds for T + P ≤ 65536, with maximum defect distance 29 (own computation, logic survey). | logic survey |
 | **Th(ℕ, +, S) is undecidable** | if c is EP, S is Presburger-definable and the theory is decidable | It would follow from disjunctiveness (own reasoning, below). In definable form: if multiplication is definable in (ℕ, 0, 1, +, S), with any parameters, Problem 1 holds (`PresburgerExpansion.problem1_of_mul_definable`): for an EP c every set definable in (ℕ, +, S) is semilinear, and the graph of multiplication is not. | logic survey, critic; [KNO26] |
-| **Problem 3 and its relatives**: no polylog-time digit extraction; circuit lower bounds for n ↦ c(n) | EP or automatic ⟹ O(log n) time | Beyond current techniques: the best general-circuit lower bound for any explicit function is about 3.1n. | [W19], [LY22], [FGHK16] |
+| **Problem 3 and its relatives**: no polylog-time digit extraction; circuit lower bounds for n ↦ c(n) | EP or automatic ⟹ O(log n) time | Beyond current techniques: the best general-circuit lower bound for any explicit function is about 3.1n. For almost every configuration, by Shannon's counting argument, no circuit with at most 2ᵏ/(8k) gates computes t ↦ c(t) on t < 2ᵏ from the k binary digits of t, for all large k (`Circuits.ae_circuit_lower_bound_trace`). | [W19], [LY22], [FGHK16] |
 
 **Undecidability from disjunctiveness** (logic survey and critic, own reasoning). Suppose every
 finite word occurs in c. Then, as x ranges over ℕ, the windows S ∩ [x, x + k) − x realize every
@@ -2331,7 +2331,11 @@ countably many, `ae_not_zero_set_countable_trace`), Prize Problem 3 in both read
 computes the column at all: a machine computes at most one sequence, and machines are countably
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration
-(`TypicalConditions.ae_prizeProblems_trace`). In the sense of category the picture splits: a
+(`TypicalConditions.ae_prizeProblems_trace`). The circuit relative of Problem 3 holds too: for all
+large k no circuit with at most 2ᵏ/(8k) binary gates computes t ↦ c(t), t < 2ᵏ, from the binary
+digits of t, since there are at most (16(k + s)²)^s circuits with s gates and each computes the
+random function with probability 2^(−2ᵏ) ([Circuits](Rule30Equivalents/Circuits.lean),
+`ae_circuit_lower_bound_trace`). In the sense of category the picture splits: a
 countable set of center columns is meager, so for a comeager set of configurations the column is
 not automatic, not morphic and not Mahler, and Problems 1 and 3 hold, but Problem 2 fails, since
 density 1/2 is meager (`residual_trace_notMem`, `residual_prizeProblems_trace`).

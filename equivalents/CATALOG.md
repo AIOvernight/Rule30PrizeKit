@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 181 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 182 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -173,7 +173,7 @@ files. The rows follow the order of Section 3.
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register` |
-| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary` |
+| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
@@ -239,7 +239,8 @@ sequences, so it decides an eventually periodic language
 ([OneTapeGap](Rule30Equivalents/OneTapeGap.lean)); its space form through the theorem of Stearns,
 Hartmanis and Lewis, with the same splicing on the input tape of an offline machine
 ([OfflineGap](Rule30Equivalents/OfflineGap.lean)). 1 form is stated,
-[41], and its direction "the form implies Problem 1" is proved. 1 form is a sketch, [46]; its
+[41], and its direction "the form implies Problem 1" is proved, as is its disk form (no
+meromorphic extension to a disk of radius > 1). 1 form is a sketch, [46]; its
 uniform case (bases 2 and 3, uniform substitutions) is proved.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
@@ -1186,7 +1187,12 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   [NaturalBoundary](Rule30Equivalents/NaturalBoundary.lean): `problem1_of_natural_boundary`. If c has
   period P from time T, then on the unit disk (1 − z^P)·f(z) is a polynomial (`mul_genFun_eq`), so f
   continues as a rational function across the circle at z₀ = e^(iπ/P), where 1 − z₀^P = 2
-  (`exists_continuation`).
+  (`exists_continuation`). The disk form, the easy case of Szegő's theorem, is proved in
+  [MeromorphicExtension](Rule30Equivalents/MeromorphicExtension.lean):
+  `problem1_iff_no_meromorphic_extension`, Problem 1 ⟺ for no R > 1 and no polynomial Q ≠ 0 does
+  Q·f extend holomorphically to abs(z) < R. The coefficients β(n) of Q·C take finitely many
+  values (one per window of c), Cauchy's estimate on a circle of radius ρ ∈ (1, R) gives
+  β(n) = O(ρ⁻ⁿ), so β is eventually 0 and C is rational ([17]).
 
   ```lean
   noncomputable def genFun (z : ℂ) : ℂ := ∑' t, (if Rule30Prize.center t then (1 : ℂ) else 0) * z ^ t

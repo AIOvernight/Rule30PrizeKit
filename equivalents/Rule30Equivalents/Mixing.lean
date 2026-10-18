@@ -29,8 +29,9 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   comeager set of configurations, the orbit enters every nonempty open set at arbitrarily large
   times, so its omega-limit set is all of `{0,1}^ℤ` (by ergodicity, and by topological mixing and
   Baire).
-* `ae_isNormal_columns`: for almost every configuration, every column of the space-time diagram
-  is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`).
+* `ae_isNormal_columns`, `ae_isNormal_rows`: for almost every configuration, every column of the
+  space-time diagram is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`), and
+  so is the right half of every row (every iterate preserves the measure).
 -/
 
 namespace Rule30Equivalents.Mixing
@@ -184,6 +185,16 @@ theorem ae_isNormal_columns :
     exact this
   rw [hcol]
   exact hx
+
+/-- **Normal rows almost surely**: for almost every configuration, the right half of every row
+of its space-time diagram is normal. Restricting to the cells `n ≥ 0` maps the fair-coin measure to
+the fair-coin measure on `{0,1}^ℕ`, and every iterate preserves it. -/
+theorem ae_isNormal_rows :
+    ∀ᵐ x ∂(coins ℤ), ∀ t : ℕ, StrongerStatements.IsNormal fun n : ℕ => evol x t n := by
+  have hright : MeasurePreserving (fun (x : ℤ → Bool) (n : ℕ) => x n) (coins ℤ) (coins ℕ) :=
+    ⟨by fun_prop, Measure.map_infinitePi_infinitePi_of_inj (Nat.cast_injective (R := ℤ))⟩
+  refine ae_all_iff.2 fun t => ?_
+  exact ((hright.comp (measurePreserving_evol t)).quasiMeasurePreserving.ae ae_isNormal)
 
 /-! ### Mixing for all measurable sets, and ergodicity -/
 

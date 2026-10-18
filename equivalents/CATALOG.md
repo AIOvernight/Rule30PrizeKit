@@ -2704,7 +2704,8 @@ with Turing machines reading n. Notes:
     (`exists_mem_evol_mem`). For μ-almost every configuration, and for a comeager set of them,
     the orbit enters every nonempty open set at arbitrarily large times (`ae_frequently_mem`,
     `residual_frequently_mem`); and for μ-almost every configuration every column of the
-    space-time diagram is normal (`ae_isNormal_columns`).
+    space-time diagram is normal, and so is the right half of every row (`ae_isNormal_columns`,
+    `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

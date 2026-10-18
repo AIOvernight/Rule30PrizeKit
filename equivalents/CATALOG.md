@@ -2308,7 +2308,7 @@ coefficients, `StrongerStatements.countable_setOf_isMahler`; every series is 1-M
 unbounded expansion complexity (a nonzero g(X, Y) over 𝔽₂ has finitely many roots in 𝔽₂⟦X⟧,
 `finite_roots_series`). Most follow from disjunctivity alone. Transcendence uses that the binary value separates
 sequences with infinitely many ones (`baseValue_injOn`) and that the fair-coin measure has no atoms
-(`coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
+(`RandomConfigurations.coins_singleton`); "not morphic" uses that morphic sequences are countably many. The defect bound
 is not typical: it fails with probability at least 2⁻⁵, whenever the column starts with five equal
 cells (`measure_not_defectBound_trace`). The sufficient conditions proved in other files hold almost
 surely too ([TypicalConditions](Rule30Equivalents/TypicalConditions.lean),

@@ -29,8 +29,8 @@ function of row `t`, stored as the list of its cells `-t, …, t` (`stepList`, `
 * `ae_not_computable_trace`, `residual_not_computable_trace`: **the center column of almost every
   and of a generic configuration is not computable**. Computable sequences are countably many
   (`countable_computable`, through Mathlib's codes for partial recursive functions); the fair-coin
-  measure has no atoms (`coins_singleton`), and a single sequence is nowhere dense. The seed is
-  special in this respect too.
+  measure has no atoms (`RandomConfigurations.coins_singleton`), and a single sequence is nowhere
+  dense (`Genericity.isNowhereDense_singleton`). The seed is special in this respect too.
 -/
 
 namespace Rule30Equivalents.Computability
@@ -294,20 +294,6 @@ theorem countable_computable : {v : ℕ → Bool | Computable v}.Countable := by
     simp only [g, Part.some_inj] at this
     exact Encodable.encode_injective this
 
-/-- The fair-coin measure has no atoms: a sequence lies in each of its prefix events. -/
-theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
-  have h : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
-    rw [← measurePreserving_trace.measure_preimage (measurableSet_singleton v).nullMeasurableSet,
-      ← measure_prefix v n]
-    refine measure_mono fun x hx t _ => ?_
-    rw [Set.mem_preimage, Set.mem_singleton_iff] at hx
-    rw [hx]
-  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
-    (ENNReal.tendsto_pow_atTop_nhds_zero_iff.2 (by norm_num)).comp (tendsto_add_atTop_nat 1)
-  exact le_antisymm (ge_of_tendsto' hlim h) bot_le
-
-instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
-
 /-- **A random configuration has a non-computable center column**, almost surely, while that of
 the single seed is primitive recursive (`primrec_center`). -/
 theorem ae_not_computable_trace : ∀ᵐ x ∂(coins ℤ), ¬ Computable (trace x) := by
@@ -315,20 +301,6 @@ theorem ae_not_computable_trace : ∀ᵐ x ∂(coins ℤ), ¬ Computable (trace 
     rw [ae_iff]
     simpa using countable_computable.measure_zero (coins ℕ)
   exact measurePreserving_trace.quasiMeasurePreserving.ae (p := fun v => ¬ Computable v) h
-
-/-- A single sequence is nowhere dense in `{0,1}^ℕ`: every neighborhood contains another one. -/
-theorem isNowhereDense_singleton (v : ℕ → Bool) : IsNowhereDense ({v} : Set (ℕ → Bool)) := by
-  have : (𝓝[≠] v).NeBot := by
-    rw [← mem_closure_iff_nhdsWithin_neBot, mem_closure_iff_nhds]
-    intro U hU
-    obtain ⟨L, hL⟩ := exists_prefix_subset hU
-    refine ⟨Function.update v L (!v L), hL fun t ht => ?_, ?_⟩
-    · exact Function.update_of_ne (by omega) _ _
-    · simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      intro he
-      have := congrFun he L
-      simp at this
-  rw [isClosed_singleton.isNowhereDense_iff, interior_singleton]
 
 /-- **A generic configuration has a non-computable center column**: the configurations with a
 computable center column form a meager set. -/

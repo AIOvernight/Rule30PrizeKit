@@ -97,6 +97,24 @@ theorem coins_pi {ι : Type*} (s : Finset ι) (t : ι → Set Bool) :
     coins ι (Set.pi s t) = ∏ i ∈ s, coin (t i) :=
   Measure.infinitePi_pi _ fun _ _ => MeasurableSet.of_discrete
 
+/-- **The fair-coin measure has no atoms**: a sequence lies in the cylinder of its prefix of
+length `n + 1`, of probability `2^-(n+1)`. -/
+theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
+  have hle : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
+    calc coins ℕ {v} ≤ coins ℕ (Set.pi (Finset.range (n + 1) : Set ℕ) fun t => {v t}) :=
+          measure_mono fun u hu => by
+            rw [Set.mem_singleton_iff] at hu
+            subst hu
+            exact fun t _ => rfl
+      _ = 2⁻¹ ^ (n + 1) := by
+          rw [coins_pi, Finset.prod_congr rfl fun t _ => coin_singleton (v t), Finset.prod_const,
+            Finset.card_range]
+  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
+    (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)).comp (tendsto_add_atTop_nat 1)
+  exact le_antisymm (ge_of_tendsto' hlim hle) zero_le
+
+instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
+
 theorem measurable_evol (t : ℕ) (p : ℤ) : Measurable fun x : ℤ → Bool => evol x t p :=
   (continuous_evol t p).measurable
 

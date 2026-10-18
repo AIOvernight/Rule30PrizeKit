@@ -173,6 +173,20 @@ theorem exists_prefix_subset {v : ℕ → Bool} {U : Set (ℕ → Bool)} (hU : U
   rw [hu i (by have := hL hi; omega)]
   exact mem_of_mem_nhds (ht i)
 
+/-- A single sequence is nowhere dense in `{0,1}^ℕ`: every neighborhood contains another one. -/
+theorem isNowhereDense_singleton (v : ℕ → Bool) : IsNowhereDense ({v} : Set (ℕ → Bool)) := by
+  have : (𝓝[≠] v).NeBot := by
+    rw [← mem_closure_iff_nhdsWithin_neBot, mem_closure_iff_nhds]
+    intro U hU
+    obtain ⟨L, hL⟩ := exists_prefix_subset hU
+    refine ⟨Function.update v L (!v L), hL fun t ht => ?_, ?_⟩
+    · exact Function.update_of_ne (by omega) _ _
+    · simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+      intro he
+      have := congrFun he L
+      simp at this
+  rw [isClosed_singleton.isNowhereDense_iff, interior_singleton]
+
 /-- **Disjunctive sequences are generic**: they form a comeager set. -/
 theorem residual_disjunctive : {v : ℕ → Bool | Disjunctive v} ∈ residual (ℕ → Bool) := by
   have h : {v : ℕ → Bool | Disjunctive v} =

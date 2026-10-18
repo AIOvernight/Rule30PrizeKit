@@ -22,7 +22,8 @@ is vacuous.
   (`abelianComplexity_of_disjunctive`); and `b` is recurrent and not purely periodic.
 * **Numbers.** In every base `B ≥ 2` the value `0.b(0) b(1) …` separates the sequences with
   infinitely many ones (`baseValue_injOn`, reading the digits off the tail values), the algebraic
-  numbers are countable, and the fair-coin measure has no atoms (`coins_singleton`). So almost every
+  numbers are countable, and the fair-coin measure has no atoms
+  (`RandomConfigurations.coins_singleton`). So almost every
   sequence has a transcendental value (`ae_transcendental_baseValue`), of irrationality exponent at
   least `2` by Dirichlet's theorem (`StrongerStatements.irrExponentGE_two_of_irrational`).
 * **Morphic sequences** are countably many (`StrongerStatements.countable_setOf_isMorphic`), so
@@ -241,24 +242,6 @@ theorem baseValue_injOn {B : ℕ} (hB : 2 ≤ B) :
         hdig t ih]
   funext t
   exact hdig t (hval t)
-
-/-- **The fair-coin measure has no atoms**: a sequence lies in the cylinder of its prefix of
-length `n + 1`, of probability `2^-(n+1)`. -/
-theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
-  have hle : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
-    calc coins ℕ {v} ≤ coins ℕ (Set.pi (Finset.range (n + 1) : Set ℕ) fun t => {v t}) :=
-          measure_mono fun u hu => by
-            rw [Set.mem_singleton_iff] at hu
-            subst hu
-            exact fun t _ => rfl
-      _ = 2⁻¹ ^ (n + 1) := by
-          rw [coins_pi, Finset.prod_congr rfl fun t _ => coin_singleton (v t), Finset.prod_const,
-            Finset.card_range]
-  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
-    (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)).comp (tendsto_add_atTop_nat 1)
-  exact le_antisymm (ge_of_tendsto' hlim hle) zero_le
-
-instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
 
 /-- **Almost every fair-coin sequence has a transcendental value**, in every base `B ≥ 2`: the
 sequences with infinitely many ones and an algebraic value are countably many (`baseValue_injOn`

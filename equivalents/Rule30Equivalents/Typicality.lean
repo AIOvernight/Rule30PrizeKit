@@ -1,0 +1,320 @@
+import Rule30Equivalents.Autocorrelation
+import Rule30Equivalents.Mixing
+
+/-!
+# The stronger statements hold for almost every configuration
+
+Problem 1 follows from many stronger statements about the center column
+(`StrongerStatements.problem1_of_*`). Fifteen of them hold for almost every configuration, with the
+seed replaced by the configuration (`ae_strongerStatements_trace`); in particular none of them is
+vacuous.
+
+* **Words.** Most of them hold for every disjunctive sequence: the effective boundary
+  `t ↦ b(t) ∧ b(t + 1)` is not eventually periodic (`not_eventuallyPeriodic_and_of_disjunctive`),
+  runs of every length occur in both colors, no residue class `k ↦ b(r + kP)` is eventually
+  constant (`antiToeplitz_of_disjunctive`), every lag disagrees infinitely often, and `b` differs
+  infinitely often from every periodic sequence. All rest on `eq_of_periodic_of_window`: a
+  sequence with period `P` from `T` that is constant on `P` consecutive positions after `T` is
+  constant from `T` on. Moreover the orbit closure is all of `{0,1}^ℕ`, hence uncountable
+  (`closure_shifts_of_disjunctive`, `not_countable_univ`); there are `2ⁿ` factors of length `n`
+  (`ncard_factors_of_disjunctive`) and `n + 1` abelian classes
+  (`abelianComplexity_of_disjunctive`); and `b` is recurrent and not purely periodic.
+* **Numbers.** In every base `B ≥ 2` the value `0.b(0) b(1) …` separates the sequences with
+  infinitely many ones (`baseValue_injOn`, reading the digits off the tail values), the algebraic
+  numbers are countable, and the fair-coin measure has no atoms (`coins_singleton`). So almost every
+  sequence has a transcendental value (`ae_transcendental_baseValue`), of irrationality exponent at
+  least `2` by Dirichlet's theorem (`StrongerStatements.irrExponentGE_two_of_irrational`).
+* **Morphic sequences** are countably many (`StrongerStatements.countable_setOf_isMorphic`), so
+  almost every sequence is not morphic (`ae_not_isMorphic`).
+* No line inside the light cone is eventually periodic (`Mixing.ae_every_line`).
+
+Not every stronger statement is typical: the defect bound fails with probability at least `1/32`,
+when the first five cells of the column agree (`measure_not_defectBound_trace`).
+-/
+
+namespace Rule30Equivalents.Typicality
+
+open MeasureTheory Filter Topology Ruliology.CellularAutomata Rule30Realization Genericity
+  RandomConfigurations StrongerStatements
+
+/-! ### Words -/
+
+/-- A sequence with period `P` from `T` that takes the value `β` on `P` consecutive positions from
+`T` on takes it everywhere from `T` on. -/
+theorem eq_of_periodic_of_window {f : ℕ → Bool} {T P : ℕ} (hP : 0 < P)
+    (hper : ∀ t, T ≤ t → f (t + P) = f t) {i : ℕ} (hi : T ≤ i) {β : Bool}
+    (hw : ∀ j < P, f (i + j) = β) {t : ℕ} (ht : T ≤ t) : f t = β := by
+  have hk : ∀ q s, T ≤ s → f (s + P * q) = f s := by
+    intro q
+    induction q with
+    | zero => intro s _; simp
+    | succ q ih =>
+      intro s hs
+      rw [Nat.mul_succ, ← add_assoc, hper _ (by omega), ih s hs]
+  have hiP : i ≤ P * i := Nat.le_mul_of_pos_left i hP
+  obtain ⟨q, ρ, hρ, hqρ⟩ : ∃ q ρ, ρ < P ∧ t + P * i - i = P * q + ρ :=
+    ⟨_, _, Nat.mod_lt _ hP, (Nat.div_add_mod _ P).symm⟩
+  have e : t + P * i = i + ρ + P * q := by omega
+  rw [← hk i t ht, e, hk q _ (by omega), hw ρ hρ]
+
+/-- **The effective boundary of a disjunctive sequence is not eventually periodic.** With period
+`P` from `T`, a run of `P + 1` ones after `T` would make `t ↦ b(t) ∧ b(t + 1)` equal to `1` from
+`T` on, and a later `0` contradicts it. -/
+theorem not_eventuallyPeriodic_and_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
+    ¬ EventuallyPeriodic fun t => b t && b (t + 1) := by
+  rintro ⟨T, P, hP, hper⟩
+  obtain ⟨i, hi, hw⟩ := Mixing.exists_ge_of_disjunctive hb (fun _ : Fin (P + 1) => true) T
+  obtain ⟨i', hi', hw'⟩ := Mixing.exists_ge_of_disjunctive hb (fun _ : Fin 1 => false) T
+  have h := eq_of_periodic_of_window (f := fun t => b t && b (t + 1)) hP hper hi (β := true)
+    (fun j hj => by
+      have h1 := hw ⟨j, by omega⟩
+      have h2 := hw ⟨j + 1, by omega⟩
+      simp only at h1 h2 ⊢
+      rw [h1, show i + j + 1 = i + (j + 1) by omega, h2]
+      rfl) hi'
+  have h0 := hw' 0
+  simp only [Fin.val_zero, add_zero] at h0
+  simp [h0] at h
+
+/-- **A disjunctive sequence is anti-Toeplitz**: no residue class `k ↦ b(r + kP)` is eventually
+constant, since a run of `P` cells of the other color after `r + KP` meets the class. -/
+theorem antiToeplitz_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) {P : ℕ} (hP : 0 < P)
+    (r : ℕ) : ¬ ∃ K β, ∀ k, K ≤ k → b (r + k * P) = β := by
+  rintro ⟨K, β, hK⟩
+  obtain ⟨i, hi, hw⟩ := Mixing.exists_ge_of_disjunctive hb (fun _ : Fin P => !β) (r + K * P)
+  obtain ⟨q, ρ, hρ, hqρ⟩ : ∃ q ρ, ρ < P ∧ i - r = P * q + ρ :=
+    ⟨_, _, Nat.mod_lt _ hP, (Nat.div_add_mod _ P).symm⟩
+  have hKP : K * P = P * K := Nat.mul_comm K P
+  have hqP : q * P = P * q := Nat.mul_comm q P
+  have hKq : K ≤ q := by
+    by_contra h
+    have h1 : P * (q + 1) ≤ P * K := Nat.mul_le_mul_left P (by omega)
+    rw [Nat.mul_succ] at h1
+    omega
+  -- the class meets the run at `r + kP`, with `k = q` or `k = q + 1`
+  rcases Nat.eq_zero_or_pos ρ with h0 | h0
+  · have hk := hK q hKq
+    have hwi := hw ⟨0, hP⟩
+    simp only [add_zero] at hwi
+    rw [show r + q * P = i by omega, hwi] at hk
+    cases β <;> simp at hk
+  · have hk := hK (q + 1) (by omega)
+    have hwi := hw ⟨P - ρ, by omega⟩
+    simp only at hwi
+    rw [show r + (q + 1) * P = i + (P - ρ) by rw [add_mul, one_mul]; omega, hwi] at hk
+    cases β <;> simp at hk
+
+/-- In a disjunctive sequence every lag `τ ≥ 1` disagrees infinitely often. -/
+theorem infinite_disagreements_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) {τ : ℕ}
+    (hτ : 0 < τ) : {t | b t ≠ b (t + τ)}.Infinite := fun hfin => by
+  obtain ⟨T, hT⟩ := hfin.bddAbove
+  refine not_eventuallyPeriodic_of_disjunctive hb ⟨T + 1, τ, hτ, fun t ht => ?_⟩
+  by_contra h
+  have := hT (show t ∈ {t | b t ≠ b (t + τ)} from fun h' => h h'.symm)
+  omega
+
+/-- A disjunctive sequence differs infinitely often from every periodic sequence. -/
+theorem infinite_ne_periodic_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) {y : ℕ → Bool}
+    {P : ℕ} (hP : 0 < P) (hy : ∀ t, y (t + P) = y t) : {t | b t ≠ y t}.Infinite := fun hfin => by
+  obtain ⟨T, hT⟩ := hfin.bddAbove
+  have hbT : ∀ t, T < t → b t = y t := fun t ht => by
+    by_contra h
+    have := hT h
+    omega
+  refine not_eventuallyPeriodic_of_disjunctive hb ⟨T + 1, P, hP, fun t ht => ?_⟩
+  rw [hbT (t + P) (by omega), hbT t (by omega), hy]
+
+/-- **The orbit closure of a disjunctive sequence is everything**: every cylinder contains a
+shift. -/
+theorem closure_shifts_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
+    closure (Set.range fun n : ℕ => fun t => b (n + t)) = Set.univ := by
+  refine Set.eq_univ_of_forall fun v => mem_closure_iff_nhds.2 fun U hU => ?_
+  obtain ⟨L, hL⟩ := exists_prefix_subset hU
+  obtain ⟨i, hi⟩ := hb L fun j => v j
+  exact ⟨fun t => b (i + t), hL fun t ht => hi ⟨t, ht⟩, i, rfl⟩
+
+/-- `{0,1}^ℕ` is uncountable (Cantor's diagonal argument). -/
+theorem not_countable_univ : ¬ (Set.univ : Set (ℕ → Bool)).Countable := by
+  intro h
+  haveI := Set.countable_univ_iff.1 h
+  obtain ⟨f, hf⟩ := exists_surjective_nat (ℕ → Bool)
+  obtain ⟨m, hm⟩ := hf fun n => !f n n
+  have := congrFun hm m
+  cases hfm : f m m <;> simp [hfm] at this
+
+/-- The factors of a disjunctive sequence are all the words. -/
+theorem factors_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) (n : ℕ) :
+    ShiftOrbit.factors b n = Set.univ :=
+  Set.eq_univ_of_forall fun w => let ⟨i, hi⟩ := hb n w; ⟨i, funext hi⟩
+
+/-- A disjunctive sequence has `2ⁿ` factors of length `n`. -/
+theorem ncard_factors_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) (n : ℕ) :
+    (ShiftOrbit.factors b n).ncard = 2 ^ n := by
+  rw [factors_of_disjunctive hb, Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fun,
+    Fintype.card_bool, Fintype.card_fin]
+
+/-- **A disjunctive sequence has abelian complexity `n + 1`**: its factors of length `n` have every
+number of ones from `0` to `n`. -/
+theorem abelianComplexity_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) (n : ℕ) :
+    abelianComplexity b n = n + 1 := by
+  unfold abelianComplexity
+  rw [factors_of_disjunctive hb, Set.image_univ]
+  have h : Set.range (fun w : Fin n → Bool => (Finset.univ.filter fun i => w i = true).card) =
+      ↑(Finset.range (n + 1)) := by
+    ext m
+    simp only [Set.mem_range, Finset.coe_range, Set.mem_Iio]
+    constructor
+    · rintro ⟨w, rfl⟩
+      exact Nat.lt_succ_of_le ((Finset.card_filter_le _ _).trans (by simp))
+    · intro hm
+      refine ⟨fun i => decide ((i : ℕ) < m), ?_⟩
+      simp only [decide_eq_true_eq]
+      rw [Fin.card_filter_val_lt]
+      omega
+  rw [h, Set.ncard_coe_finset, Finset.card_range]
+
+/-- A disjunctive sequence is recurrent: its prefix of length `n` occurs again. -/
+theorem isRecurrent_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) : IsRecurrent b :=
+  fun n => by
+    obtain ⟨s, hs, hw⟩ := Mixing.exists_ge_of_disjunctive hb (fun j : Fin n => b j) 1
+    exact ⟨s, hs, fun i hi => hw ⟨i, hi⟩⟩
+
+/-- A disjunctive sequence is not purely periodic. -/
+theorem not_purelyPeriodic_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
+    ¬ ∃ P, 0 < P ∧ ∀ t, b (t + P) = b t :=
+  fun ⟨P, hP, h⟩ => not_eventuallyPeriodic_of_disjunctive hb ⟨0, P, hP, fun t _ => h t⟩
+
+/-! ### Numbers -/
+
+/-- **The value separates the sequences with infinitely many ones**, in every base `B ≥ 2`: the
+digits are read off the tail values (`BinaryIrrational.digit_iff`), and the tail values of equal
+values agree at every time (`BinaryIrrational.baseValue_tail_succ`). -/
+theorem baseValue_injOn {B : ℕ} (hB : 2 ≤ B) :
+    Set.InjOn (BinaryIrrational.baseValue B) {b | ∀ T, ∃ s, T ≤ s ∧ b s = true} := by
+  intro b hb b' hb' h
+  have hdig : ∀ t, BinaryIrrational.baseValue B (BinaryIrrational.tail b t) =
+      BinaryIrrational.baseValue B (BinaryIrrational.tail b' t) → b t = b' t := fun t ht =>
+    Bool.eq_iff_iff.2 (by
+      rw [BinaryIrrational.digit_iff hB b hb, BinaryIrrational.digit_iff hB b' hb', ht])
+  have hval : ∀ t, BinaryIrrational.baseValue B (BinaryIrrational.tail b t) =
+      BinaryIrrational.baseValue B (BinaryIrrational.tail b' t) := by
+    intro t
+    induction t with
+    | zero =>
+      have e : ∀ v : ℕ → Bool, BinaryIrrational.tail v 0 = v := fun v =>
+        funext fun s => by simp [BinaryIrrational.tail]
+      rw [e, e]
+      exact h
+    | succ t ih =>
+      rw [BinaryIrrational.baseValue_tail_succ hB, BinaryIrrational.baseValue_tail_succ hB, ih,
+        hdig t ih]
+  funext t
+  exact hdig t (hval t)
+
+/-- **The fair-coin measure has no atoms**: a sequence lies in the cylinder of its prefix of
+length `n + 1`, of probability `2^-(n+1)`. -/
+theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
+  have hle : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
+    calc coins ℕ {v} ≤ coins ℕ (Set.pi (Finset.range (n + 1) : Set ℕ) fun t => {v t}) :=
+          measure_mono fun u hu => by
+            rw [Set.mem_singleton_iff] at hu
+            subst hu
+            exact fun t _ => rfl
+      _ = 2⁻¹ ^ (n + 1) := by
+          rw [coins_pi, Finset.prod_congr rfl fun t _ => coin_singleton (v t), Finset.prod_const,
+            Finset.card_range]
+  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
+    (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)).comp (tendsto_add_atTop_nat 1)
+  exact le_antisymm (ge_of_tendsto' hlim hle) zero_le
+
+instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
+
+/-- **Almost every fair-coin sequence has a transcendental value**, in every base `B ≥ 2`: the
+sequences with infinitely many ones and an algebraic value are countably many (`baseValue_injOn`
+and the countability of the algebraic numbers), and almost every sequence has infinitely many
+ones. -/
+theorem ae_transcendental_baseValue {B : ℕ} (hB : 2 ≤ B) :
+    ∀ᵐ v ∂(coins ℕ), Transcendental ℚ (BinaryIrrational.baseValue B v) := by
+  have hcount : {v : ℕ → Bool | (∀ T, ∃ s, T ≤ s ∧ v s = true) ∧
+      IsAlgebraic ℚ (BinaryIrrational.baseValue B v)}.Countable :=
+    Set.MapsTo.countable_of_injOn (f := BinaryIrrational.baseValue B) (fun _ hv => hv.2)
+      ((baseValue_injOn hB).mono fun _ hv => hv.1) (Algebraic.countable ℚ ℝ)
+  filter_upwards [measure_eq_zero_iff_ae_notMem.1 (hcount.measure_zero (coins ℕ)), ae_isNormal]
+    with v hv hn halg
+  refine hv ⟨fun T => ?_, halg⟩
+  obtain ⟨i, hi, hw⟩ := Mixing.exists_ge_of_disjunctive (fun n w => disjunctive_of_isNormal hn n w)
+    (fun _ : Fin 1 => true) T
+  exact ⟨i, hi, by simpa using hw 0⟩
+
+/-- For almost every configuration, `x₂ = 0.c(0)c(1)…₂` of the center column is transcendental. -/
+theorem ae_transcendental_trace :
+    ∀ᵐ x ∂(coins ℤ), Transcendental ℚ (BinaryIrrational.baseValue 2 (trace x)) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae (ae_transcendental_baseValue le_rfl)
+
+/-- **Almost every fair-coin sequence is not morphic**: morphic sequences are countably many. -/
+theorem ae_not_isMorphic : ∀ᵐ v ∂(coins ℕ), ¬ IsMorphic v :=
+  measure_eq_zero_iff_ae_notMem.1 (countable_setOf_isMorphic.measure_zero _)
+
+/-- For almost every configuration, the center column is not morphic. -/
+theorem ae_not_isMorphic_trace : ∀ᵐ x ∂(coins ℤ), ¬ IsMorphic (trace x) :=
+  measurePreserving_trace.quasiMeasurePreserving.ae ae_not_isMorphic
+
+/-! ### The stronger statements, almost surely -/
+
+/-- **The stronger statements hold for almost every configuration.** For almost every
+configuration `x`, the center column `trace x` satisfies, with `c` replaced by `trace x`, the
+hypotheses of `StrongerStatements.problem1_of_effective_boundary`, `problem1_of_every_line`,
+`problem1_of_unbounded_runs` (in both colors), `problem1_of_anti_toeplitz`,
+`problem1_of_infinite_disagreements`, `problem1_of_far_from_periodic`,
+`problem1_of_uncountable_orbit_closure`, `problem1_of_exponential_complexity`,
+`problem1_of_disjunctive`, `problem1_of_isNormal`, `problem1_of_transcendental_binary`,
+`problem1_of_irrExponentGE`, `problem1_of_unbounded_abelianComplexity`, `problem1_of_not_isMorphic`
+and `problem1_of_recurrent_not_purelyPeriodic`. -/
+theorem ae_strongerStatements_trace : ∀ᵐ x ∂(coins ℤ),
+    (¬ EventuallyPeriodic fun t => trace x t && trace x (t + 1)) ∧
+    (∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), 0 < q → |p| < q →
+      ¬ EventuallyPeriodic fun t => evol x (q * t + t₀) (p * t + x₀)) ∧
+    (∀ (β : Bool) (n : ℕ), ∃ t, ∀ i < n, trace x (t + i) = β) ∧
+    (∀ P, 0 < P → ∀ r, ¬ ∃ K β, ∀ k, K ≤ k → trace x (r + k * P) = β) ∧
+    (∀ τ, 0 < τ → {t | trace x t ≠ trace x (t + τ)}.Infinite) ∧
+    (∀ (y : ℕ → Bool) (P : ℕ), 0 < P → (∀ t, y (t + P) = y t) →
+      {t | trace x t ≠ y t}.Infinite) ∧
+    ¬ (closure (Set.range fun n : ℕ => fun t => trace x (n + t))).Countable ∧
+    (∃ a : ℝ, 1 < a ∧ ∀ n, a ^ n ≤ ((ShiftOrbit.factors (trace x) n).ncard : ℝ)) ∧
+    Disjunctive (trace x) ∧ IsNormal (trace x) ∧
+    Transcendental ℚ (BinaryIrrational.baseValue 2 (trace x)) ∧
+    IrrExponentGE (BinaryIrrational.baseValue 2 (trace x)) 2 ∧
+    (∀ C, ∃ n, C < abelianComplexity (trace x) n) ∧
+    ¬ IsMorphic (trace x) ∧
+    IsRecurrent (trace x) ∧ ¬ ∃ P, 0 < P ∧ ∀ t, trace x (t + P) = trace x t := by
+  filter_upwards [ae_isNormal_trace, Mixing.ae_every_line, ae_transcendental_trace,
+    ae_not_isMorphic_trace] with x hn hline htr hmor
+  have hd : Disjunctive (trace x) := fun n w => disjunctive_of_isNormal hn n w
+  refine ⟨not_eventuallyPeriodic_and_of_disjunctive hd, hline, fun β n => ?_,
+    fun P hP r => antiToeplitz_of_disjunctive hd hP r,
+    fun τ hτ => infinite_disagreements_of_disjunctive hd hτ,
+    fun y P hP hy => infinite_ne_periodic_of_disjunctive hd hP hy, ?_,
+    ⟨2, one_lt_two, fun n => le_of_eq (by rw [ncard_factors_of_disjunctive hd n]; push_cast; rfl)⟩,
+    hd, hn, htr, irrExponentGE_two_of_irrational
+      ((BinaryIrrational.irrational_iff_not_eventuallyPeriodic le_rfl (trace x)).2
+        (not_eventuallyPeriodic_of_disjunctive hd)),
+    fun C => ⟨C, by rw [abelianComplexity_of_disjunctive hd]; omega⟩, hmor,
+    isRecurrent_of_disjunctive hd, not_purelyPeriodic_of_disjunctive hd⟩
+  · obtain ⟨t, ht⟩ := hd n fun _ => β
+    exact ⟨t, fun i hi => ht ⟨i, hi⟩⟩
+  · rw [closure_shifts_of_disjunctive hd]
+    exact not_countable_univ
+
+/-- **The defect bound is not typical**: it fails, at `T = 0` and `P = 1`, for every configuration
+whose center column starts with five white cells, so with probability at least `2^-5`. -/
+theorem measure_not_defectBound_trace :
+    (2⁻¹ : ENNReal) ^ 5 ≤ coins ℤ {x | ¬ ∀ T P, 0 < P → ∃ t, T ≤ t ∧
+      t ≤ T + 3 * Nat.log 2 (T + P + 1) ∧ trace x (t + P) ≠ trace x t} := by
+  rw [← measure_prefix (fun _ => false) 4]
+  refine measure_mono fun x hx h => ?_
+  obtain ⟨t, -, ht, hne⟩ := h 0 1 one_pos
+  have hlog : Nat.log 2 (0 + 1 + 1) = 1 := by decide
+  rw [hlog] at ht
+  exact hne (by rw [hx (t + 1) (by omega), hx t (by omega)])
+
+end Rule30Equivalents.Typicality

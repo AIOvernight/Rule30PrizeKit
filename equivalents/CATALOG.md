@@ -2441,8 +2441,11 @@ Relation to Problem 1:
   Problem 1 (Section 4; `ProblemTwo.problem1_of_density_on_progressions`).
 - An explicit periodic tail would decide Problem 2 [W19].
 
-Problem 2 is Π⁰₃. Data: the first 10⁹ bits contain 500,025,038 ones, about 1.6 standard deviations
-from half [W19].
+Problem 2 is Π⁰₃. For a random configuration the trace is a fair-coin sequence, and the number of
+black cells among the first n deviates from n/2 on the scale √n/2: (count − n/2)/√n converges in
+distribution to the normal law with variance 1/4 (`RandomConfigurations.tendstoInDistribution_count_trace`,
+through Mathlib's central limit theorem). That is the yardstick for the data: the first 10⁹ bits
+contain 500,025,038 ones, about 1.6 standard deviations from half [W19].
 
 ### 6.2 Problem 3: computational effort
 

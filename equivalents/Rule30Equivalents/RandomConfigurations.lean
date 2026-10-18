@@ -4,6 +4,7 @@ import Mathlib.Probability.ProductMeasure
 import Mathlib.Probability.Independence.InfinitePi
 import Mathlib.Probability.StrongLaw
 import Mathlib.Probability.Distributions.Uniform
+import Mathlib.Probability.CentralLimitTheorem
 
 /-!
 # Random configurations
@@ -24,6 +25,11 @@ uniform Bernoulli product measure).
   numbers `u` occurs with frequency `2⁻ᵐ` along the residue class `r`
   (`ae_tendsto_residue_frequency`); averaging over the `m` classes gives frequency `2⁻ᵐ`
   (`tendsto_average_of_residues`).
+* `trace_evol_one`: the trace intertwines rule 30 with the shift, so with `measurePreserving_trace`
+  the one-sided Bernoulli shift is a factor of rule 30.
+* `tendstoInDistribution_count_trace`: **the central limit theorem** for the trace (Mathlib's
+  `tendstoInDistribution_inv_sqrt_mul_sum_sub`): `(black cells among the first n - n/2) / √n`
+  converges in distribution to the normal law with variance `1/4`.
 * `ae_isNormal_trace_glue`: **the right half does not matter**. The same holds for the map
   `x ↦ glue R x` that keeps the cells `p ≤ 0` of `x` and puts a fixed right half `R` beside them
   (white, say, as for the single seed): the prefix argument only flips cells left of `1`
@@ -262,6 +268,13 @@ fair-coin measure on `{0,1}^ℤ` to the fair-coin measure on `{0,1}^ℕ`. -/
 theorem measurePreserving_trace : MeasurePreserving trace (coins ℤ) (coins ℕ) :=
   measurePreserving_trace_of_flipsLeft measurable_id flipsLeft_id
 
+/-- **The Bernoulli shift is a factor of rule 30**: the trace intertwines rule 30 with the shift,
+`trace (F x) = σ (trace x)`, and it carries `coins ℤ` to `coins ℕ` (`measurePreserving_trace`). -/
+theorem trace_evol_one (x : ℤ → Bool) : trace (evol x 1) = fun t => trace x (t + 1) := by
+  funext t
+  show evol (fun p => evol x 1 p) t 0 = evol x (t + 1) 0
+  rw [Rule30ZeroBoundaryBarriers.evol_restart, Nat.add_comm]
+
 /-! ### Normality almost surely (Borel) -/
 
 /-- Summing over `[0, m q)` by residues modulo `m`. -/
@@ -446,6 +459,83 @@ theorem ae_isNormal : ∀ᵐ v ∂(coins ℕ), StrongerStatements.IsNormal v := 
 normal. -/
 theorem ae_isNormal_trace : ∀ᵐ x ∂(coins ℤ), StrongerStatements.IsNormal (trace x) :=
   measurePreserving_trace.quasiMeasurePreserving.ae ae_isNormal
+
+/-! ### Fluctuations: the central limit theorem -/
+
+/-- Black as `1`, white as `0`. -/
+def black (b : Bool) : ℝ := if b then 1 else 0
+
+theorem measurable_black : Measurable black := Measurable.of_discrete
+
+theorem integral_black : ∫ b, black b ∂coin = 1 / 2 := by
+  rw [integral_fintype Integrable.of_finite]
+  simp [black, measureReal_def, coin_singleton]
+
+theorem variance_black : Var[black; coin] = 1 / 4 := by
+  rw [variance_eq_integral measurable_black.aemeasurable, integral_black,
+    integral_fintype Integrable.of_finite]
+  simp [black, measureReal_def, coin_singleton]
+  norm_num
+
+theorem measurable_centeredSum (n : ℕ) :
+    Measurable fun v : ℕ → Bool => (√n)⁻¹ * (∑ k ∈ Finset.range n, black (v k) - n * (1 / 2)) :=
+  ((Finset.measurable_sum _ fun k _ => measurable_black.comp (measurable_pi_apply k)).sub
+    measurable_const).const_mul _
+
+/-- **The central limit theorem for fair coins**: `(black cells among the first n - n/2) / √n`
+converges in distribution to the normal law with variance `1/4`. -/
+theorem tendstoInDistribution_count :
+    TendstoInDistribution
+      (fun (n : ℕ) (v : ℕ → Bool) => (√n)⁻¹ * (∑ k ∈ Finset.range n, black (v k) - n * (1 / 2)))
+      atTop id (fun _ => coins ℕ) (gaussianReal 0 (1 / 4)) := by
+  let X : ℕ → (ℕ → Bool) → ℝ := fun k v => black (v k)
+  have hX : ∀ k, Measurable (X k) := fun k => measurable_black.comp (measurable_pi_apply k)
+  have hmap : ∀ k, (coins ℕ).map (X k) = coin.map black := fun k => by
+    rw [show X k = black ∘ fun v => v k from rfl,
+      ← Measure.map_map measurable_black (measurable_pi_apply k), coins_map_eval]
+  have hind : iIndepFun X (coins ℕ) :=
+    iIndepFun_infinitePi (X := fun _ => black) fun _ => measurable_black
+  have hident : ∀ k, IdentDistrib (X k) (X 0) (coins ℕ) (coins ℕ) := fun k =>
+    ⟨(hX k).aemeasurable, (hX 0).aemeasurable, by rw [hmap, hmap]⟩
+  have hL2 : MemLp (X 0) 2 (coins ℕ) :=
+    memLp_of_bounded (a := 0) (b := 1) (Eventually.of_forall fun v => by
+      simp only [X, black, Set.mem_Icc]
+      split_ifs <;> norm_num) (hX 0).aestronglyMeasurable 2
+  have hmean : (coins ℕ)[X 0] = 1 / 2 := by
+    show ∫ v, black (v 0) ∂(coins ℕ) = 1 / 2
+    rw [← integral_map (measurable_pi_apply 0).aemeasurable
+      measurable_black.aestronglyMeasurable, coins_map_eval, integral_black]
+  have hvar : Var[X 0; coins ℕ] = 1 / 4 := by
+    rw [show X 0 = black ∘ fun v : ℕ → Bool => v 0 from rfl,
+      ← variance_map measurable_black.aemeasurable (measurable_pi_apply 0).aemeasurable,
+      coins_map_eval, variance_black]
+  have hY : HasLaw id (gaussianReal 0 (Var[X 0; coins ℕ]).toNNReal) (gaussianReal 0 (1 / 4)) := by
+    rw [hvar, show ((1 / 4 : ℝ)).toNNReal = 1 / 4 by
+      rw [Real.toNNReal_div (by norm_num)]
+      norm_num]
+    exact HasLaw.id
+  have h := tendstoInDistribution_inv_sqrt_mul_sum_sub hY hL2 hind hident
+  rw [hmean] at h
+  exact h
+
+/-- **Fluctuations of the density for a random configuration**: the number of black cells among
+the first `n` cells of the center trace is `n/2 + √n · Z / 2` in the limit, with `Z` standard
+normal: `(count - n/2) / √n` converges in distribution to the normal law with variance `1/4`.
+For the single seed, Wolfram's `10⁹` bits show `500,025,038` black cells, `1.6` such standard
+deviations above `n/2` (catalog Section 6.1). -/
+theorem tendstoInDistribution_count_trace :
+    TendstoInDistribution
+      (fun (n : ℕ) (x : ℤ → Bool) =>
+        (√n)⁻¹ * (∑ k ∈ Finset.range n, black (trace x k) - n * (1 / 2)))
+      atTop id (fun _ => coins ℤ) (gaussianReal 0 (1 / 4)) := by
+  have h := tendstoInDistribution_count
+  refine ⟨fun n => ((measurable_centeredSum n).comp measurable_trace).aemeasurable,
+    h.aemeasurable_limit, h.tendsto.congr fun n => ?_⟩
+  apply Subtype.ext
+  show (coins ℕ).map _ = (coins ℤ).map _
+  rw [← measurePreserving_trace.map_eq, Measure.map_map (measurable_centeredSum n)
+    measurable_trace]
+  rfl
 
 /-! ### The right half does not matter -/
 

@@ -4,19 +4,24 @@ import Rule30Equivalents.AlgebraicDegree
 /-!
 # Periodic points of rule 30
 
-Catalog Section 7, item 11. Call `x` periodic if `F^k x = x` for some `k ≥ 1`.
+Catalog Section 7, item 11. Say that `x` recurs if `F^k x = σ^d x` for some `k ≥ 1` and `d`: it
+comes back after `k` steps moved `d` cells to the left (`Recurs`), a pattern travelling at the
+velocity `-d/k`. Periodic configurations are the case `d = 0`.
 
-* `eq_of_periodic_of_eq_on`: **a periodic configuration is determined, to the left, by any `2k`
-  adjacent cells**. Rule 30 is left-permutive, and so is `F^k`, in the cell `i - k`
-  (`evol_ne_of_ne_left`, from `Genericity.evol_flip_at`): the cell `j - 1` is the one value that
-  makes `F^k(x)_{j - 1 + k} = x_{j - 1 + k}` given the cells `j, …, j + 2k - 1`.
-* `evol_add_factorial`: so **every periodic configuration is spatially periodic**, with period
+* `eq_of_recurs_of_eq_on`: **for `1 - k ≤ d ≤ k`, a recurring configuration is determined, to the
+  left, by any `2k` adjacent cells**. Rule 30 is left-permutive, and so is `F^k`, in the cell
+  `i - k` (`evol_ne_of_ne_left`, from `Genericity.evol_flip_at`): the cell `j - 1` is the one value
+  that makes `F^k(x)_{j - 1 + k} = x_{j - 1 + k + d}` given the cells `j, …, j + 2k - 1`.
+* `recurs_add_factorial`: so **every such configuration is spatially periodic**, with period
   `(4^k)!`. Among `4^k + 1` adjacent windows of `2k` cells two coincide, so `x` agrees with its
   shift by some `p ≤ 4^k` left of any given cell (`periodic_left_of_window`), and `p` divides
-  `(4^k)!`.
-* `ncard_fixedPoints_le`: hence **at most `4^k` configurations satisfy `F^k x = x`**: such a
-  configuration is determined by its cells `0, …, 2k - 1`. Rule 30 has countably many periodic
-  points, all of them spatially periodic.
+  `(4^k)!`. Every rational velocity in `[-1, 1)` is `-d/k` with `1 - k ≤ d ≤ k`, so **rule 30 has
+  no gliders at these velocities**: a pattern that reappears exactly while moving left, standing
+  still, or moving right slower than light is spatially periodic. `evol_add_factorial` is the
+  periodic case.
+* `ncard_recurs_le`, `ncard_fixedPoints_le`: hence **at most `4^k` configurations satisfy
+  `F^k x = σ^d x`**: such a configuration is determined by its cells `0, …, 2k - 1`. Rule 30 has
+  countably many periodic points, all of them spatially periodic.
 * `evol_one_eq_self_iff`: **rule 30 has exactly three fixed points**, all white and the two phases
   of `…0101…`. `F x = x` says `x_{i-1} = ¬x_i ∧ x_{i+1}`, and one black cell forces the alternating
   pattern in both directions.
@@ -44,11 +49,29 @@ theorem evol_ne_of_ne_left {x y : ℤ → Bool} {k : ℕ} {i : ℤ}
   rw [← e]
   cases evol x k i <;> simp
 
-/-- **A periodic configuration is determined to the left by any `2k` adjacent cells**: if
-`F^k x = x`, `F^k y = y` and `x, y` agree on `[j, j + 2k)`, they agree left of `j + 2k`. -/
-theorem eq_of_periodic_of_eq_on {k : ℕ} (hk : 0 < k) {x y : ℤ → Bool} (hx : evol x k = x)
-    (hy : evol y k = y) {j : ℤ} (h : ∀ i, j ≤ i → i < j + 2 * k → x i = y i) :
-    ∀ i, i < j + 2 * k → x i = y i := by
+/-- `x` comes back after `k` steps, moved by `d` cells to the left: `F^k x = σ^d x`. For `d = 0`,
+`F^k x = x`. -/
+def Recurs (k : ℕ) (d : ℤ) (x : ℤ → Bool) : Prop := ∀ i, evol x k i = x (i + d)
+
+theorem recurs_zero_iff {k : ℕ} {x : ℤ → Bool} : Recurs k 0 x ↔ evol x k = x := by
+  simp only [Recurs, add_zero]
+  exact funext_iff.symm
+
+/-- A shift of a recurring configuration recurs in the same way. -/
+theorem Recurs.shift {k : ℕ} {d : ℤ} {x : ℤ → Bool} (hx : Recurs k d x) (e : ℤ) :
+    Recurs k d fun i => x (i + e) := fun i => by
+  have := Rule30ZeroBoundaryBarriers.evol_shift_all (x := fun i => x (i + e)) (x' := x) (d := e)
+    (fun p => rfl) k i
+  rw [← this, hx, add_right_comm]
+
+/-- **A recurring configuration is determined to the left by any `2k` adjacent cells**, when it
+moves at most one cell per step to the left and less than one to the right (`1 - k ≤ d ≤ k`): if
+`x, y` both satisfy `F^k z = σ^d z` and agree on `[j, j + 2k)`, they agree left of `j + 2k`. The
+cell `j - 1` is the one value that makes `F^k(x)_{j - 1 + k}` equal `x_{j - 1 + k + d}`, a cell of
+the window. -/
+theorem eq_of_recurs_of_eq_on {k : ℕ} {d : ℤ} (hd1 : 1 - (k : ℤ) ≤ d) (hd2 : d ≤ k)
+    {x y : ℤ → Bool} (hx : Recurs k d x) (hy : Recurs k d y) {j : ℤ}
+    (h : ∀ i, j ≤ i → i < j + 2 * k → x i = y i) : ∀ i, i < j + 2 * k → x i = y i := by
   have key : ∀ n : ℕ, ∀ i, j - n ≤ i → i < j + 2 * k → x i = y i := by
     intro n
     induction n with
@@ -61,32 +84,26 @@ theorem eq_of_periodic_of_eq_on {k : ℕ} (hk : 0 < k) {x y : ℤ → Bool} (hx 
         by_contra hne
         apply evol_ne_of_ne_left (k := k) (i := i + k)
           (fun l hl1 hl2 => ih l (by omega) (by omega)) (by rwa [add_sub_cancel_right])
-        rw [congrFun hx, congrFun hy]
-        exact ih (i + k) (by omega) (by omega)
+        rw [hx, hy]
+        exact ih (i + k + d) (by omega) (by omega)
   intro i hi
   exact key (j - i).toNat i (by omega) hi
 
-/-- A shift of a configuration with `F^k x = x` has the same property. -/
-theorem evol_shift_eq {k : ℕ} {x : ℤ → Bool} (hx : evol x k = x) (d : ℤ) :
-    evol (fun i => x (i + d)) k = fun i => x (i + d) := by
-  funext i
-  have := Rule30ZeroBoundaryBarriers.evol_shift_all (x := fun i => x (i + d)) (x' := x) (d := d)
-    (fun p => rfl) k i
-  rw [← this, hx]
-
 /-- If two windows of `2k` cells at `a < b` coincide, `x` is `(b - a)`-periodic left of
 `a + 2k`. -/
-theorem periodic_left_of_window {k : ℕ} (hk : 0 < k) {x : ℤ → Bool} (hx : evol x k = x)
-    {a b : ℤ} (h : ∀ j : ℕ, j < 2 * k → x (a + j) = x (b + j)) :
+theorem periodic_left_of_window {k : ℕ} {d : ℤ} (hd1 : 1 - (k : ℤ) ≤ d) (hd2 : d ≤ k)
+    {x : ℤ → Bool} (hx : Recurs k d x) {a b : ℤ}
+    (h : ∀ j : ℕ, j < 2 * k → x (a + j) = x (b + j)) :
     ∀ i, i < a + 2 * k → x i = x (i + (b - a)) :=
-  eq_of_periodic_of_eq_on hk hx (evol_shift_eq hx (b - a)) fun i h1 h2 => by
+  eq_of_recurs_of_eq_on hd1 hd2 hx (hx.shift (b - a)) fun i h1 h2 => by
     have := h (i - a).toNat (by omega)
     rw [show a + ((i - a).toNat : ℤ) = i by omega] at this
     rw [this, show b + ((i - a).toNat : ℤ) = i + (b - a) by omega]
 
-/-- **Every periodic configuration of rule 30 is spatially periodic**, with period `(4^k)!`. -/
-theorem evol_add_factorial {k : ℕ} (hk : 0 < k) {x : ℤ → Bool} (hx : evol x k = x) (i : ℤ) :
-    x (i + (4 ^ k).factorial) = x i := by
+/-- **Every recurring configuration of rule 30 with `1 - k ≤ d ≤ k` is spatially periodic**, with
+period `(4^k)!`. -/
+theorem recurs_add_factorial {k : ℕ} {d : ℤ} (hd1 : 1 - (k : ℤ) ≤ d) (hd2 : d ≤ k)
+    {x : ℤ → Bool} (hx : Recurs k d x) (i : ℤ) : x (i + (4 ^ k).factorial) = x i := by
   set N := (4 ^ k).factorial with hN
   -- left of every cell `M`, `x` has a period `p ≤ 4^k`, which divides `N`
   have hleft : ∀ M : ℤ, ∀ i, i ≤ M → x (i - N) = x i := by
@@ -103,7 +120,7 @@ theorem evol_add_factorial {k : ℕ} (hk : 0 < k) {x : ℤ → Bool} (hx : evol 
           fun j hj => congrFun he ⟨j, hj⟩⟩
       · exact ⟨b, a, h, Nat.lt_succ_iff.1 b.2, Nat.lt_succ_iff.1 a.2,
           fun j hj => (congrFun he ⟨j, hj⟩).symm⟩
-    have hper := periodic_left_of_window hk hx (a := M + a') (b := M + b') he'
+    have hper := periodic_left_of_window hd1 hd2 hx (a := M + a') (b := M + b') he'
     set p := b' - a' with hp
     have hp0 : 0 < p := by omega
     obtain ⟨q, hq⟩ := Nat.dvd_factorial (n := 4 ^ k) hp0 (by omega)
@@ -136,25 +153,31 @@ theorem evol_add_factorial {k : ℕ} (hk : 0 < k) {x : ℤ → Bool} (hx : evol 
   rw [add_sub_cancel_right] at this
   exact this.symm
 
-/-- **At most `4^k` configurations satisfy `F^k x = x`**: such a configuration is determined by
-its cells `0, …, 2k - 1`. -/
-theorem ncard_fixedPoints_le {k : ℕ} (hk : 0 < k) :
-    {x : ℤ → Bool | evol x k = x}.ncard ≤ 4 ^ k := by
+/-- **Every periodic configuration of rule 30 is spatially periodic**, with period `(4^k)!`. -/
+theorem evol_add_factorial {k : ℕ} (hk : 0 < k) {x : ℤ → Bool} (hx : evol x k = x) (i : ℤ) :
+    x (i + (4 ^ k).factorial) = x i :=
+  recurs_add_factorial (d := 0) (by omega) (by omega) (recurs_zero_iff.2 hx) i
+
+/-- **At most `4^k` configurations satisfy `F^k x = σ^d x`**, for `1 - k ≤ d ≤ k`: such a
+configuration is determined by its cells `0, …, 2k - 1`. -/
+theorem ncard_recurs_le {k : ℕ} {d : ℤ} (hd1 : 1 - (k : ℤ) ≤ d) (hd2 : d ≤ k) :
+    {x : ℤ → Bool | Recurs k d x}.ncard ≤ 4 ^ k := by
+  have hk : 0 < k := by omega
   have hinj : Set.InjOn (fun (x : ℤ → Bool) (j : Fin (2 * k)) => x j)
-      {x : ℤ → Bool | evol x k = x} := by
+      {x : ℤ → Bool | Recurs k d x} := by
     intro x hx y hy hxy
-    have hleft := eq_of_periodic_of_eq_on hk hx hy (j := 0) fun i h1 h2 => by
+    have hleft := eq_of_recurs_of_eq_on hd1 hd2 hx hy (j := 0) fun i h1 h2 => by
       have := congrFun hxy ⟨i.toNat, by omega⟩
       simpa [show ((i.toNat : ℕ) : ℤ) = i by omega] using this
     -- right of `2k`, go left by multiples of the spatial period
     funext i
-    have hback : ∀ (z : ℤ → Bool), evol z k = z → ∀ m : ℕ,
+    have hback : ∀ (z : ℤ → Bool), Recurs k d z → ∀ m : ℕ,
         z (i - m * (4 ^ k).factorial) = z i := by
       intro z hz m
       induction m with
       | zero => simp
       | succ m ih =>
-        have := evol_add_factorial hk hz (i - ((m + 1 : ℕ) : ℤ) * (4 ^ k).factorial)
+        have := recurs_add_factorial hd1 hd2 hz (i - ((m + 1 : ℕ) : ℤ) * (4 ^ k).factorial)
         rw [← ih, ← this]
         congr 1
         push_cast
@@ -165,13 +188,20 @@ theorem ncard_fixedPoints_le {k : ℕ} (hk : 0 < k) :
     have h2 := le_mul_of_one_le_right (Int.natCast_nonneg i.toNat) h1
     have h3 : (0 : ℤ) < k := by exact_mod_cast hk
     linarith [Int.self_le_toNat i]
-  calc {x : ℤ → Bool | evol x k = x}.ncard
+  calc {x : ℤ → Bool | Recurs k d x}.ncard
       ≤ (Set.univ : Set (Fin (2 * k) → Bool)).ncard :=
         Set.ncard_le_ncard_of_injOn _ (fun _ _ => Set.mem_univ _) hinj Set.finite_univ
     _ = 4 ^ k := by
       rw [Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fun, Fintype.card_bool,
         Fintype.card_fin, pow_mul]
       norm_num
+
+/-- **At most `4^k` configurations satisfy `F^k x = x`.** -/
+theorem ncard_fixedPoints_le {k : ℕ} (hk : 0 < k) :
+    {x : ℤ → Bool | evol x k = x}.ncard ≤ 4 ^ k := by
+  have h := ncard_recurs_le (k := k) (d := 0) (by omega) (by omega)
+  simp only [recurs_zero_iff] at h
+  exact h
 
 /-! ### The fixed points -/
 

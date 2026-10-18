@@ -2858,9 +2858,10 @@ with Turing machines reading n. Notes:
     every row of the space-time diagram of almost every configuration determines it
     (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
     `Mixing.residual_existsUnique_preimage`, `Mixing.ae_injective_iterate`). Its periodic points are
-    all spatially periodic: F^k x = x forces period (4^k)!, at most 4^k configurations satisfy it,
-    and F itself has exactly three fixed points, all white and the two phases of …0101…
-    ([PeriodicPoints](Rule30Equivalents/PeriodicPoints.lean): `evol_add_factorial`,
+    all spatially periodic: F^k x = x forces period (4^k)!, and so does F^k x = σ^d x for 1 − k ≤ d
+    ≤ k, so rule 30 has no gliders with velocity in [−1, 1) (`recurs_add_factorial`); at most 4^k
+    configurations satisfy it, and F itself has exactly three fixed points, all white and the two
+    phases of …0101… ([PeriodicPoints](Rule30Equivalents/PeriodicPoints.lean): `evol_add_factorial`,
     `ncard_fixedPoints_le`, `evol_one_eq_self_iff`). So rule 30 is an automorphism of μ modulo null
     sets, with a measurable, measure-preserving inverse G
     ([Invertibility](Rule30Equivalents/Invertibility.lean): `exists_measurePreserving_inverse`), and

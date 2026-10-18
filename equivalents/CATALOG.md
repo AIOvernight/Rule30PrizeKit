@@ -2770,18 +2770,19 @@ with Turing machines reading n. Notes:
    perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological entropy
    at least log 2, since the trace is a factor map onto the full shift (`log_two_le_coverEntropy`,
    Mathlib's `coverEntropy`; the trace intertwines rule 30 with the shift,
-   `RandomConfigurations.trace_evol_one`); and for μ-almost every configuration every column of the
-   space-time diagram is normal, and so is the right half of every row (`ae_isNormal_columns`,
-   `ae_isNormal_rows`). More generally the cells along any path that never moves right (p(t + 1) ≤
-   p(t): columns, the left edge of the light cone) are independent fair coins
-   (`measurePreserving_path`, `ae_isNormal_path`), while along a right diagonal they are not: the
-   cells (t, a) and (t + 1, a + 1) agree with probability 1/4 (`measure_diag_eq`). Topologically the
-   picture is reversed (critic, own reasoning from standard facts): - Tr₀ is continuous, surjective
-   and open: by left-permutivity, the image of the cylinder fixing x[−n, n] is the cylinder fixing
-   c(0..n); - normal sequences form a meager set [Oxt80], [Šal66], so the configurations with a
-   normal trace form a meager set; - disjunctive sequences form a dense G_δ, so the configurations
-   with a disjunctive trace form a comeager set, while those whose trace is even simply normal form
-   a meager set.
+   `RandomConfigurations.trace_evol_one`), and at most 2 log 2, since one configuration per pattern
+   on [−(N + n), N + n] covers agreement on [−N, N] for n steps (`coverEntropy_le_two_mul_log_two`);
+   and for μ-almost every configuration every column of the space-time diagram is normal, and so is
+   the right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`). More generally the cells
+   along any path that never moves right (p(t + 1) ≤ p(t): columns, the left edge of the light cone)
+   are independent fair coins (`measurePreserving_path`, `ae_isNormal_path`), while along a right
+   diagonal they are not: the cells (t, a) and (t + 1, a + 1) agree with probability 1/4
+   (`measure_diag_eq`). Topologically the picture is reversed (critic, own reasoning from standard
+   facts): - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder
+   fixing x[−n, n] is the cylinder fixing c(0..n); - normal sequences form a meager set [Oxt80],
+   [Šal66], so the configurations with a normal trace form a meager set; - disjunctive sequences
+   form a dense G_δ, so the configurations with a disjunctive trace form a comeager set, while those
+   whose trace is even simply normal form a meager set.
 
     The single seed lies in the countable, null, meager set of finite configurations, so neither
     statement says anything about it. *Lean* ([Genericity](Rule30Equivalents/Genericity.lean)): the

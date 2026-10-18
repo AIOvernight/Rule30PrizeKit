@@ -48,7 +48,10 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   is sensitive to initial conditions.
 * `log_two_le_coverEntropy`: **rule 30 has topological entropy at least `log 2`** (Mathlib's
   `coverEntropy`): the center trace is a uniformly continuous factor map onto the full shift on
-  `{0,1}^ℕ`, whose entropy is at least `log 2` (`log_two_le_coverEntropy_shift`).
+  `{0,1}^ℕ`, whose entropy is at least `log 2` (`log_two_le_coverEntropy_shift`). And
+  `coverEntropy_le_two_mul_log_two`: **at most `2 log 2`**, since every entourage contains
+  agreement on a window `[-N, N]` (`exists_windowRel_subset`) and one configuration per pattern on
+  `[-(N + n), N + n]` covers `n` steps (`coverMincard_le`).
 * `measurePreserving_path`: along any path that never moves right, `p (t + 1) ≤ p t`, the cells
   `F^t(x)_{p t}` are independent fair coins (`measure_prefix_path`); so for almost every
   configuration they form a normal sequence (`ae_isNormal_path`). Columns are the constant paths
@@ -894,6 +897,89 @@ theorem log_two_le_coverEntropy :
     (CompactSpace.uniformContinuous_of_continuous continuous_trace) Set.univ
   rw [Set.image_univ_of_surjective surjective_trace] at h
   exact log_two_le_coverEntropy_shift.trans h
+
+/-- Agreement on the window `[-N, N]`. -/
+def windowRel (N : ℕ) : SetRel (ℤ → Bool) (ℤ → Bool) :=
+  {p | ∀ i, -(N : ℤ) ≤ i → i ≤ N → p.1 i = p.2 i}
+
+/-- Every entourage of `{0,1}^ℤ` contains agreement on some window `[-N, N]`. -/
+theorem exists_windowRel_subset {U : SetRel (ℤ → Bool) (ℤ → Bool)} (hU : U ∈ 𝓤 (ℤ → Bool)) :
+    ∃ N : ℕ, windowRel N ⊆ U := by
+  rw [Pi.uniformity, Filter.mem_iInf] at hU
+  obtain ⟨I, hI, V, hV, rfl⟩ := hU
+  obtain ⟨a, ha⟩ := hI.bddBelow
+  obtain ⟨b, hb⟩ := hI.bddAbove
+  refine ⟨(max (-a) b).toNat, fun p hp => Set.mem_iInter.2 fun i => ?_⟩
+  obtain ⟨t, ht, hsub⟩ := Filter.mem_comap.1 (hV i)
+  have hai := ha i.2
+  have hbi := hb i.2
+  have heq : p.1 i = p.2 i := hp i (by omega) (by omega)
+  refine hsub ?_
+  show (p.1 i, p.2 i) ∈ t
+  rw [heq]
+  exact refl_mem_uniformity ht
+
+/-- The iterates of rule 30 as a map. -/
+theorem iterate_evol_one (k : ℕ) (x : ℤ → Bool) :
+    (fun x : ℤ → Bool => evol x 1)^[k] x = evol x k := by
+  induction k generalizing x with
+  | zero => rfl
+  | succ k ih =>
+    rw [Function.iterate_succ_apply, ih]
+    funext p
+    rw [Rule30ZeroBoundaryBarriers.evol_restart x 1 k p, Nat.add_comm]
+
+/-- **A dynamical cover**: agreement on `[-N, N]` for `n` steps of rule 30 needs at most one
+configuration per pattern on `[-(N + n), N + n]`, by the light cone. -/
+theorem coverMincard_le (N n : ℕ) :
+    coverMincard (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n ≤
+      2 ^ (2 * (N + n) + 1) := by
+  classical
+  let W : Finset ℤ := Finset.Icc (-((N + n : ℕ) : ℤ)) (N + n : ℕ)
+  let s : Finset (ℤ → Bool) := Finset.univ.image fun v : W → Bool => extend v
+  have hcov : IsDynCoverOf (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n s := by
+    intro x _
+    refine ⟨extend (W.restrict x), Finset.mem_coe.2 (Finset.mem_image_of_mem _
+      (Finset.mem_univ _)), ?_⟩
+    simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
+      Prod.map_apply, windowRel, Set.mem_setOf_eq]
+    intro k hk i hi1 hi2
+    rw [iterate_evol_one, iterate_evol_one]
+    refine AlgebraicDegree.evol_congr k i fun j hj1 hj2 => ?_
+    have hj : j ∈ W := Finset.mem_Icc.2 ⟨by push_cast; omega, by push_cast; omega⟩
+    simp only [extend, dif_pos hj, Finset.restrict]
+  refine hcov.coverMincard_le_card.trans ?_
+  have hcard : s.card ≤ 2 ^ (2 * (N + n) + 1) := by
+    refine Finset.card_image_le.trans ?_
+    simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_bool, Fintype.card_coe, W,
+      Int.card_Icc]
+    rw [show ((N + n : ℕ) : ℤ) + 1 - -((N + n : ℕ) : ℤ) = ((2 * (N + n) + 1 : ℕ) : ℤ) by
+      push_cast; ring, Int.toNat_natCast]
+  exact_mod_cast hcard
+
+/-- **Rule 30 has topological entropy at most `2 log 2`** (Mathlib's `coverEntropy`), so
+`log 2 ≤ h(rule 30) ≤ 2 log 2` with `log_two_le_coverEntropy`: every entourage contains agreement
+on a window `[-N, N]`, and the dynamical covers `coverMincard_le` grow like `4^n`. -/
+theorem coverEntropy_le_two_mul_log_two :
+    coverEntropy (fun x : ℤ → Bool => evol x 1) Set.univ ≤ 2 * ENNReal.log 2 := by
+  refine iSup₂_le fun U hU => ?_
+  obtain ⟨N, hN⟩ := exists_windowRel_subset hU
+  refine (coverEntropyEntourage_antitone _ _ hN).trans ?_
+  have hle : ∀ n : ℕ, ((coverMincard (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N) n :
+      ℕ∞) : ENNReal) ≤ 2 ^ (2 * N + 1) * 4 ^ n := fun n => by
+    have h := ENat.toENNReal_le.2 (coverMincard_le N n)
+    refine h.trans_eq ?_
+    rw [show 2 * (N + n) + 1 = (2 * N + 1) + 2 * n by ring, pow_add, pow_mul]
+    push_cast
+    norm_num
+  calc coverEntropyEntourage (fun x : ℤ → Bool => evol x 1) Set.univ (windowRel N)
+      ≤ ExpGrowth.expGrowthSup fun n : ℕ => (4 : ENNReal) ^ n :=
+        ExpGrowth.expGrowthSup_le_of_eventually_le (b := 2 ^ (2 * N + 1)) (by simp)
+          (Eventually.of_forall hle)
+    _ = ENNReal.log 4 := ExpGrowth.expGrowthSup_pow
+    _ = 2 * ENNReal.log 2 := by
+      rw [show (4 : ENNReal) = 2 ^ 2 by norm_num, ENNReal.log_pow]
+      norm_cast
 
 end Entropy
 

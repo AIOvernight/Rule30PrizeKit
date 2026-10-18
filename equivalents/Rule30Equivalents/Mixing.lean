@@ -25,6 +25,10 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   their windows (`measure_inter_preimage_cylinder`), and every measurable set is close to a
   cylinder (`exists_cylinder_approx`, from Mathlib's approximation by a generating ring of sets).
   Hence `ergodic_evol_one`: rule 30 is ergodic, in Mathlib's sense of `Ergodic`.
+* `ae_frequently_mem`, `residual_frequently_mem`: for almost every configuration, and for a
+  comeager set of configurations, the orbit enters every nonempty open set at arbitrarily large
+  times, so its omega-limit set is all of `{0,1}^ℤ` (by ergodicity, and by topological mixing and
+  Baire).
 * `ae_isNormal_columns`: for almost every configuration, every column of the space-time diagram
   is normal (shift invariance and `RandomConfigurations.ae_isNormal_trace`).
 -/
@@ -354,5 +358,93 @@ theorem ergodic_evol_one : Ergodic (fun x : ℤ → Bool => evol x 1) (coins ℤ
     have hc : (coins ℤ).real sᶜ = 0 := by
       rw [measureReal_compl hs, probReal_univ, h1, sub_self]
     exact ae_iff.2 ((measureReal_eq_zero_iff (measure_ne_top _ _)).1 hc)
+
+/-! ### Orbits that return to every open set -/
+
+/-- The configurations whose `t`-th image, for some `t ≥ T`, shows the pattern `v` on `I`. -/
+def visits (I : Finset ℤ) (v : I → Bool) (T : ℕ) : Set (ℤ → Bool) :=
+  ⋃ t ∈ Set.Ici T, {x | ∀ i ∈ I, evol x t i = extend v i}
+
+theorem measurableSet_visits (I : Finset ℤ) (v : I → Bool) (T : ℕ) :
+    MeasurableSet (visits I v T) :=
+  MeasurableSet.biUnion (Set.to_countable _) fun t _ => measurableSet_window t I _
+
+theorem isOpen_window (t : ℕ) (I : Finset ℤ) (v : I → Bool) :
+    IsOpen {x : ℤ → Bool | ∀ i ∈ I, evol x t i = extend v i} := by
+  have hc : Continuous fun x : ℤ → Bool => I.restrict (evol x t) :=
+    continuous_pi fun i : I => continuous_evol t i
+  rw [← preimage_restrict_singleton]
+  exact (isOpen_discrete {v}).preimage hc
+
+/-- After any time, almost every orbit shows the pattern `v` on `I`: the set `visits I v T` is
+almost invariant, so by ergodicity null or full, and it contains a window event of positive
+measure. -/
+theorem ae_mem_visits (I : Finset ℤ) (v : I → Bool) (T : ℕ) :
+    ∀ᵐ x ∂(coins ℤ), x ∈ visits I v T := by
+  have hsub : (fun x : ℤ → Bool => evol x 1) ⁻¹' visits I v T ⊆ visits I v T := by
+    intro x hx
+    simp only [visits, Set.mem_preimage, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hx ⊢
+    obtain ⟨t, ht, h⟩ := hx
+    refine ⟨1 + t, by omega, fun i hi => ?_⟩
+    rw [← Rule30ZeroBoundaryBarriers.evol_restart x 1 t i]
+    exact h i hi
+  rcases ergodic_evol_one.ae_empty_or_univ_of_preimage_ae_le
+      (measurableSet_visits I v T).nullMeasurableSet hsub.eventuallyLE with h | h
+  · exfalso
+    have hle : coins ℤ {x | ∀ i ∈ I, evol x T i = extend v i} ≤ coins ℤ (visits I v T) :=
+      measure_mono fun x hx => Set.mem_biUnion (Set.mem_Ici.2 le_rfl) hx
+    rw [measure_congr h, measure_empty, measure_window] at hle
+    exact absurd hle (not_le.2 (ENNReal.pow_pos (ENNReal.inv_pos.2 ENNReal.ofNat_ne_top) _))
+  · exact h.mem_iff.mono fun x hx => hx.2 trivial
+
+/-- **Almost every orbit returns to every open set**: for almost every configuration `x`, every
+nonempty open set contains `evol x t` for arbitrarily large `t`, so the omega-limit set of `x`
+is all of `{0,1}^ℤ`. -/
+theorem ae_frequently_mem :
+    ∀ᵐ x ∂(coins ℤ), ∀ U : Set (ℤ → Bool), IsOpen U → U.Nonempty →
+      ∀ T : ℕ, ∃ t ≥ T, evol x t ∈ U := by
+  have h : ∀ᵐ x ∂(coins ℤ), ∀ (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) (T : ℕ),
+      x ∈ visits (Finset.Icc (-(n : ℤ)) n) v T :=
+    ae_all_iff.2 fun n => ae_all_iff.2 fun v => ae_all_iff.2 fun T => ae_mem_visits _ v T
+  filter_upwards [h] with x hx
+  rintro U hU ⟨y, hy⟩ T
+  obtain ⟨n, hn⟩ := exists_window_subset (hU.mem_nhds hy)
+  have hxv := hx n ((Finset.Icc (-(n : ℤ)) n).restrict y) T
+  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hxv
+  obtain ⟨t, ht, hw⟩ := hxv
+  refine ⟨t, ht, hn fun p hp1 hp2 => ?_⟩
+  have := hw p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
+  simp only [extend, dif_pos (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
+  exact this
+
+/-- **Generic orbits return to every open set**: for a comeager set of configurations `x`, every
+nonempty open set contains `evol x t` for arbitrarily large `t`. Each `visits I v T` is open and,
+by topological mixing, dense. -/
+theorem residual_frequently_mem :
+    {x : ℤ → Bool | ∀ U : Set (ℤ → Bool), IsOpen U → U.Nonempty →
+      ∀ T : ℕ, ∃ t ≥ T, evol x t ∈ U} ∈ residual (ℤ → Bool) := by
+  have h : (⋂ (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) (T : ℕ),
+      visits (Finset.Icc (-(n : ℤ)) n) v T) ∈ residual (ℤ → Bool) := by
+    refine countable_iInter_mem.2 fun n => countable_iInter_mem.2 fun v =>
+      countable_iInter_mem.2 fun T => residual_of_dense_open ?_ ?_
+    · exact isOpen_biUnion fun t _ => isOpen_window t _ v
+    · rw [dense_iff_inter_open]
+      intro U hU hU0
+      have hV : IsOpen {y : ℤ → Bool | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, y i = extend v i} :=
+        isOpen_window 0 _ v
+      obtain ⟨T₀, hT₀⟩ := exists_mem_evol_mem hU hV hU0 ⟨extend v, fun i _ => rfl⟩
+      obtain ⟨x, hxU, hxV⟩ := hT₀ (max T T₀) (le_max_right _ _)
+      exact ⟨x, hxU, Set.mem_biUnion (Set.mem_Ici.2 (le_max_left T T₀)) hxV⟩
+  refine mem_of_superset h fun x hx => ?_
+  rintro U hU ⟨y, hy⟩ T
+  obtain ⟨n, hn⟩ := exists_window_subset (hU.mem_nhds hy)
+  have hxv := Set.mem_iInter.1 (Set.mem_iInter.1 (Set.mem_iInter.1 hx n)
+    ((Finset.Icc (-(n : ℤ)) n).restrict y)) T
+  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hxv
+  obtain ⟨t, ht, hw⟩ := hxv
+  refine ⟨t, ht, hn fun p hp1 hp2 => ?_⟩
+  have := hw p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
+  simp only [extend, dif_pos (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
+  exact this
 
 end Rule30Equivalents.Mixing

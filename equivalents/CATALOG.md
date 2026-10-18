@@ -2699,8 +2699,10 @@ with Turing machines reading n. Notes:
     (`measure_window_inter_window`); approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) →
     μ(A)μ(B) for all measurable A, B (`tendsto_measure_inter_preimage`), so rule 30 is mixing and
     ergodic (`ergodic_evol_one`, Mathlib's `Ergodic`), and topologically mixing
-    (`exists_mem_evol_mem`); and for μ-almost every configuration every column of the space-time
-    diagram is normal (`ae_isNormal_columns`).
+    (`exists_mem_evol_mem`). For μ-almost every configuration, and for a comeager set of them,
+    the orbit enters every nonempty open set at arbitrarily large times (`ae_frequently_mem`,
+    `residual_frequently_mem`); and for μ-almost every configuration every column of the
+    space-time diagram is normal (`ae_isNormal_columns`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

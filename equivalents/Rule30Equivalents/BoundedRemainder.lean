@@ -1,5 +1,6 @@
 import Rule30Equivalents.Genericity
 import Rule30Equivalents.BlackTimes
+import Rule30Equivalents.RandomConfigurations
 
 /-!
 # Bounded remainder
@@ -15,7 +16,7 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
 * `unbounded_remainder_of_disjunctive`: a disjunctive sequence (every word occurs) has unbounded
   remainder for every `α`: a run of `m` black cells raises `N(n) - α n` by `(1 - α) m`, and a run
   of `m` white cells lowers it by `α m`. So the new statement sits between "c is disjunctive" and
-  Problem 1.
+  Problem 1, and it holds for almost every configuration (`ae_unbounded_remainder_trace`).
 * `problem1_of_problem2_of_unbounded_discrepancy`: **if Problem 2 holds and the discrepancy
   `N(n) - n/2` of the center column is unbounded, Problem 1 holds**, since an eventually periodic
   sequence with density `1/2` has bounded discrepancy.
@@ -187,5 +188,14 @@ theorem problem1_of_problem2_of_unbounded_discrepancy (h2 : Rule30Prize.Problem2
   have := hC n
   rw [hα, show (1 / 2 : ℝ) * n = n / 2 by ring] at this
   exact absurd this (not_le.2 hn)
+
+/-- **Random configurations have unbounded remainder**: for almost every configuration, the
+number of black cells among the first `n` cells of the center trace is not `α n + O(1)` for any
+`α`, since the trace is disjunctive (`RandomConfigurations.ae_disjunctive_trace`). -/
+theorem ae_unbounded_remainder_trace :
+    ∀ᵐ x ∂(RandomConfigurations.coins ℤ), ∀ α C : ℝ, ∃ n,
+      C < |(ones (trace x) n : ℝ) - α * n| := by
+  filter_upwards [RandomConfigurations.ae_disjunctive_trace] with x hx
+  exact unbounded_remainder_of_disjunctive hx
 
 end Rule30Equivalents.BoundedRemainder

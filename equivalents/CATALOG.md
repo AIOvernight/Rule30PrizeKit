@@ -131,8 +131,8 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 171 library theorems whose names begin with `problem1_iff`,
-  `problem1_of` or `problem2_iff`.
+  prints the axioms of all 174 library theorems whose names begin with `problem1_iff`,
+  `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
 - **Proved (core catalog)**: proved in the core-Lean catalog [`../lean`](../lean).
@@ -2264,7 +2264,8 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
   its own ForMathlib layer [FC];
 - Wolfram: `DiscreteLimit[Total[c[t]]/t, t -> Infinity] == 1/2` [W19];
 - x₂ is simply normal in base 2. This uses that c is not eventually constant, so c is the unique
-  binary expansion of x₂;
+  binary expansion of x₂ (proved: `ProblemTwo.problem2_iff_simplyNormal`, through
+  `binDigit_centerBinary`);
 - lim_{x→1⁻} (1 − x)·Σ c(t)xᵗ = 1/2. The Abelian direction is elementary. The converse is the
   Hardy–Littlewood–Karamata Tauberian theorem [HL14], [Kar30], which applies because the
   coefficients are nonnegative.
@@ -2296,9 +2297,10 @@ Relation to Problem 1:
 
 - As properties of sequences the two are independent: (01)^∞ has density 1/2 and is periodic, and
   non-EP sequences of density 1/3 exist.
-- Normality implies both.
+- Normality implies both (`StrongerStatements.problem1_of_isNormal`,
+  `ProblemTwo.problem2_of_isNormal`).
 - Density 1/2 along every arithmetic progression implies the anti-Toeplitz statement, which implies
-  Problem 1 (Section 4).
+  Problem 1 (Section 4; `ProblemTwo.problem1_of_density_on_progressions`).
 - An explicit periodic tail would decide Problem 2 [W19].
 
 Problem 2 is Π⁰₃. Data: the first 10⁹ bits contain 500,025,038 ones, about 1.6 standard deviations

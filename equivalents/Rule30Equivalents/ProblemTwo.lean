@@ -1,5 +1,7 @@
 import Rule30Equivalents.Basic
 import Rule30Equivalents.Tauberian
+import Rule30Equivalents.BinaryIrrational
+import Rule30Equivalents.StrongerStatements
 
 /-!
 # Prize Problem 2: density 1/2
@@ -12,7 +14,13 @@ center column, stated with integers: for every `k > 0`, eventually `k |2 b(n) - 
 * `problem2_iff_abel`: the Abel mean `(1 - x) ∑ c(t) xᵗ` tends to `1/2` as `x → 1⁻`. The forward
   direction is Abelian (`Tauberian.tendsto_abel_of_tendsto_cesaro`); the converse is the
   Hardy–Littlewood–Karamata Tauberian theorem (`Tauberian.tendsto_cesaro_of_tendsto_abel`), which
-  applies because the coefficients are nonnegative.
+  applies because the coefficients are nonnegative;
+* `problem2_iff_simplyNormal`: `x₂ = 0.c(0) c(1) …₂` is simply normal in base `2`. Its binary digits
+  are the center column, since `c` has infinitely many `0`s (`binDigit_centerBinary`).
+
+Also `problem2_of_isNormal` (normality of `x₂` gives Problem 2) and
+`problem1_of_density_on_progressions`: density `1/2` along every arithmetic progression rules out
+an eventually constant residue class, hence gives Problem 1 (anti-Toeplitz, catalog Section 4).
 -/
 
 namespace Rule30Equivalents.ProblemTwo
@@ -99,5 +107,148 @@ theorem problem2_iff_abel : Rule30Prize.Problem2 ↔
         (summable_geometric_of_lt_one hx0 hx1)
       · split_ifs <;> simp [pow_nonneg hx0]
       · split_ifs <;> simp [pow_nonneg hx0]
+
+/-! ### Simple normality of `x₂` -/
+
+/-- The binary digit of `x ≥ 0` at position `t` after the point: `⌊2^(t+1) x⌋ mod 2`. -/
+noncomputable def binDigit (x : ℝ) (t : ℕ) : ℕ := ⌊(2 : ℝ) ^ (t + 1) * x⌋₊ % 2
+
+/-- `x` is simply normal in base `2`: the digit `1` has frequency `1/2`. -/
+def SimplyNormal2 (x : ℝ) : Prop :=
+  Tendsto (fun n : ℕ => (((Finset.range n).filter fun t => binDigit x t = 1).card : ℝ) / n)
+    atTop (𝓝 (1 / 2))
+
+/-- `0.b(0) b(1) …₂ < 1` as soon as one digit is `0`. -/
+theorem baseValue_two_lt_one (b : ℕ → Bool) {s : ℕ} (hs : b s = false) :
+    BinaryIrrational.baseValue 2 b < 1 :=
+  calc BinaryIrrational.baseValue 2 b < ∑' t : ℕ, (1 : ℝ) / 2 / 2 ^ t :=
+        (BinaryIrrational.summable_term le_rfl b).tsum_lt_tsum (i := s)
+          (BinaryIrrational.term_le le_rfl b) (by simp [hs]) (summable_geometric_two' 1)
+    _ = 1 := tsum_geometric_two' 1
+
+/-- The binary digits of `x₂` are the center column. -/
+theorem binDigit_centerBinary (t : ℕ) :
+    binDigit BinaryIrrational.centerBinary t = if c t then 1 else 0 := by
+  have hcb : BinaryIrrational.centerBinary = BinaryIrrational.baseValue 2 c := by
+    simp [BinaryIrrational.centerBinary, BinaryIrrational.baseValue]
+  -- a later digit is `0`, since `c` is not eventually `1`
+  obtain ⟨s, hs, hcs⟩ : ∃ s, t + 1 ≤ s ∧ c s = false := by
+    by_contra hne
+    push Not at hne
+    exact Rule30Prize.center_not_eventually_constant
+      ⟨t + 1, true, fun s hs => by simpa using hne s hs⟩
+  have hshift := BinaryIrrational.pow_mul_baseValue (B := 2) le_rfl c (t + 1)
+  have hlt := baseValue_two_lt_one (BinaryIrrational.tail c (t + 1)) (s := s - (t + 1)) (by
+    simp only [BinaryIrrational.tail]
+    rw [Nat.sub_add_cancel hs]
+    exact hcs)
+  have hge := BinaryIrrational.baseValue_nonneg (B := 2) le_rfl (BinaryIrrational.tail c (t + 1))
+  have hfloor : ⌊(2 : ℝ) ^ (t + 1) * BinaryIrrational.centerBinary⌋₊ =
+      BinaryIrrational.lead 2 c (t + 1) := by
+    rw [hcb]
+    push_cast at hshift
+    rw [hshift, Nat.floor_eq_iff (by positivity)]
+    constructor <;> linarith
+  rw [binDigit, hfloor]
+  simp only [BinaryIrrational.lead]
+  cases h : c t <;> simp
+
+/-- **Problem 2 as simple normality**: `x₂` is simply normal in base `2`. -/
+theorem problem2_iff_simplyNormal :
+    Rule30Prize.Problem2 ↔ SimplyNormal2 BinaryIrrational.centerBinary := by
+  rw [problem2_iff_tendsto, SimplyNormal2]
+  have : ∀ n, (((Finset.range n).filter fun t =>
+      binDigit BinaryIrrational.centerBinary t = 1).card : ℝ) = Rule30Prize.blackCount n := by
+    intro n
+    rw [blackCount_eq_sum, Finset.sum_boole]
+    congr 2
+    refine Finset.filter_congr fun t _ => ?_
+    rw [binDigit_centerBinary]
+    cases h : Rule30Prize.center t <;> simp [c, h]
+  simp only [this]
+
+/-- **Normality gives Problem 2**: if every word of length `n` occurs in `c` with frequency
+`2⁻ⁿ`, then in particular the black cells have density `1/2`. -/
+theorem problem2_of_isNormal (h : StrongerStatements.IsNormal c) : Rule30Prize.Problem2 := by
+  rw [problem2_iff_tendsto]
+  have h1 := h 1 fun _ => true
+  rw [pow_one, ← one_div] at h1
+  refine h1.congr fun n => ?_
+  rw [blackCount_eq_sum, Finset.sum_boole]
+  congr 3
+  refine Finset.filter_congr fun t _ => ?_
+  simp
+
+/-- **Density on progressions gives Problem 1**: if `c` has density `1/2` along every
+arithmetic progression, no residue class is eventually constant (anti-Toeplitz). -/
+theorem problem1_of_density_on_progressions
+    (h : ∀ P r : ℕ, 0 < P → Tendsto (fun n : ℕ =>
+      (((Finset.range n).filter fun k => c (r + k * P) = true).card : ℝ) / n) atTop (𝓝 (1 / 2))) :
+    Rule30Prize.Problem1 := by
+  refine StrongerStatements.problem1_of_anti_toeplitz fun P hP r ⟨K, b, hK⟩ => ?_
+  have h1 := h P r hP
+  cases b
+  · -- eventually white: at most `K` black terms, so the frequency tends to `0`
+    have h0 : Tendsto (fun n : ℕ =>
+        (((Finset.range n).filter fun k => c (r + k * P) = true).card : ℝ) / n) atTop (𝓝 0) := by
+      refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds
+        (tendsto_const_div_atTop_nhds_zero_nat (K : ℝ))
+        (Eventually.of_forall fun n => div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))
+        (Eventually.of_forall fun n => ?_)
+      have hsub : (Finset.range n).filter (fun k => c (r + k * P) = true) ⊆ Finset.range K :=
+        fun k hk => by
+          rw [Finset.mem_filter] at hk
+          rw [Finset.mem_range]
+          by_contra hKk
+          have := hK k (by omega)
+          simp_all
+      have := Finset.card_le_card hsub
+      rw [Finset.card_range] at this
+      gcongr
+    have := tendsto_nhds_unique h1 h0
+    norm_num at this
+  · -- eventually black: at least `n - K` black terms, so the frequency tends to `1`
+    have hlin : Tendsto (fun n : ℕ => ((n : ℝ) - K) / n) atTop (𝓝 1) := by
+      have := (tendsto_const_div_atTop_nhds_zero_nat (K : ℝ)).const_sub 1
+      rw [sub_zero] at this
+      refine this.congr' ?_
+      filter_upwards [eventually_gt_atTop 0] with n hn
+      have : (n : ℝ) ≠ 0 := by positivity
+      field_simp
+    have h0 : Tendsto (fun n : ℕ =>
+        (((Finset.range n).filter fun k => c (r + k * P) = true).card : ℝ) / n) atTop (𝓝 1) := by
+      refine tendsto_of_tendsto_of_tendsto_of_le_of_le' hlin tendsto_const_nhds ?_ ?_
+      · filter_upwards [eventually_gt_atTop 0] with n hn
+        have hsub : (Finset.range n).filter (fun k => K ≤ k) ⊆
+            (Finset.range n).filter (fun k => c (r + k * P) = true) := fun k hk => by
+          rw [Finset.mem_filter] at hk ⊢
+          exact ⟨hk.1, hK k hk.2⟩
+        have hcard : ((Finset.range n).filter (fun k => K ≤ k)).card = n - K := by
+          rw [show (Finset.range n).filter (fun k => K ≤ k) = Finset.Ico K n by
+            ext k; simp [Finset.mem_Ico, and_comm]]
+          exact Nat.card_Ico K n
+        have h4 := Finset.card_le_card hsub
+        rw [hcard] at h4
+        have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+        rw [div_le_div_iff_of_pos_right hn']
+        have h5 : ((n - K : ℕ) : ℝ) ≤
+            (((Finset.range n).filter fun k => c (r + k * P) = true).card : ℝ) := by
+          exact_mod_cast h4
+        have h3 : (n : ℝ) - K ≤ ((n - K : ℕ) : ℝ) := by
+          rcases le_total K n with hKn | hKn
+          · rw [Nat.cast_sub hKn]
+          · rw [Nat.sub_eq_zero_of_le hKn]
+            have : (n : ℝ) ≤ K := by exact_mod_cast hKn
+            push_cast
+            linarith
+        linarith
+      · filter_upwards [eventually_gt_atTop 0] with n hn
+        have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+        rw [div_le_one hn']
+        have := Finset.card_filter_le (Finset.range n) (fun k => c (r + k * P) = true)
+        rw [Finset.card_range] at this
+        exact_mod_cast this
+    have := tendsto_nhds_unique h1 h0
+    norm_num at this
 
 end Rule30Equivalents.ProblemTwo

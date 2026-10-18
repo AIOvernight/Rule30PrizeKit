@@ -13,17 +13,20 @@ regular language. For unary input this means the language is eventually periodic
 holds iff no one-tape machine decides `{1ⁿ : c(n) = 1}` in time `o(n log n)`
 (`problem1_iff_no_fast_one_tape_decider`).
 
-* `TM`, `step`, `run`: the textbook model, with finitely many states, a finite tape alphabet, a
-  two-way infinite tape, and a transition that writes a symbol and moves the head one cell left or
-  right; halting states are fixed. `DecidesInTime M f T`: on input `1ⁿ` the machine has halted by
-  step `T n`, in an accepting state iff `f n`.
+* `Machine`, `step`, `run`: a head on a two-way infinite tape, with a transition that writes a
+  symbol and moves the head one cell left or right or leaves it; halting states are fixed. The
+  states and symbols are arbitrary types, so that `OfflineGap` can reuse everything below. `TM`
+  is the textbook one-tape machine: a `Machine` with finitely many states and tape symbols.
+  `DecidesInTime M f T`: on input `1ⁿ` the machine has halted by step `T n`, in an accepting
+  state iff `f n`.
 * `cs X b T`: the crossing sequence of a run `X` at the boundary `b` (between cells `b − 1` and
   `b`) before time `T`, the states just after each crossing.
 * `splice`: two halting runs with the same crossing sequence at `b₁` and at `b₂` can be cut there
   and joined. The joined run halts with the crossing sequences of the left run up to `b₁` and of
   the right run from `b₁` on, in the final state of the left run if the crossing sequence has even
-  length and of the right run otherwise. The proof is a simulation invariant, `SpliceInv`.
-* `DecidesInTime.eventuallyPeriodic_of_bounded`: bounded crossing sequences give eventual
+  length and of the right run otherwise; it passes through every state of the left run on the
+  left and of the right run on the right. The proof is a simulation invariant, `SpliceInv`.
+* `DecidesInTime.eventuallyPeriodic_of_finite`: finitely many crossing sequences give eventual
   periodicity. By splicing, the values `f (a + r)` are determined by a finite type of the left
   length `a`, so two left lengths of the same type give a period.
 * `DecidesInTime.time_lower_bound`, `DecidesInTime.bounded`: Hennie's counting. In a shortest input
@@ -32,22 +35,38 @@ holds iff no one-tape machine decides `{1ⁿ : c(n) = 1}` in time `o(n log n)`
   `(n / 4) · log_{q+1} (n / 4)`, which time `o(n log n)` rules out for large `K`.
 * `periodicTM`: an eventually periodic `f` is decided in `n + 1` steps.
 
-The proof never uses that the tape alphabet is finite. The space form of [43] (space
-`o(log log n)` with a read-only input tape) is not formalized.
+The proof never uses that the tape alphabet is finite. The space form of [43] is in
+`OfflineGap`.
 -/
 
 namespace Rule30Equivalents.OneTapeGap
 
 open Ruliology.CellularAutomata
 
-/-- A deterministic one-tape Turing machine with finitely many states. -/
-structure TM where
+/-- A head move: one cell left, none, or one cell right. -/
+inductive Move
+  | left
+  | stay
+  | right
+
+/-- The change of the head position. -/
+def Move.shift : Move → ℤ
+  | left => -1
+  | stay => 0
+  | right => 1
+
+theorem Move.shift_cases (m : Move) : m.shift = 1 ∨ m.shift = -1 ∨ m.shift = 0 := by
+  cases m <;> simp [Move.shift]
+
+/-- A deterministic machine with one head on a two-way infinite tape, with arbitrary types of
+states and symbols. Crossing sequences are studied at this generality: a machine with a read-only
+input tape and a work tape is such a machine on its input tape, whose states are the work
+configurations. -/
+structure Machine where
   /-- States. -/
   Q : Type
-  [instFintype : Fintype Q]
   /-- Tape symbols. -/
   Γ : Type
-  [instFintypeΓ : Fintype Γ]
   /-- The blank symbol. -/
   blank : Γ
   /-- The input symbol. -/
@@ -58,38 +77,42 @@ structure TM where
   halt : Q → Bool
   /-- Accepting states. -/
   accept : Q → Bool
-  /-- New state, written symbol, and whether the head moves right (else left). -/
-  δ : Q → Γ → Q × Γ × Bool
+  /-- New state, written symbol, and head move. -/
+  δ : Q → Γ → Q × Γ × Move
+
+/-- A deterministic one-tape Turing machine: finitely many states and tape symbols. -/
+structure TM extends Machine where
+  [instFintype : Fintype Q]
+  [instFintypeΓ : Fintype Γ]
 
 attribute [instance] TM.instFintype TM.instFintypeΓ
 
 /-- A configuration: state, head position, tape. -/
-structure Cfg (M : TM) where
+structure Cfg (M : Machine) where
   q : M.Q
   h : ℤ
   tape : ℤ → M.Γ
 
-variable {M : TM}
+variable {M : Machine}
 
 /-- One step; a halting state stays put. -/
 def step (c : Cfg M) : Cfg M :=
   if M.halt c.q then c else
-    ⟨(M.δ c.q (c.tape c.h)).1, if (M.δ c.q (c.tape c.h)).2.2 then c.h + 1 else c.h - 1,
+    ⟨(M.δ c.q (c.tape c.h)).1, c.h + (M.δ c.q (c.tape c.h)).2.2.shift,
       Function.update c.tape c.h (M.δ c.q (c.tape c.h)).2.1⟩
 
 /-- The input `1ⁿ` on cells `0, …, n − 1`, with the head on cell `0`. -/
-def init (M : TM) (n : ℕ) : Cfg M :=
+def init (M : Machine) (n : ℕ) : Cfg M :=
   ⟨M.start, 0, fun i => if 0 ≤ i ∧ i < n then M.one else M.blank⟩
 
 /-- The run on input `1ⁿ`. -/
-def run (M : TM) (n t : ℕ) : Cfg M := step^[t] (init M n)
+def run (M : Machine) (n t : ℕ) : Cfg M := step^[t] (init M n)
 
 theorem run_succ (n t : ℕ) : run M n (t + 1) = step (run M n t) := by
   rw [run, run, Function.iterate_succ_apply']
 
 theorem step_eq {c : Cfg M} (h : M.halt c.q = false) :
-    step c = ⟨(M.δ c.q (c.tape c.h)).1,
-      if (M.δ c.q (c.tape c.h)).2.2 then c.h + 1 else c.h - 1,
+    step c = ⟨(M.δ c.q (c.tape c.h)).1, c.h + (M.δ c.q (c.tape c.h)).2.2.shift,
       Function.update c.tape c.h (M.δ c.q (c.tape c.h)).2.1⟩ := by
   simp [step, h]
 
@@ -99,10 +122,14 @@ theorem step_of_halt {c : Cfg M} (h : M.halt c.q = true) : step c = c := by
 theorem step_q_of_not_halt {c : Cfg M} (h : M.halt c.q = false) :
     (step c).q = (M.δ c.q (c.tape c.h)).1 := by simp [step, h]
 
-/-- The head moves one cell, unless the machine has halted. -/
-theorem step_h (c : Cfg M) : (step c).h = c.h + 1 ∨ (step c).h = c.h - 1 ∨ step c = c := by
+/-- The head moves at most one cell. -/
+theorem step_h (c : Cfg M) : (step c).h = c.h + 1 ∨ (step c).h = c.h - 1 ∨ (step c).h = c.h := by
   unfold step
-  split_ifs with h1 h2 <;> simp
+  split_ifs
+  · simp
+  · dsimp only
+    have := Move.shift_cases (M.δ c.q (c.tape c.h)).2.2
+    omega
 
 /-- Only the scanned cell changes. -/
 theorem step_tape_of_ne (c : Cfg M) {i : ℤ} (hi : i ≠ c.h) : (step c).tape i = c.tape i := by
@@ -278,12 +305,6 @@ theorem eq_of_prefix_of_length_eq {α : Type*} {l₁ l₂ L : List α} (h₁ : l
     (h : l₁.length = l₂.length) : l₁ = l₂ :=
   (List.prefix_of_prefix_length_le h₁ h₂ h.le).eq_of_length h
 
-theorem step_h_of_not_halt {c : Cfg M} (h : M.halt c.q = false) :
-    (step c).h = c.h + 1 ∨ (step c).h = c.h - 1 := by
-  unfold step
-  rw [if_neg (by simp [h])]
-  split_ifs <;> simp
-
 theorem cross_congr {X Y : ℕ → Cfg M} {s t : ℕ} {b b' : ℤ} (h0 : (X s).h - b = (Y t).h - b')
     (h1 : (X (s + 1)).h - b = (Y (t + 1)).h - b') : Cross X b s ↔ Cross Y b' t := by
   unfold Cross
@@ -343,6 +364,8 @@ structure SpliceInv (X Y Z : ℕ → Cfg M) (b₁ b₂ : ℤ) (TX TY τ l r : �
   tapeR : ∀ i, b₁ ≤ i → (Z τ).tape i = (Y r).tape (i + (b₂ - b₁))
   left : (Z τ).h < b₁ → (Z τ).q = (X l).q ∧ (Z τ).h = (X l).h ∧ (Y r).h < b₂
   right : b₁ ≤ (Z τ).h → (Z τ).q = (Y r).q ∧ (Z τ).h + (b₂ - b₁) = (Y r).h ∧ b₁ ≤ (X l).h
+  visL : ∀ t, t < l → (X t).h < b₁ → ∃ σ, (Z σ).q = (X t).q
+  visR : ∀ t, t < r → b₂ ≤ (Y t).h → ∃ σ, (Z σ).q = (Y t).q
 
 theorem SpliceInv.step_halt {τ l r : ℕ} (hZ : IsRun Z) (I : SpliceInv X Y Z b₁ b₂ TX TY τ l r)
     (hh : M.halt (Z τ).q = true) : SpliceInv X Y Z b₁ b₂ TX TY (τ + 1) l r := by
@@ -350,7 +373,7 @@ theorem SpliceInv.step_halt {τ l r : ℕ} (hZ : IsRun Z) (I : SpliceInv X Y Z b
   have hcs : ∀ b, cs Z b (τ + 1) = cs Z b τ := fun b => by
     rw [cs_succ, if_neg (by unfold Cross; rw [hZ1]; simp), List.append_nil]
   refine ⟨fun b hb => (hcs b).trans (I.csL b hb), fun b hb => (hcs b).trans (I.csR b hb), I.bl,
-    I.br, Or.inr (by rw [hZ1]; exact hh), ?_, ?_, ?_, ?_⟩ <;> rw [hZ1]
+    I.br, Or.inr (by rw [hZ1]; exact hh), ?_, ?_, ?_, ?_, I.visL, I.visR⟩ <;> rw [hZ1]
   exacts [I.tapeL, I.tapeR, I.left, I.right]
 
 theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z)
@@ -367,7 +390,7 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
     rcases Nat.lt_or_eq_of_le I.bl with h | h
     · exact h
     · subst h; rw [← hq, hh] at hXT; exact absurd hXT (by simp)
-  have hmove := step_h_of_not_halt hh
+  have hmove := step_h (Z τ)
   rw [← hZ τ] at hmove
   have hb12 : b₁ + (b₂ - b₁) = b₂ := by omega
   have htL : ∀ i, i < b₁ → (Z (τ + 1)).tape i = (X (l + 1)).tape i := by
@@ -378,9 +401,13 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
       exact I.tapeL i hi
   have hcsL : ∀ b, b ≤ b₁ → cs Z b (τ + 1) = cs X b (l + 1) := fun b hb =>
     cs_succ_congr (I.csL b hb) (cross_congr (by omega) (by omega)) h1
+  have hvisL : ∀ t, t < l + 1 → (X t).h < b₁ → ∃ σ, (Z σ).q = (X t).q := fun t ht hxt => by
+    rcases Nat.lt_or_eq_of_le (Nat.lt_succ_iff.1 ht) with h | rfl
+    · exact I.visL t h hxt
+    · exact ⟨τ, hq⟩
   rcases lt_or_ge (Z (τ + 1)).h b₁ with hL' | hR'
   · refine ⟨l + 1, r, hcsL, fun b hb => ?_, hlt, I.br, Or.inl (by omega), htL, fun i hi => ?_,
-      fun _ => ⟨h1, hXh.symm, hYr⟩, fun h => absurd h (not_le.2 hL')⟩
+      fun _ => ⟨h1, hXh.symm, hYr⟩, fun h => absurd h (not_le.2 hL'), hvisL, I.visR⟩
     · rw [cs_succ, if_neg (not_cross_of_lt (by omega) (by omega)), List.append_nil]
       exact I.csR b hb
     · rw [hZ τ, step_tape_of_ne _ (by omega)]
@@ -410,7 +437,8 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
       rw [cs_succ, if_pos hcrX, cs_succ, if_pos hcrY, hcsY, hXY] at this
       simpa using this
     refine ⟨l + 1, r' + 1, hcsL, fun b hb => ?_, hlt, hr'T, Or.inl (by omega), htL, fun i hi => ?_,
-      fun h => absurd h (by omega), fun _ => ⟨h1.trans hq', by omega, by omega⟩⟩
+      fun h => absurd h (by omega), fun _ => ⟨h1.trans hq', by omega, by omega⟩, hvisL,
+      fun t ht hyt => ?_⟩
     · have hno : cs Y (b + (b₂ - b₁)) r' = cs Y (b + (b₂ - b₁)) r :=
         cs_eq_of_no_cross hr' fun t ht1 ht2 => not_cross_of_lt
           (by have := hYside t ht1 (by omega); omega)
@@ -420,6 +448,9 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
     · rw [hZ τ, step_tape_of_ne _ (by omega), I.tapeR i hi]
       exact (frozen_right hY (by omega : r ≤ r' + 1)
         (fun t ht1 ht2 => hYside t ht1 (by omega)) (by omega)).symm
+    · rcases lt_or_ge t r with h | h
+      · exact I.visR t h hyt
+      · exact absurd hyt (not_le.2 (hYside t h (by omega)))
 
 theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z)
     (hYT : M.halt (Y TY).q = true) (hC : cs X b₁ TX = cs Y b₂ TY)
@@ -435,7 +466,7 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
     rcases Nat.lt_or_eq_of_le I.br with h | h
     · exact h
     · subst h; rw [← hq, hh] at hYT; exact absurd hYT (by simp)
-  have hmove := step_h_of_not_halt hh
+  have hmove := step_h (Z τ)
   rw [← hZ τ] at hmove
   have hb12 : b₁ + (b₂ - b₁) = b₂ := by omega
   have htR : ∀ i, b₁ ≤ i → (Z (τ + 1)).tape i = (Y (r + 1)).tape (i + (b₂ - b₁)) := by
@@ -446,9 +477,13 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
       exact I.tapeR i hi
   have hcsR : ∀ b, b₁ ≤ b → cs Z b (τ + 1) = cs Y (b + (b₂ - b₁)) (r + 1) := fun b hb =>
     cs_succ_congr (I.csR b hb) (cross_congr (by omega) (by omega)) h1
+  have hvisR : ∀ t, t < r + 1 → b₂ ≤ (Y t).h → ∃ σ, (Z σ).q = (Y t).q := fun t ht hyt => by
+    rcases Nat.lt_or_eq_of_le (Nat.lt_succ_iff.1 ht) with h | rfl
+    · exact I.visR t h hyt
+    · exact ⟨τ, hq⟩
   rcases le_or_gt b₁ (Z (τ + 1)).h with hR' | hL'
   · refine ⟨l, r + 1, fun b hb => ?_, hcsR, I.bl, hlt, Or.inl (by omega), fun i hi => ?_, htR,
-      fun h => absurd h (not_lt.2 hR'), fun _ => ⟨h1, hYh.symm, hXl⟩⟩
+      fun h => absurd h (not_lt.2 hR'), fun _ => ⟨h1, hYh.symm, hXl⟩, I.visL, hvisR⟩
     · rw [cs_succ, if_neg (not_cross_of_ge (by omega) (by omega)), List.append_nil]
       exact I.csL b hb
     · rw [hZ τ, step_tape_of_ne _ (by omega)]
@@ -478,7 +513,8 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
       rw [cs_succ, if_pos hcrX, cs_succ, if_pos hcrY, hcsX, hXY] at this
       simpa using this
     refine ⟨l' + 1, r + 1, fun b hb => ?_, hcsR, hl'T, hlt, Or.inl (by omega), fun i hi => ?_, htR,
-      fun _ => ⟨h1.trans hq'.symm, by omega, by omega⟩, fun h => absurd h (by omega)⟩
+      fun _ => ⟨h1.trans hq'.symm, by omega, by omega⟩, fun h => absurd h (by omega),
+      fun t ht hxt => ?_, hvisR⟩
     · have hno : cs X b l' = cs X b l :=
         cs_eq_of_no_cross hl' fun t ht1 ht2 => not_cross_of_ge
           (by have := hXside t ht1 (by omega); omega)
@@ -488,6 +524,9 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
     · rw [hZ τ, step_tape_of_ne _ (by omega), I.tapeL i hi]
       exact (frozen_left hX (by omega : l ≤ l' + 1)
         (fun t ht1 ht2 => hXside t ht1 (by omega)) hi).symm
+    · rcases lt_or_ge t l with h | h
+      · exact I.visL t h hxt
+      · exact absurd hxt (not_lt.2 (hXside t h (by omega)))
 
 theorem SpliceInv.step {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z)
     (hXT : M.halt (X TX).q = true) (hYT : M.halt (Y TY).q = true)
@@ -511,12 +550,15 @@ theorem splice (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z) (hXT : M.halt (X TX)
     (htR : ∀ i, b₁ ≤ i → (Z 0).tape i = (Y 0).tape (i + (b₂ - b₁))) :
     ∃ T, M.halt (Z T).q = true ∧ (∀ b, b ≤ b₁ → cs Z b T = cs X b TX) ∧
       (∀ b, b₁ ≤ b → cs Z b T = cs Y (b + (b₂ - b₁)) TY) ∧
-      (Z T).q = if Even (cs X b₁ TX).length then (X TX).q else (Y TY).q := by
+      (Z T).q = (if Even (cs X b₁ TX).length then (X TX).q else (Y TY).q) ∧
+      (∀ t, t ≤ TX → (X t).h < b₁ → ∃ σ, (Z σ).q = (X t).q) ∧
+      (∀ t, t ≤ TY → b₂ ≤ (Y t).h → ∃ σ, (Z σ).q = (Y t).q) := by
   have hall : ∀ τ, ∃ l r, SpliceInv X Y Z b₁ b₂ TX TY τ l r := by
     intro τ
     induction τ with
     | zero => exact ⟨0, 0, fun _ _ => rfl, fun _ _ => rfl, Nat.zero_le _, Nat.zero_le _,
-        Or.inl le_rfl, htL, htR, fun _ => ⟨hq, hh, hy⟩, fun h => absurd h (not_le.2 hz)⟩
+        Or.inl le_rfl, htL, htR, fun _ => ⟨hq, hh, hy⟩, fun h => absurd h (not_le.2 hz),
+        fun t ht => absurd ht (Nat.not_lt_zero t), fun t ht => absurd ht (Nat.not_lt_zero t)⟩
     | succ τ ih =>
       obtain ⟨l, r, I⟩ := ih
       exact I.step hX hY hZ hXT hYT hC
@@ -542,8 +584,15 @@ theorem splice (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z) (hXT : M.halt (X TX)
         (by have := lt_of_no_cross (by omega : r ≤ t + 1)
               (fun u hu1 hu2 => hno u hu1 (by omega)) hYr; omega)
     refine ⟨by rw [hq']; exact hXl, fun b hb => (I.csL b hb).trans (hXeq b).symm,
-      fun b hb => (I.csR b hb).trans (hYeq _ (by omega)).symm, ?_⟩
-    rw [if_pos (by rw [hXeq, ← I.csL b₁ le_rfl]; exact hpar.1 hL), hq', eq_of_halt hX hXl I.bl]
+      fun b hb => (I.csR b hb).trans (hYeq _ (by omega)).symm, ?_, fun t _ hxt => ?_,
+      fun t ht hyt => ?_⟩
+    · rw [if_pos (by rw [hXeq, ← I.csL b₁ le_rfl]; exact hpar.1 hL), hq', eq_of_halt hX hXl I.bl]
+    · rcases lt_or_ge t l with h | h
+      · exact I.visL t h hxt
+      · exact ⟨TX + TY, by rw [hq', eq_of_halt hX hXl h]⟩
+    · rcases lt_or_ge t r with h | h
+      · exact I.visR t h hyt
+      · exact absurd hyt (not_le.2 (lt_of_no_cross h (fun u hu1 hu2 => hno u hu1 (by omega)) hYr))
   · obtain ⟨hq', -, hXl⟩ := I.right hR
     have hYr : M.halt (Y r).q = true := by
       rcases I.prog with hp | hp
@@ -561,9 +610,16 @@ theorem splice (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z) (hXT : M.halt (X TX)
         (by have := ge_of_no_cross (by omega : l ≤ t + 1)
               (fun u hu1 hu2 => hno u hu1 (by omega)) hXl; omega)
     refine ⟨by rw [hq']; exact hYr, fun b hb => (I.csL b hb).trans (hXeq b hb).symm,
-      fun b hb => (I.csR b hb).trans (hYeq _).symm, ?_⟩
-    rw [if_neg (by rw [hXeq b₁ le_rfl, ← I.csL b₁ le_rfl]; exact fun he => not_lt.2 hR (hpar.2 he)),
-      hq', eq_of_halt hY hYr I.br]
+      fun b hb => (I.csR b hb).trans (hYeq _).symm, ?_, fun t ht hxt => ?_, fun t _ hyt => ?_⟩
+    · rw [if_neg (by
+          rw [hXeq b₁ le_rfl, ← I.csL b₁ le_rfl]; exact fun he => not_lt.2 hR (hpar.2 he)),
+        hq', eq_of_halt hY hYr I.br]
+    · rcases lt_or_ge t l with h | h
+      · exact I.visL t h hxt
+      · exact absurd hxt (not_lt.2 (ge_of_no_cross h (fun u hu1 hu2 => hno u hu1 (by omega)) hXl))
+    · rcases lt_or_ge t r with h | h
+      · exact I.visR t h hyt
+      · exact ⟨TX + TY, by rw [hq', eq_of_halt hY hYr h]⟩
 
 end Splice
 
@@ -576,7 +632,9 @@ theorem splice_run {n m n' a₁ a₂ TX TY : ℕ} (h₁ : 1 ≤ a₁) (h₁n : a
       (∀ b : ℤ, b ≤ a₁ → cs (run M n') b T = cs (run M n) b TX) ∧
       (∀ b : ℤ, a₁ ≤ b → cs (run M n') b T = cs (run M m) (b + ((a₂ : ℤ) - a₁)) TY) ∧
       (run M n' T).q =
-        if Even (cs (run M n) a₁ TX).length then (run M n TX).q else (run M m TY).q :=
+        (if Even (cs (run M n) a₁ TX).length then (run M n TX).q else (run M m TY).q) ∧
+      (∀ t, t ≤ TX → (run M n t).h < a₁ → ∃ σ, (run M n' σ).q = (run M n t).q) ∧
+      (∀ t, t ≤ TY → (a₂ : ℤ) ≤ (run M m t).h → ∃ σ, (run M n' σ).q = (run M m t).q) :=
   splice (isRun_run n) (isRun_run m) (isRun_run n') hXT hYT hC rfl rfl
     (by simp only [run, Function.iterate_zero, id, init]; omega)
     (by simp only [run, Function.iterate_zero, id, init]; omega)
@@ -708,7 +766,7 @@ theorem log_bound {q n ℓ : ℕ} (hq : 1 ≤ q) (hn : 64 ≤ n) (hnq : (q + 1) 
 
 /-- `M` decides `f` within time `T`: on input `1ⁿ` it has halted by step `T n`, in an accepting
 state iff `f n`. -/
-def DecidesInTime (M : TM) (f : ℕ → Bool) (T : ℕ → ℕ) : Prop :=
+def DecidesInTime (M : Machine) (f : ℕ → Bool) (T : ℕ → ℕ) : Prop :=
   ∀ n, M.halt (run M n (T n)).q = true ∧ M.accept (run M n (T n)).q = f n
 
 section Decider
@@ -722,7 +780,7 @@ theorem DecidesInTime.splice (hM : DecidesInTime M f T) {n m n' a₁ a₂ : ℕ}
     (∀ b : ℤ, b ≤ a₁ → cs (run M n') b (T n') = cs (run M n) b (T n)) ∧
     (∀ b : ℤ, a₁ ≤ b → cs (run M n') b (T n') = cs (run M m) (b + ((a₂ : ℤ) - a₁)) (T m)) ∧
     f n' = if Even (cs (run M n) a₁ (T n)).length then f n else f m := by
-  obtain ⟨T', hT', hL, hR, hq⟩ := splice_run h₁ h₁n h₂ h₂m hn' (hM n).1 (hM m).1 hC
+  obtain ⟨T', hT', hL, hR, hq, -, -⟩ := splice_run h₁ h₁n h₂ h₂m hn' (hM n).1 (hM m).1 hC
   have heq := cs_eq_of_halt (isRun_run n') hT' (hM n').1
   refine ⟨fun b hb => (heq b).symm.trans (hL b hb), fun b hb => (heq b).symm.trans (hR b hb), ?_⟩
   rw [← (hM n').2, ← eq_of_halt' (isRun_run n') hT' (hM n').1, hq]
@@ -730,17 +788,27 @@ theorem DecidesInTime.splice (hM : DecidesInTime M f T) {n m n' a₁ a₂ : ℕ}
   · exact (hM n).2
   · exact (hM m).2
 
-/-- **Bounded crossing sequences give eventual periodicity.** -/
-theorem DecidesInTime.eventuallyPeriodic_of_bounded (hM : DecidesInTime M f T) {K : ℕ}
-    (hK : ∀ n (b : ℤ), (cs (run M n) b (T n)).length ≤ K) : EventuallyPeriodic f := by
+/-- Splicing for a decider: the spliced run passes through every state of the left run on the left
+of `a₁`, and of the right run from `a₂` on. -/
+theorem DecidesInTime.splice_visit (hM : DecidesInTime M f T) {n m n' a₁ a₂ : ℕ} (h₁ : 1 ≤ a₁)
+    (h₁n : a₁ ≤ n) (h₂ : 1 ≤ a₂) (h₂m : a₂ ≤ m) (hn' : n' + a₂ = a₁ + m)
+    (hC : cs (run M n) a₁ (T n) = cs (run M m) a₂ (T m)) :
+    (∀ t, t ≤ T n → (run M n t).h < a₁ → ∃ σ, (run M n' σ).q = (run M n t).q) ∧
+    (∀ t, t ≤ T m → (a₂ : ℤ) ≤ (run M m t).h → ∃ σ, (run M n' σ).q = (run M m t).q) := by
+  obtain ⟨-, -, -, -, -, hvL, hvR⟩ := splice_run h₁ h₁n h₂ h₂m hn' (hM n).1 (hM m).1 hC
+  exact ⟨hvL, hvR⟩
+
+/-- **Finitely many crossing sequences give eventual periodicity.** -/
+theorem DecidesInTime.eventuallyPeriodic_of_finite (hM : DecidesInTime M f T)
+    (hfin : {C | ∃ (n : ℕ) (b : ℤ), cs (run M n) b (T n) = C}.Finite) : EventuallyPeriodic f := by
   classical
   -- `C` occurs at the boundary `a + 1` of inputs whose length exceeds `a` by some `r`
   let occ : ℕ → List M.Q → Prop := fun a C => ∃ r, cs (run M (a + 1 + r)) ((a + 1 : ℕ) : ℤ)
     (T (a + 1 + r)) = C
   -- the type of `a`: which crossing sequences occur, and for even ones, the value of `f`
-  let typ : ℕ → {C : List M.Q // C.length ≤ K} → Option Bool := fun a C =>
+  let typ : ℕ → {C | ∃ (n : ℕ) (b : ℤ), cs (run M n) b (T n) = C} → Option Bool := fun a C =>
     if h : occ a C.1 then some (if Even C.1.length then f (a + 1 + h.choose) else false) else none
-  have : Finite {C : List M.Q // C.length ≤ K} := (List.finite_length_le M.Q K).to_subtype
+  have : Finite {C | ∃ (n : ℕ) (b : ℤ), cs (run M n) b (T n) = C} := hfin.to_subtype
   -- equal even crossing sequences at the same boundary give equal values
   have heven : ∀ a r r', cs (run M (a + 1 + r)) ((a + 1 : ℕ) : ℤ) (T (a + 1 + r)) =
       cs (run M (a + 1 + r')) ((a + 1 : ℕ) : ℤ) (T (a + 1 + r')) →
@@ -754,7 +822,7 @@ theorem DecidesInTime.eventuallyPeriodic_of_bounded (hM : DecidesInTime M f T) {
     intro a a' htyp r
     set C := cs (run M (a + 1 + r)) ((a + 1 : ℕ) : ℤ) (T (a + 1 + r)) with hCdef
     have hocc : occ a C := ⟨r, rfl⟩
-    have hta := congrFun htyp ⟨C, hK _ _⟩
+    have hta := congrFun htyp ⟨C, a + 1 + r, _, rfl⟩
     have hocc' : occ a' C := by
       by_contra hn
       simp only [typ, dif_pos hocc, dif_neg hn] at hta
@@ -781,12 +849,18 @@ theorem DecidesInTime.eventuallyPeriodic_of_bounded (hM : DecidesInTime M f T) {
     rw [show a' + 1 + r + (a - a') = a + 1 + r by omega]
     exact key a' a htyp.symm r
 
+/-- **Bounded crossing sequences give eventual periodicity.** -/
+theorem DecidesInTime.eventuallyPeriodic_of_bounded [Finite M.Q] (hM : DecidesInTime M f T)
+    {K : ℕ} (hK : ∀ n (b : ℤ), (cs (run M n) b (T n)).length ≤ K) : EventuallyPeriodic f :=
+  hM.eventuallyPeriodic_of_finite <| (List.finite_length_le M.Q K).subset fun _ ⟨n, b, hC⟩ =>
+    hC ▸ hK n b
+
 /-- **Hennie's bound.** Let `1ⁿ` be a shortest input with a crossing sequence longer than `K`, at
 `p`. Cutting out the part between two boundaries on the same side of `p` with equal crossing
 sequences would give a shorter such input, so the `n` boundaries `1, …, n` have pairwise distinct
 crossing sequences on each side of `p`; counting gives `ℓ · (n / 4) ≤ T n` for
 `ℓ = log_{q+1} (n / 4)`. -/
-theorem DecidesInTime.time_lower_bound (hM : DecidesInTime M f T) {K n : ℕ} {p : ℤ}
+theorem DecidesInTime.time_lower_bound [Fintype M.Q] (hM : DecidesInTime M f T) {K n : ℕ} {p : ℤ}
     (hmin : ∀ n' < n, ∀ b : ℤ, (cs (run M n') b (T n')).length ≤ K)
     (hp : K < (cs (run M n) p (T n)).length) :
     Nat.log (Fintype.card M.Q + 1) (n / 4) * (n / 4) ≤ T n := by
@@ -848,7 +922,7 @@ theorem DecidesInTime.time_lower_bound (hM : DecidesInTime M f T) {K n : ℕ} {p
   nlinarith
 
 /-- **Hennie: time `o(n log n)` bounds the crossing sequences.** -/
-theorem DecidesInTime.bounded (hM : DecidesInTime M f T)
+theorem DecidesInTime.bounded [Fintype M.Q] (hM : DecidesInTime M f T)
     (hT : (fun n => (T n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n)) :
     ∃ K, ∀ n (b : ℤ), (cs (run M n) b (T n)).length ≤ K := by
   classical
@@ -896,7 +970,7 @@ theorem DecidesInTime.bounded (hM : DecidesInTime M f T)
 
 /-- **Hennie's theorem for unary input.** A one-tape machine that decides `f` in time
 `o(n log n)` has bounded crossing sequences, so `f` is eventually periodic. -/
-theorem DecidesInTime.eventuallyPeriodic (hM : DecidesInTime M f T)
+theorem DecidesInTime.eventuallyPeriodic [Fintype M.Q] (hM : DecidesInTime M f T)
     (hT : (fun n => (T n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n)) :
     EventuallyPeriodic f := by
   obtain ⟨K, hK⟩ := hM.bounded hT
@@ -953,18 +1027,18 @@ def periodicTM (f : ℕ → Bool) (N P : ℕ) (hP : 0 < P) : TM where
   halt := Sum.isRight
   accept := Sum.elim (fun _ => false) id
   δ := fun s x => match s, x with
-    | Sum.inl s, true => (Sum.inl ⟨wrap N P s, wrap_lt hP s⟩, true, true)
-    | Sum.inl s, false => (Sum.inr (f s), false, true)
-    | Sum.inr b, x => (Sum.inr b, x, true)
+    | Sum.inl s, true => (Sum.inl ⟨wrap N P s, wrap_lt hP s⟩, true, Move.right)
+    | Sum.inl s, false => (Sum.inr (f s), false, Move.right)
+    | Sum.inr b, x => (Sum.inr b, x, Move.right)
 
 theorem run_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) {n t : ℕ} (ht : t ≤ n) :
-    run (periodicTM f N P hP) n t =
-      ⟨Sum.inl (cnt N P hP t), t, (init (periodicTM f N P hP) n).tape⟩ := by
+    run (periodicTM f N P hP).toMachine n t =
+      ⟨Sum.inl (cnt N P hP t), t, (init (periodicTM f N P hP).toMachine n).tape⟩ := by
   induction t with
   | zero => rfl
   | succ t ih =>
     rw [run_succ, ih (by omega), step_eq rfl]
-    have htape : (init (periodicTM f N P hP) n).tape (t : ℤ) = true := by
+    have htape : (init (periodicTM f N P hP).toMachine n).tape (t : ℤ) = true := by
       simp only [init]; rw [if_pos (by omega)]; rfl
     dsimp only
     rw [htape]
@@ -973,10 +1047,11 @@ theorem run_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) {n t : ℕ} (
     exact Function.update_eq_self_iff.2 htape.symm
 
 theorem decidesInTime_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P)
-    (hf : ∀ t, N ≤ t → f (t + P) = f t) : DecidesInTime (periodicTM f N P hP) f (· + 1) := by
+    (hf : ∀ t, N ≤ t → f (t + P) = f t) :
+    DecidesInTime (periodicTM f N P hP).toMachine f (· + 1) := by
   intro n
   rw [run_succ, run_periodicTM hP le_rfl, step_eq rfl]
-  have htape : (init (periodicTM f N P hP) n).tape (n : ℤ) = false := by
+  have htape : (init (periodicTM f N P hP).toMachine n).tape (n : ℤ) = false := by
     simp only [init]; rw [if_neg (by omega)]; rfl
   dsimp only
   rw [htape]
@@ -1003,7 +1078,7 @@ periodic (Hennie–Trakhtenbrot; the fast direction takes `n + 1` steps). -/
 theorem eventuallyPeriodic_iff_exists_fast_decider (f : ℕ → Bool) : EventuallyPeriodic f ↔
     ∃ (M : TM) (T : ℕ → ℕ),
       (fun n => (T n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n) ∧
-      DecidesInTime M f T := by
+      DecidesInTime M.toMachine f T := by
   constructor
   · rintro ⟨N, P, hP, hf⟩
     exact ⟨periodicTM f N P hP, (· + 1), isLittleO_succ_mul_log, decidesInTime_periodicTM hP hf⟩
@@ -1015,7 +1090,7 @@ theorem eventuallyPeriodic_iff_exists_fast_decider (f : ℕ → Bool) : Eventual
 theorem problem1_iff_no_fast_one_tape_decider : Rule30Prize.Problem1 ↔
     ¬ ∃ (M : TM) (T : ℕ → ℕ),
       (fun n => (T n : ℝ)) =o[Filter.atTop] (fun n => (n : ℝ) * Real.log n) ∧
-      DecidesInTime M c T := by
+      DecidesInTime M.toMachine c T := by
   rw [problem1_iff_not_eventuallyPeriodic, eventuallyPeriodic_iff_exists_fast_decider]
 
 end Rule30Equivalents.OneTapeGap

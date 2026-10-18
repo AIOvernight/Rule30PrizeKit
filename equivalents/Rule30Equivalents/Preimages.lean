@@ -21,7 +21,9 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   exactly two preimages**, one white and one black from that cell on (`extendLeft`): there the
   preimage satisfies `x_{q-1} = x_q ∨ x_{q+1}`, which forces it to be constant
   (`eq_of_evol_one_white`). Every finite configuration is one, such as each row of rule 30 from the
-  single black cell; for the white configuration, `preimage_white`: all white and all black.
+  single black cell, whose two preimages are the row before it and one that is black far to the
+  right (`evol_one_eq_row_iff`); for the white configuration, `preimage_white`: all white and all
+  black.
 * `evol_one_eq_iff_of_eventually_black`: **a configuration that is black from some cell on has
   exactly three preimages**, repeating `100` in each of the three phases from that cell on
   (`eq_third_of_evol_one_black`). So the counts `1` (almost every configuration), `2` and `3` all
@@ -392,6 +394,25 @@ theorem evol_one_eq_iff_of_eventually_black {y : ℤ → Bool} {N : ℤ}
     · exact Or.inr (Or.inl (hagree.trans (by rw [hthird r (N + 1) h])))
     · exact Or.inr (Or.inr (hagree.trans (by rw [hthird r (N + 2) h])))
   · rintro (rfl | rfl | rfl) <;> exact evol_extendLeft (hz _)
+
+/-- **Each row of rule 30 from the single black cell has exactly two preimages**: the row before
+it, and one that is black from the cell `t + 1` on. -/
+theorem evol_one_eq_row_iff (t : ℕ) (x : ℤ → Bool) :
+    evol x 1 = evol seed (t + 1) ↔
+      x = evol seed t ∨ x = extendLeft (evol seed (t + 1)) ((t : ℤ) + 1) (fun _ => true) := by
+  have hy : ∀ q, (t : ℤ) + 1 < q → evol seed (t + 1) q = false := fun q hq => by
+    rw [evol_seed]
+    exact Rule30Diagonals.cell_eq_false_of_gt _ _ (by push_cast; omega)
+  have hprev : evol (evol seed t) 1 = evol seed (t + 1) :=
+    funext fun p => Rule30ZeroBoundaryBarriers.evol_restart seed t 1 p
+  have hwhite : evol seed t = extendLeft (evol seed (t + 1)) ((t : ℤ) + 1) (fun _ => false) := by
+    rcases (evol_one_eq_iff_of_eventually_white hy (evol seed t)).1 hprev with h | h
+    · exact h
+    · exfalso
+      have h1 := congrFun h ((t : ℤ) + 1)
+      rw [evol_seed, Rule30Diagonals.cell_eq_false_of_gt _ _ (by omega)] at h1
+      simp [extendLeft] at h1
+  rw [evol_one_eq_iff_of_eventually_white hy, ← hwhite]
 
 /-! ### Configurations with a unique preimage -/
 

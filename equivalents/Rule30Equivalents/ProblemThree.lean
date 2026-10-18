@@ -25,17 +25,6 @@ namespace Rule30Equivalents.ProblemThree
 
 open Filter Ruliology.CellularAutomata OneTapeGap Automatic
 
-/-- The input word `w` on cells `0, …, |w| − 1`, blanks elsewhere, with the head on cell `0`. -/
-def initWord (M : Machine) (w : List M.Γ) : Cfg M :=
-  ⟨M.start, 0, fun i => if h : 0 ≤ i ∧ i < w.length then w[i.toNat]'(by omega) else M.blank⟩
-
-/-- The run on input `w`. -/
-def runWord (M : Machine) (w : List M.Γ) (t : ℕ) : Cfg M := step^[t] (initWord M w)
-
-theorem runWord_succ (M : Machine) (w : List M.Γ) (t : ℕ) :
-    runWord M w (t + 1) = step (runWord M w t) := by
-  rw [runWord, runWord, Function.iterate_succ_apply']
-
 /-- The binary digits of `n`, least significant first, as tape symbols: `M.one` for `1` and `zero`
 for `0`. -/
 def binWord (M : Machine) (zero : M.Γ) (n : ℕ) : List M.Γ :=
@@ -44,8 +33,8 @@ def binWord (M : Machine) (zero : M.Γ) (n : ℕ) : List M.Γ :=
 /-- `M` computes `f` from the binary digits of `n` within time `T`: on the input `binWord n` it has
 halted by step `T n`, in an accepting state iff `f n`. -/
 def DecidesBinInTime (M : Machine) (zero : M.Γ) (f : ℕ → Bool) (T : ℕ → ℕ) : Prop :=
-  ∀ n, M.halt (runWord M (binWord M zero n) (T n)).q = true ∧
-    M.accept (runWord M (binWord M zero n) (T n)).q = f n
+  ∀ n, M.halt (runW M id (binWord M zero n) (T n)).q = true ∧
+    M.accept (runW M id (binWord M zero n) (T n)).q = f n
 
 /-- **Problem 3**, literally: no one-tape Turing machine computes `c(n)` from the binary digits of
 `n` in time `O(n)`. -/
@@ -97,20 +86,20 @@ theorem mem_kernel_low (f : ℕ → Bool) (n t : ℕ) :
   ⟨t, n % 2 ^ t, Nat.mod_lt _ (by positivity), rfl⟩
 
 theorem run_kernelTM {f : ℕ → Bool} (hf : IsAutomatic 2 f) (n : ℕ) {t : ℕ} (ht : t ≤ n.size) :
-    runWord (kernelTM f hf).toMachine (binWord (kernelTM f hf).toMachine (some false) n) t =
+    runW (kernelTM f hf).toMachine id (binWord (kernelTM f hf).toMachine (some false) n) t =
       ⟨Sum.inl ⟨fun m => f (2 ^ t * m + n % 2 ^ t), mem_kernel_low f n t⟩, t,
-        (initWord (kernelTM f hf).toMachine
+        (initW (kernelTM f hf).toMachine id
           (binWord (kernelTM f hf).toMachine (some false) n)).tape⟩ := by
   induction t with
   | zero =>
-    show initWord _ _ = _
-    simp only [initWord, pow_zero, one_mul, Nat.mod_one, add_zero, Nat.cast_zero]
+    show initW _ id _ = _
+    simp only [initW, pow_zero, one_mul, Nat.mod_one, add_zero, Nat.cast_zero]
     rfl
   | succ t ih =>
-    rw [runWord_succ, ih (by omega), step_eq rfl]
-    have htape : (initWord (kernelTM f hf).toMachine
+    rw [(isRun_runW (M := (kernelTM f hf).toMachine) id _) t, ih (by omega), step_eq rfl]
+    have htape : (initW (kernelTM f hf).toMachine id
         (binWord (kernelTM f hf).toMachine (some false) n)).tape (t : ℤ) = some (n.testBit t) := by
-      simp only [initWord, binWord, List.length_map, List.length_range]
+      simp only [initW, binWord, List.length_map, List.length_range, id]
       rw [dif_pos (by omega)]
       simp only [List.getElem_map, List.getElem_range, Int.toNat_natCast]
       cases n.testBit t <;> rfl
@@ -138,10 +127,11 @@ theorem run_kernelTM {f : ℕ → Bool} (hf : IsAutomatic 2 f) (n : ℕ) {t : �
 theorem decidesBinInTime_kernelTM {f : ℕ → Bool} (hf : IsAutomatic 2 f) :
     DecidesBinInTime (kernelTM f hf).toMachine (some false) f fun n => n.size + 1 := by
   intro n
-  rw [runWord_succ, run_kernelTM hf n le_rfl, step_eq rfl]
-  have htape : (initWord (kernelTM f hf).toMachine
+  rw [(isRun_runW (M := (kernelTM f hf).toMachine) id _) n.size, run_kernelTM hf n le_rfl,
+    step_eq rfl]
+  have htape : (initW (kernelTM f hf).toMachine id
       (binWord (kernelTM f hf).toMachine (some false) n)).tape (n.size : ℤ) = none := by
-    simp only [initWord, binWord, List.length_map, List.length_range]
+    simp only [initW, binWord, List.length_map, List.length_range]
     rw [dif_neg (by omega)]
     rfl
   dsimp only

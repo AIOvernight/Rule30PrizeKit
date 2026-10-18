@@ -245,7 +245,7 @@ variable {α : Type} (M : OTM α)
 
 /-- The machine on the input tape whose states are the work configurations (state, work tape,
 work head). It writes back the symbol it reads. Its inputs are words, written with `some`
-(`OneTapeRegular.runW`), so its unary input symbol `one` is not used. -/
+(`OneTapeGap.runW`), so its unary input symbol `one` is not used. -/
 def toMachine : Machine where
   Q := M.Q × (ℤ → M.Γ) × ℤ
   Γ := Option α

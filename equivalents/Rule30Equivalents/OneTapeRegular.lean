@@ -36,20 +36,7 @@ open Filter OneTapeGap Ruliology.CellularAutomata
 
 variable {M : Machine} {α : Type*}
 
-/-! ### Runs on words -/
-
-/-- The input word `w`, written letter by letter through `enc` on the cells `0, …, |w| - 1`,
-blanks elsewhere, with the head on cell `0`. -/
-def initW (M : Machine) (enc : α → M.Γ) (w : List α) : Cfg M :=
-  ⟨M.start, 0, fun i => if h : 0 ≤ i ∧ i < w.length then enc (w[i.toNat]'(by omega)) else M.blank⟩
-
-/-- The run on the input `w`. -/
-def runW (M : Machine) (enc : α → M.Γ) (w : List α) (t : ℕ) : Cfg M := step^[t] (initW M enc w)
-
-theorem isRun_runW (enc : α → M.Γ) (w : List α) : IsRun (runW M enc w) := fun t => by
-  simp only [runW, Function.iterate_succ_apply']
-
-theorem runW_zero (enc : α → M.Γ) (w : List α) : runW M enc w 0 = initW M enc w := rfl
+/-! ### Splicing runs on words -/
 
 /-- Splicing runs on words: the run on `u ++ v'` follows the run on `u ++ v` left of `|u|`, and the
 run on `u' ++ v'` right of `|u'|`; it passes through every state those runs have there. -/

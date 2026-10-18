@@ -163,6 +163,25 @@ def IsRun (X : ℕ → Cfg M) : Prop := ∀ t, X (t + 1) = step (X t)
 
 theorem isRun_run (n : ℕ) : IsRun (run M n) := run_succ n
 
+/-! ### Runs on words
+
+The input word `w ∈ α*`, written letter by letter through `enc : α → M.Γ`. -/
+
+/-- The input word `w`, written letter by letter through `enc` on the cells `0, …, |w| - 1`,
+blanks elsewhere, with the head on cell `0`. -/
+def initW {α : Type*} (M : Machine) (enc : α → M.Γ) (w : List α) : Cfg M :=
+  ⟨M.start, 0, fun i => if h : 0 ≤ i ∧ i < w.length then enc (w[i.toNat]'(by omega)) else M.blank⟩
+
+/-- The run on the input `w`. -/
+def runW {α : Type*} (M : Machine) (enc : α → M.Γ) (w : List α) (t : ℕ) : Cfg M :=
+  step^[t] (initW M enc w)
+
+theorem isRun_runW {α : Type*} (enc : α → M.Γ) (w : List α) : IsRun (runW M enc w) := fun t => by
+  simp only [runW, Function.iterate_succ_apply']
+
+theorem runW_zero {α : Type*} (enc : α → M.Γ) (w : List α) :
+    runW M enc w 0 = initW M enc w := rfl
+
 /-- The run crosses the boundary `b` (between cells `b − 1` and `b`) at step `t`. -/
 def Cross (X : ℕ → Cfg M) (b : ℤ) (t : ℕ) : Prop := ¬ ((X t).h < b ↔ (X (t + 1)).h < b)
 

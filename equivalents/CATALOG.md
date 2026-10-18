@@ -2660,7 +2660,9 @@ with Turing machines reading n. Notes:
     version of [Kop23].
 11. **Generic versus special points.** For μ-almost every configuration, with μ the uniform Bernoulli
     measure, the center trace is normal. The trace map Tr₀ pushes μ forward to μ, because
-    c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the cell x_{−t} is used by no earlier c(s).
+    c(t) = x_{−t} ⊕ g_t(x_{−t+1}, …, x_t) and the cell x_{−t} is used by no earlier c(s). In finite
+    form this is proved (`AlgebraicDegree.card_trace`): each word w(0), …, w(n) is the center trace
+    of exactly 2ⁿ of the 2^(2n+1) configurations on [−n, n].
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

@@ -31,6 +31,9 @@ the Möbius transform `coef Φ_t S = ∑_{U ⊆ S} Φ_t(1_U)`.
 * `walsh_center_eq_zero`, `card_center_true`: `Φ_t` is balanced, and uncorrelated with every affine
   function that does not involve `x_{-t}`: its Walsh coefficient there is `0`, because `Φ_t` flips
   with `x_{-t}`.
+* `card_trace`: the whole center trace is uniform: each word `w(0), …, w(n)` is the trace of
+  exactly `2ⁿ` of the `2^(2n+1)` configurations on `[-n, n]` (cells `±(n+1)` do not affect the
+  trace up to time `n`, and flipping `x_{-(n+1)}` flips the center at time `n + 1`).
 
 The degree does not decide Problem 1: there are rules of maximal degree whose single-seed center
 columns are eventually periodic (catalog Section 6.3).
@@ -654,5 +657,127 @@ theorem card_center_true (t : ℕ) :
     omega
   have h2 : (2 : ℕ) ^ (2 * t + 1) = 2 ^ (2 * t) * 2 := pow_succ 2 (2 * t)
   omega
+
+/-! ### The center trace of a random configuration is uniform -/
+
+/-- Splitting the subsets of `insert i S` by whether they contain `i`. -/
+theorem card_filter_powerset_insert {S : Finset ℤ} {i : ℤ} (hi : i ∉ S) (P : Finset ℤ → Prop)
+    [DecidablePred P] :
+    ((insert i S).powerset.filter P).card =
+      (S.powerset.filter P).card + (S.powerset.filter fun U => P (insert i U)).card := by
+  rw [Finset.powerset_insert, Finset.filter_union, Finset.card_union_of_disjoint]
+  · rw [Finset.filter_image, Finset.card_image_of_injOn]
+    intro U hU V hV h
+    simp only [Finset.coe_filter, Finset.mem_powerset, Set.mem_setOf_eq] at hU hV
+    have hiU : i ∉ U := fun h' => hi (hU.1 h')
+    have hiV : i ∉ V := fun h' => hi (hV.1 h')
+    rw [← Finset.erase_insert hiU, ← Finset.erase_insert hiV]
+    exact congrArg (fun W => W.erase i) h
+  · rw [Finset.disjoint_left]
+    intro U hU hU'
+    obtain ⟨V, -, hVU⟩ := Finset.mem_image.1 (Finset.mem_filter.1 hU').1
+    have hU1 := (Finset.mem_powerset.1 (Finset.mem_filter.1 hU).1)
+    exact hi (hU1 (hVU ▸ Finset.mem_insert_self i V))
+
+/-- **The center trace of a random configuration is uniform** (catalog Section 7, item 11): every
+word `w(0), …, w(n)` is the center trace of exactly `2ⁿ` of the `2^(2n+1)` configurations on
+`[-n, n]`, so the trace map pushes the uniform Bernoulli measure to the uniform measure. Cells
+`±(n+1)` do not affect the trace up to time `n`, and flipping the cell `-(n+1)` flips the center at
+time `n + 1` (left-permutivity). -/
+theorem card_trace (w : ℕ → Bool) : ∀ n : ℕ,
+    ((Icc (-(n : ℤ)) n).powerset.filter fun U => ∀ t ≤ n, evol (ind U) t 0 = w t).card = 2 ^ n
+  | 0 => by
+    rw [show Icc (-((0 : ℕ) : ℤ)) ((0 : ℕ) : ℤ) = {0} by simp, pow_zero, Finset.card_eq_one]
+    refine ⟨if w 0 then {0} else ∅, ?_⟩
+    ext U
+    rw [Finset.mem_filter, Finset.mem_powerset, Finset.mem_singleton, Finset.subset_singleton_iff]
+    have hev : (∀ t ≤ 0, evol (ind U) t 0 = w t) ↔ decide ((0 : ℤ) ∈ U) = w 0 :=
+      ⟨fun h => h 0 le_rfl, fun h t ht => by
+        obtain rfl : t = 0 := by omega
+        exact h⟩
+    rw [hev]
+    cases hw : w 0
+    · constructor
+      · rintro ⟨rfl | rfl, h⟩
+        · rfl
+        · simp at h
+      · intro h
+        rw [if_neg (by simp)] at h
+        subst h
+        simp
+    · constructor
+      · rintro ⟨rfl | rfl, h⟩
+        · simp at h
+        · rfl
+      · intro h
+        rw [if_pos rfl] at h
+        subst h
+        simp
+  | n + 1 => by
+    have ih := card_trace w n
+    set B := Icc (-(n : ℤ)) n with hB
+    set L : ℤ := -((n : ℤ) + 1)
+    set R : ℤ := (n : ℤ) + 1
+    have hRB : R ∉ B := by simp [B, R]
+    have hLB : L ∉ insert R B := by simp [B, L, R]; omega
+    have hA : Icc (-((n + 1 : ℕ) : ℤ)) ((n + 1 : ℕ) : ℤ) = insert L (insert R B) := by
+      ext j
+      simp only [Finset.mem_Icc, Finset.mem_insert, B, L, R]
+      push_cast
+      omega
+    rw [hA]
+    -- the constraints up to time `n` do not see the cells `L` and `R`
+    set P : Finset ℤ → Prop := fun U => ∀ t ≤ n, evol (ind U) t 0 = w t
+    have hfar : ∀ (U : Finset ℤ) (j : ℤ), j = L ∨ j = R → (P (insert j U) ↔ P U) := by
+      intro U j hj
+      refine forall_congr' fun t => imp_congr_right fun ht => ?_
+      rw [evol_congr t 0 (y := ind U) fun k hk1 hk2 => ?_]
+      simp only [ind, Finset.mem_insert]
+      have : k ≠ j := by rcases hj with rfl | rfl <;> simp only [L, R] <;> omega
+      simp [this]
+    -- flipping `L` flips the center at time `n + 1`
+    have hflip : ∀ U : Finset ℤ, L ∉ U →
+        evol (ind (insert L U)) (n + 1) 0 = !evol (ind U) (n + 1) 0 := by
+      intro U hLU
+      have ha : (0 : ℤ) - ((n + 1 : ℕ) : ℤ) = L := by simp only [L]; push_cast; omega
+      have e0 := evol_update_left (ind U) (n + 1) 0
+      rw [ha] at e0
+      have e1 : ind (insert L U) = Function.update (ind U) L true := by
+        funext k
+        by_cases hk : k = L
+        · subst hk; simp [ind]
+        · simp [ind, Function.update, hk]
+      have e2 : Function.update (ind U) L false = ind U :=
+        Function.update_eq_self_iff.2 (by simp [ind, hLU])
+      rw [e1, e0, e2]
+    have hsplit : ∀ U : Finset ℤ, (∀ t ≤ n + 1, evol (ind U) t 0 = w t) ↔
+        P U ∧ evol (ind U) (n + 1) 0 = w (n + 1) := fun U =>
+      ⟨fun h => ⟨fun t ht => h t (by omega), h (n + 1) le_rfl⟩, fun h t ht => by
+        rcases Nat.lt_or_ge t (n + 1) with h' | h'
+        · exact h.1 t (by omega)
+        · obtain rfl : t = n + 1 := by omega
+          exact h.2⟩
+    simp only [Finset.filter_congr fun U _ => hsplit U]
+    rw [card_filter_powerset_insert hLB]
+    -- the half with `L` is the complement of the half without it
+    have hL : ((insert R B).powerset.filter fun U =>
+        P (insert L U) ∧ evol (ind (insert L U)) (n + 1) 0 = w (n + 1)) =
+        (insert R B).powerset.filter fun U => P U ∧ ¬ evol (ind U) (n + 1) 0 = w (n + 1) := by
+      refine Finset.filter_congr fun U hU => ?_
+      rw [Finset.mem_powerset] at hU
+      rw [hfar U L (Or.inl rfl), hflip U fun h => hLB (hU h)]
+      cases evol (ind U) (n + 1) 0 <;> cases w (n + 1) <;> simp
+    rw [hL, ← Finset.card_union_of_disjoint (Finset.disjoint_filter.2 fun U _ h1 h2 => h2.2 h1.2),
+      ← Finset.filter_or]
+    have hP : ((insert R B).powerset.filter fun U =>
+        (P U ∧ evol (ind U) (n + 1) 0 = w (n + 1)) ∨
+          (P U ∧ ¬ evol (ind U) (n + 1) 0 = w (n + 1))) =
+        (insert R B).powerset.filter P :=
+      Finset.filter_congr fun U _ => by tauto
+    rw [hP, card_filter_powerset_insert hRB]
+    have hR : (B.powerset.filter fun U => P (insert R U)) = B.powerset.filter P :=
+      Finset.filter_congr fun U _ => hfar U R (Or.inr rfl)
+    rw [hR, ih, pow_succ]
+    omega
 
 end Rule30Equivalents.AlgebraicDegree

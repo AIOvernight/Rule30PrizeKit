@@ -120,7 +120,8 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   [IntegerRows](Rule30Equivalents/IntegerRows.lean), [LogicAutomata](Rule30Equivalents/LogicAutomata.lean),
   [Realization](Rule30Equivalents/Realization.lean), [WordForms](Rule30Equivalents/WordForms.lean),
   [Expansions](Rule30Equivalents/Expansions.lean), [Holonomic](Rule30Equivalents/Holonomic.lean),
-  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotBase](Rule30Equivalents/PisotBase.lean),
+  [OmegaRegular](Rule30Equivalents/OmegaRegular.lean), [PisotNumbers](Rule30Equivalents/PisotNumbers.lean),
+  [PisotBase](Rule30Equivalents/PisotBase.lean),
   [Automatic](Rule30Equivalents/Automatic.lean), [Transcendence](Rule30Equivalents/Transcendence.lean),
   [LempelZiv](Rule30Equivalents/LempelZiv.lean), [CoupledHalves](Rule30Equivalents/CoupledHalves.lean),
   [TailLanguage](Rule30Equivalents/TailLanguage.lean), [TFunction](Rule30Equivalents/TFunction.lean),
@@ -131,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 185 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 186 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -162,7 +163,7 @@ files. The rows follow the order of Section 3.
 | 39 | lagrange | real numbers | θ = [1+c(0); 1+c(1), 1+c(2), …] is not a quadratic irrational | Proved (library) | `Lagrange.problem1_iff_not_quadratic`, `Lagrange.digit_periodic_iff` |
 | 49 | minkowski | real numbers | ?⁻¹(x₂) = [0; 1, r₁, r₂, …] (r_k the run lengths) is not a quadratic irrational | Proved (library), for y defined by its continued fraction | `Minkowski.problem1_iff_minkowski_not_quadratic` |
 | 50 | other-expansions | real numbers | the Engel, Sylvester and factorial-base expansions of x₂ are infinite; its Lüroth expansion is not EP | Proved (library), all four | `Expansions.problem1_iff_engel_infinite`, `Expansions.problem1_iff_sylvester_infinite`, `Expansions.problem1_iff_factorial_infinite`, `Expansions.problem1_iff_luroth_not_eventuallyPeriodic` |
-| 48 | pisot-base | real numbers | Σ c(t)β^−(t+1) ∉ ℚ(β) for a Pisot number β > 2, such as 1 + √2 | Proved (library) for β = 1 + √2 | `PisotBase.problem1_iff_not_mem_Q_sqrt_two` |
+| 48 | pisot-base | real numbers | Σ c(t)β^−(t+1) ∉ ℚ(β) for a Pisot number β > 2, such as 1 + √2 | Proved (library), for every Pisot number β > 2 | `PisotNumbers.problem1_iff_not_mem_adjoin`, `PisotBase.problem1_iff_not_mem_Q_sqrt_two` |
 | 15 | two-adic | p-adic numbers | Σ c(t)2ᵗ ∈ ℤ₂ is not rational; an integer congruence form for every prime p | Proved (library) | `TwoAdic.problem1_iff_padic_irrational`, `TwoAdic.problem1_iff_padic_int` |
 | 30 | fcsr-complexity | coding theory | the 2-adic (FCSR) complexity of c is unbounded | Proved (library) | `TwoAdic.problem1_iff_two_adic_complexity` |
 | 5 | series-f2-lfsr | algebra, coding theory | Σ c(t)Xᵗ ∉ F₂(X); no eventual linear recurrence or LFSR over F₂ generates c; its linear complexity is unbounded | Proved (library) | `PowerSeriesF2.problem1_iff_series_not_rational` and five more |
@@ -208,8 +209,9 @@ batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
 [Expansions](Rule30Equivalents/Expansions.lean), [31] in [Holonomic](Rule30Equivalents/Holonomic.lean)
 (the recurrence form) and [DFinite](Rule30Equivalents/DFinite.lean) (the D-finite form), [36] in
-[OmegaRegular](Rule30Equivalents/OmegaRegular.lean) (Büchi) and [MonadicLogic](Rule30Equivalents/MonadicLogic.lean) (MSO), [48] (β = 1 + √2) in
-[PisotBase](Rule30Equivalents/PisotBase.lean), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
+[OmegaRegular](Rule30Equivalents/OmegaRegular.lean) (Büchi) and [MonadicLogic](Rule30Equivalents/MonadicLogic.lean) (MSO), [48] in
+[PisotNumbers](Rule30Equivalents/PisotNumbers.lean) (every Pisot base β > 2) and
+[PisotBase](Rule30Equivalents/PisotBase.lean) (β = 1 + √2), [52] in [Automatic](Rule30Equivalents/Automatic.lean), and
 [37] in [LempelZiv](Rule30Equivalents/LempelZiv.lean), and [33] in
 [CoupledHalves](Rule30Equivalents/CoupledHalves.lean), [54] in
 [AutomatonGroup](Rule30Equivalents/AutomatonGroup.lean), [39] in [Lagrange](Rule30Equivalents/Lagrange.lean),
@@ -821,12 +823,18 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   equivalence fails. For a Salem number β > 2, x_β ∉ ℚ(β) still implies Problem 1, but the converse
   is open (Schmidt's conjecture).
 - *Difficulty.* Moderate.
-- *Lean.* Proved in the library for β = 1 + √2: `PisotBase.problem1_iff_not_mem_Q_sqrt_two`, from
-  `eventuallyPeriodic_iff_mem_qsqrt2`, by the lattice argument above with explicit coordinates
-  (`uv`, `conj_bound`; ℚ(√2) is the subfield `qsqrt2`). The critic's note on the statement: the
-  quadratic case can use explicit a + b√2 coordinates
-  and the bounded conjugate, with no number-field machinery. Mathlib has no β-expansions and no
-  Pisot numbers.
+- *Lean.* Proved in the library for every Pisot number β > 2, in
+  [PisotNumbers](Rule30Equivalents/PisotNumbers.lean): `problem1_iff_not_mem_adjoin`, from
+  `eventuallyPeriodic_iff_mem_adjoin` (Schmidt's theorem for 0/1 digits). `IsPisot β` says that β
+  is a real algebraic integer > 1 whose other complex conjugates, the roots of `minpoly ℤ β`, lie
+  in the open unit disk; ℚ(β) is `IntermediateField.adjoin ℚ {β}`, a number field. The lattice
+  argument above runs in it: q·x_t is an algebraic integer; an embedding φ : ℚ(β) → ℂ either fixes
+  β, and is then the inclusion (`IntermediateField.adjoin_algHom_ext`), or sends it into the unit
+  disk; so all conjugates of q·x_t are bounded, and Mathlib's
+  `NumberField.Embeddings.finite_of_norm_le` leaves finitely many values. The case β = 1 + √2 is
+  the corollary `PisotBase.problem1_iff_not_mem_Q_sqrt_two`, with explicit a + b√2 coordinates:
+  1 + √2 is a root of X² − 2X − 1 (`isPisot_β`), and ℚ(1 + √2) = ℚ(√2) (`mem_adjoin_iff`).
+  Mathlib has no β-expansions and no Pisot numbers.
 
   ```lean
   noncomputable def xβ (β : ℝ) : ℝ := ∑' t, (if Rule30Prize.center t then (1 : ℝ) else 0) / β ^ (t + 1)

@@ -47,6 +47,7 @@ import Rule30Equivalents.WordForms
 import Rule30Equivalents.Expansions
 import Rule30Equivalents.Holonomic
 import Rule30Equivalents.OmegaRegular
+import Rule30Equivalents.PisotNumbers
 import Rule30Equivalents.PisotBase
 import Rule30Equivalents.Automatic
 import Rule30Equivalents.Transcendence

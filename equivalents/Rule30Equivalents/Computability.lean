@@ -1,7 +1,8 @@
-import Rule30Equivalents.Basic
+import Rule30Equivalents.RandomConfigurations
 import Ruliology.CellularAutomata.Rule30Diagonals
 import Mathlib.Computability.Primrec.List
 import Mathlib.Computability.Partrec
+import Mathlib.Computability.PartrecCode
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Zify
 import Mathlib.Tactic.Tauto
@@ -25,6 +26,11 @@ function of row `t`, stored as the list of its cells `-t, …, t` (`stepList`, `
 * `problem2_iff_forall_exists_forall`: Problem 2 says that for every `k` there is an `N` such that
   `(k + 1) |2 N(n) - n| ≤ n` for every `n ≥ N`, where `N(n)` counts the black cells among the
   first `n`; the condition is primitive recursive (`primrec_balanced`). So **Problem 2 is Π⁰₃**.
+* `ae_not_computable_trace`, `residual_not_computable_trace`: **the center column of almost every
+  and of a generic configuration is not computable**. Computable sequences are countably many
+  (`countable_computable`, through Mathlib's codes for partial recursive functions); the fair-coin
+  measure has no atoms (`coins_singleton`), and a single sequence is nowhere dense. The seed is
+  special in this respect too.
 -/
 
 namespace Rule30Equivalents.Computability
@@ -261,5 +267,78 @@ theorem problem2_iff_forall_exists_forall :
     refine ⟨N, fun n hn => ?_⟩
     have := (key (k - 1) N n).1 (hN n) hn
     rwa [Nat.sub_add_cancel hk] at this
+
+/-! ### Random and generic center columns are not computable -/
+
+section NotComputable
+
+open MeasureTheory Filter Topology RandomConfigurations Genericity
+
+/-- **Countably many sequences are computable**: a computable `v` is the partial recursive function
+`n ↦ encode (v n)`, which has a code. -/
+theorem countable_computable : {v : ℕ → Bool | Computable v}.Countable := by
+  let g : (ℕ → Bool) → (ℕ →. ℕ) := fun v n => Part.some (Encodable.encode (v n))
+  refine Set.MapsTo.countable_of_injOn (f := g) (t := Set.range Nat.Partrec.Code.eval) ?_ ?_
+    (Set.countable_range _)
+  · intro v hv
+    have h : Nat.Partrec (g v) := by
+      have h' : Partrec (v : ℕ →. Bool) := hv
+      unfold Partrec at h'
+      convert h' using 1
+      funext n
+      simp [g]
+    exact Nat.Partrec.Code.exists_code.1 h
+  · intro v _ w _ h
+    funext n
+    have := congrFun h n
+    simp only [g, Part.some_inj] at this
+    exact Encodable.encode_injective this
+
+/-- The fair-coin measure has no atoms: a sequence lies in each of its prefix events. -/
+theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
+  have h : ∀ n : ℕ, coins ℕ {v} ≤ 2⁻¹ ^ (n + 1) := fun n => by
+    rw [← measurePreserving_trace.measure_preimage (measurableSet_singleton v).nullMeasurableSet,
+      ← measure_prefix v n]
+    refine measure_mono fun x hx t _ => ?_
+    rw [Set.mem_preimage, Set.mem_singleton_iff] at hx
+    rw [hx]
+  have hlim : Tendsto (fun n : ℕ => (2⁻¹ : ENNReal) ^ (n + 1)) atTop (𝓝 0) :=
+    (ENNReal.tendsto_pow_atTop_nhds_zero_iff.2 (by norm_num)).comp (tendsto_add_atTop_nat 1)
+  exact le_antisymm (ge_of_tendsto' hlim h) bot_le
+
+instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
+
+/-- **A random configuration has a non-computable center column**, almost surely, while that of
+the single seed is primitive recursive (`primrec_center`). -/
+theorem ae_not_computable_trace : ∀ᵐ x ∂(coins ℤ), ¬ Computable (trace x) := by
+  have h : ∀ᵐ v ∂(coins ℕ), ¬ Computable v := by
+    rw [ae_iff]
+    simpa using countable_computable.measure_zero (coins ℕ)
+  exact measurePreserving_trace.quasiMeasurePreserving.ae (p := fun v => ¬ Computable v) h
+
+/-- A single sequence is nowhere dense in `{0,1}^ℕ`: every neighborhood contains another one. -/
+theorem isNowhereDense_singleton (v : ℕ → Bool) : IsNowhereDense ({v} : Set (ℕ → Bool)) := by
+  have : (𝓝[≠] v).NeBot := by
+    rw [← mem_closure_iff_nhdsWithin_neBot, mem_closure_iff_nhds]
+    intro U hU
+    obtain ⟨L, hL⟩ := exists_prefix_subset hU
+    refine ⟨Function.update v L (!v L), hL fun t ht => ?_, ?_⟩
+    · exact Function.update_of_ne (by omega) _ _
+    · simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+      intro he
+      have := congrFun he L
+      simp at this
+  rw [isClosed_singleton.isNowhereDense_iff, interior_singleton]
+
+/-- **A generic configuration has a non-computable center column**: the configurations with a
+computable center column form a meager set. -/
+theorem residual_not_computable_trace :
+    {x : ℤ → Bool | ¬ Computable (trace x)} ∈ residual (ℤ → Bool) := by
+  have hmeagre : IsMeagre {v : ℕ → Bool | Computable v} := by
+    rw [← Set.biUnion_of_singleton {v : ℕ → Bool | Computable v}]
+    exact isMeagre_biUnion countable_computable fun v _ => (isNowhereDense_singleton v).isMeagre
+  exact tendsto_residual_of_isOpenMap continuous_trace isOpenMap_trace hmeagre
+
+end NotComputable
 
 end Rule30Equivalents.Computability

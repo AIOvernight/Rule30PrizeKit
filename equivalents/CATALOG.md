@@ -2866,10 +2866,12 @@ with Turing machines reading n. Notes:
     column is primitive recursive (`primrec_center`), Problem 1 says that for every T and P some t ≥
     T has c(t + P + 1) ≠ c(t) (`problem1_iff_forall_exists_defect`), and it holds iff the unbounded
     search for such a t, a partial recursive function, halts on every input (T, P)
-    (`problem1_iff_firstDefect_dom`). Problem 2 is Π⁰₃ (`problem2_iff_forall_exists_forall`).
-    Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof mining, a
-    provably total bound on the defects, which is a Π⁰₁ strengthening like the defect bound of
-    Section 4 (own reasoning, logic survey).
+    (`problem1_iff_firstDefect_dom`). Problem 2 is Π⁰₃ (`problem2_iff_forall_exists_forall`). The
+    seed is special here as well: the center column of almost every and of a generic configuration
+    is not computable (`ae_not_computable_trace`, `residual_not_computable_trace`). Independence
+    from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof mining, a provably
+    total bound on the defects, which is a Π⁰₁ strengthening like the defect bound of Section 4 (own
+    reasoning, logic survey).
 13. **Complexity profiles from cryptography.** For each finite-register model, "profile bounded ⟺
     EP" holds: LFSR linear complexity, FCSR 2-adic complexity, maximum-order and k-th order
     complexity (k ≥ 1), finite-state generation, and automatic complexity ([52]). For c, every

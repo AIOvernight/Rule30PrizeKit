@@ -2214,8 +2214,14 @@ Each statement below is implied by Problem 1.
   argument). So the statement is equivalent to "c is not eventually constant", which is the proved
   `Rule30Prize.center_not_eventually_constant`. It is the bottom rung of a logic ladder (Section 7).
   - *Difficulty.* Moderate: the model-theoretic lemma must be formalized.
-  - *Lean.* Stated (critic). `orderStructure` is a definition, not an instance, so the statement
-    needs `letI`:
+  - *Lean.* Proved in [OrderDefinable](Rule30Equivalents/OrderDefinable.lean):
+    `not_definable_order` (the statement below), and `not_definable` for any set of parameters.
+    `eventually_const_of_definable` shows that every set definable in (ℕ, ≤), with any parameters,
+    is eventually constant, by an Ehrenfeucht–Fraïssé argument on clamped distances: assignments
+    whose points (variables, constants of the formula, and 0) have the same pairwise distances cut
+    off at ± 2^d satisfy the same formulas of quantifier depth d (`realize_iff_of_clamp`), because
+    a new point can always be matched with distances cut off at half the bound (`exists_extension`).
+    `orderStructure` is a definition, not an instance, so the statement needs `letI`:
 
     ```lean
     theorem not_definable_order :

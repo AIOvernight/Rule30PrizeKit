@@ -2322,7 +2322,10 @@ Lempel–Ziv forms, black times that are not the zero set of a linear recurrence
 computes the column at all: a machine computes at most one sequence, and machines are countably
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration
-(`TypicalConditions.ae_prizeProblems_trace`).
+(`TypicalConditions.ae_prizeProblems_trace`). In the sense of category the picture splits: a
+countable set of center columns is meager, so for a comeager set of configurations the column is
+not automatic, not morphic and not Mahler, and Problems 1 and 3 hold, but Problem 2 fails, since
+density 1/2 is meager (`residual_trace_notMem`, `residual_prizeProblems_trace`).
 
 ---
 

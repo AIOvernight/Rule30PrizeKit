@@ -46,6 +46,10 @@ those is vacuous.
   column of almost every configuration, in any time (`ae_not_decidesBin_trace`): Problem 3 holds
   for it in both readings. With the analogues of Problems 1 and 2, **all three Prize problems hold
   for almost every configuration** (`ae_prizeProblems_trace`).
+* **Category.** A countable set of center columns is meager, so a generic configuration avoids it
+  too (`residual_trace_notMem`): for a comeager set of configurations the center column is not
+  automatic, not morphic, not Mahler, and Problems 1 and 3 hold for it, but Problem 2 fails
+  (`residual_prizeProblems_trace`; density `1/2` is meager).
 * **Words.** For every disjunctive sequence, multiplication is definable in `(ℕ, +, S)`
   (`PresburgerExpansion.mul_definable_of_disjunctive`), and the unbordered words `1 0^L` occur
   arbitrarily late (`not_bordered_one_zeros`). For every sequence that is not eventually periodic,
@@ -641,5 +645,61 @@ theorem ae_prizeProblems_trace : ∀ᵐ x ∂(coins ℤ),
   filter_upwards [ae_not_eventuallyPeriodic_trace, ae_halfDensity_trace, ae_not_decidesBin_trace]
     with x h1 h2 h3
   exact ⟨h1, h2, fun ⟨M, zero, T, _, hM⟩ => h3 ⟨M, zero, T, hM⟩⟩
+
+/-! ### Generic configurations -/
+
+/-- **A generic configuration avoids every countable set of center columns**: a countable set of
+sequences is meager (a single sequence is nowhere dense, `Genericity.isNowhereDense_singleton`),
+and the trace map is continuous and open. -/
+theorem residual_trace_notMem {s : Set (ℕ → Bool)} (hs : s.Countable) :
+    {x : ℤ → Bool | trace x ∉ s} ∈ residual (ℤ → Bool) := by
+  have hmeagre : IsMeagre s := by
+    rw [← Set.biUnion_of_singleton s]
+    exact isMeagre_biUnion hs fun v _ => (isNowhereDense_singleton v).isMeagre
+  exact tendsto_residual_of_isOpenMap continuous_trace isOpenMap_trace hmeagre
+
+/-- **Countable families, generically**: for a comeager set of configurations the center column is
+not `k`-automatic for any `k ≥ 2`, not morphic, and its generating function is not `k`-Mahler for
+any `k ≥ 2`. -/
+theorem residual_not_automatic_morphic_mahler_trace : {x : ℤ → Bool |
+    (∀ k, 2 ≤ k → ¬ Automatic.IsAutomatic k (trace x)) ∧ ¬ StrongerStatements.IsMorphic (trace x) ∧
+      ∀ k (hk : k ≠ 0), 2 ≤ k →
+        ¬ StrongerStatements.IsMahler k hk (LinearRelations.series ℚ (trace x))} ∈
+      residual (ℤ → Bool) := by
+  have h1 : {v : ℕ → Bool | ∃ k, 2 ≤ k ∧ Automatic.IsAutomatic k v}.Countable := by
+    refine (Set.countable_iUnion fun k : ℕ => ?_).mono
+      (s₁ := {v : ℕ → Bool | ∃ k, 2 ≤ k ∧ Automatic.IsAutomatic k v})
+      (s₂ := ⋃ k : ℕ, {v : ℕ → Bool | 2 ≤ k ∧ Automatic.IsAutomatic k v})
+      fun v ⟨k, hk⟩ => Set.mem_iUnion.2 ⟨k, hk⟩
+    by_cases hk : 2 ≤ k
+    · exact (Automatic.countable_setOf_isAutomatic hk).mono fun v hv => hv.2
+    · exact Set.countable_empty.mono fun v hv => (hk hv.1).elim
+  have h3 : {v : ℕ → Bool | ∃ k, ∃ hk : k ≠ 0, 2 ≤ k ∧
+      StrongerStatements.IsMahler k hk (LinearRelations.series ℚ v)}.Countable := by
+    refine (Set.countable_iUnion fun k : ℕ => ?_).mono
+      (s₁ := {v : ℕ → Bool | ∃ k, ∃ hk : k ≠ 0, 2 ≤ k ∧
+        StrongerStatements.IsMahler k hk (LinearRelations.series ℚ v)})
+      (s₂ := ⋃ k : ℕ, {v : ℕ → Bool | ∃ hk : k ≠ 0, 2 ≤ k ∧
+        StrongerStatements.IsMahler k hk (LinearRelations.series ℚ v)})
+      fun v ⟨k, hk⟩ => Set.mem_iUnion.2 ⟨k, hk⟩
+    by_cases hk : 2 ≤ k
+    · exact (StrongerStatements.countable_setOf_isMahler hk (by omega)).mono
+        fun v ⟨_, _, hv⟩ => hv
+    · exact Set.countable_empty.mono fun v ⟨_, h2, _⟩ => (hk h2).elim
+  filter_upwards [residual_trace_notMem h1, residual_trace_notMem
+    StrongerStatements.countable_setOf_isMorphic, residual_trace_notMem h3] with x hx1 hx2 hx3
+  simp only [not_exists, not_and] at hx1 hx2 hx3
+  exact ⟨fun k hk => hx1 k hk, hx2, fun k hk h2 => hx3 k hk h2⟩
+
+/-- **The Prize problems for a generic configuration**: for a comeager set of configurations the
+center column is not eventually periodic (Problem 1) and no one-tape Turing machine computes it, in
+any time (Problem 3), but its density is not `1/2` (Problem 2 fails). Problem 2 is typical in
+measure (`ae_prizeProblems_trace`) and atypical in category. -/
+theorem residual_prizeProblems_trace : {x : ℤ → Bool | ¬ EventuallyPeriodic (trace x) ∧
+    ¬ Symmetry.HalfDensity (trace x) ∧ ¬ ∃ (M : OneTapeGap.TM) (zero : M.Γ) (T : ℕ → ℕ),
+      ProblemThree.DecidesBinInTime M.toMachine zero (trace x) T} ∈ residual (ℤ → Bool) := by
+  filter_upwards [residual_disjunctive_trace, isMeagre_halfDensity_trace,
+    residual_trace_notMem countable_setOf_decidesBin] with x hd hhalf hp3
+  exact ⟨StrongerStatements.not_eventuallyPeriodic_of_disjunctive hd, hhalf, hp3⟩
 
 end Rule30Equivalents.TypicalConditions

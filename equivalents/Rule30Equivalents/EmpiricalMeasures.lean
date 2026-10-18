@@ -35,24 +35,23 @@ theorem isClopen_one : IsClopen one :=
 theorem measurableSet_one : MeasurableSet one :=
   (measurableSet_singleton true).preimage (measurable_pi_apply 0)
 
-/-- The empirical measure of `b` over the times `0, …, N`. -/
-noncomputable def empirical (b : ℕ → Bool) (N : ℕ) : ProbabilityMeasure (ℕ → Bool) :=
-  ⟨((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1), Measure.dirac (Mixing.shift^[n] b), by
+/-- The empirical measure of the points `u 0, …, u N` of a measurable space. -/
+noncomputable def empiricalOf {X : Type*} [MeasurableSpace X] (u : ℕ → X) (N : ℕ) :
+    ProbabilityMeasure X :=
+  ⟨((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1), Measure.dirac (u n), by
     constructor
     rw [Measure.smul_apply, Measure.coe_finsetSum, Finset.sum_apply]
     simp only [measure_univ, sum_const, card_range, nsmul_eq_mul, mul_one, smul_eq_mul]
     push_cast
     exact ENNReal.inv_mul_cancel (by simp) (by simp)⟩
 
-/-- The mass of a measurable set `s` is the proportion of the times `i ≤ N` with `σⁱ b ∈ s`. -/
-theorem empirical_apply (b : ℕ → Bool) (N : ℕ) {s : Set (ℕ → Bool)} [DecidablePred (· ∈ s)]
-    (hs : MeasurableSet s) :
-    ((empirical b N) s : ℝ) =
-      (#{i ∈ range (N + 1) | Mixing.shift^[i] b ∈ s} : ℝ) / ((N + 1 : ℕ) : ℝ) := by
-  have hμ : (empirical b N : Measure (ℕ → Bool)) s =
-      ((N : ENNReal) + 1)⁻¹ * (#{i ∈ range (N + 1) | Mixing.shift^[i] b ∈ s} : ENNReal) := by
-    show (((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1),
-      Measure.dirac (Mixing.shift^[n] b)) s = _
+/-- The mass of a measurable set `s` is the proportion of the times `i ≤ N` with `u i ∈ s`. -/
+theorem empiricalOf_apply {X : Type*} [MeasurableSpace X] (u : ℕ → X) (N : ℕ) {s : Set X}
+    [DecidablePred (· ∈ s)] (hs : MeasurableSet s) :
+    ((empiricalOf u N) s : ℝ) = (#{i ∈ range (N + 1) | u i ∈ s} : ℝ) / ((N + 1 : ℕ) : ℝ) := by
+  have hμ : (empiricalOf u N : Measure X) s =
+      ((N : ENNReal) + 1)⁻¹ * (#{i ∈ range (N + 1) | u i ∈ s} : ENNReal) := by
+    show (((N : ENNReal) + 1)⁻¹ • ∑ n ∈ range (N + 1), Measure.dirac (u n)) s = _
     rw [Measure.smul_apply, Measure.coe_finsetSum, Finset.sum_apply, smul_eq_mul, ← sum_boole]
     congr 1
     refine sum_congr rfl fun n _ => ?_
@@ -63,6 +62,16 @@ theorem empirical_apply (b : ℕ → Bool) (N : ℕ) {s : Set (ℕ → Bool)} [D
   push_cast
   rw [ENNReal.toReal_add (by simp) (by simp)]
   simp
+
+/-- The empirical measure of `b` over the times `0, …, N`: of the shifts `b, σb, …, σᴺb`. -/
+noncomputable def empirical (b : ℕ → Bool) (N : ℕ) : ProbabilityMeasure (ℕ → Bool) :=
+  empiricalOf (fun n => Mixing.shift^[n] b) N
+
+theorem empirical_apply (b : ℕ → Bool) (N : ℕ) {s : Set (ℕ → Bool)} [DecidablePred (· ∈ s)]
+    (hs : MeasurableSet s) :
+    ((empirical b N) s : ℝ) =
+      (#{i ∈ range (N + 1) | Mixing.shift^[i] b ∈ s} : ℝ) / ((N + 1 : ℕ) : ℝ) :=
+  empiricalOf_apply _ N hs
 
 /-- **The mass of `[1]` is the proportion of `1`s** among `b 0, …, b N`. -/
 theorem empirical_one (b : ℕ → Bool) (N : ℕ) :

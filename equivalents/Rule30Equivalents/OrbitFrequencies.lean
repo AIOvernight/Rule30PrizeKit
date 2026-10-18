@@ -1,4 +1,4 @@
-import Rule30Equivalents.Mixing
+import Rule30Equivalents.EmpiricalMeasures
 
 /-!
 # Pattern frequencies along rule 30 orbits
@@ -18,6 +18,10 @@ Etemadi's strong law of large numbers, which needs only pairwise independence.
   (`RandomConfigurations.tendsto_average_of_residues`), **for almost every configuration, every
   pattern on every window `[-n, n]` appears in the rows of the space-time diagram with frequency
   `2^-(2n+1)`.**
+* `ae_tendsto_orbit_empirical`: so **almost every configuration is generic** for the fair-coin
+  measure under rule 30: the empirical measures of its orbit converge weakly to it (the window
+  patterns form a π-system of small neighbourhoods,
+  `IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem`).
 -/
 
 namespace Rule30Equivalents.OrbitFrequencies
@@ -129,5 +133,63 @@ theorem ae_orbit_frequency :
       (1 : (ℤ → Bool) → ℝ) x)
     (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num)
     (fun i => by simp only [Set.indicator]; split_ifs <;> norm_num) fun r hr => hx ⟨r, hr⟩
+
+/-! ### Generic points -/
+
+/-- The configurations that show the pattern `v` on the window `[-n, n]`. -/
+def windowSet (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) : Set (ℤ → Bool) :=
+  {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, y i = extend v i}
+
+/-- The fair-coin measure on configurations, as a point of the space of probability measures. -/
+noncomputable def coinsPM : ProbabilityMeasure (ℤ → Bool) := ⟨coins ℤ, inferInstance⟩
+
+theorem coinsPM_windowSet (n : ℕ) (v : Finset.Icc (-(n : ℤ)) n → Bool) :
+    (coinsPM (windowSet n v) : ℝ) = (2 : ℝ)⁻¹ ^ (2 * n + 1) := by
+  have hcard : (Finset.Icc (-(n : ℤ)) n).card = 2 * n + 1 := by
+    rw [Int.card_Icc]
+    omega
+  rw [ProbabilityMeasure.coeFn_def, ENNReal.coe_toNNReal_eq_toReal]
+  show (coins ℤ {y | ∀ i ∈ Finset.Icc (-(n : ℤ)) n, evol y 0 i = extend v i}).toReal = _
+  rw [measure_window, hcard, ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat]
+
+/-- **Almost every configuration is generic** for the fair-coin measure under rule 30: the
+empirical measures `(δ_x + δ_{Fx} + ⋯ + δ_{F^T x}) / (T + 1)` of its orbit converge weakly to the
+fair-coin measure. -/
+theorem ae_tendsto_orbit_empirical :
+    ∀ᵐ x ∂(coins ℤ), Tendsto (fun T => EmpiricalMeasures.empiricalOf (fun t => evol x t) T)
+      atTop (𝓝 coinsPM) := by
+  filter_upwards [ae_orbit_frequency] with x hx
+  refine IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem
+    (S := {s | ∃ n v, s = windowSet n v}) ?_ ?_ ?_ ?_
+  · rintro s ⟨n, v, rfl⟩ t ⟨n', v', rfl⟩ ⟨z, hz1, hz2⟩
+    rcases le_total n n' with h | h
+    · refine ⟨n', v', Set.ext fun u => ⟨fun hu => hu.2, fun hu => ⟨fun i hi => ?_, hu⟩⟩⟩
+      have hi' : i ∈ Finset.Icc (-(n' : ℤ)) n' := by
+        rw [Finset.mem_Icc] at hi ⊢
+        omega
+      rw [hu i hi', ← hz2 i hi', hz1 i hi]
+    · refine ⟨n, v, Set.ext fun u => ⟨fun hu => hu.1, fun hu => ⟨hu, fun i hi => ?_⟩⟩⟩
+      have hi' : i ∈ Finset.Icc (-(n : ℤ)) n := by
+        rw [Finset.mem_Icc] at hi ⊢
+        omega
+      rw [hu i hi', ← hz1 i hi', hz2 i hi]
+  · rintro s ⟨n, v, rfl⟩
+    exact measurableSet_window 0 _ _
+  · intro u hu y hy
+    obtain ⟨n, hn⟩ := exists_window_subset (hu.mem_nhds hy)
+    refine ⟨windowSet n ((Finset.Icc (-(n : ℤ)) n).restrict y), ⟨n, _, rfl⟩,
+      (isOpen_window 0 _ _).mem_nhds fun i hi => by simp [Mixing.extend, hi]; rfl,
+      fun z hz => hn fun p hp1 hp2 => ?_⟩
+    have := hz p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
+    simpa [Mixing.extend, Finset.mem_Icc.2 ⟨hp1, hp2⟩] using this
+  · rintro s ⟨n, v, rfl⟩
+    have h := hx n v
+    rw [← tendsto_add_atTop_iff_nat 1] at h
+    rw [← coinsPM_windowSet n v] at h
+    refine NNReal.tendsto_coe.1 (h.congr fun T => ?_)
+    classical
+    have hW : MeasurableSet (windowSet n v) := measurableSet_window 0 _ _
+    rw [EmpiricalMeasures.empiricalOf_apply _ T hW, ← sum_boole]
+    congr 1
 
 end Rule30Equivalents.OrbitFrequencies

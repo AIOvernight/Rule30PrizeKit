@@ -2729,13 +2729,15 @@ with Turing machines reading n. Notes:
     every window [−n, n] appears in the rows with frequency 2^−(2n+1), a pointwise ergodic theorem
     for local patterns proved from Etemadi's strong law, since rows far apart in time are
     independent on a window ([OrbitFrequencies](Rule30Equivalents/OrbitFrequencies.lean),
-    `ae_orbit_frequency`), so the right halves of its rows have every sequence as a limit point
-    (`ae_rightHalves_frequently`; for the seed, Kopra's theorem gives infinitely many); rule 30 is
-    sensitive to initial conditions, and the right front of a perturbation moves at speed one
-    (`sensitive`, `evol_flip_front`); rule 30 has topological entropy at least log 2, since the
-    trace is a factor map onto the full shift (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`);
-    and for μ-almost every configuration every column of the space-time diagram is normal, and so is
-    the right half of every row (`ae_isNormal_columns`, `ae_isNormal_rows`).
+    `ae_orbit_frequency`); so almost every configuration is generic, the empirical measures of its
+    orbit converging weakly to μ (`ae_tendsto_orbit_empirical`), and the right halves of its rows
+    have every sequence as a limit point (`ae_rightHalves_frequently`; for the seed, Kopra's theorem
+    gives infinitely many); rule 30 is sensitive to initial conditions, and the right front of a
+    perturbation moves at speed one (`sensitive`, `evol_flip_front`); rule 30 has topological
+    entropy at least log 2, since the trace is a factor map onto the full shift
+    (`log_two_le_coverEntropy`, Mathlib's `coverEntropy`); and for μ-almost every configuration
+    every column of the space-time diagram is normal, and so is the right half of every row
+    (`ae_isNormal_columns`, `ae_isNormal_rows`).
     Topologically the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);

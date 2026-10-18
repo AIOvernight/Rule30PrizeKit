@@ -39,6 +39,7 @@ import Rule30Equivalents.CenterFormulas
 import Rule30Equivalents.OneTapeRegular
 import Rule30Equivalents.UniformMorphic
 import Rule30Equivalents.MeromorphicExtension
+import Rule30Equivalents.TwoAdicPeriods
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

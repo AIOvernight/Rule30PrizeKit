@@ -2253,6 +2253,14 @@ Each statement below is implied by Problem 1.
   This is open, since it includes periods 2 and 4. Replacing ℤ₂ by the profinite integers gives back
   Problem 1. Mathlib has `PadicInt.mahler`, `PadicInt.mahlerEquiv` and `PadicInt.hasSum_mahler`
   (number-theory and algebra surveys).
+  - *Lean.* Both equivalences are proved in [TwoAdicPeriods](Rule30Equivalents/TwoAdicPeriods.lean),
+    for every bit sequence (`exists_continuous_extension_iff`, `exists_fwdDiff_eq_zero_iff`), and
+    for c (`noTwoPowPeriod_iff_not_continuous`, `noTwoPowPeriod_iff_fwdDiff`). A continuous
+    ℤ₂ → Bool is constant on all balls of some radius (Lebesgue's number lemma on the compact ℤ₂),
+    so it reads only α mod 2^k. The Mahler coefficients are Mathlib's forward differences
+    Δⁿu(0) = Σ_{j ≤ n} C(n, j)u(j); Lucas' theorem is not needed: in characteristic 2,
+    Δ^(2^k)u(t) = u(t + 2^k) − u(t), and Newton's forward formula writes Δ^(2^k)u(t) through the
+    coefficients Δ^(j + 2^k)u(0). The profinite form is not formalized (Mathlib has no Ẑ).
 - **Jen's pairs and masked Jen** (proved):
   - c and column j ≠ 0 are not both EP (`Rule30Jen.jen`);
   - c and c ∨ (column 1) are not both EP;

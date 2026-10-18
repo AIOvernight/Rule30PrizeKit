@@ -24,6 +24,7 @@ import Rule30Equivalents.Christol
 import Rule30Equivalents.OneTapeGap
 import Rule30Equivalents.OfflineGap
 import Rule30Equivalents.MonadicLogic
+import Rule30Equivalents.BuchiArithmetic
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

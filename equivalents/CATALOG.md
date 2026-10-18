@@ -131,7 +131,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 151 library theorems whose names begin with `problem1_iff` or
+  prints the axioms of all 152 library theorems whose names begin with `problem1_iff` or
   `problem1_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -197,7 +197,7 @@ files. The rows follow the order of Section 3.
 | 27 | finite-state-machines | automata | every finite-state predictor errs infinitely often; no finite autonomous machine generates c | Proved (library) | `WordsAutomata.problem1_iff_unpredictable`, `WordsAutomata.problem1_iff_no_finite_generator` |
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
-| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X) | Proved (library) | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
+| 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃) | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic` |
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch | none |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), both forms | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OfflineGap.problem1_iff_no_small_space_decider` |
 
@@ -1959,7 +1959,18 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   - The g with c₀g = Σ hᵢ F^(pⁱ), deg hᵢ ≤ D, form a finite set that contains F and is closed under
     every Λ_r: c₀ Λ_r g = Λ_r(c₀^(p−1)·c₀g), and c₀F is a combination of higher powers. The p-kernel
     of c is the image of F under the iterated Λ's, so it is finite.
-  The Büchi-arithmetic form is stated in words.
+  The Büchi-arithmetic form is proved in [BuchiArithmetic](Rule30Equivalents/BuchiArithmetic.lean):
+  `problem1_iff_not_buchi_definable`, with Mathlib's `Set.Definable₁` and the language
+  `buchi k` = (0, 1, +, V_k), where V_k x is the largest power of k dividing x and V_k 0 = 0. The
+  direction it needs, "definable in (ℕ, +, V_k) ⟹ k-automatic" (`isAutomatic_of_definable`), is
+  proved without automata. A relation on ℕ^ι is `Recognizable` when it has finitely many sections
+  {v | kᵉv + r ∈ R} with r < kᵉ. Recognizable relations are closed under complement, finite
+  intersection, reindexing and projection: a section of {w | ∃ u, (w, u) ∈ R} is a union of
+  projections of sections of R, one for each choice of the low digits of u, so it is determined by
+  a subset of the finite kernel of R. The graphs of =, +, V_k and the constants have at most a
+  handful of sections, so by induction every term graph and every formula is recognizable.
+  Together with Cobham's theorem this gives `eventuallyPeriodic_of_definable` for any
+  multiplicatively independent pair of bases.
 
   ```lean
   def kernel (k : ℕ) (f : ℕ → Bool) : Set (ℕ → Bool) :=

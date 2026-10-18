@@ -8,7 +8,8 @@ preimages, using only left-permutivity: `F(x)_q = x_{q-1} ⊕ (x_q ∨ x_{q+1})`
 determined by `F(x)_q`, `x_q` and `x_{q+1}`.
 
 * `eq_of_evol_one_eq`: two configurations with the same image that agree on two adjacent cells
-  `k`, `k + 1` agree at every cell left of them.
+  `k`, `k + 1` agree at every cell left of them; locally, down to the cell `p` when the images
+  agree on the cells from `p + 1` to `k + 1` (`eq_of_evol_one_eq_on`).
 * `eq_of_evol_one_eq_of_right`: so rule 30 is injective on configurations that agree far to the
   right, in particular pre-injective (as the Garden of Eden theorem requires of an onto map).
 * `card_le_four`: **every configuration has at most four preimages** (Hedlund's bound
@@ -20,7 +21,9 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   right has exactly one preimage**. An image showing `010` at `q, q + 1, q + 2` forces the
   preimage to be black at `q - 1` (`eq_true_of_window`), and then the image at `q - 1` fixes the
   cell `q - 2`. Almost every configuration, and a comeager set of them, show `010` so
-  (`Mixing.ae_existsUnique_preimage`, `Mixing.residual_existsUnique_preimage`).
+  (`Mixing.ae_existsUnique_preimage`, `Mixing.residual_existsUnique_preimage`). The inverse looks
+  only to the right: the cell `p` of the preimage is determined by the image on the cells
+  `p + 1, …, q + 2` for any such `q > p` (`eq_of_evol_one_eq_on_of_window`).
 * `exists_ne_left_eq`: rule 30 is not injective on left-asymptotic configurations. Black only at
   `0` on the left, then `(0110)^∞` against `(1000)^∞` from the cell `1` on, have the same
   image. A preimage can branch only after a black cell, and these two branches run around a cycle
@@ -36,31 +39,39 @@ open Ruliology.CellularAutomata Rule30Realization
 /-- One step of rule 30, cell by cell. -/
 theorem evol_one (x : ℤ → Bool) (q : ℤ) : evol x 1 q = xor (x (q - 1)) (x q || x (q + 1)) := rfl
 
-/-- **Left determinism**: configurations with the same image that agree on `k` and `k + 1` agree
-at every cell `q ≤ k + 1`. -/
-theorem eq_of_evol_one_eq {x y : ℤ → Bool} (h : evol x 1 = evol y 1) {k : ℤ}
-    (hk : x k = y k) (hk1 : x (k + 1) = y (k + 1)) : ∀ q, q ≤ k + 1 → x q = y q := by
-  -- agreement on `k - n` and `k - n + 1`, by induction on `n`
-  have step : ∀ n : ℕ, x (k - n) = y (k - n) ∧ x (k - n + 1) = y (k - n + 1) := by
+/-- **Left determinism, locally**: configurations whose images agree on the cells `j` with
+`p < j ≤ k + 1`, and which agree on `k` and `k + 1`, agree on every cell from `p` to `k + 1`. -/
+theorem eq_of_evol_one_eq_on {x y : ℤ → Bool} {p k : ℤ}
+    (h : ∀ j, p < j → j ≤ k + 1 → evol x 1 j = evol y 1 j) (hk : x k = y k)
+    (hk1 : x (k + 1) = y (k + 1)) : ∀ q, p ≤ q → q ≤ k + 1 → x q = y q := by
+  have step : ∀ n : ℕ, p ≤ k - n → x (k - n) = y (k - n) ∧ x (k - n + 1) = y (k - n + 1) := by
     intro n
     induction n with
-    | zero => simpa using ⟨hk, hk1⟩
+    | zero => intro _; simpa using ⟨hk, hk1⟩
     | succ n ih =>
-      have e := congrFun h (k - n)
-      rw [evol_one, evol_one, ih.1, ih.2] at e
+      intro hn
+      have ih' := ih (by push_cast at hn; omega)
+      have e := h (k - n) (by push_cast at hn; omega) (by omega)
+      rw [evol_one, evol_one, ih'.1, ih'.2] at e
       refine ⟨?_, ?_⟩
       · have : x (k - n - 1) = y (k - n - 1) := by
           generalize (y (k - n) || y (k - n + 1)) = c at e
           cases c <;> simpa using e
         rwa [show k - ((n + 1 : ℕ) : ℤ) = k - n - 1 by push_cast; ring]
       · rw [show k - ((n + 1 : ℕ) : ℤ) + 1 = k - n by push_cast; ring]
-        exact ih.1
-  intro q hq
+        exact ih'.1
+  intro q hpq hq
   rcases eq_or_lt_of_le hq with rfl | hlt
   · exact hk1
   · obtain ⟨n, hn⟩ : ∃ n : ℕ, q = k - n := ⟨(k - q).toNat, by omega⟩
     rw [hn]
-    exact (step n).1
+    exact (step n (by omega)).1
+
+/-- **Left determinism**: configurations with the same image that agree on `k` and `k + 1` agree
+at every cell `q ≤ k + 1`. -/
+theorem eq_of_evol_one_eq {x y : ℤ → Bool} (h : evol x 1 = evol y 1) {k : ℤ}
+    (hk : x k = y k) (hk1 : x (k + 1) = y (k + 1)) : ∀ q, q ≤ k + 1 → x q = y q := fun q hq =>
+  eq_of_evol_one_eq_on (p := q) (fun j _ _ => congrFun h j) hk hk1 q le_rfl hq
 
 /-- **Rule 30 is injective on right-asymptotic configurations**: two configurations with the same
 image that agree right of some cell are equal. In particular rule 30 is pre-injective. -/
@@ -173,20 +184,32 @@ theorem eq_true_of_window {x : ℤ → Bool} {q : ℤ} (h0 : evol x 1 q = false)
   cases x (q - 1) <;> cases x q <;> cases x (q + 1) <;> cases x (q + 2) <;>
     cases x (q + 2 + 1) <;> decide
 
-/-- Two preimages of a configuration agree at every cell left of an occurrence of `010` in it:
-both are black at `q - 1`, so the image at `q - 1` fixes the cell `q - 2`, and left determinism
-(`eq_of_evol_one_eq`) does the rest. -/
-theorem eq_of_evol_one_eq_of_window {x y : ℤ → Bool} (h : evol x 1 = evol y 1) {q : ℤ}
+/-- **The inverse of rule 30 looks only to the right**: if the image of `x` shows `010` at the
+cells `q, q + 1, q + 2` with `p < q`, then the cell `p` of `x` is determined by the image on the
+cells `p + 1, …, q + 2`. Both preimages are black at `q - 1` (`eq_true_of_window`), so the image
+at `q - 1` fixes the cell `q - 2`, and left determinism runs down to `p`. -/
+theorem eq_of_evol_one_eq_on_of_window {x y : ℤ → Bool} {p q : ℤ} (hpq : p < q)
+    (h : ∀ j, p < j → j ≤ q + 2 → evol x 1 j = evol y 1 j)
     (h0 : evol x 1 q = false) (h1 : evol x 1 (q + 1) = true) (h2 : evol x 1 (q + 2) = false) :
-    ∀ p, p ≤ q - 1 → x p = y p := by
+    x p = y p := by
   have hx := eq_true_of_window h0 h1 h2
-  have hy := eq_true_of_window (h ▸ h0) (h ▸ h1) (h ▸ h2)
+  have hy := eq_true_of_window (x := y) (q := q) (by rw [← h q hpq (by omega)]; exact h0)
+    (by rw [← h (q + 1) (by omega) (by omega)]; exact h1)
+    (by rw [← h (q + 2) (by omega) le_rfl]; exact h2)
+  rcases eq_or_lt_of_le (show p ≤ q - 1 by omega) with hp | hp
+  · rw [hp, hx, hy]
   have h2' : x (q - 2) = y (q - 2) := by
-    have e := congrFun h (q - 1)
+    have e := h (q - 1) hp (by omega)
     rw [evol_one, evol_one, show q - 1 - 1 = q - 2 by ring, hx, hy] at e
     simpa using e
-  intro p hp
-  exact eq_of_evol_one_eq h h2' (by rw [show q - 2 + 1 = q - 1 by ring, hx, hy]) p (by omega)
+  exact eq_of_evol_one_eq_on (k := q - 2) (fun j hj hj' => h j hj (by omega)) h2'
+    (by rw [show q - 2 + 1 = q - 1 by ring, hx, hy]) p le_rfl (by omega)
+
+/-- Two preimages of a configuration agree at every cell left of an occurrence of `010` in it. -/
+theorem eq_of_evol_one_eq_of_window {x y : ℤ → Bool} (h : evol x 1 = evol y 1) {q : ℤ}
+    (h0 : evol x 1 q = false) (h1 : evol x 1 (q + 1) = true) (h2 : evol x 1 (q + 2) = false) :
+    ∀ p, p ≤ q - 1 → x p = y p := fun p hp =>
+  eq_of_evol_one_eq_on_of_window (by omega) (fun j _ _ => congrFun h j) h0 h1 h2
 
 /-- **Unique preimages**: a configuration that shows `010` arbitrarily far to the right has
 exactly one preimage. -/

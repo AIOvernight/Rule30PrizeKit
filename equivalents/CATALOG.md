@@ -2785,27 +2785,28 @@ with Turing machines reading n. Notes:
     left of a cell can have the same image, so rule 30 is not positively expansive
     (`exists_ne_left_eq`, `not_positivelyExpansive`). Still, rule 30 is invertible almost everywhere
     and generically: an image showing 010 at the cells q, q + 1, q + 2 forces the preimage to be
-    black at q − 1 (`eq_true_of_window`), so a configuration that shows 010 arbitrarily far to the
-    right has exactly one preimage (`eq_of_evol_one_eq_of_frequently`). Almost every configuration
-    does, and so does a comeager set of them, so rule 30 is injective on a set of full measure
-    (`Mixing.ae_existsUnique_preimage`, `Mixing.exists_injOn_ae`,
-    `Mixing.residual_existsUnique_preimage`). Likewise, ergodicity of the doubling map
-    (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:* an earlier
-    version said that the trace is normal for a comeager set of configurations; that is false. 12.
-    **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
-    neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof
-    mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the defect
-    bound of Section 4 (own reasoning, logic survey). 13. **Complexity profiles from cryptography.**
-    For each finite-register model, "profile bounded ⟺ EP" holds: LFSR linear complexity, FCSR
-    2-adic complexity, maximum-order and k-th order complexity (k ≥ 1), finite-state generation, and
-    automatic complexity ([52]). For c, every profile computed so far looks random. As numeric
-    certificates they are weaker per bit than the kernel's factor count: about n/2 for T + P from n
-    bits, against about n (algebra survey). 14. **Mathlib infrastructure.** - Mathlib already has:
-    Presburger definability; Myhill–Nerode; `LinearRecurrence`; AddCircle torsion and density;
-    continued fractions over ordered fields; p-adic numbers and the Mahler basis; `PowerSeries`,
-    `RatFunc`, `LaurentSeries` and `PowerSeries.derivative`; `omegaLimit`; `SymbolicDynamics`;
-    König's lemma; `Dioph` with `Dioph.pow_dioph`; Lucas' theorem
-    (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
+    black at q − 1 (`eq_true_of_window`), so the cell p of a preimage is determined by the image on
+    the cells p + 1, …, q + 2 for any such q > p (`eq_of_evol_one_eq_on_of_window`), and a
+    configuration that shows 010 arbitrarily far to the right has exactly one preimage
+    (`eq_of_evol_one_eq_of_frequently`). Almost every configuration does, and so does a comeager set
+    of them, so rule 30 is injective on a set of full measure (`Mixing.ae_existsUnique_preimage`,
+    `Mixing.exists_injOn_ae`, `Mixing.residual_existsUnique_preimage`). Likewise, ergodicity of the
+    doubling map (`AddCircle.ergodic_nsmul`) says nothing about one specific number. *Correction:*
+    an earlier version said that the trace is normal for a comeager set of configurations; that is
+    false. 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation
+    settles neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by
+    proof mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the
+    defect bound of Section 4 (own reasoning, logic survey). 13. **Complexity profiles from
+    cryptography.** For each finite-register model, "profile bounded ⟺ EP" holds: LFSR linear
+    complexity, FCSR 2-adic complexity, maximum-order and k-th order complexity (k ≥ 1),
+    finite-state generation, and automatic complexity ([52]). For c, every profile computed so far
+    looks random. As numeric certificates they are weaker per bit than the kernel's factor count:
+    about n/2 for T + P from n bits, against about n (algebra survey). 14. **Mathlib
+    infrastructure.** - Mathlib already has: Presburger definability; Myhill–Nerode;
+    `LinearRecurrence`; AddCircle torsion and density; continued fractions over ordered fields;
+    p-adic numbers and the Mahler basis; `PowerSeries`, `RatFunc`, `LaurentSeries` and
+    `PowerSeries.derivative`; `omegaLimit`; `SymbolicDynamics`; König's lemma; `Dioph` with
+    `Dioph.pow_dioph`; Lucas' theorem (`Choose.choose_modEq_prod_range_choose`) and Kummer's theorem
     (`Nat.Prime.emultiplicity_choose`); `List.HasPeriod` with the Fine–Wilf lemma
     `List.HasPeriod.gcd`; `schnirelmannDensity`; and `Module.AEval`. - Mathlib lacks: an
     eventually-periodic predicate; the digits-rationality lemma for arbitrary digits; Morse–Hedlund;

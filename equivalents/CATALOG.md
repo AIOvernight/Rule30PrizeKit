@@ -1923,8 +1923,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   - Christol 1979 and [CKMR80]: over F_p, p-automatic ⟺ algebraic over F_p(X).
   - Büchi–Bruyère: k-automatic ⟺ definable in (ℕ, +, V_k). Cobham–Semenov gives the two-base
     version.
-- *Difficulty.* Hard: it needs Cobham's and Christol's theorems. Both are proved here (Christol in
-  the direction "algebraic ⟹ automatic", which is the one [42] needs).
+- *Difficulty.* Hard: it needs Cobham's and Christol's theorems. Both are proved here, Christol in
+  both directions (`Christol.isAutomatic_iff_isAlgebraic`).
 - *Data.* The 2-kernel of c has at least 262,143 elements and the 3-kernel at least 265,720: the
   kernel sequences c(2^e·n + r) with e ≤ 17, and c(3^e·n + r) with e ≤ 11, have pairwise distinct
   40-bit prefixes (number-theory survey, own computation). A minimal LSD-first DFAO for a sequence
@@ -2093,7 +2093,7 @@ so they are strictly stronger.
 | **Normality** of x₂ in base 2 (⟺ finite-state dimension 1); the seed is generic for (rule 30, Bernoulli) | normal ⟹ disjunctive. Normality also gives Problem 2. | 500,025,038 ones in the first 10⁹ bits [W19]. | [Bor09], [Wal49], [DLLM04], [W19] |
 | **x₂ is transcendental** (likewise x_B) | transcendental ⟹ irrational | Conditional only: if c were automatic, [AB07] would apply. | [AB07] |
 | **μ(x₂) = 2** (irrationality exponent) | it includes irrationality | Numerically about 2.0017 for q > 2^4096. | [Bug11], [BHWY16]; number-theory survey (data) |
-| **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
+| **c is not 2-automatic** ⟺ C(X) is transcendental over F₂(X) (Christol) ⟺ the expansion complexity is unbounded; also: not k-automatic for any k, not morphic, not a Mahler function | EP ⟹ automatic ⟹ morphic | Kernel bounds as in [42]. The expansion complexity is maximal (178) at N = 16000. The first equivalence, for every prime p, is `Christol.not_isAutomatic_iff_transcendental`. | [Chr79], [Die12], [MNW17], [ABS23]; algebra survey (data) |
 | **L_n/n → 1/2** (the F₂ irrationality exponent of ξ is 2) | it forces L_n → ∞ | abs(L_n − n/2) ≤ 9.5 for n ≤ 10⁶. Thue–Morse also satisfies it. | [Nie88], [MeWi17]; algebra survey (data) |
 | **H_m ≠ 0 for all m ≥ 9** (integer Hankel determinants) | infinitely many nonzero H_m suffice ([32]) | True for 9 ≤ m < 45,000 (data). | algebra survey, [WM86] |
 | **Hypertranscendence** (new): C(z) satisfies no algebraic differential equation P(z, C, C′, …, C⁽ⁿ⁾) = 0 with P ≠ 0 over ℚ | if c is EP, C is rational, hence differentially algebraic | Strictly stronger: Σ z^(n²) is built on the non-EP set of squares, is a theta function, and satisfies an algebraic differential equation [Jac48]. A Mahler function is either rational or hypertranscendental [ADH21], so a non-EP automatic c would give a hypertranscendental C. In general neither "not automatic" nor "hypertranscendental" implies the other. | [ADH21], [Jac48] |

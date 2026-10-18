@@ -19,6 +19,7 @@ import Rule30Equivalents.Strassmann
 import Rule30Equivalents.SkolemMahlerLech
 import Rule30Equivalents.DiophantineGraph
 import Rule30Equivalents.NaturalBoundary
+import Rule30Equivalents.Cobham
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski
 import Rule30Equivalents.WordForms

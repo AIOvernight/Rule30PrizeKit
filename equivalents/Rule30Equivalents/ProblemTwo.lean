@@ -133,14 +133,6 @@ def SimplyNormal2 (x : ℝ) : Prop :=
   Tendsto (fun n : ℕ => (((Finset.range n).filter fun t => binDigit x t = 1).card : ℝ) / n)
     atTop (𝓝 (1 / 2))
 
-/-- `0.b(0) b(1) …₂ < 1` as soon as one digit is `0`. -/
-theorem baseValue_two_lt_one (b : ℕ → Bool) {s : ℕ} (hs : b s = false) :
-    BinaryIrrational.baseValue 2 b < 1 :=
-  calc BinaryIrrational.baseValue 2 b < ∑' t : ℕ, (1 : ℝ) / 2 / 2 ^ t :=
-        (BinaryIrrational.summable_term le_rfl b).tsum_lt_tsum (i := s)
-          (BinaryIrrational.term_le le_rfl b) (by simp [hs]) (summable_geometric_two' 1)
-    _ = 1 := tsum_geometric_two' 1
-
 /-- The binary digits of `x₂` are the center column. -/
 theorem binDigit_centerBinary (t : ℕ) :
     binDigit BinaryIrrational.centerBinary t = if c t then 1 else 0 := by
@@ -153,7 +145,8 @@ theorem binDigit_centerBinary (t : ℕ) :
     exact Rule30Prize.center_not_eventually_constant
       ⟨t + 1, true, fun s hs => by simpa using hne s hs⟩
   have hshift := BinaryIrrational.pow_mul_baseValue (B := 2) le_rfl c (t + 1)
-  have hlt := baseValue_two_lt_one (BinaryIrrational.tail c (t + 1)) (s := s - (t + 1)) (by
+  have hlt := BinaryIrrational.baseValue_lt_one le_rfl (b := BinaryIrrational.tail c (t + 1))
+      (s := s - (t + 1)) (by
     simp only [BinaryIrrational.tail]
     rw [Nat.sub_add_cancel hs]
     exact hcs)

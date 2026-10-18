@@ -260,6 +260,26 @@ theorem eventuallyPeriodic_of_not_irrational (b : ℕ → Bool) (h : ¬ Irration
   have e2 : t = i + (t - i) := by omega
   rw [e1, Bool.eq_iff_iff, hdig, hdig, ← hk (t - i), ← e2]
 
+/-- `0.b(0) b(1) … < 1` in base `B ≥ 2` as soon as one digit is `0`. -/
+theorem baseValue_lt_one {b : ℕ → Bool} {s : ℕ} (hs : b s = false) :
+    baseValue B b < 1 := by
+  have h := Summable.tsum_lt_tsum_of_nonneg (i := s) (term_nonneg hB b) (term_le hB b)
+    (by rw [hs]; simp only [Bool.false_eq_true, if_false, zero_div]; positivity)
+    (summable_geometric_two' 1)
+  rwa [tsum_geometric_two' 1] at h
+
+/-- If `b` has a `0` after every time, every tail value `0.b(t) b(t+1) …` is `< 1`. -/
+theorem tail_lt_one {b : ℕ → Bool} (h : ¬ ∃ T, ∀ t, T ≤ t → b t = true) (t : ℕ) :
+    baseValue B (tail b t) < 1 := by
+  obtain ⟨s, hs, hbs⟩ : ∃ s, t ≤ s ∧ b s = false := by
+    by_contra hT
+    push Not at hT
+    exact h ⟨t, fun u hu => by simpa using hT u hu⟩
+  refine baseValue_lt_one hB (s := s - t) ?_
+  simp only [tail]
+  rw [Nat.sub_add_cancel hs]
+  exact hbs
+
 end
 
 /-- **Rational digit sequences are exactly the eventually periodic ones.** For every base

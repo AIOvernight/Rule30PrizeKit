@@ -416,14 +416,6 @@ theorem not_eventually_true_of_digits (hq : 0 < q) {b : ℕ → Bool}
   have h3 := @Nat.lt_two_pow_self q
   omega
 
-/-- `0.b(0) b(1) … < 1` in base `B ≥ 2` as soon as one digit is `0`. -/
-theorem baseValue_lt_one (hB : 2 ≤ B) {b : ℕ → Bool} {s : ℕ} (hs : b s = false) :
-    baseValue B b < 1 := by
-  have h := Summable.tsum_lt_tsum_of_nonneg (i := s) (term_nonneg hB b) (term_le hB b)
-    (by rw [hs]; simp only [Bool.false_eq_true, if_false, zero_div]; positivity)
-    (summable_geometric_two' 1)
-  rwa [tsum_geometric_two' 1] at h
-
 /-- In base `B ≥ 3`, `0.b(0) b(1) … < 1` for every `b`. -/
 theorem baseValue_lt_one_of_three_le (hB : 3 ≤ B) (b : ℕ → Bool) : baseValue B b < 1 := by
   have hB' : (3 : ℝ) ≤ B := by exact_mod_cast hB
@@ -475,18 +467,6 @@ theorem exists_digits_of_eventuallyPeriodic (hB : 2 ≤ B) {b : ℕ → Bool}
 /-- `decide ((if x then 1 else 0) = 1) = x`. -/
 theorem decide_ite_eq_one (x : Bool) : decide ((if x then 1 else 0 : ℕ) = 1) = x := by
   cases x <;> rfl
-
-/-- If `b` has a `0` after every time, every tail value `0.b(t) b(t+1) …` is `< 1`. -/
-theorem tail_lt_one (hB : 2 ≤ B) {b : ℕ → Bool} (h : ¬ ∃ T, ∀ t, T ≤ t → b t = true) (t : ℕ) :
-    baseValue B (tail b t) < 1 := by
-  obtain ⟨s, hs, hbs⟩ : ∃ s, t ≤ s ∧ b s = false := by
-    by_contra hT
-    push Not at hT
-    exact h ⟨t, fun u hu => by simpa using hT u hu⟩
-  refine baseValue_lt_one hB (s := s - t) ?_
-  simp only [tail]
-  rw [Nat.sub_add_cancel hs]
-  exact hbs
 
 /-- **Binary digits of fractions**: `b(t) = decide (⌊2^(t+1) p / q⌋ mod 2 = 1)` for all `t`, for
 some `p` and `q > 0`, iff `b` is eventually periodic and not eventually `true`. The second

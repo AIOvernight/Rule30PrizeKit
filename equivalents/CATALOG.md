@@ -2459,9 +2459,10 @@ black cells among the first n deviates from n/2 on the scale √n/2: (count − 
 distribution to the normal law with variance 1/4
 (`RandomConfigurations.tendstoInDistribution_count_trace`, through Mathlib's central limit theorem).
 At every finite n, a deviation of at least nδ has probability at most 2·exp(−2nδ²)
-(`RandomConfigurations.measureReal_abs_count_trace_ge_le`, through Mathlib's Hoeffding inequality).
-That is the yardstick for the data: the first 10⁹ bits contain 500,025,038 ones, about 1.6 standard
-deviations from half [W19].
+(`RandomConfigurations.measureReal_abs_count_trace_ge_le`, through Mathlib's Hoeffding inequality),
+so by Borel–Cantelli, for almost every configuration, the count is within √(n log n) of n/2 for all
+large n (`RandomConfigurations.ae_eventually_abs_count_trace_lt`). That is the yardstick for the
+data: the first 10⁹ bits contain 500,025,038 ones, about 1.6 standard deviations from half [W19].
 
 ### 6.2 Problem 3: computational effort
 

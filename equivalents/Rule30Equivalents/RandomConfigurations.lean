@@ -33,7 +33,9 @@ uniform Bernoulli product measure).
   converges in distribution to the normal law with variance `1/4`.
 * `measureReal_abs_count_trace_ge_le`: **Hoeffding's inequality** for the trace (Mathlib's
   `HasSubgaussianMGF.measure_sum_range_ge_le_of_iIndepFun`): among the first `n` cells, at least
-  `n/2 + n δ` or at most `n/2 - n δ` black ones has probability at most `2 exp(-2 n δ²)`.
+  `n/2 + n δ` or at most `n/2 - n δ` black ones has probability at most `2 exp(-2 n δ²)`. With
+  Borel–Cantelli, `ae_eventually_abs_count_trace_lt`: for almost every configuration the count is
+  within `√(n log n)` of `n/2` for all large `n`.
 * `ae_isNormal_trace_glue`: **the right half does not matter**. The same holds for the map
   `x ↦ glue R x` that keeps the cells `p ≤ 0` of `x` and puts a fixed right half `R` beside them
   (white, say, as for the single seed): the prefix argument only flips cells left of `1`
@@ -634,6 +636,53 @@ theorem measureReal_abs_count_trace_ge_le (n : ℕ) {δ : ℝ} (hδ : 0 ≤ δ) 
     _ ≤ Real.exp (-2 * (n * δ) ^ 2 / n) + Real.exp (-2 * (n * δ) ^ 2 / n) :=
       add_le_add (measureReal_sum_ge_le n hε) (measureReal_sum_le_le n hε)
     _ = 2 * Real.exp (-2 * n * δ ^ 2) := by rw [hexp, two_mul]
+
+/-- **The rate of convergence of the density**: for almost every configuration, the number of
+black cells among the first `n` cells of the center trace is within `√(n log n)` of `n/2` for all
+large `n`. At `n ≥ 1` the opposite has probability at most `2/n²`
+(`measureReal_abs_count_trace_ge_le` with `δ = √(n log n)/n`), and these are summable
+(Borel–Cantelli). -/
+theorem ae_eventually_abs_count_trace_lt :
+    ∀ᵐ x ∂(coins ℤ), ∀ᶠ n : ℕ in atTop,
+      |∑ k ∈ Finset.range n, black (trace x k) - n / 2| < √(n * Real.log n) := by
+  let s : ℕ → Set (ℤ → Bool) := fun n =>
+    {x | √(n * Real.log n) ≤ |∑ k ∈ Finset.range n, black (trace x k) - n / 2|}
+  have hreal : ∀ n : ℕ, (coins ℤ).real (s n) ≤ 8 / ((n : ℝ) + 1) ^ 2 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h0 | hn
+    · subst h0
+      refine measureReal_le_one.trans ?_
+      norm_num
+    have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
+    have hn0 : (0 : ℝ) < n := by linarith
+    have hlog : 0 ≤ Real.log n := Real.log_nonneg hn'
+    have hnl : 0 ≤ (n : ℝ) * Real.log n := mul_nonneg hn0.le hlog
+    have hδ : 0 ≤ √(n * Real.log n) / n := div_nonneg (Real.sqrt_nonneg _) hn0.le
+    have h := measureReal_abs_count_trace_ge_le n hδ
+    rw [mul_div_cancel₀ _ hn0.ne'] at h
+    have hexp : Real.exp (-2 * n * (√(n * Real.log n) / n) ^ 2) = ((n : ℝ) ^ 2)⁻¹ := by
+      rw [div_pow, Real.sq_sqrt hnl, show -2 * (n : ℝ) * (n * Real.log n / n ^ 2) =
+        -Real.log ((n : ℝ) ^ 2) by rw [Real.log_pow]; field_simp; ring, Real.exp_neg,
+        Real.exp_log (by positivity)]
+    rw [hexp] at h
+    refine h.trans ?_
+    rw [← div_eq_mul_inv, div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith
+  have hsum : ∑' n, coins ℤ (s n) ≠ ⊤ := by
+    have hsumm : Summable fun n : ℕ => 8 / ((n : ℝ) + 1) ^ 2 := by
+      have := ((summable_nat_add_iff 1).2
+        (Real.summable_one_div_nat_pow.2 one_lt_two)).mul_left 8
+      refine this.congr fun n => ?_
+      push_cast
+      ring
+    refine ne_top_of_le_ne_top (ENNReal.ofReal_ne_top (r := ∑' n : ℕ, 8 / ((n : ℝ) + 1) ^ 2)) ?_
+    rw [ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hsumm]
+    refine ENNReal.tsum_le_tsum fun n => ?_
+    rw [← ofReal_measureReal (measure_ne_top _ _)]
+    exact ENNReal.ofReal_le_ofReal (hreal n)
+  filter_upwards [ae_eventually_notMem hsum] with x hx
+  filter_upwards [hx] with n hn
+  simpa [s, not_le] using hn
 
 /-! ### The right half does not matter -/
 

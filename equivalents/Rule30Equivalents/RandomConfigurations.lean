@@ -589,33 +589,39 @@ theorem tendsto_average_of_residues {a : ℕ → ℝ} {m : ℕ} (hm : 0 < m) {L 
   field_simp
   ring
 
+/-- **Disjoint windows are independent**: if the windows `n k, …, n k + m k - 1` are pairwise
+disjoint, the words `v(n k), …, v(n k + m k - 1)` of a fair-coin sequence are independent fair
+words (reindex the product measure, then curry it). -/
+theorem map_windows {m n : ℕ → ℕ}
+    (hinj : Function.Injective fun p : (k : ℕ) × Fin (m k) => n p.1 + p.2) :
+    (coins ℕ).map (fun v k (j : Fin (m k)) => v (n k + j)) =
+      Measure.infinitePi fun k => coins (Fin (m k)) := by
+  have h1 : (coins ℕ).map (fun v (p : (k : ℕ) × Fin (m k)) => v (n p.1 + p.2)) =
+      Measure.infinitePi fun _ : (k : ℕ) × Fin (m k) => coin :=
+    Measure.map_infinitePi_infinitePi_of_inj hinj
+  have h2 := Measure.infinitePi_map_piCurry (X := fun (k : ℕ) (_ : Fin (m k)) => Bool)
+    fun _ _ => coin
+  rw [← h2, ← h1, Measure.map_map (MeasurableEquiv.piCurry _).measurable (by fun_prop)]
+  rfl
+
 /-- The blocks `v(r + k m), …, v(r + k m + m - 1)`, `k = 0, 1, …`, of a fair-coin sequence are
 independent fair words. -/
 theorem map_blocks {m : ℕ} (hm : 0 < m) (r : ℕ) :
     (coins ℕ).map (fun v k (j : Fin m) => v (r + k * m + j)) =
       Measure.infinitePi fun _ : ℕ => coins (Fin m) := by
-  have hinj : Function.Injective fun p : ℕ × Fin m => r + p.1 * m + p.2 := by
-    rintro ⟨k, j⟩ ⟨k', j'⟩ h
-    have h' : (j : ℕ) + k * m = j' + k' * m := by simp only at h; omega
-    have hj : (j : ℕ) = j' := by
-      have := congrArg (· % m) h'
-      simpa only [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt j.2, Nat.mod_eq_of_lt j'.2]
-        using this
-    have hk : k = k' := by
-      have := congrArg (· / m) h'
-      simpa only [Nat.add_mul_div_right _ _ hm, Nat.div_eq_of_lt j.2, Nat.div_eq_of_lt j'.2,
-        zero_add] using this
-    rw [hk, Fin.ext hj]
-  have h1 : (coins ℕ).map (fun v (p : ℕ × Fin m) => v (r + p.1 * m + p.2)) =
-      Measure.infinitePi fun _ : ℕ × Fin m => coin :=
-    Measure.map_infinitePi_infinitePi_of_inj hinj
-  have h2 : (Measure.infinitePi fun _ : ℕ × Fin m => coin).map
-      (MeasurableEquiv.curry ℕ (Fin m) Bool) =
-        Measure.infinitePi fun _ : ℕ => coins (Fin m) :=
-    Measure.infinitePi_map_curry fun _ _ => coin
-  rw [← h2, ← h1, Measure.map_map (MeasurableEquiv.curry ℕ (Fin m) Bool).measurable
-    (by fun_prop)]
-  rfl
+  refine map_windows (m := fun _ => m) (n := fun k => r + k * m) ?_
+  rintro ⟨k, j⟩ ⟨k', j'⟩ h
+  have h' : (j : ℕ) + k * m = j' + k' * m := by simp only at h; omega
+  have hj : (j : ℕ) = j' := by
+    have := congrArg (· % m) h'
+    simpa only [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt j.2, Nat.mod_eq_of_lt j'.2]
+      using this
+  have hk : k = k' := by
+    have := congrArg (· / m) h'
+    simpa only [Nat.add_mul_div_right _ _ hm, Nat.div_eq_of_lt j.2, Nat.div_eq_of_lt j'.2,
+      zero_add] using this
+  subst hk
+  rw [Fin.ext hj]
 
 /-- **Borel's theorem for one word along one residue class**: the strong law of large numbers
 for the independent blocks. -/

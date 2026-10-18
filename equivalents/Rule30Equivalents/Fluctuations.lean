@@ -33,7 +33,8 @@ with steps `±1/2` (`imbalance`).
   `2 / (j log 2)²`, a summable sequence (`ae_eventually_imbalance_lt`).
 
 So the fluctuations of a random center column lie between `K √n`, for every `K`, and
-`√(2 n log log n)`; the law of the iterated logarithm puts them at `√(n log log n / 2)`. At the
+`√(2 n log log n)`; the law of the iterated logarithm puts them at `√(n log log n / 2)`
+(`IteratedLogarithm.ae_limsup_liminf_walk_trace`). At the
 density `1/2` this strengthens `BoundedRemainder.ae_unbounded_remainder_trace`: the remainder is not
 even `O(√n)`.
 -/
@@ -589,7 +590,7 @@ theorem ae_eventually_imbalance_lt :
 
 /-- **For almost every fair-coin sequence, `|N(n) - n/2| < √(2 n log log n)` from some `n` on**
 (by exchanging black and white for the lower side). The law of the iterated logarithm gives the
-sharp constant `1/√2` in place of `√2`. -/
+sharp constant `1/√2` in place of `√2` (`IteratedLogarithm.ae_limsup_liminf_walk`). -/
 theorem ae_eventually_abs_imbalance_lt :
     ∀ᵐ v ∂(coins ℕ), ∀ᶠ n : ℕ in atTop, |imbalance v n| < √(2 * n * Real.log (Real.log n)) := by
   filter_upwards [ae_eventually_imbalance_lt,

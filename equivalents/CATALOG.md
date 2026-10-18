@@ -2824,7 +2824,11 @@ with Turing machines reading n. Notes:
     ([Fluctuations](Rule30Equivalents/Fluctuations.lean): `ae_frequently_balanced_trace`, by
     Kolmogorov's zero-one law and the central limit theorem), and it stays within
     √(2n log log n) from some n on (`ae_eventually_abs_discrepancy_lt_trace`, by Lévy's maximal
-    inequality and Hoeffding's along n = 2^j). The configurations with an eventually
+    inequality and Hoeffding's along n = 2^j). Sharply, the walk W(n) = 2N(n) − n obeys Khinchin's
+    law of the iterated logarithm: the limsup and liminf of W(n)/√(2n log log n) are 1 and −1
+    ([IteratedLogarithm](Rule30Equivalents/IteratedLogarithm.lean), `ae_limsup_liminf_walk_trace`;
+    the lower half bounds the fair binomial tail from below at moderate deviations and applies the
+    second Borel–Cantelli lemma to the windows [2bᵏ, 2bᵏ⁺¹)). The configurations with an eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
     ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,

@@ -963,7 +963,7 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 - *Lean.* Proved in the library (batch 2: `LinearRelations.problem1_iff_series_not_rational`,
   `problem1_iff_no_linearRecurrence` and `problem1_iff_no_eventual_linearRecurrence`). The
   rational form now holds over every nontrivial commutative ring (`eventuallyPeriodic_of_mul_eq`
-  through the window lemma `eventuallyPeriodic_of_window`). Before
+  through the window lemma `WordsAutomata.eventuallyPeriodic_of_determined`). Before
   batch 2 the recurrence form had a scratch proof (logic survey, any field) and the power-series
   form was stated. Here `series K` is the scratch definition above, not the library's
   `PowerSeriesF2.series`.

@@ -5,6 +5,7 @@ import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 import Mathlib.Order.Filter.AtTopBot.Basic
 import Rule30Equivalents.PowerSeriesF2
 import Rule30Equivalents.ShiftOrbit
+import Rule30Equivalents.WordsAutomata
 
 /-!
 # Problem 1 as the absence of linear relations, over any field
@@ -20,7 +21,7 @@ equivalent to Problem 1. Unless a bullet says otherwise, `K` is an arbitrary fie
   (`problem1_iff_series_not_rational_coeff_zero`). Here `K` may be any nontrivial commutative
   ring, such as `ℤ` or `ℤ/4ℤ`: the lowest nonzero coefficient `q` of `Q` need not be invertible,
   since `q · 0 = 0 ≠ q · 1` already makes each bit a function of the bits before it
-  (`eventuallyPeriodic_of_window`, `eventuallyPeriodic_of_mul_eq`).
+  (`eventuallyPeriodic_of_mul_eq`, through `WordsAutomata.eventuallyPeriodic_of_determined`).
 * **No linear recurrence.** The column solves no Mathlib `LinearRecurrence K`: not from `n = 0`
   (`problem1_iff_no_linearRecurrence`), not eventually, `∀ᶠ n in atTop`
   (`problem1_iff_no_eventual_linearRecurrence`), and no shift `n ↦ cK(n + T)` solves one
@@ -195,58 +196,6 @@ theorem exists_mul_eq_of_eventuallyPeriodic [Nontrivial K] {b : ℕ → Bool}
       unfold toK
       rw [hn', sub_self]
 
-/-- **Window determinism.** If from time `T` on each bit is a function of the `d` bits before it,
-the sequence is eventually periodic: two windows coincide, and everything after them repeats. -/
-theorem eventuallyPeriodic_of_window {b : ℕ → Bool} {d T : ℕ} (F : (Fin d → Bool) → Bool)
-    (h : ∀ t, T ≤ t → b (t + d) = F fun i => b (t + i)) : EventuallyPeriodic b := by
-  have key : ∀ t₁ t₂, T ≤ t₁ → t₁ < t₂ → (∀ i < d, b (t₁ + i) = b (t₂ + i)) →
-      EventuallyPeriodic b := by
-    intro t₁ t₂ h₁ h₁₂ h0
-    have all : ∀ n, ∀ i, b (t₁ + n + i) = b (t₂ + n + i) ∨ d ≤ i := by
-      intro n
-      induction n with
-      | zero =>
-        intro i
-        rcases Nat.lt_or_ge i d with hi | hi
-        · exact Or.inl (by simpa using h0 i hi)
-        · exact Or.inr hi
-      | succ n ih =>
-        intro i
-        rcases Nat.lt_or_ge (i + 1) d with hi | hi
-        · rcases ih (i + 1) with e | e
-          · left
-            rwa [show t₁ + (n + 1) + i = t₁ + n + (i + 1) by omega,
-              show t₂ + (n + 1) + i = t₂ + n + (i + 1) by omega]
-          · omega
-        · rcases Nat.lt_or_ge i d with hi' | hi'
-          · left
-            rw [show t₁ + (n + 1) + i = t₁ + n + d by omega,
-              show t₂ + (n + 1) + i = t₂ + n + d by omega, h _ (by omega), h _ (by omega)]
-            congr 1
-            funext j
-            rcases ih j with e | e
-            · exact e
-            · exact absurd j.isLt (by omega)
-          · exact Or.inr hi'
-    refine ⟨t₁ + d, t₂ - t₁, by omega, fun t ht => ?_⟩
-    have e := h (t - d) (by omega)
-    have e' := h (t - d + (t₂ - t₁)) (by omega)
-    rw [Nat.sub_add_cancel (by omega)] at e
-    rw [show t - d + (t₂ - t₁) + d = t + (t₂ - t₁) by omega] at e'
-    rw [e, e']
-    congr 1
-    funext j
-    rcases all (t - d - t₁) j with e2 | e2
-    · rw [show t₁ + (t - d - t₁) + j = t - d + j by omega,
-        show t₂ + (t - d - t₁) + j = t - d + (t₂ - t₁) + j by omega] at e2
-      exact e2.symm
-    · exact absurd j.isLt (by omega)
-  obtain ⟨x, y, hxy, hw⟩ :=
-    Finite.exists_ne_map_eq_of_infinite (fun n : ℕ => fun i : Fin d => b (T + n + i))
-  rcases Nat.lt_or_gt_of_ne hxy with hlt | hlt
-  · exact key (T + x) (T + y) (by omega) (by omega) fun i hi => congrFun hw ⟨i, hi⟩
-  · exact key (T + y) (T + x) (by omega) (by omega) fun i hi => (congrFun hw ⟨i, hi⟩).symm
-
 /-- If `Q · series b = P` with `Q ≠ 0` over a commutative ring, then `b` is eventually periodic.
 Comparing coefficients of `X^(t + deg Q)` for `t > deg P` gives `q · b(t + w) = -∑_{m < w} …` for
 the lowest nonzero coefficient `q` of `Q`; since `q · 0 = 0 ≠ q = q · 1`, the bit `b(t + w)` is a
@@ -259,31 +208,38 @@ theorem eventuallyPeriodic_of_mul_eq {b : ℕ → Bool} {P Q : K[X]} (hQ : Q ≠
   have hkD : i₀ ≤ d := Polynomial.natTrailingDegree_le_natDegree Q
   have hq : Q.coeff i₀ ≠ 0 := Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr hQ
   set w := d - i₀
-  refine eventuallyPeriodic_of_window (d := w) (T := P.natDegree + 1)
-    (fun win => decide (Q.coeff i₀ = -∑ m : Fin w, Q.coeff (d - m) * (if win m then 1 else 0)))
-    fun t ht => ?_
-  have h0 : PowerSeries.coeff (t + d) ((Q : PowerSeries K) * series K b) = 0 := by
-    rw [h, Polynomial.coeff_coe]
-    exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
-  rw [PowerSeriesF2.coeff_coe_mul_add_natDegree, show d + 1 = (w + 1) + i₀ by omega,
-    Finset.sum_range_add, Finset.sum_range_succ] at h0
-  have hz : ∑ m ∈ range i₀, Q.coeff (d - (w + 1 + m)) *
-      PowerSeries.coeff (t + (w + 1 + m)) (series K b) = 0 :=
-    Finset.sum_eq_zero fun m hm => by
-      rw [Finset.mem_range] at hm
-      rw [Polynomial.coeff_eq_zero_of_lt_natTrailingDegree (by omega), zero_mul]
-  rw [hz, add_zero, show d - w = i₀ by omega] at h0
-  simp only [coeff_series] at h0
-  rw [← Fin.sum_univ_eq_sum_range (fun m => Q.coeff (d - m) * toK K b (t + m)) w] at h0
-  show b (t + w) = decide (Q.coeff i₀ = -∑ m : Fin w, Q.coeff (d - m) *
-    (if b (t + m) then 1 else 0))
-  unfold toK at h0
-  cases hb : b (t + w)
-  · rw [hb, if_neg (by simp), mul_zero, add_zero] at h0
-    rw [h0, neg_zero]
-    exact (decide_eq_false hq).symm
-  · rw [hb, if_pos rfl, mul_one] at h0
-    exact (decide_eq_true (eq_neg_of_add_eq_zero_right h0)).symm
+  -- each bit from `P.natDegree + 1` on is a function of the `w` bits before it
+  have key : ∀ t, P.natDegree + 1 ≤ t → b (t + w) =
+      decide (Q.coeff i₀ = -∑ m : Fin w, Q.coeff (d - m) * (if b (t + m) then 1 else 0)) := by
+    intro t ht
+    have h0 : PowerSeries.coeff (t + d) ((Q : PowerSeries K) * series K b) = 0 := by
+      rw [h, Polynomial.coeff_coe]
+      exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
+    rw [PowerSeriesF2.coeff_coe_mul_add_natDegree, show d + 1 = (w + 1) + i₀ by omega,
+      Finset.sum_range_add, Finset.sum_range_succ] at h0
+    have hz : ∑ m ∈ range i₀, Q.coeff (d - (w + 1 + m)) *
+        PowerSeries.coeff (t + (w + 1 + m)) (series K b) = 0 :=
+      Finset.sum_eq_zero fun m hm => by
+        rw [Finset.mem_range] at hm
+        rw [Polynomial.coeff_eq_zero_of_lt_natTrailingDegree (by omega), zero_mul]
+    rw [hz, add_zero, show d - w = i₀ by omega] at h0
+    simp only [coeff_series] at h0
+    rw [← Fin.sum_univ_eq_sum_range (fun m => Q.coeff (d - m) * toK K b (t + m)) w] at h0
+    show b (t + w) = decide (Q.coeff i₀ = -∑ m : Fin w, Q.coeff (d - m) *
+      (if b (t + m) then 1 else 0))
+    unfold toK at h0
+    cases hb : b (t + w)
+    · rw [hb, if_neg (by simp), mul_zero, add_zero] at h0
+      rw [h0, neg_zero]
+      exact (decide_eq_false hq).symm
+    · rw [hb, if_pos rfl, mul_one] at h0
+      exact (decide_eq_true (eq_neg_of_add_eq_zero_right h0)).symm
+  refine WordsAutomata.eventuallyPeriodic_of_determined (n := w) (T := P.natDegree + 1)
+    fun i i' hi hi' hw => ?_
+  have hsum : ∑ m : Fin w, Q.coeff (d - m) * (if b (i + m) then (1 : K) else 0) =
+      ∑ m : Fin w, Q.coeff (d - m) * (if b (i' + m) then 1 else 0) :=
+    Finset.sum_congr rfl fun m _ => by rw [hw m m.isLt]
+  rw [key i hi, key i' hi', hsum]
 
 /-- **Rational generating function over any nontrivial commutative ring.** A bit sequence is
 eventually periodic iff its generating function over `K` is rational: `Q · ∑ₜ b(t) Xᵗ = P` for

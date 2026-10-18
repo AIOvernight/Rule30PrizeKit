@@ -1,4 +1,4 @@
-import Rule30Equivalents.Basic
+import Rule30Equivalents.ShiftOrbit
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Tactic.LinearCombination
@@ -39,6 +39,13 @@ the first term gives `B x_t = b(t) + x_(t+1)` (`mul_baseValue`), and so `B^t x_0
   `x_(t+1) = B x_t - b(t)`, the next tail value. By induction `x_(i+k) = x_(j+k)` and
   `b(i+k) = b(j+k)` for all `k`, so `b` has period `j - i` from `i` on.
 
+Everything except the digit rule holds in every real base `β > 1`: the value `value β b`, the
+shift `β^t x_0 = N_t + x_t` (`pow_mul_value`, with `N_t = lead β b t`), the geometric series
+(`mem_of_eventuallyPeriodic`: an eventually periodic `b` has its value in every subfield of `ℝ`
+containing `β`) and the pigeonhole step (`eventuallyPeriodic_of_finite_tails`: finitely many tail
+values give eventual periodicity once the tail value determines the digit).
+[PisotNumbers](PisotNumbers.lean) uses them for Pisot bases.
+
 The case split takes care of double expansions. In base 2, `0.0111…₂ = 0.1000…₂`: equal tail
 values need not have equal digits. That only happens for eventually constant sequences, and when
 infinitely many digits are `1` the tail value does determine the digit. For `B ≥ 3` the digits
@@ -58,18 +65,28 @@ namespace Rule30Equivalents.BinaryIrrational
 
 open Ruliology.CellularAutomata
 
-/-- The real number `0.b(0) b(1) b(2) …` written in base `B`, with digit `1` for `true` and `0`
-for `false`. -/
-noncomputable def baseValue (B : ℕ) (b : ℕ → Bool) : ℝ :=
-  ∑' t, (if b t then (1 : ℝ) else 0) / (B : ℝ) ^ (t + 1)
+/-! ### Expansions in a real base `β > 1` -/
+
+/-- The value `0.b(0) b(1) b(2) …` of the digits `b` in a real base `β`, with digit `1` for `true`
+and `0` for `false`. -/
+noncomputable def value (β : ℝ) (b : ℕ → Bool) : ℝ :=
+  ∑' t, (if b t then (1 : ℝ) else 0) / β ^ (t + 1)
 
 /-- The tail `b(t), b(t + 1), …` of a sequence. -/
 def tail (b : ℕ → Bool) (t : ℕ) : ℕ → Bool := fun s => b (s + t)
 
-/-- The first `t` digits `b(0) … b(t - 1)` read as a base-`B` numeral. -/
-def lead (B : ℕ) (b : ℕ → Bool) : ℕ → ℕ
+/-- The first `t` digits `b(0) … b(t - 1)` read as a numeral in base `x`, an element of a
+semiring: `lead x b (t + 1) = x · lead x b t + b(t)`. -/
+def lead {R : Type*} [Semiring R] (x : R) (b : ℕ → Bool) : ℕ → R
   | 0 => 0
-  | t + 1 => B * lead B b t + (if b t then 1 else 0)
+  | t + 1 => x * lead x b t + (if b t then 1 else 0)
+
+theorem map_lead {R S : Type*} [Semiring R] [Semiring S] (f : R →+* S) (x : R) (b : ℕ → Bool) :
+    ∀ t, f (lead x b t) = lead (f x) b t
+  | 0 => map_zero f
+  | t + 1 => by
+    rw [lead, lead, map_add, map_mul, map_lead f x b t]
+    split_ifs <;> simp
 
 /-- The first digit of the tail from `t` is `b t`. -/
 theorem tail_zero_apply (b : ℕ → Bool) (t : ℕ) : tail b t 0 = b t := by
@@ -82,6 +99,144 @@ theorem tail_tail_one (b : ℕ → Bool) (t : ℕ) : tail (tail b t) 1 = tail b 
   congr 1
   omega
 
+section RealBase
+variable {β : ℝ} (hβ : 1 < β)
+include hβ
+
+theorem term_nonneg (b : ℕ → Bool) (t : ℕ) :
+    0 ≤ (if b t then (1 : ℝ) else 0) / β ^ (t + 1) := by
+  have : (0 : ℝ) < β ^ (t + 1) := pow_pos (by linarith) _
+  split_ifs <;> positivity
+
+theorem term_le (b : ℕ → Bool) (t : ℕ) :
+    (if b t then (1 : ℝ) else 0) / β ^ (t + 1) ≤ (β⁻¹) ^ (t + 1) := by
+  rw [inv_pow, ← one_div]
+  have : (0 : ℝ) < β ^ (t + 1) := pow_pos (by linarith) _
+  split_ifs
+  · exact le_refl _
+  · rw [zero_div]; positivity
+
+theorem summable_geom : Summable fun t : ℕ => (β⁻¹) ^ (t + 1) := by
+  have h := summable_geometric_of_lt_one (inv_nonneg.2 (by linarith)) (inv_lt_one_of_one_lt₀ hβ)
+  exact h.comp_injective (add_left_injective 1)
+
+/-- The series defining `value β b` converges. -/
+theorem summable_term (b : ℕ → Bool) :
+    Summable fun t => (if b t then (1 : ℝ) else 0) / β ^ (t + 1) :=
+  Summable.of_nonneg_of_le (term_nonneg hβ b) (term_le hβ b) (summable_geom hβ)
+
+theorem value_nonneg (b : ℕ → Bool) : 0 ≤ value β b := tsum_nonneg (term_nonneg hβ b)
+
+/-- `∑ β^-(t+1) = 1 / (β - 1)`. -/
+theorem tsum_geom : ∑' t : ℕ, (β⁻¹) ^ (t + 1) = 1 / (β - 1) := by
+  have h : β⁻¹ < 1 := inv_lt_one_of_one_lt₀ hβ
+  have hs := tsum_geometric_of_lt_one (inv_nonneg.2 (by linarith : (0 : ℝ) ≤ β)) h
+  have : ∑' t : ℕ, (β⁻¹) ^ (t + 1) = β⁻¹ * ∑' t : ℕ, (β⁻¹) ^ t := by
+    rw [← tsum_mul_left]; congr 1; funext t; ring
+  rw [this, hs]
+  have hb : β ≠ 0 := by linarith
+  have h1 : β - 1 ≠ 0 := by linarith
+  have h2 : 1 - β⁻¹ ≠ 0 := by linarith
+  field_simp
+
+theorem value_le (b : ℕ → Bool) : value β b ≤ 1 / (β - 1) := by
+  rw [← tsum_geom hβ]
+  exact (summable_term hβ b).tsum_le_tsum (term_le hβ b) (summable_geom hβ)
+
+/-- A single digit `1` makes the value positive. -/
+theorem value_pos (b : ℕ → Bool) {s : ℕ} (hs : b s = true) : 0 < value β b := by
+  refine (summable_term hβ b).tsum_pos (term_nonneg hβ b) s ?_
+  have : (0 : ℝ) < β := by linarith
+  simp only [hs, if_true]
+  positivity
+
+/-- Peeling off the first digit: `β · 0.b₀b₁b₂… = b₀ + 0.b₁b₂…`. -/
+theorem mul_value (b : ℕ → Bool) :
+    β * value β b = (if b 0 then 1 else 0) + value β (tail b 1) := by
+  have hb : β ≠ 0 := by linarith
+  have e : value β (tail b 1) = ∑' n, (if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1) := rfl
+  rw [e, value, (summable_term hβ b).tsum_eq_zero_add]
+  have h : ∀ n : ℕ, (if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1 + 1) =
+      β⁻¹ * ((if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1)) := by
+    intro n; rw [pow_succ]; field_simp
+  simp only [h, tsum_mul_left]
+  field_simp
+  ring
+
+/-- One step of the digit dynamics: `x_{t+1} = β x_t - b(t)`. -/
+theorem tailValue_succ (b : ℕ → Bool) (t : ℕ) :
+    value β (tail b (t + 1)) = β * value β (tail b t) - (if b t then 1 else 0) := by
+  have h1 := mul_value hβ (tail b t)
+  rw [tail_tail_one, tail_zero_apply] at h1
+  linarith
+
+/-- Shifting by `t` digits: `βᵗ · 0.b₀b₁… = (b₀ … b_{t-1})_β + 0.b_t b_{t+1}…`. -/
+theorem pow_mul_value (b : ℕ → Bool) : ∀ t, β ^ t * value β b = lead β b t + value β (tail b t)
+  | 0 => by simp only [pow_zero, one_mul, lead, zero_add]; rfl
+  | t + 1 => by
+    rw [pow_succ, mul_comm (β ^ t) β, mul_assoc, pow_mul_value b t, mul_add,
+      tailValue_succ hβ b t, lead]
+    ring
+
+/-- **The periodic direction** (geometric series). An eventually periodic digit sequence has its
+value in every subfield of `ℝ` that contains `β`. -/
+theorem mem_of_eventuallyPeriodic (F : Subfield ℝ) (hF : β ∈ F) {b : ℕ → Bool}
+    (h : EventuallyPeriodic b) : value β b ∈ F := by
+  obtain ⟨T, P, hP, hper⟩ := h
+  have hlead : ∀ (b' : ℕ → Bool) t, lead β b' t ∈ F := fun b' t => by
+    induction t with
+    | zero => exact F.zero_mem
+    | succ t ih =>
+      exact F.add_mem (F.mul_mem hF ih) (by split_ifs; exacts [F.one_mem, F.zero_mem])
+  have htail : tail (tail b T) P = tail b T := by
+    funext s; simp only [tail]; rw [show s + P + T = s + T + P by omega]; exact hper _ (by omega)
+  have e1 := pow_mul_value hβ (tail b T) P
+  rw [htail] at e1
+  have e2 := pow_mul_value hβ b T
+  have hβP : (1 : ℝ) < β ^ P := one_lt_pow₀ hβ hP.ne'
+  have hβT : (0 : ℝ) < β ^ T := pow_pos (by linarith) T
+  have hx : value β (tail b T) = lead β (tail b T) P / (β ^ P - 1) := by
+    rw [eq_div_iff (by linarith)]; linarith
+  have hv : value β b = (lead β b T + value β (tail b T)) / β ^ T := by
+    rw [eq_div_iff hβT.ne']; linarith
+  rw [hv, hx]
+  exact F.div_mem (F.add_mem (hlead b T)
+    (F.div_mem (hlead _ P) (F.sub_mem (F.pow_mem hF P) F.one_mem))) (F.pow_mem hF T)
+
+/-- **Finitely many tail values give eventual periodicity**, as soon as the tail value determines
+the digit: then it also determines the next tail value (`tailValue_succ`). -/
+theorem eventuallyPeriodic_of_finite_tails {b : ℕ → Bool} (f : ℝ → Bool)
+    (hdig : ∀ t, b t = f (value β (tail b t)))
+    (hfin : (Set.range fun t => value β (tail b t)).Finite) : EventuallyPeriodic b := by
+  obtain ⟨s, t, hst, heq⟩ : ∃ s t, s < t ∧ value β (tail b s) = value β (tail b t) := by
+    by_contra hne
+    push Not at hne
+    refine Set.infinite_range_of_injective (fun s t he => ?_) hfin
+    rcases lt_trichotomy s t with h | h | h
+    · exact absurd he (hne s t h)
+    · exact h
+    · exact absurd he.symm (hne t s h)
+  have key : ∀ j, value β (tail b (s + j)) = value β (tail b (t + j)) := by
+    intro j
+    induction j with
+    | zero => exact heq
+    | succ j ih =>
+      have hd : b (s + j) = b (t + j) := by rw [hdig, hdig, ih]
+      rw [← add_assoc, ← add_assoc, tailValue_succ hβ, tailValue_succ hβ, ih, hd]
+  refine ShiftOrbit.eventuallyPeriodic_of_shift_eq hst fun j => ?_
+  rw [hdig, hdig, key]
+
+end RealBase
+
+/-! ### Integer bases -/
+
+/-- The real number `0.b(0) b(1) b(2) …` written in the integer base `B`. -/
+noncomputable def baseValue (B : ℕ) (b : ℕ → Bool) : ℝ := value B b
+
+/-- The base-`B` numeral of the first `t` digits, cast to `ℝ`, is the numeral in base `(B : ℝ)`. -/
+theorem cast_lead (B : ℕ) (b : ℕ → Bool) (t : ℕ) : ((lead B b t : ℕ) : ℝ) = lead (B : ℝ) b t :=
+  map_lead (Nat.castRingHom ℝ) B b t
+
 section
 variable {B : ℕ} (hB : 2 ≤ B)
 include hB
@@ -89,13 +244,10 @@ include hB
 /-- The base, as a real number, is at least `2`. -/
 theorem two_le_cast : (2 : ℝ) ≤ B := by exact_mod_cast hB
 
-/-- Each term `b(t) / B^(t+1)` is nonnegative. -/
-theorem term_nonneg (b : ℕ → Bool) (t : ℕ) :
-    0 ≤ (if b t then (1 : ℝ) else 0) / (B : ℝ) ^ (t + 1) := by
-  split_ifs <;> positivity
+theorem one_lt_cast : (1 : ℝ) < B := by linarith [two_le_cast hB]
 
 /-- Each term is at most `1 / 2^(t+1)`, written `1 / 2 / 2^t` to match `tsum_geometric_two'`. -/
-theorem term_le (b : ℕ → Bool) (t : ℕ) :
+theorem term_le_two (b : ℕ → Bool) (t : ℕ) :
     (if b t then (1 : ℝ) else 0) / (B : ℝ) ^ (t + 1) ≤ 1 / 2 / 2 ^ t := by
   have hpow : (2 : ℝ) ^ (t + 1) ≤ (B : ℝ) ^ (t + 1) :=
     pow_le_pow_left₀ (by norm_num) (two_le_cast hB) _
@@ -104,63 +256,34 @@ theorem term_le (b : ℕ → Bool) (t : ℕ) :
   · exact one_div_le_one_div_of_le (by positivity) hpow
   · rw [zero_div]; positivity
 
-/-- The series defining `baseValue B b` converges. -/
-theorem summable_term (b : ℕ → Bool) :
-    Summable (fun t => (if b t then (1 : ℝ) else 0) / (B : ℝ) ^ (t + 1)) :=
-  Summable.of_nonneg_of_le (term_nonneg hB b) (term_le hB b) (summable_geometric_two' 1)
-
 /-- `0 ≤ 0.b(0) b(1) …`. -/
-theorem baseValue_nonneg (b : ℕ → Bool) : 0 ≤ baseValue B b :=
-  tsum_nonneg (term_nonneg hB b)
+theorem baseValue_nonneg (b : ℕ → Bool) : 0 ≤ baseValue B b := value_nonneg (one_lt_cast hB) b
 
-/-- `0.b(0) b(1) … ≤ 1`, by comparison with `∑ 1/2^(t+1) = 1`. -/
-theorem baseValue_le_one (b : ℕ → Bool) : baseValue B b ≤ 1 :=
-  calc baseValue B b ≤ ∑' t : ℕ, (1 : ℝ) / 2 / 2 ^ t :=
-        (summable_term hB b).tsum_le_tsum (term_le hB b) (summable_geometric_two' 1)
-    _ = 1 := tsum_geometric_two' 1
+/-- `0.b(0) b(1) … ≤ 1`, by comparison with `∑ B^-(t+1) = 1/(B - 1)`. -/
+theorem baseValue_le_one (b : ℕ → Bool) : baseValue B b ≤ 1 := by
+  refine (value_le (one_lt_cast hB) b).trans ?_
+  rw [div_le_one (by linarith [two_le_cast hB])]
+  linarith [two_le_cast hB]
 
 /-- A single digit `1` makes the value positive. -/
-theorem baseValue_pos (b : ℕ → Bool) {s : ℕ} (hs : b s = true) : 0 < baseValue B b := by
-  refine (summable_term hB b).tsum_pos (term_nonneg hB b) s ?_
-  have : (0 : ℝ) < B := by linarith [two_le_cast hB]
-  simp only [hs, if_true]
-  positivity
+theorem baseValue_pos (b : ℕ → Bool) {s : ℕ} (hs : b s = true) : 0 < baseValue B b :=
+  value_pos (one_lt_cast hB) b hs
 
 /-- Peeling off the first digit: `B · 0.b₀b₁b₂… = b₀ + 0.b₁b₂…`. -/
 theorem mul_baseValue (b : ℕ → Bool) :
-    (B : ℝ) * baseValue B b = (if b 0 then 1 else 0) + baseValue B (tail b 1) := by
-  have hB0 : (B : ℝ) ≠ 0 := by linarith [two_le_cast hB]
-  have e : baseValue B (tail b 1) =
-      ∑' n, (if b (n + 1) then (1 : ℝ) else 0) / (B : ℝ) ^ (n + 1) := rfl
-  rw [e, baseValue, (summable_term hB b).tsum_eq_zero_add]
-  have h : ∀ n : ℕ, (if b (n + 1) then (1 : ℝ) else 0) / (B : ℝ) ^ (n + 1 + 1) =
-      (B : ℝ)⁻¹ * ((if b (n + 1) then (1 : ℝ) else 0) / (B : ℝ) ^ (n + 1)) := by
-    intro n
-    rw [pow_succ]
-    ring
-  simp only [h, tsum_mul_left]
-  field_simp
-  ring
+    (B : ℝ) * baseValue B b = (if b 0 then 1 else 0) + baseValue B (tail b 1) :=
+  mul_value (one_lt_cast hB) b
 
 /-- Shifting by `t` digits: `B^t · 0.b₀b₁… = (b₀ … b_{t-1})_B + 0.b_t b_{t+1}…`. -/
 theorem pow_mul_baseValue (b : ℕ → Bool) (t : ℕ) :
     (B : ℝ) ^ t * baseValue B b = lead B b t + baseValue B (tail b t) := by
-  induction t with
-  | zero => simp only [pow_zero, one_mul, lead, Nat.cast_zero, zero_add]; rfl
-  | succ t ih =>
-    have h1 := mul_baseValue hB (tail b t)
-    rw [tail_tail_one, tail_zero_apply] at h1
-    rw [pow_succ, mul_comm ((B : ℝ) ^ t) B, mul_assoc, ih, mul_add, h1]
-    simp only [lead]
-    push_cast
-    ring
+  unfold baseValue
+  rw [pow_mul_value (one_lt_cast hB) b t, cast_lead]
 
 /-- One step of the digit dynamics: `x_{t+1} = B x_t - b(t)`. -/
 theorem baseValue_tail_succ (b : ℕ → Bool) (t : ℕ) :
-    baseValue B (tail b (t + 1)) = B * baseValue B (tail b t) - (if b t then 1 else 0) := by
-  have h1 := mul_baseValue hB (tail b t)
-  rw [tail_tail_one, tail_zero_apply] at h1
-  linarith
+    baseValue B (tail b (t + 1)) = B * baseValue B (tail b t) - (if b t then 1 else 0) :=
+  tailValue_succ (one_lt_cast hB) b t
 
 /-- If infinitely many digits are `1`, the digit `b t` is read off the tail value. -/
 theorem digit_iff (b : ℕ → Bool) (hinf : ∀ T, ∃ s, T ≤ s ∧ b s = true) (t : ℕ) :
@@ -177,37 +300,16 @@ theorem digit_iff (b : ℕ → Bool) (hinf : ∀ T, ∃ s, T ≤ s ∧ b s = tru
   have hle := baseValue_le_one hB (tail b (t + 1))
   cases b t <;> simp <;> linarith
 
-/-- (→): an eventually periodic digit sequence has a rational value (geometric series). -/
+/-- (→): an eventually periodic digit sequence has a rational value (`mem_of_eventuallyPeriodic`
+with the field `ℚ`). -/
 theorem not_irrational_of_eventuallyPeriodic (b : ℕ → Bool) (h : EventuallyPeriodic b) :
     ¬ Irrational (baseValue B b) := by
-  obtain ⟨T, P, hP, hper⟩ := h
-  have htail : tail (tail b T) P = tail b T := by
-    funext s
-    simp only [tail]
-    rw [show s + P + T = s + T + P by omega]
-    exact hper (s + T) (by omega)
-  have e1 := pow_mul_baseValue hB (tail b T) P
-  rw [htail] at e1
-  have e2 := pow_mul_baseValue hB b T
-  have hBP : (1 : ℝ) < (B : ℝ) ^ P := one_lt_pow₀ (by linarith [two_le_cast hB]) hP.ne'
-  have hBT : (0 : ℝ) < (B : ℝ) ^ T := by
-    have : (0 : ℝ) < B := by linarith [two_le_cast hB]
-    positivity
-  have hx : baseValue B (tail b T) = (lead B (tail b T) P : ℝ) / ((B : ℝ) ^ P - 1) := by
-    rw [eq_div_iff (by linarith)]
-    linarith
-  have hv : baseValue B b = ((lead B b T : ℝ) + baseValue B (tail b T)) / (B : ℝ) ^ T := by
-    rw [eq_div_iff hBT.ne']
-    linarith
-  rw [hv, hx]
-  have : ((lead B b T : ℝ) + (lead B (tail b T) P : ℝ) / ((B : ℝ) ^ P - 1)) / (B : ℝ) ^ T =
-      (((lead B b T : ℚ) + (lead B (tail b T) P : ℚ) / ((B : ℚ) ^ P - 1)) / (B : ℚ) ^ T : ℚ) := by
-    push_cast
-    ring
-  rw [this]
-  exact Rat.not_irrational _
+  have hB' : (B : ℝ) ∈ (Rat.castHom ℝ).fieldRange := ⟨B, by simp⟩
+  obtain ⟨q, hq⟩ := mem_of_eventuallyPeriodic (one_lt_cast hB) _ hB' h
+  exact fun hirr => hirr ⟨q, hq⟩
 
-/-- (←): a rational value forces an eventually periodic digit sequence (pigeonhole on the tails). -/
+/-- (←): a rational value forces an eventually periodic digit sequence: the tails take finitely
+many values (`eventuallyPeriodic_of_finite_tails`). -/
 theorem eventuallyPeriodic_of_not_irrational (b : ℕ → Bool) (h : ¬ Irrational (baseValue B b)) :
     EventuallyPeriodic b := by
   by_cases hfin : ∃ T, ∀ t, T ≤ t → b t = false
@@ -225,6 +327,7 @@ theorem eventuallyPeriodic_of_not_irrational (b : ℕ → Bool) (h : ¬ Irration
   have hrq : (r.den : ℝ) * baseValue B b = r.num := by
     rw [hr]
     exact_mod_cast r.den_mul_eq_num
+  -- `den · x_t` is an integer in `[0, den]`
   let m : ℕ → ℤ := fun t => (B : ℤ) ^ t * r.num - (r.den : ℤ) * lead B b t
   have hm : ∀ t, (m t : ℝ) = r.den * baseValue B (tail b t) := by
     intro t
@@ -241,29 +344,20 @@ theorem eventuallyPeriodic_of_not_irrational (b : ℕ → Bool) (h : ¬ Irration
       exact_mod_cast this
     · have : (m t : ℝ) ≤ r.den := by rw [hm]; nlinarith
       exact_mod_cast this
-  obtain ⟨i, j, hij, hmij⟩ := (Set.finite_Icc (0 : ℤ) r.den).exists_lt_map_eq_of_forall_mem hmem
-  have hxij : baseValue B (tail b i) = baseValue B (tail b j) := by
-    have := congrArg (fun z : ℤ => (z : ℝ)) hmij
-    simp only [hm] at this
-    exact mul_left_cancel₀ hq.ne' this
-  have hdig := digit_iff hB b hinf
-  have hk : ∀ k, baseValue B (tail b (i + k)) = baseValue B (tail b (j + k)) := by
-    intro k
-    induction k with
-    | zero => simpa using hxij
-    | succ k ih =>
-      have hbk : b (i + k) = b (j + k) := by
-        rw [Bool.eq_iff_iff, hdig, hdig, ih]
-      rw [← add_assoc, ← add_assoc, baseValue_tail_succ hB, baseValue_tail_succ hB, ih, hbk]
-  refine ⟨i, j - i, by omega, fun t ht => ?_⟩
-  have e1 : t + (j - i) = j + (t - i) := by omega
-  have e2 : t = i + (t - i) := by omega
-  rw [e1, Bool.eq_iff_iff, hdig, hdig, ← hk (t - i), ← e2]
+  have hfin : (Set.range fun t => value B (tail b t)).Finite := by
+    refine ((Set.finite_Icc (0 : ℤ) r.den).image fun z : ℤ => (z : ℝ) / r.den).subset ?_
+    rintro _ ⟨t, rfl⟩
+    refine ⟨m t, hmem t, ?_⟩
+    show (m t : ℝ) / r.den = baseValue B (tail b t)
+    rw [hm, mul_div_cancel_left₀ _ hq.ne']
+  exact eventuallyPeriodic_of_finite_tails (one_lt_cast hB) (fun x => decide (1 < (B : ℝ) * x))
+    (fun t => Bool.eq_iff_iff.2 (by rw [decide_eq_true_iff]; exact digit_iff hB b hinf t)) hfin
 
 /-- `0.b(0) b(1) … < 1` in base `B ≥ 2` as soon as one digit is `0`. -/
 theorem baseValue_lt_one {b : ℕ → Bool} {s : ℕ} (hs : b s = false) :
     baseValue B b < 1 := by
-  have h := Summable.tsum_lt_tsum_of_nonneg (i := s) (term_nonneg hB b) (term_le hB b)
+  have h := Summable.tsum_lt_tsum_of_nonneg (i := s) (term_nonneg (one_lt_cast hB) b)
+    (term_le_two hB b)
     (by rw [hs]; simp only [Bool.false_eq_true, if_false, zero_div]; positivity)
     (summable_geometric_two' 1)
   rwa [tsum_geometric_two' 1] at h
@@ -305,6 +399,10 @@ theorem problem1_iff_irrational_base {B : ℕ} (hB : 2 ≤ B) :
 
 /-- The center column of rule 30 read as the binary number `0.c(0) c(1) c(2) …₂`. -/
 noncomputable def centerBinary : ℝ := ∑' t, (if c t then 1 else 0) / 2 ^ (t + 1)
+
+/-- `centerBinary` is `0.c(0) c(1) c(2) …` in base `2`, as a `baseValue`. -/
+theorem centerBinary_eq_baseValue : centerBinary = baseValue 2 c := by
+  simp only [centerBinary, baseValue, value, Nat.cast_ofNat]
 
 /-- **Problem 1 as irrationality**: the center column is not eventually periodic iff the binary
 number `0.c(0) c(1) c(2) …₂` is irrational. -/

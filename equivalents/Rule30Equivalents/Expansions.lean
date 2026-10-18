@@ -556,10 +556,7 @@ theorem lurothDigits_eventuallyPeriodic_iff {x : ℝ} (hx0 : 0 < x) (hx1 : x ≤
     exact lurothDigits_eventuallyPeriodic_of_rat q.den_pos hk1 hkq
 
 theorem centerBinary_mem : 0 < BinaryIrrational.centerBinary ∧ BinaryIrrational.centerBinary ≤ 1 := by
-  have e : BinaryIrrational.centerBinary = BinaryIrrational.baseValue 2 c := by
-    unfold BinaryIrrational.centerBinary BinaryIrrational.baseValue
-    simp only [Nat.cast_ofNat]
-  rw [e]
+  rw [BinaryIrrational.centerBinary_eq_baseValue]
   exact ⟨BinaryIrrational.baseValue_pos (le_refl 2) c (s := 0) (by decide),
     BinaryIrrational.baseValue_le_one (le_refl 2) c⟩
 

@@ -136,8 +136,7 @@ def SimplyNormal2 (x : ℝ) : Prop :=
 /-- The binary digits of `x₂` are the center column. -/
 theorem binDigit_centerBinary (t : ℕ) :
     binDigit BinaryIrrational.centerBinary t = if c t then 1 else 0 := by
-  have hcb : BinaryIrrational.centerBinary = BinaryIrrational.baseValue 2 c := by
-    simp [BinaryIrrational.centerBinary, BinaryIrrational.baseValue]
+  have hcb := BinaryIrrational.centerBinary_eq_baseValue
   -- a later digit is `0`, since `c` is not eventually `1`
   obtain ⟨s, hs, hcs⟩ : ∃ s, t + 1 ≤ s ∧ c s = false := by
     by_contra hne

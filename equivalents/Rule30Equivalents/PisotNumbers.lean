@@ -1,4 +1,4 @@
-import Rule30Equivalents.ShiftOrbit
+import Rule30Equivalents.BinaryIrrational
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
@@ -14,13 +14,14 @@ generally, a `Bool` sequence is eventually periodic iff its value in base `β` l
 other conjugates lie in the open unit disk (`IsPisot`).
 
 **Expansions in a base `β > 2`.** Write `x_t` for the value of the tail `b(t), b(t + 1), …`. Then
-`x_{t+1} = β x_t - b(t)` (`tailValue_succ`), and `0 ≤ x_t ≤ 1/(β - 1) < 1`, so the digit `b(t)` is
-`1` exactly when `β x_t ≥ 1` (`digit_iff`): the digits are the greedy β-expansion of `x_β`, and
-finitely many tail values make `b` eventually periodic (`eventuallyPeriodic_of_finite_tails`).
+`x_{t+1} = β x_t - b(t)` (`BinaryIrrational.tailValue_succ`, which holds in every real base
+`β > 1`), and `0 ≤ x_t ≤ 1/(β - 1) < 1`, so the digit `b(t)` is `1` exactly when `β x_t ≥ 1`
+(`digit_iff`): the digits are the greedy β-expansion of `x_β`, and finitely many tail values make
+`b` eventually periodic (`eventuallyPeriodic_of_finite_tails`).
 
 **Proof** (Bertrand, Schmidt).
 * If `b` is eventually periodic, the geometric series puts `x_β` in every field that contains `β`
-  (`mem_of_eventuallyPeriodic`).
+  (`BinaryIrrational.mem_of_eventuallyPeriodic`).
 * If `x_β ∈ K = ℚ(β)`, a number field, then `q x_β` is an algebraic integer for some integer
   `q ≠ 0`, and so is every `q x_t = βᵗ (q x_β) - q (b(0) β^(t-1) + ⋯ + b(t-1))`. An embedding
   `φ : K → ℂ` sends `β` to a conjugate: either `β` itself, and then `φ` is the inclusion and
@@ -37,27 +38,10 @@ modulo 1*, C. R. Acad. Sci. Paris 285 (1977) 419–421.
 namespace Rule30Equivalents.PisotNumbers
 
 open Ruliology.CellularAutomata
+open BinaryIrrational (value tail lead map_lead value_nonneg value_le tailValue_succ
+  pow_mul_value mem_of_eventuallyPeriodic)
 
 /-! ### Expansions in a base `β > 2` -/
-
-/-- The value of the digits `b` in base `β`. -/
-noncomputable def value (β : ℝ) (b : ℕ → Bool) : ℝ :=
-  ∑' t, (if b t then (1 : ℝ) else 0) / β ^ (t + 1)
-
-/-- The tail of `b` from `t`. -/
-def tail (b : ℕ → Bool) (t : ℕ) : ℕ → Bool := fun s => b (s + t)
-
-/-- The first `t` digits as an element of a semiring: `lead x b (t + 1) = x · lead x b t + b(t)`. -/
-def lead {R : Type*} [Semiring R] (x : R) (b : ℕ → Bool) : ℕ → R
-  | 0 => 0
-  | t + 1 => x * lead x b t + (if b t then 1 else 0)
-
-theorem map_lead {R S : Type*} [Semiring R] [Semiring S] (f : R →+* S) (x : R) (b : ℕ → Bool) :
-    ∀ t, f (lead x b t) = lead (f x) b t
-  | 0 => map_zero f
-  | t + 1 => by
-    rw [lead, lead, map_add, map_mul, map_lead f x b t]
-    split_ifs <;> simp
 
 variable {β : ℝ}
 
@@ -66,83 +50,18 @@ section Base
 variable (hβ : 2 < β)
 include hβ
 
-theorem β_pos : (0 : ℝ) < β := by linarith
-
-theorem term_le (b : ℕ → Bool) (t : ℕ) :
-    (if b t then (1 : ℝ) else 0) / β ^ (t + 1) ≤ (β⁻¹) ^ (t + 1) := by
-  rw [inv_pow, ← one_div]
-  have : (0 : ℝ) < β ^ (t + 1) := pow_pos (β_pos hβ) _
-  split_ifs
-  · exact le_refl _
-  · rw [zero_div]; positivity
-
-theorem term_nonneg (b : ℕ → Bool) (t : ℕ) :
-    0 ≤ (if b t then (1 : ℝ) else 0) / β ^ (t + 1) := by
-  have : (0 : ℝ) < β ^ (t + 1) := pow_pos (β_pos hβ) _
-  split_ifs <;> positivity
-
-theorem summable_geom : Summable fun t : ℕ => (β⁻¹) ^ (t + 1) := by
-  have h : β⁻¹ < 1 := inv_lt_one_of_one_lt₀ (by linarith)
-  exact (summable_geometric_of_lt_one (inv_nonneg.2 (β_pos hβ).le) h).comp_injective
-    (add_left_injective 1)
-
-theorem summable_term (b : ℕ → Bool) :
-    Summable fun t => (if b t then (1 : ℝ) else 0) / β ^ (t + 1) :=
-  Summable.of_nonneg_of_le (term_nonneg hβ b) (term_le hβ b) (summable_geom hβ)
-
-theorem value_nonneg (b : ℕ → Bool) : 0 ≤ value β b := tsum_nonneg (term_nonneg hβ b)
-
-/-- `∑ β^-(t+1) = 1 / (β - 1)`. -/
-theorem tsum_geom : ∑' t : ℕ, (β⁻¹) ^ (t + 1) = 1 / (β - 1) := by
-  have h : β⁻¹ < 1 := inv_lt_one_of_one_lt₀ (by linarith)
-  have hs := tsum_geometric_of_lt_one (inv_nonneg.2 (β_pos hβ).le) h
-  have : ∑' t : ℕ, (β⁻¹) ^ (t + 1) = β⁻¹ * ∑' t : ℕ, (β⁻¹) ^ t := by
-    rw [← tsum_mul_left]; congr 1; funext t; ring
-  rw [this, hs]
-  have hb : β ≠ 0 := (β_pos hβ).ne'
-  have h1 : β - 1 ≠ 0 := by linarith
-  have h2 : 1 - β⁻¹ ≠ 0 := by
-    have : β⁻¹ < 1 := h
-    linarith
-  field_simp
-
-theorem value_le (b : ℕ → Bool) : value β b ≤ 1 / (β - 1) := by
-  rw [← tsum_geom hβ]
-  exact (summable_term hβ b).tsum_le_tsum (term_le hβ b) (summable_geom hβ)
+theorem one_lt : (1 : ℝ) < β := one_lt_two.trans hβ
 
 theorem value_lt_one (b : ℕ → Bool) : value β b < 1 := by
-  have h := value_le hβ b
+  have h := value_le (one_lt hβ) b
   have h2 : 1 / (β - 1) < 1 := by
     rw [div_lt_one (by linarith)]; linarith
   linarith
 
-/-- Peeling off the first digit: `β x = b(0) + x(tail)`. -/
-theorem mul_value (b : ℕ → Bool) :
-    β * value β b = (if b 0 then 1 else 0) + value β (tail b 1) := by
-  have hb : β ≠ 0 := (β_pos hβ).ne'
-  have e : value β (tail b 1) = ∑' n, (if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1) := rfl
-  rw [e, value, (summable_term hβ b).tsum_eq_zero_add]
-  have h : ∀ n : ℕ, (if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1 + 1) =
-      β⁻¹ * ((if b (n + 1) then (1 : ℝ) else 0) / β ^ (n + 1)) := by
-    intro n; rw [pow_succ]; field_simp
-  simp only [h, tsum_mul_left]
-  field_simp
-  ring
-
-/-- The tail recursion `x_{t+1} = β x_t - b(t)`. -/
-theorem tailValue_succ (b : ℕ → Bool) (t : ℕ) :
-    value β (tail b (t + 1)) = β * value β (tail b t) - (if b t then 1 else 0) := by
-  have h1 := mul_value hβ (tail b t)
-  have e1 : tail (tail b t) 1 = tail b (t + 1) := by
-    funext s; simp only [tail]; rw [show s + 1 + t = s + (t + 1) by omega]
-  have e2 : tail b t 0 = b t := by simp [tail]
-  rw [e1, e2] at h1
-  linarith
-
 /-- **The greedy digit**: `b(t) = 1` iff `β x_t ≥ 1`. -/
 theorem digit_iff (b : ℕ → Bool) (t : ℕ) : b t = true ↔ 1 ≤ β * value β (tail b t) := by
-  have h1 := tailValue_succ hβ b t
-  have h2 := value_nonneg hβ (tail b (t + 1))
+  have h1 := tailValue_succ (one_lt hβ) b t
+  have h2 := value_nonneg (one_lt hβ) (tail b (t + 1))
   have h3 := value_lt_one hβ (tail b (t + 1))
   constructor
   · intro h; rw [h] at h1; simp at h1; linarith
@@ -151,61 +70,11 @@ theorem digit_iff (b : ℕ → Bool) (t : ℕ) : b t = true ↔ 1 ≤ β * value
     rw [Bool.not_eq_true] at hne
     rw [hne] at h1; simp at h1; linarith
 
-/-- Shifting by `t` digits: `βᵗ x = lead_t + x_t`. -/
-theorem pow_mul_value (b : ℕ → Bool) : ∀ t, β ^ t * value β b = lead β b t + value β (tail b t)
-  | 0 => by simp only [pow_zero, one_mul, lead, zero_add]; rfl
-  | t + 1 => by
-    rw [pow_succ, mul_comm (β ^ t) β, mul_assoc, pow_mul_value b t, mul_add,
-      tailValue_succ hβ b t, lead]
-    ring
-
-/-- **The periodic direction.** An eventually periodic digit sequence has its value in every
-subfield of `ℝ` that contains `β`. -/
-theorem mem_of_eventuallyPeriodic (F : Subfield ℝ) (hF : β ∈ F) {b : ℕ → Bool}
-    (h : EventuallyPeriodic b) : value β b ∈ F := by
-  obtain ⟨T, P, hP, hper⟩ := h
-  have hlead : ∀ (b' : ℕ → Bool) t, lead β b' t ∈ F := fun b' t => by
-    induction t with
-    | zero => exact F.zero_mem
-    | succ t ih =>
-      exact F.add_mem (F.mul_mem hF ih) (by split_ifs; exacts [F.one_mem, F.zero_mem])
-  have htail : tail (tail b T) P = tail b T := by
-    funext s; simp only [tail]; rw [show s + P + T = s + T + P by omega]; exact hper _ (by omega)
-  have e1 := pow_mul_value hβ (tail b T) P
-  rw [htail] at e1
-  have e2 := pow_mul_value hβ b T
-  have hβP : (1 : ℝ) < β ^ P := one_lt_pow₀ (by linarith) hP.ne'
-  have hβT : (0 : ℝ) < β ^ T := pow_pos (β_pos hβ) T
-  have hx : value β (tail b T) = lead β (tail b T) P / (β ^ P - 1) := by
-    rw [eq_div_iff (by linarith)]; linarith
-  have hv : value β b = (lead β b T + value β (tail b T)) / β ^ T := by
-    rw [eq_div_iff hβT.ne']; linarith
-  rw [hv, hx]
-  exact F.div_mem (F.add_mem (hlead b T)
-    (F.div_mem (hlead _ P) (F.sub_mem (F.pow_mem hF P) F.one_mem))) (F.pow_mem hF T)
-
-/-- **Finitely many tail values give eventual periodicity**: the digit is read off the tail value,
-and the next tail value is determined by it. -/
+/-- **Finitely many tail values give eventual periodicity**: the digit is the greedy one. -/
 theorem eventuallyPeriodic_of_finite_tails {b : ℕ → Bool}
-    (hfin : (Set.range fun t => value β (tail b t)).Finite) : EventuallyPeriodic b := by
-  obtain ⟨s, t, hst, heq⟩ : ∃ s t, s < t ∧ value β (tail b s) = value β (tail b t) := by
-    by_contra hne
-    push Not at hne
-    refine Set.infinite_range_of_injective (fun s t he => ?_) hfin
-    rcases lt_trichotomy s t with h | h | h
-    · exact absurd he (hne s t h)
-    · exact h
-    · exact absurd he.symm (hne t s h)
-  have key : ∀ j, value β (tail b (s + j)) = value β (tail b (t + j)) := by
-    intro j
-    induction j with
-    | zero => exact heq
-    | succ j ih =>
-      have hd : b (s + j) = b (t + j) := by
-        rw [Bool.eq_iff_iff, digit_iff hβ, digit_iff hβ, ih]
-      rw [← add_assoc, ← add_assoc, tailValue_succ hβ, tailValue_succ hβ, ih, hd]
-  refine ShiftOrbit.eventuallyPeriodic_of_shift_eq hst fun j => ?_
-  rw [Bool.eq_iff_iff, digit_iff hβ, digit_iff hβ, key]
+    (hfin : (Set.range fun t => value β (tail b t)).Finite) : EventuallyPeriodic b :=
+  BinaryIrrational.eventuallyPeriodic_of_finite_tails (one_lt hβ) (fun x => decide (1 ≤ β * x))
+    (fun t => Bool.eq_iff_iff.2 (by rw [decide_eq_true_iff]; exact digit_iff hβ b t)) hfin
 
 end Base
 
@@ -231,7 +100,7 @@ theorem eventuallyPeriodic_of_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) {b : �
   -- the tails as elements of `K`
   set xt : ℕ → K := fun t => βK ^ t * xK - lead βK b t
   have hxt : ∀ t, ((xt t : K) : ℝ) = value β (tail b t) := fun t => by
-    have e := pow_mul_value hβ b t
+    have e := pow_mul_value (one_lt hβ) b t
     have hl := map_lead (K.val : K →+* ℝ) βK b t
     rw [hval, hval] at hl
     show ((βK ^ t * xK - lead βK b t : K) : ℝ) = _
@@ -298,7 +167,7 @@ theorem eventuallyPeriodic_of_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) {b : �
       Finset.single_le_sum (fun φ' _ => hterm φ') (Finset.mem_univ φ)
     rcases hroot φ with hb | hb
     · rw [hreal φ hb, Complex.norm_real, Real.norm_eq_abs, hxt,
-        abs_of_nonneg (value_nonneg hβ _)]
+        abs_of_nonneg (value_nonneg (one_lt hβ) _)]
       have := value_lt_one hβ (tail b t)
       linarith [hterm φ]
     · rw [if_pos hb] at hsum
@@ -347,7 +216,8 @@ theorem eventuallyPeriodic_of_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) {b : �
 eventually periodic iff its value in base `β` lies in `ℚ(β)`. -/
 theorem eventuallyPeriodic_iff_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) (b : ℕ → Bool) :
     EventuallyPeriodic b ↔ value β b ∈ IntermediateField.adjoin ℚ ({β} : Set ℝ) :=
-  ⟨fun h => mem_of_eventuallyPeriodic hβ (IntermediateField.adjoin ℚ ({β} : Set ℝ)).toSubfield
+  ⟨fun h => mem_of_eventuallyPeriodic (one_lt hβ)
+      (IntermediateField.adjoin ℚ ({β} : Set ℝ)).toSubfield
       (IntermediateField.mem_adjoin_simple_self ℚ β) h,
     eventuallyPeriodic_of_mem_adjoin hP hβ⟩
 
@@ -361,7 +231,8 @@ theorem problem1_iff_not_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) :
 number the converse is open (Schmidt's conjecture). -/
 theorem problem1_of_not_mem_adjoin (hβ : 2 < β)
     (h : value β c ∉ IntermediateField.adjoin ℚ ({β} : Set ℝ)) : Rule30Prize.Problem1 :=
-  fun hep => h (mem_of_eventuallyPeriodic hβ (IntermediateField.adjoin ℚ ({β} : Set ℝ)).toSubfield
+  fun hep => h (mem_of_eventuallyPeriodic (one_lt hβ)
+    (IntermediateField.adjoin ℚ ({β} : Set ℝ)).toSubfield
     (IntermediateField.mem_adjoin_simple_self ℚ β) hep)
 
 end Rule30Equivalents.PisotNumbers

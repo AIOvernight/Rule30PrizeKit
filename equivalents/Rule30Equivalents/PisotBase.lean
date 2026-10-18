@@ -127,7 +127,7 @@ theorem mem_adjoin_iff {x : ℝ} : x ∈ IntermediateField.adjoin ℚ ({β} : Se
 
 /-- **A digit sequence is eventually periodic iff its value in base `1 + √2` lies in `ℚ(√2)`.** -/
 theorem eventuallyPeriodic_iff_mem_qsqrt2 (b : ℕ → Bool) :
-    EventuallyPeriodic b ↔ PisotNumbers.value β b ∈ qsqrt2 := by
+    EventuallyPeriodic b ↔ BinaryIrrational.value β b ∈ qsqrt2 := by
   rw [PisotNumbers.eventuallyPeriodic_iff_mem_adjoin isPisot_β two_lt_β, mem_adjoin_iff]
 
 /-- **Problem 1 ⟺ `x_β ∉ ℚ(√2)` for `β = 1 + √2`** (catalog [48]). -/

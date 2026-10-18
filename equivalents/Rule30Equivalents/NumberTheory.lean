@@ -419,8 +419,8 @@ theorem not_eventually_true_of_digits (hq : 0 < q) {b : ℕ → Bool}
 /-- In base `B ≥ 3`, `0.b(0) b(1) … < 1` for every `b`. -/
 theorem baseValue_lt_one_of_three_le (hB : 3 ≤ B) (b : ℕ → Bool) : baseValue B b < 1 := by
   have hB' : (3 : ℝ) ≤ B := by exact_mod_cast hB
-  have h := Summable.tsum_lt_tsum_of_nonneg (i := 0) (term_nonneg (B := B) (by omega) b)
-    (term_le (B := B) (by omega) b) ?_ (summable_geometric_two' 1)
+  have h := Summable.tsum_lt_tsum_of_nonneg (i := 0) (term_nonneg (β := (B : ℝ)) (by linarith) b)
+    (term_le_two (B := B) (by omega) b) ?_ (summable_geometric_two' 1)
   · rwa [tsum_geometric_two' 1] at h
   · rw [zero_add, pow_one, pow_zero, div_one]
     split_ifs
@@ -451,11 +451,11 @@ theorem exists_digits_of_eventuallyPeriodic (hB : 2 ≤ B) {b : ℕ → Bool}
   have hx : (r : ℝ) * r.den = r.num := by exact_mod_cast Rat.mul_den_eq_num r
   have hdiv : B ^ (t + 1) * r.num.toNat / r.den = lead B b (t + 1) := by
     apply Nat.div_eq_of_lt_le
-    · have : (lead B b (t + 1) : ℝ) * r.den ≤ (B : ℝ) ^ (t + 1) * r.num.toNat := by
+    · have : ((lead B b (t + 1) : ℕ) : ℝ) * r.den ≤ (B : ℝ) ^ (t + 1) * r.num.toNat := by
         rw [hp, ← hx, ← hr]
         nlinarith [mul_nonneg hge hq.le]
       exact_mod_cast this
-    · have : (B : ℝ) ^ (t + 1) * r.num.toNat < ((lead B b (t + 1) : ℝ) + 1) * r.den := by
+    · have : (B : ℝ) ^ (t + 1) * r.num.toNat < (((lead B b (t + 1) : ℕ) : ℝ) + 1) * r.den := by
         rw [hp, ← hx, ← hr]
         nlinarith [mul_lt_mul_of_pos_right hlt hq]
       exact_mod_cast this
@@ -502,10 +502,6 @@ end LongDivision
 /-- The center column is not eventually `true` (`Rule30Prize.center_not_eventually_constant`). -/
 theorem center_not_eventually_true : ¬ ∃ T, ∀ t, T ≤ t → c t = true := fun ⟨T, hT⟩ =>
   Rule30Prize.center_not_eventually_constant ⟨T, true, hT⟩
-
-/-- `x₂ = centerBinary` is `0.c(0) c(1) c(2) …` in base `2`, as a `baseValue`. -/
-theorem centerBinary_eq_baseValue : centerBinary = baseValue 2 c := by
-  simp only [centerBinary, baseValue, Nat.cast_ofNat]
 
 /-- The doubling map shifts the binary digits of `x₂`: its `n`-th iterate sends `x₂ mod 1` to
 `0.c(n) c(n+1) …₂ mod 1`. -/
@@ -676,8 +672,8 @@ theorem occurs_iff_fract (t : ℕ) {m : ℕ} (w : Fin m → Bool) :
   · intro h
     constructor <;> rw [h] <;> linarith
   · rintro ⟨h1, h2⟩
-    have h1' : (num w : ℝ) < lead 2 (tail c t) m + 1 := by linarith
-    have h2' : (lead 2 (tail c t) m : ℝ) < num w + 1 := by linarith
+    have h1' : (num w : ℝ) < ((lead 2 (tail c t) m : ℕ) : ℝ) + 1 := by linarith
+    have h2' : ((lead 2 (tail c t) m : ℕ) : ℝ) < num w + 1 := by linarith
     have h1'' : num w < lead 2 (tail c t) m + 1 := by exact_mod_cast h1'
     have h2'' : lead 2 (tail c t) m < num w + 1 := by exact_mod_cast h2'
     omega

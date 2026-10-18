@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 202 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 203 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2391,7 +2391,12 @@ Prize Problem 2 asks whether each color occurs on average equally often in the c
 - the same density statement for the center columns of rules 86 (single black cell), 135 and 149
   (single white cell on a black background), by the reflection and complement symmetries
   (proved: `Symmetry.problem2_iff_rule86`, `problem2_iff_rule135`, `problem2_iff_rule149`;
-  complementing a sequence keeps density 1/2, `halfDensity_not_iff`).
+  complementing a sequence keeps density 1/2, `halfDensity_not_iff`);
+- the Hölder means of every order k ≥ 1 (the k-fold iterated Cesàro means) of c tend to 1/2
+  (proved: `HolderMeans.problem2_iff_holder`). Iterating means preserves limits; conversely the
+  mean of a bounded sequence has increments O(1/n), and Hardy's Tauberian theorem
+  (`tendsto_of_tendsto_mean`: Cesàro limit plus increments O(1/n) give convergence) removes one
+  mean at a time.
 
 Both Lean forms are proved in [ProblemTwo](Rule30Equivalents/ProblemTwo.lean), the second through
 the Hardy–Littlewood–Karamata theorem, which the kit proves in

@@ -150,9 +150,6 @@ theorem problem2_iff_mapClusterPt : Rule30Prize.Problem2 ↔
 
 /-! ### Krylov–Bogolyubov -/
 
-theorem continuous_shift : Continuous ShiftOrbit.shift :=
-  continuous_pi fun t => continuous_apply (A := fun _ : ℕ => Bool) (t + 1)
-
 /-- The integral of a bounded continuous function against an empirical measure is its average
 along the points. -/
 theorem integral_empiricalOf {X : Type*} [MeasurableSpace X] [MeasurableSingletonClass X]
@@ -169,7 +166,7 @@ invariant under the shift. -/
 theorem map_shift_of_mapClusterPt {b : ℕ → Bool} {ν : ProbabilityMeasure (ℕ → Bool)}
     (hν : MapClusterPt ν atTop (empirical b)) :
     (ν : Measure (ℕ → Bool)).map ShiftOrbit.shift = ν := by
-  have hσ := continuous_shift
+  have hσ := WordsAutomata.continuous_shift
   refine ext_of_forall_integral_eq_of_IsFiniteMeasure fun f => ?_
   have hint : ∀ g : (ℕ → Bool) →ᵇ ℝ,
       Continuous fun μ : ProbabilityMeasure (ℕ → Bool) => ∫ x, g x ∂(μ : Measure (ℕ → Bool)) :=

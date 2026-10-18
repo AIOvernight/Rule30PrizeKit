@@ -98,6 +98,37 @@ theorem coins_fin_singleton (m : ℕ) (w : Fin m → Bool) : coins (Fin m) {w} =
   rw [this, coins_pi, Finset.prod_congr rfl fun j _ => coin_singleton (w j), Finset.prod_const,
     Finset.card_univ, Fintype.card_fin]
 
+/-- A set of words of length `m` has probability its size times `2⁻ᵐ`. -/
+theorem measureReal_finset (m : ℕ) (S : Finset (Fin m → Bool)) :
+    (coins (Fin m)).real S = S.card * (2⁻¹ : ℝ) ^ m := by
+  rw [measureReal_def, ← sum_measure_singleton,
+    Finset.sum_congr rfl fun u _ => coins_fin_singleton m u, Finset.sum_const, nsmul_eq_mul]
+  simp only [ENNReal.toReal_mul, ENNReal.toReal_natCast, ENNReal.toReal_pow,
+    ENNReal.toReal_inv, ENNReal.toReal_ofNat]
+
+/-- The words of length `m` with exactly `t` black letters number `m.choose t`. -/
+theorem card_filter_card_eq (m t : ℕ) :
+    (Finset.univ.filter fun u : Fin m → Bool =>
+      (Finset.univ.filter fun j => u j = true).card = t).card = m.choose t := by
+  classical
+  have h : m.choose t = (Finset.powersetCard t (Finset.univ : Finset (Fin m))).card := by
+    rw [Finset.card_powersetCard, Finset.card_univ, Fintype.card_fin]
+  rw [h]
+  refine Finset.card_nbij' (fun u => Finset.univ.filter fun j => u j = true)
+    (fun s j => decide (j ∈ s)) ?_ ?_ ?_ ?_
+  · intro u hu
+    simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hu
+    simp [Finset.mem_powersetCard, hu]
+  · intro s hs
+    simp only [Finset.mem_coe, Finset.mem_powersetCard] at hs
+    simp [hs.2]
+  · intro u _
+    funext j
+    simp
+  · intro s _
+    ext j
+    simp
+
 /-- **Bernoulli's inequality, multiplied out**: `(1 - x)^K (1 + K x) ≤ 1` for `0 ≤ x ≤ 1`, since
 `1 + K x ≤ (1 + x)^K` and `(1 - x)^K (1 + x)^K = (1 - x²)^K ≤ 1`. -/
 theorem one_sub_pow_mul_le {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (K : ℕ) :

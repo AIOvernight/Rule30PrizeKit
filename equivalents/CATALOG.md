@@ -2844,7 +2844,11 @@ with Turing machines reading n. Notes:
     second Borel–Cantelli lemma to the windows [2bᵏ, 2bᵏ⁺¹)), and its limit points form exactly
     [−1, 1] (`ae_clusterPt_walk_trace`). In the sense of category the oscillation is maximal instead:
     for a comeager set of configurations limsup W(n)/n = 1 and liminf W(n)/n = −1
-    (`residual_limsup_liminf_walk_div_trace`). The configurations with an eventually
+    (`residual_limsup_liminf_walk_div_trace`). Large deviations of the density are exponentially
+    rare at Cramér's rate: for 1/2 ≤ a < 1, (1/n) log P(N(n) ≥ an) → H(a) − log 2, H the binary
+    entropy ([LargeDeviations](Rule30Equivalents/LargeDeviations.lean),
+    `tendsto_log_measureReal_trace`; Chernoff's bound from above, the mode of the binomial
+    distribution from below). The configurations with an eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
     ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,

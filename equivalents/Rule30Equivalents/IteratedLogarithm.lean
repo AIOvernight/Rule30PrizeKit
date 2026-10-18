@@ -205,29 +205,6 @@ theorem ae_eventually_two_mul_imbalance_lt {c : ℝ} (hc : 1 < c) :
 
 /-! ### Fair binomial tails from below -/
 
-/-- The words of length `m` with exactly `t` black letters number `m.choose t`. -/
-theorem card_filter_card_eq (m t : ℕ) :
-    (Finset.univ.filter fun u : Fin m → Bool =>
-      (Finset.univ.filter fun j => u j = true).card = t).card = m.choose t := by
-  classical
-  have h : m.choose t = (Finset.powersetCard t (Finset.univ : Finset (Fin m))).card := by
-    rw [Finset.card_powersetCard, Finset.card_univ, Fintype.card_fin]
-  rw [h]
-  refine Finset.card_nbij' (fun u => Finset.univ.filter fun j => u j = true)
-    (fun s j => decide (j ∈ s)) ?_ ?_ ?_ ?_
-  · intro u hu
-    simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hu
-    simp [Finset.mem_powersetCard, hu]
-  · intro s hs
-    simp only [Finset.mem_coe, Finset.mem_powersetCard] at hs
-    simp [hs.2]
-  · intro u _
-    funext j
-    simp
-  · intro s _
-    ext j
-    simp
-
 /-- `4^M ≤ 2 √M (2M choose M)` for `M ≥ 1`: by induction `16^M ≤ 4M (2M choose M)²`, since
 `(M + 1) (2M + 2 choose M + 1) = 2 (2M + 1) (2M choose M)` and `4M (M + 1) ≤ (2M + 1)²`. -/
 theorem four_pow_le_two_mul_sqrt_mul_centralBinom {M : ℕ} (hM : 0 < M) :
@@ -362,18 +339,14 @@ theorem le_measureReal_sum_ge {M : ℕ} (hM : 0 < M) {y : ℝ} (hy : 0 ≤ y)
     linarith [(Nat.cast_nonneg l : (0 : ℝ) ≤ l)]
   have hTcard : T.card = ∑ l ∈ Finset.range (r + 1), (2 * M).choose (M + (i₀ + l)) := by
     rw [hT, Finset.card_biUnion]
-    · exact Finset.sum_congr rfl fun l _ => card_filter_card_eq (2 * M) (M + (i₀ + l))
+    · exact Finset.sum_congr rfl fun l _ => LongestRuns.card_filter_card_eq (2 * M) (M + (i₀ + l))
     · intro l _ l' _ hll'
       rw [Function.onFun, Finset.disjoint_left]
       intro u hu hu'
       simp only [hA, Finset.mem_filter, Finset.mem_univ, true_and] at hu hu'
       omega
-  have hTmeas : (coins (Fin (2 * M))).real T = T.card * (2⁻¹ : ℝ) ^ (2 * M) := by
-    rw [measureReal_def, ← sum_measure_singleton,
-      Finset.sum_congr rfl fun u _ => LongestRuns.coins_fin_singleton (2 * M) u,
-      Finset.sum_const, nsmul_eq_mul]
-    simp only [ENNReal.toReal_mul, ENNReal.toReal_natCast, ENNReal.toReal_pow,
-      ENNReal.toReal_inv, ENNReal.toReal_ofNat]
+  have hTmeas : (coins (Fin (2 * M))).real T = T.card * (2⁻¹ : ℝ) ^ (2 * M) :=
+    LongestRuns.measureReal_finset _ T
   -- each of these coefficients is at least `(2M choose M) exp(-z²/(M - z))`
   have hzM : 0 < (M : ℝ) - z := by linarith
   have hterm : ∀ l ∈ Finset.range (r + 1),

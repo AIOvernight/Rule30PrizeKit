@@ -2758,9 +2758,10 @@ with Turing machines reading n. Notes:
     its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
     approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
     (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
-    Mathlib's `Ergodic`), and topologically mixing (`exists_mem_evol_mem`). It is even mixing of all
-    orders: cylinders at times whose gaps exceed the width of their windows are independent
-    (`measure_biInter_preimage_cylinder`), so μ(F^{−t₀}A₀ ∩ ⋯ ∩ F^{−t_{n−1}}A_{n−1}) →
+    Mathlib's `Ergodic`; in L², the averages of g ∘ Fⁿ converge to ∫ g,
+    `tendsto_birkhoffAverage_integral`), and topologically mixing (`exists_mem_evol_mem`). It is
+    even mixing of all orders: cylinders at times whose gaps exceed the width of their windows are
+    independent (`measure_biInter_preimage_cylinder`), so μ(F^{−t₀}A₀ ∩ ⋯ ∩ F^{−t_{n−1}}A_{n−1}) →
     μ(A₀)⋯μ(A_{n−1}) as the gaps grow (`mixing_all_orders`). For μ-almost every configuration, and
     for a comeager set of them, the orbit enters every nonempty open set at arbitrarily large times
     (`ae_frequently_mem`, `residual_frequently_mem`), and every pattern on every window [−n, n]

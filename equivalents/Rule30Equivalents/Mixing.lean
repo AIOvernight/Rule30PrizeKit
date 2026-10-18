@@ -4,6 +4,9 @@ import Mathlib.MeasureTheory.Measure.MeasuredSets
 import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
 import Mathlib.Dynamics.Ergodic.Ergodic
 import Mathlib.Dynamics.TopologicalEntropy.Semiconj
+import Mathlib.Analysis.InnerProductSpace.MeanErgodic
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Dynamics.Ergodic.Function
 
 /-!
 # Rule 30 preserves the fair-coin measure and is mixing
@@ -27,6 +30,10 @@ one halves the measure (`RandomConfigurations.two_mul_measure_flip`).
   their windows (`measure_inter_preimage_cylinder`), and every measurable set is close to a
   cylinder (`exists_cylinder_approx`, from Mathlib's approximation by a generating ring of sets).
   Hence `ergodic_evol_one`: rule 30 is ergodic, in Mathlib's sense of `Ergodic`.
+* `tendsto_birkhoffAverage_integral`: **the L² ergodic theorem for rule 30** (von Neumann, through
+  Mathlib's `ContinuousLinearMap.tendsto_birkhoffAverage_orthogonalProjection` for the Koopman
+  operator `koopman`): for every `g ∈ L²` the averages `(g + g ∘ F + ⋯ + g ∘ F^(N-1)) / N`
+  converge in `L²` to the constant `∫ g`; the limit is invariant, hence constant by ergodicity.
 * `ae_existsUnique_preimage`, `residual_existsUnique_preimage`: **rule 30 is invertible almost
   everywhere and generically**: almost every configuration, and a comeager set of them, show `010`
   arbitrarily far to the right and so have exactly one preimage
@@ -719,6 +726,101 @@ theorem mixing_all_orders {A : ℕ → Set (ℤ → Bool)} (hA : ∀ j, Measurab
         exact abs_sub_le _ _ _
     _ ≤ n * δ + n * δ := add_le_add e1 e2
     _ < ε := by linarith
+
+/-! ### The L² ergodic theorem -/
+
+section MeanErgodic
+
+/-- The Koopman operator of rule 30 on `L²` of the fair-coin measure: `g ↦ g ∘ F`. -/
+noncomputable def koopman : Lp ℝ 2 (coins ℤ) →L[ℝ] Lp ℝ 2 (coins ℤ) :=
+  (Lp.compMeasurePreservingₗᵢ ℝ (fun x : ℤ → Bool => evol x 1)
+    (measurePreserving_evol 1)).toContinuousLinearMap
+
+theorem norm_koopman_le : ‖koopman‖ ≤ 1 :=
+  LinearIsometry.norm_toContinuousLinearMap_le _
+
+/-- **The L² ergodic theorem for rule 30** (von Neumann's mean ergodic theorem): for every
+`g ∈ L²`, the averages `(g + g ∘ F + ⋯ + g ∘ F^(N-1)) / N` converge in `L²` to a constant, since
+the only functions invariant under rule 30 are the constants (`ergodic_evol_one`). -/
+theorem exists_tendsto_birkhoffAverage_const (g : Lp ℝ 2 (coins ℤ)) :
+    ∃ c : ℝ, Tendsto (fun N => birkhoffAverage ℝ koopman _root_.id N g) atTop
+      (𝓝 (Lp.const 2 (coins ℤ) c)) := by
+  have h := koopman.tendsto_birkhoffAverage_orthogonalProjection norm_koopman_le g
+  set P : Lp ℝ 2 (coins ℤ) := ((LinearMap.eqLocus koopman 1).orthogonalProjection g :
+    Lp ℝ 2 (coins ℤ)) with hPdef
+  have hP : koopman P = P := by
+    have := ((LinearMap.eqLocus koopman 1).orthogonalProjection g).2
+    rw [LinearMap.mem_eqLocus] at this
+    simpa using this
+  -- as an a.e.-class, `P ∘ F = P`, so `P` is constant
+  have hP' : P.1.compMeasurePreserving (fun x : ℤ → Bool => evol x 1) ergodic_evol_one.1 =
+      P.1 := congrArg Subtype.val hP
+  obtain ⟨c, hc⟩ := ergodic_evol_one.eq_const_of_compMeasurePreserving_eq hP'
+  refine ⟨c, ?_⟩
+  have hPc : P = Lp.const 2 (coins ℤ) c := Subtype.ext hc
+  rw [← hPc]
+  exact h
+
+/-- The integral of an `L²` function is its inner product with the constant `1`. -/
+theorem inner_const_one (g : Lp ℝ 2 (coins ℤ)) :
+    inner ℝ (Lp.const 2 (coins ℤ) (1 : ℝ)) g = ∫ x, g x ∂(coins ℤ) := by
+  rw [L2.inner_def]
+  refine integral_congr_ae ?_
+  filter_upwards [Lp.coeFn_const 2 (coins ℤ) (1 : ℝ)] with x hx
+  rw [hx]
+  simp
+
+/-- Rule 30 preserves integrals: `∫ g ∘ F = ∫ g`. -/
+theorem integral_koopman (h : Lp ℝ 2 (coins ℤ)) :
+    ∫ x, koopman h x ∂(coins ℤ) = ∫ x, h x ∂(coins ℤ) := by
+  have hF := measurePreserving_evol 1
+  have hc : (koopman h : (ℤ → Bool) → ℝ) =ᵐ[coins ℤ] h ∘ fun x : ℤ → Bool => evol x 1 :=
+    Lp.coeFn_compMeasurePreserving h hF
+  rw [integral_congr_ae hc]
+  have hm : AEStronglyMeasurable (h : (ℤ → Bool) → ℝ) (Measure.map (fun x : ℤ → Bool => evol x 1)
+      (coins ℤ)) := by
+    rw [hF.map_eq]
+    exact Lp.aestronglyMeasurable h
+  have := integral_map hF.measurable.aemeasurable hm
+  rw [hF.map_eq] at this
+  exact this.symm
+
+/-- **The L² ergodic theorem for rule 30**, with its limit: for every `g ∈ L²`, the averages
+`(g + g ∘ F + ⋯ + g ∘ F^(N-1)) / N` converge in `L²` to the constant `∫ g`. The limit is a constant
+(`exists_tendsto_birkhoffAverage_const`); pairing with `1` is continuous, and each average has
+integral `∫ g`. -/
+theorem tendsto_birkhoffAverage_integral (g : Lp ℝ 2 (coins ℤ)) :
+    Tendsto (fun N => birkhoffAverage ℝ koopman _root_.id N g) atTop
+      (𝓝 (Lp.const 2 (coins ℤ) (∫ x, g x ∂(coins ℤ)))) := by
+  obtain ⟨c, hc⟩ := exists_tendsto_birkhoffAverage_const g
+  have hiter : ∀ k : ℕ, inner ℝ (Lp.const 2 (coins ℤ) (1 : ℝ)) (koopman^[k] g) =
+      ∫ x, g x ∂(coins ℤ) := by
+    intro k
+    rw [inner_const_one]
+    induction k with
+    | zero => rfl
+    | succ k ih => rw [Function.iterate_succ_apply', integral_koopman, ih]
+  have hinner : ∀ N : ℕ, 1 ≤ N → inner ℝ (Lp.const 2 (coins ℤ) (1 : ℝ))
+      (birkhoffAverage ℝ koopman _root_.id N g) = ∫ x, g x ∂(coins ℤ) := by
+    intro N hN
+    rw [birkhoffAverage, real_inner_smul_right, birkhoffSum, inner_sum]
+    simp only [id, hiter, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    have hN' : (N : ℝ) ≠ 0 := by exact_mod_cast (show N ≠ 0 by omega)
+    field_simp
+  have hlim := Filter.Tendsto.inner (𝕜 := ℝ)
+    (tendsto_const_nhds (x := Lp.const 2 (coins ℤ) (1 : ℝ))) hc
+  have hconst : inner ℝ (Lp.const 2 (coins ℤ) (1 : ℝ)) (Lp.const 2 (coins ℤ) c) = c := by
+    rw [inner_const_one, integral_congr_ae (Lp.coeFn_const 2 (coins ℤ) c)]
+    simp
+  have hc' : c = ∫ x, g x ∂(coins ℤ) := by
+    rw [← hconst]
+    refine tendsto_nhds_unique hlim (tendsto_const_nhds.congr' ?_)
+    filter_upwards [eventually_ge_atTop 1] with N hN
+    exact (hinner N hN).symm
+  rw [← hc']
+  exact hc
+
+end MeanErgodic
 
 /-! ### Orbits that return to every open set -/
 

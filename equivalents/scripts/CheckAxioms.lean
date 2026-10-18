@@ -23,6 +23,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.BoundedRemainder.problem1_of_unbounded_remainder
 #print axioms Rule30Equivalents.BoundedRemainder.problem1_of_unbounded_word_remainder
 #print axioms Rule30Equivalents.BoundedRemainder.problem1_of_problem2_of_unbounded_discrepancy
+#print axioms Rule30Equivalents.BoundedRemainder.problem1_of_oscillating_discrepancy
 #print axioms Rule30Equivalents.BoundedRemainder.problem1_of_unpredictable_half
 #print axioms Rule30Equivalents.BoundedRemainder.problem2_of_unpredictable_half
 #print axioms Rule30Equivalents.BuchiArithmetic.problem1_iff_not_buchi_definable

@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 216 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 217 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2186,6 +2186,7 @@ so they are strictly stronger.
 | **Non-atomic limit**: some limit point of the empirical measures (δ_c + ⋯ + δ_{σᴺc})/(N + 1) has no atoms | for an EP c every empirical measure, hence every limit point, is carried by the finitely many shifts σᵐc, m < T + P (`EmpiricalMeasures.problem1_of_nonatomic_mapClusterPt`) | Strictly stronger: a sequence with sparse aperiodic defects has the atomic limit of its periodic part. Normality gives the fair-coin limit, which has no atoms. | own reasoning |
 | **No bounded remainder**: the number N(n) of black cells among the first n is not αn + O(1) for any real α | an EP c has N(n) = αn + O(1), with α the density of black cells in a period (`BoundedRemainder.problem1_of_unbounded_remainder`) | Strictly stronger: Sturmian sequences are not EP and have bounded remainder. The same works for the occurrences of any word (`problem1_of_unbounded_word_remainder`). A disjunctive c satisfies it (`unbounded_remainder_of_disjunctive`): a run of m black cells raises N(n) − αn by (1 − α)m, and a run of m white cells lowers it by αm. | own reasoning |
 | **Problem 2 with unbounded discrepancy**: c has density 1/2 and N(n) − n/2 is unbounded | an EP c with density 1/2 has N(n) = n/2 + O(1) (`BoundedRemainder.problem1_of_problem2_of_unbounded_discrepancy`) | Of the two assumptions, Problem 2 is open and so is the discrepancy; for a random configuration both hold almost surely (its trace is normal, hence disjunctive; `BoundedRemainder.ae_unbounded_remainder_trace`). | own reasoning |
+| **Oscillating discrepancy**: N(n) − n/2 is unbounded above and below | an EP c has N(n) = αn + O(1), so N(n) − n/2 is bounded below if α ≥ 1/2 and bounded above if α ≤ 1/2 (`BoundedRemainder.problem1_of_oscillating_discrepancy`) | Strictly stronger: a non-EP sequence of density 1/3 has N(n) − n/2 → −∞. Unlike the previous row it assumes nothing about the density, and it implies the no-bounded-remainder form. For a random configuration it holds almost surely with room to spare: N(n) − n/2 exceeds K√n and falls below −K√n infinitely often for every K (`Fluctuations.ae_oscillating_discrepancy_trace`, from Kolmogorov's zero-one law and the central limit theorem). | own reasoning |
 | **Anti-Toeplitz**: no residue class k ↦ c(r + kP) is eventually constant. Density 1/2 along every arithmetic progression implies it | if c had period P, every class modulo P would be eventually constant; form (b) of [20] needs only one non-constant class | Holds for P = 1. Equidistribution of y_{Pk+r} implies it [W19]. | [JK69], [Wal49] |
 | **Disagreements of positive density**: for every τ ≥ 1, c(t) ≠ c(t + τ) for a set of t of positive upper density; vanishing autocorrelations | if c had period P from T, there would be no disagreement at τ = P after T | Data: at least 49.96% disagreement for τ ≤ 300 in 10⁷ bits. | [Gol67], [MS97]; algebra survey (data) |
 | **Positive Besicovitch distance** from every periodic sequence | an EP c has distance 0 from a periodic sequence | Data: excess agreement of random size for P ≤ 1024. | [BFK97]; words survey (data) |
@@ -2474,6 +2475,9 @@ Relation to Problem 1:
 - Problem 2 together with an unbounded discrepancy N(n) − n/2 implies Problem 1, because an
   eventually periodic sequence of density 1/2 has N(n) = n/2 + O(1) (Section 4;
   `BoundedRemainder.problem1_of_problem2_of_unbounded_discrepancy`).
+- A discrepancy N(n) − n/2 that is unbounded above and below implies Problem 1 with no assumption on
+  the density, because an eventually periodic sequence has bounded discrepancy on the side of its
+  density (`BoundedRemainder.problem1_of_oscillating_discrepancy`).
 - An explicit periodic tail would decide Problem 2 [W19].
 
 Problem 2 is Π⁰₃. For a random configuration the trace is a fair-coin sequence, and the number of
@@ -2483,8 +2487,13 @@ distribution to the normal law with variance 1/4
 At every finite n, a deviation of at least nδ has probability at most 2·exp(−2nδ²)
 (`RandomConfigurations.measureReal_abs_count_trace_ge_le`, through Mathlib's Hoeffding inequality),
 so by Borel–Cantelli, for almost every configuration, the count is within √(n log n) of n/2 for all
-large n (`RandomConfigurations.ae_eventually_abs_count_trace_lt`). That is the yardstick for the
-data: the first 10⁹ bits contain 500,025,038 ones, about 1.6 standard deviations from half [W19].
+large n (`RandomConfigurations.ae_eventually_abs_count_trace_lt`). In the other direction, for every
+K the count exceeds n/2 + K√n and falls below n/2 − K√n infinitely often, so it equals n/2 for
+infinitely many n (`Fluctuations.ae_frequently_le_imbalance_trace`,
+`ae_frequently_imbalance_le_trace`, `ae_frequently_balanced_trace`; by Kolmogorov's zero-one law,
+with the central limit theorem for positive probability). So random fluctuations lie between K√n,
+for every K, and √(n log n). That is the yardstick for the data: the first 10⁹ bits contain
+500,025,038 ones, about 1.6 standard deviations from half [W19].
 
 ### 6.2 Problem 3: computational effort
 
@@ -2766,13 +2775,16 @@ with Turing machines reading n. Notes:
     right half x₁, x₂, … (`indepFun_trace_rightHalf`: conditioned on any event about the right half,
     the trace is still a fair-coin sequence, `measure_inter_prefix_of_flipsLeft`). So the trace has
     density 1/2, is disjunctive and is not eventually periodic (`ae_halfDensity_trace`,
-    `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`). The configurations with an
-    eventually periodic trace are dense, meager and null
-    (`dense_isMeagre_null_eventuallyPeriodic_trace`). The same flips show that rule 30 is a mixing
-    measure-preserving system ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ
-    (`measurePreserving_evol`, Hedlund's theorem for rule 30); the window J of x and the window I of
-    its t-th image are independent once t > max I − min J (`measure_window_inter_window`);
-    approximating measurable sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
+    `ae_disjunctive_trace`, `ae_not_eventuallyPeriodic_trace`). Its discrepancy N(n) − n/2 exceeds
+    K√n and falls below −K√n infinitely often for every K, so it is exactly balanced infinitely
+    often ([Fluctuations](Rule30Equivalents/Fluctuations.lean): `ae_frequently_balanced_trace`, by
+    Kolmogorov's zero-one law and the central limit theorem). The configurations with an eventually
+    periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
+    same flips show that rule 30 is a mixing measure-preserving system
+    ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,
+    Hedlund's theorem for rule 30); the window J of x and the window I of its t-th image are
+    independent once t > max I − min J (`measure_window_inter_window`); approximating measurable
+    sets by cylinders, μ(A ∩ F^{−t}B) → μ(A)μ(B) for all measurable A, B
     (`tendsto_measure_inter_preimage`), so rule 30 is mixing and ergodic (`ergodic_evol_one`,
     Mathlib's `Ergodic`; in L², the averages of g ∘ Fⁿ converge to ∫ g,
     `tendsto_birkhoffAverage_integral`), and topologically mixing (`exists_mem_evol_mem`). It is
@@ -2800,8 +2812,8 @@ with Turing machines reading n. Notes:
     `ae_isNormal_rows`). More generally the cells along any path that never moves right (p(t + 1) ≤
     p(t): columns, the left edge of the light cone) are independent fair coins
     (`measurePreserving_path`, `ae_isNormal_path`), while along a right diagonal they are not: the
-    cells (t, a) and (t + 1, a + 1) agree with probability 1/4 (`measure_diag_eq`).
-    Topologically the picture is reversed (critic, own reasoning from standard facts):
+    cells (t, a) and (t + 1, a + 1) agree with probability 1/4 (`measure_diag_eq`). Topologically
+    the picture is reversed (critic, own reasoning from standard facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing
       x[−n, n] is the cylinder fixing c(0..n);
     - normal sequences form a meager set [Oxt80], [Šal66], so the configurations with a normal

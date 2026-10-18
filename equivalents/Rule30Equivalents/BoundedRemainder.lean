@@ -21,6 +21,10 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
 * `problem1_of_problem2_of_unbounded_discrepancy`: **if Problem 2 holds and the discrepancy
   `N(n) - n/2` of the center column is unbounded, Problem 1 holds**, since an eventually periodic
   sequence with density `1/2` has bounded discrepancy.
+* `problem1_of_oscillating_discrepancy`: **if the discrepancy is unbounded above and below,
+  Problem 1 holds**, with no assumption on the density: an eventually periodic sequence has
+  bounded discrepancy on the side of its density. The hypothesis holds for almost every
+  configuration (`Fluctuations.ae_oscillating_discrepancy_trace`).
 * `problem1_of_unpredictable_half`, `problem2_of_unpredictable_half`: **if every finite-state
   predictor errs on half of the center column, Problems 1 and 2 hold.** An eventually periodic
   column has a predictor that is eventually always right; the predictor that always guesses white
@@ -219,6 +223,25 @@ theorem problem1_of_problem2_of_unbounded_discrepancy (h2 : Rule30Prize.Problem2
   have := hC n
   rw [hα, show (1 / 2 : ℝ) * n = n / 2 by ring] at this
   exact absurd this (not_le.2 hn)
+
+/-- **If the discrepancy `N(n) - n/2` of the center column is unbounded above and below, Problem 1
+holds.** An eventually periodic sequence has `N(n) = α n + O(1)`, so its discrepancy is bounded
+below if `α ≥ 1/2` and above if `α ≤ 1/2`. Unlike `problem1_of_problem2_of_unbounded_discrepancy`
+this assumes nothing about the density. -/
+theorem problem1_of_oscillating_discrepancy
+    (hhi : ∀ C : ℝ, ∃ n, C < (ones Rule30Prize.center n : ℝ) - n / 2)
+    (hlo : ∀ C : ℝ, ∃ n, (ones Rule30Prize.center n : ℝ) - n / 2 < -C) :
+    Rule30Prize.Problem1 := fun hep => by
+  obtain ⟨α, C, hC⟩ := exists_abs_ones_sub_le_of_eventuallyPeriodic hep
+  rcases le_total (1 / 2) α with hα | hα
+  · obtain ⟨n, hn⟩ := hlo C
+    have h1 := (abs_le.1 (hC n)).1
+    have h2 : (1 / 2 : ℝ) * n ≤ α * n := mul_le_mul_of_nonneg_right hα n.cast_nonneg
+    linarith
+  · obtain ⟨n, hn⟩ := hhi C
+    have h1 := (abs_le.1 (hC n)).2
+    have h2 : α * n ≤ (1 / 2 : ℝ) * n := mul_le_mul_of_nonneg_right hα n.cast_nonneg
+    linarith
 
 /-! ### Unpredictability at error rate `1/2` -/
 

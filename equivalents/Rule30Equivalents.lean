@@ -54,6 +54,7 @@ import Rule30Equivalents.EmpiricalMeasures
 import Rule30Equivalents.OrbitFrequencies
 import Rule30Equivalents.QueryComplexity
 import Rule30Equivalents.BoundedRemainder
+import Rule30Equivalents.Fluctuations
 import Rule30Equivalents.FiniteRings
 import Rule30Equivalents.Lagrange
 import Rule30Equivalents.Minkowski

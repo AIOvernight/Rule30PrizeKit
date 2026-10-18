@@ -40,6 +40,8 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
 * `problem1_of_irrExponentGE`: the irrationality exponent of `x₂` is at least some `μ > 1`, for
   example `μ(x₂) = 2`.
 * `problem1_of_not_isMahler`: `∑ c(t) zᵗ` is not a `k`-Mahler function.
+* `problem1_of_expansionComplexity_unbounded`: the expansion complexity of `∑ c(t) Xᵗ` over `𝔽₂`
+  is unbounded.
 -/
 
 namespace Rule30Equivalents.StrongerStatements
@@ -391,5 +393,42 @@ theorem problem1_of_not_isMahler {k : ℕ} (hk : k ≠ 0)
       PowerSeries.expand_one_apply F]
     linear_combination (↑(Polynomial.expand ℚ k P) : PowerSeries ℚ) * hPQ -
       (↑P : PowerSeries ℚ) * hPQk
+
+/-- **Expansion complexity** (Diem; Mérai, Niederreiter and Winterhof). If for every `D` some
+precision `n` admits no nonzero `h(X, Y)` over `𝔽₂` of degree at most `D` in each variable with
+`h(X, G) ≡ 0 mod Xⁿ`, where `G = ∑ c(t) Xᵗ`, then Problem 1 holds: for an eventually periodic `c`,
+`G = P/Q` and `Q(X) Y - P(X)` vanishes at `G` exactly. By Christol's theorem the hypothesis is
+equivalent to `c` not being `2`-automatic. -/
+theorem problem1_of_expansionComplexity_unbounded
+    (h : ∀ D : ℕ, ∃ n : ℕ, ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 → g.natDegree ≤ D →
+      (∀ i, (g.coeff i).natDegree ≤ D) →
+        PowerSeries.trunc n (g.eval₂ Polynomial.coeToPowerSeries.ringHom
+          (LinearRelations.series (ZMod 2) c)) ≠ 0) :
+    Rule30Prize.Problem1 := by
+  intro hep
+  obtain ⟨P, Q, hQ, hPQ⟩ := (LinearRelations.eventuallyPeriodic_iff_rational (K := ZMod 2) c).1 hep
+  set g : Polynomial (Polynomial (ZMod 2)) := Polynomial.C Q * Polynomial.X - Polynomial.C P
+  have hg : g ≠ 0 := by
+    intro h0
+    have := congrArg (fun q => q.coeff 1) h0
+    simp [g] at this
+    exact hQ this
+  obtain ⟨n, hn⟩ := h (max (max Q.natDegree P.natDegree) 1)
+  refine hn g hg ?_ ?_ ?_
+  · calc g.natDegree ≤ max (Polynomial.C Q * Polynomial.X).natDegree (Polynomial.C P).natDegree :=
+          Polynomial.natDegree_sub_le _ _
+      _ ≤ max (max Q.natDegree P.natDegree) 1 := by
+          refine max_le ((Polynomial.natDegree_C_mul_le _ _).trans ?_) ?_
+          · rw [Polynomial.natDegree_X]; exact le_max_right _ _
+          · rw [Polynomial.natDegree_C]; exact Nat.zero_le _
+  · intro i
+    simp only [g, Polynomial.coeff_sub, Polynomial.coeff_C_mul, Polynomial.coeff_X,
+      Polynomial.coeff_C]
+    split_ifs <;> simp only [mul_one, mul_zero, sub_zero, zero_sub, Polynomial.natDegree_neg,
+      Polynomial.natDegree_zero] <;>
+      omega
+  · simp only [g, Polynomial.eval₂_sub, Polynomial.eval₂_mul, Polynomial.eval₂_C,
+      Polynomial.eval₂_X, Polynomial.coeToPowerSeries.ringHom_apply, hPQ, sub_self,
+      map_zero]
 
 end Rule30Equivalents.StrongerStatements

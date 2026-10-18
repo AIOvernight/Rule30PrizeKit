@@ -116,6 +116,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.StrongerStatements.problem1_of_unbounded_abelianComplexity
 #print axioms Rule30Equivalents.StrongerStatements.problem1_of_irrExponentGE
 #print axioms Rule30Equivalents.StrongerStatements.problem1_of_not_isMahler
+#print axioms Rule30Equivalents.StrongerStatements.problem1_of_expansionComplexity_unbounded
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_complement
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_of_eq
 #print axioms Rule30Equivalents.Symmetry.problem1_iff_of_eq_not

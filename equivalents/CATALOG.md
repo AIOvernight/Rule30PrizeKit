@@ -132,7 +132,7 @@ forms ([44]–[53]), two stronger statements, one weaker statement and one relat
   refuted nothing of substance; one unconfirmed theorem number and one overstated docstring
   sentence were corrected. The later modules were compiled and axiom-checked by their author; no
   independent verifier has restated them yet. [scripts/CheckAxioms.lean](scripts/CheckAxioms.lean)
-  prints the axioms of all 217 library theorems whose names begin with `problem1_iff`,
+  prints the axioms of all 220 library theorems whose names begin with `problem1_iff`,
   `problem1_of`, `problem2_iff` or `problem2_of`.
 - **Sufficient direction proved (library)**: the library proves that the form implies Problem 1
   (`problem1_of_*`); the equivalence is only stated.
@@ -2480,9 +2480,9 @@ Relation to Problem 1:
   density (`BoundedRemainder.problem1_of_oscillating_discrepancy`).
 - An explicit periodic tail would decide Problem 2 [W19].
 
-Problem 2 is Π⁰₃. For a random configuration the trace is a fair-coin sequence, and the number of
-black cells among the first n deviates from n/2 on the scale √n/2: (count − n/2)/√n converges in
-distribution to the normal law with variance 1/4
+Problem 2 is Π⁰₃ (`Computability.problem2_iff_forall_exists_forall`). For a random configuration the
+trace is a fair-coin sequence, and the number of black cells among the first n deviates from n/2 on
+the scale √n/2: (count − n/2)/√n converges in distribution to the normal law with variance 1/4
 (`RandomConfigurations.tendstoInDistribution_count_trace`, through Mathlib's central limit theorem).
 At every finite n, a deviation of at least nδ has probability at most 2·exp(−2nδ²)
 (`RandomConfigurations.measureReal_abs_count_trace_ge_le`, through Mathlib's Hoeffding inequality),
@@ -2858,9 +2858,14 @@ with Turing machines reading n. Notes:
     *Correction:* an earlier version said that the trace is normal for a comeager set of
     configurations; that is false.
 12. **Proof theory.** Problem 1 is Π⁰₂ and its negation is Σ⁰₂, so finite computation settles
-    neither. Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof
-    mining, a provably total bound on the defects, which is a Π⁰₁ strengthening like the defect
-    bound of Section 4 (own reasoning, logic survey).
+    neither. This is formal ([Computability](Rule30Equivalents/Computability.lean)): the center
+    column is primitive recursive (`primrec_center`), Problem 1 says that for every T and P some t ≥
+    T has c(t + P + 1) ≠ c(t) (`problem1_iff_forall_exists_defect`), and it holds iff the unbounded
+    search for such a t, a partial recursive function, halts on every input (T, P)
+    (`problem1_iff_firstDefect_dom`). Problem 2 is Π⁰₃ (`problem2_iff_forall_exists_forall`).
+    Independence from PA or ZFC is conceivable [W19]. A proof in PA would yield, by proof mining, a
+    provably total bound on the defects, which is a Π⁰₁ strengthening like the defect bound of
+    Section 4 (own reasoning, logic survey).
 13. **Complexity profiles from cryptography.** For each finite-register model, "profile bounded ⟺
     EP" holds: LFSR linear complexity, FCSR 2-adic complexity, maximum-order and k-th order
     complexity (k ≥ 1), finite-state generation, and automatic complexity ([52]). For c, every

@@ -31,6 +31,9 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Christol.problem1_iff_transcendental_F2_or_F3
 #print axioms Rule30Equivalents.Cobham.problem1_iff_not_two_three_automatic
 #print axioms Rule30Equivalents.Cobham.problem1_iff_exists_not_automatic
+#print axioms Rule30Equivalents.Computability.problem1_iff_forall_exists_defect
+#print axioms Rule30Equivalents.Computability.problem1_iff_firstDefect_dom
+#print axioms Rule30Equivalents.Computability.problem2_iff_forall_exists_forall
 #print axioms Rule30Equivalents.ContextFree.problem1_iff_unary_not_contextFree
 #print axioms Rule30Equivalents.ContextFree.problem1_iff_prefixes_not_contextFree
 #print axioms Rule30Equivalents.CoupledHalves.problem1_iff_coupled_halves

@@ -2894,7 +2894,10 @@ with Turing machines reading n. Notes:
     `measurePreserving_cells`): so are the cells along any path that never moves right
     (p(t + 1) ≤ p(t): columns, the left edge of the light cone; `measurePreserving_path`,
     `ae_isNormal_path`) and along every line of velocity other than 1 (`measurePreserving_line`,
-    `ae_isNormal_lines`), while along a right diagonal they are not: the cells (t, a) and
+    `ae_isNormal_lines`). So every almost-sure law of fair coins holds along all these lines at
+    once (`ae_lines_of_ae`): normality, the law of the iterated logarithm with its limit points, the
+    longest runs, the return times, the linear complexity and the Erdős–Rényi law
+    ([Lines](Rule30Equivalents/Lines.lean)). Along a right diagonal they are not: the cells (t, a) and
     (t + 1, a + 1) agree with probability 1/4 (`measure_diag_eq`). Topologically the picture is reversed (critic, own reasoning from standard
     facts):
     - Tr₀ is continuous, surjective and open: by left-permutivity, the image of the cylinder fixing

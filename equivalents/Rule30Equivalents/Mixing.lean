@@ -315,17 +315,25 @@ theorem measurePreserving_line {p : ℤ} {q : ℕ} (hpq : p ≠ q) (t₀ : ℕ) 
   measurePreserving_cells (cell := fun k => (q * k + t₀, p * k + x₀))
     (injective_foot_line hpq t₀ x₀)
 
-/-- **Every line is normal, almost surely**: for almost every configuration, the cells along
-every line of rational velocity other than `1`, through every cell, form a normal sequence. -/
-theorem ae_isNormal_lines :
+/-- **Every almost-sure property holds along every line**: if almost every fair-coin sequence has
+the property `P`, then for almost every configuration the cells along every line of rational
+velocity other than `1`, through every cell, form a sequence with the property `P`, for all of
+these countably many lines at once (`measurePreserving_line`). -/
+theorem ae_lines_of_ae {P : (ℕ → Bool) → Prop} (h : ∀ᵐ v ∂(coins ℕ), P v) :
     ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
-      StrongerStatements.IsNormal fun k => evol x (q * k + t₀) (p * k + x₀) := by
+      P fun k => evol x (q * k + t₀) (p * k + x₀) := by
   refine ae_all_iff.2 fun p => ae_all_iff.2 fun q => ae_all_iff.2 fun t₀ =>
     ae_all_iff.2 fun x₀ => ?_
   by_cases hpq : p = q
   · exact Eventually.of_forall fun _ h => absurd hpq h
-  · exact ((measurePreserving_line hpq t₀ x₀).quasiMeasurePreserving.ae ae_isNormal).mono
-      fun _ h _ => h
+  · exact ((measurePreserving_line hpq t₀ x₀).quasiMeasurePreserving.ae h).mono fun _ h _ => h
+
+/-- **Every line is normal, almost surely**: for almost every configuration, the cells along
+every line of rational velocity other than `1`, through every cell, form a normal sequence. -/
+theorem ae_isNormal_lines :
+    ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
+      StrongerStatements.IsNormal fun k => evol x (q * k + t₀) (p * k + x₀) :=
+  ae_lines_of_ae ae_isNormal
 
 /-- **No line inside the light cone is eventually periodic, almost surely**: for almost every
 configuration, the hypothesis of `StrongerStatements.problem1_of_every_line` holds with the seed

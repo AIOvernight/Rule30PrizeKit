@@ -68,6 +68,7 @@ import Rule30Equivalents.IrrationalityExponent
 import Rule30Equivalents.Circuits
 import Rule30Equivalents.LargeDeviations
 import Rule30Equivalents.ErdosRenyi
+import Rule30Equivalents.Lines
 import Rule30Equivalents.Typicality
 import Rule30Equivalents.FiniteRings
 import Rule30Equivalents.Lagrange

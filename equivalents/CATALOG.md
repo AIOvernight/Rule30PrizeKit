@@ -2848,7 +2848,11 @@ with Turing machines reading n. Notes:
     rare at Cramér's rate: for 1/2 ≤ a < 1, (1/n) log P(N(n) ≥ an) → H(a) − log 2, H the binary
     entropy ([LargeDeviations](Rule30Equivalents/LargeDeviations.lean),
     `tendsto_log_measureReal_trace`; Chernoff's bound from above, the mode of the binomial
-    distribution from below). The configurations with an eventually
+    distribution from below). The densest windows follow the Erdős–Rényi law: for 1/2 < α < 1 the
+    windows of length L(n) = ⌊log n/(log 2 − H(α))⌋ inside the first n cells are at most a fraction
+    α + o(1) black, and some of them reach it ([ErdosRenyi](Rule30Equivalents/ErdosRenyi.lean),
+    `ae_tendsto_maxWindow_trace`; the longest runs are the case α = 1). The configurations with an
+    eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
     ([Mixing](Rule30Equivalents/Mixing.lean)): every iterate preserves μ (`measurePreserving_evol`,

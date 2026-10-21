@@ -87,7 +87,7 @@ theorem measure_computes_le {k s : ℕ} (P : Prog k (s + 1)) :
         measure_mono fun v hv => by
           simp only [Set.mem_pi, Finset.coe_range, Set.mem_Iio, Set.mem_singleton_iff]
           intro n hn
-          rw [dif_pos hn]
+          rw [dite_eq_left hn]
           have := hv ((index k).symm ⟨n, hn⟩)
           simp only [Equiv.apply_symm_apply] at this
           exact this.symm

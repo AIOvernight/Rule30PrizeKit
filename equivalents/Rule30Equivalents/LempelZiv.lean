@@ -182,7 +182,7 @@ theorem eventuallyPeriodic_of_lz_bounded {b : ℕ → Bool} {K : ℕ}
     have hle : J s hs + 1 ≤ L := by
       have h1 : (if hs' : s < p then J s hs' + 1 else 0) ≤ L :=
         Finset.le_sup (f := fun s => if hs : s < p then J s hs + 1 else 0) (Finset.mem_range.2 hs)
-      rw [dif_pos hs] at h1
+      rw [dite_eq_left hs] at h1
       exact h1
     exact hJ s hs (hagree (J s hs) (by omega))
   refine ⟨s, p - s, by omega, fun t ht => ?_⟩

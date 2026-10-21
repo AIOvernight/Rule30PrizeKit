@@ -1,6 +1,6 @@
 import Rule30Equivalents.Basic
 import Mathlib.Data.Set.Card
-import Mathlib.Data.Finite.Prod
+import Mathlib.Basic.Finite.Prod
 import Mathlib.Dynamics.PeriodicPts.Defs
 import Mathlib.Order.Preorder.Finite
 

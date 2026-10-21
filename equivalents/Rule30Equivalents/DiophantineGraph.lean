@@ -170,7 +170,7 @@ theorem testBit_blocks {w : ℕ} : ∀ (k : ℕ) (f : ℕ → ℕ), (∀ s, s < 
     cases t with
     | zero => simp [hj]
     | succ t =>
-      rw [if_neg (by nlinarith), show (t + 1) * w + j - w = t * w + j by
+      rw [ite_eq_right (by nlinarith), show (t + 1) * w + j - w = t * w + j by
         rw [Nat.succ_mul]; omega, testBit_blocks k _ (fun s hs => hf _ (by omega)) t j hj]
       simp
 
@@ -204,21 +204,22 @@ theorem Φ_add {w x y : ℕ} (hw : 2 ≤ w) (hx : x < 2 ^ (w - 2)) :
   rw [add_comm (Φ x), Nat.testBit_two_pow_mul_add _ hΦ, testBit_Φ, add_comm x,
     Nat.testBit_two_pow_mul_add _ hx']
   by_cases hi : i < w
-  · rw [if_pos hi, testBit_Φ, Nat.testBit_two_pow_mul_add _ hx',
-      Nat.testBit_two_pow_mul_add _ hx', if_pos hi, if_pos (by omega), if_pos (by omega)]
-  · rw [if_neg hi, if_neg hi, testBit_Φ, Nat.testBit_two_pow_mul_add _ hx',
+  · rw [ite_eq_left hi, testBit_Φ, Nat.testBit_two_pow_mul_add _ hx',
+      Nat.testBit_two_pow_mul_add _ hx', ite_eq_left hi,
+      ite_eq_left (by omega), ite_eq_left (by omega)]
+  · rw [ite_eq_right hi, ite_eq_right hi, testBit_Φ, Nat.testBit_two_pow_mul_add _ hx',
       Nat.testBit_two_pow_mul_add _ hx']
     by_cases h1 : i - 1 < w
     · have hi' : i = w := by omega
       subst hi'
-      rw [if_pos h1, if_pos (by omega), hb _ (by omega), hb _ (by omega)]
+      rw [ite_eq_left h1, ite_eq_left (by omega), hb _ (by omega), hb _ (by omega)]
       simp
     · by_cases h2 : i - 2 < w
       · have hi' : i = w + 1 := by omega
         subst hi'
-        rw [if_neg h1, if_pos h2, hb _ (by omega)]
+        rw [ite_eq_right h1, ite_eq_left h2, hb _ (by omega)]
         simp [show w + 1 - w = 1 by omega]
-      · rw [if_neg h1, if_neg h2]
+      · rw [ite_eq_right h1, ite_eq_right h2]
         simp only [show i - 1 - w = i - w - 1 by omega, show i - 2 - w = i - w - 2 by omega]
         simp [show 1 ≤ i by omega, show 2 ≤ i by omega, show 1 ≤ i - w by omega,
           show 2 ≤ i - w by omega]
@@ -389,7 +390,7 @@ theorem sub_dioph {α : Type} {f g : (α → ℕ) → ℕ} (df : Dioph.DiophFn f
   have h : Dioph {v : α → ℕ | (g v).choose (f v) % 2 = 1} :=
     Dioph.eq_dioph (Dioph.mod_dioph (choose_diophFn dg df) (Dioph.const_dioph 2)) (Dioph.const_dioph 1)
   refine Dioph.ext h fun v => ?_
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [sub_iff_odd_choose, Nat.odd_iff]
 
 /-! ### The graph of the center column -/
@@ -428,7 +429,7 @@ theorem center_diophFn :
   have hT := Dioph.ex_dioph (c1.inter (c2.inter (c3.inter (c4.inter (c5.inter (c6.inter
     (c7.inter (c8.inter c9))))))))
   refine Dioph.ext hT fun v => ?_
-  simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Function.const_apply, Sum.elim_inl,
+  simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, Function.const_apply, Sum.elim_inl,
     Sum.elim_inr, Function.comp_apply]
   refine Iff.trans ?_ (center_iff _ _).symm
   constructor

@@ -116,7 +116,7 @@ theorem tendsto_comp_iff_forall_mapClusterPt {X : Type*} [TopologicalSpace X] [C
     obtain ⟨ε, hε, hfreq⟩ := hne
     let S : Set ℕ := {n | ε ≤ dist ((g ∘ u) n) L}
     have hfr : ∃ᶠ n in atTop, n ∈ S := Filter.frequently_atTop.2 hfreq
-    haveI : NeBot (atTop ⊓ 𝓟 S) := Filter.frequently_iff_neBot.1 hfr
+    have : NeBot (atTop ⊓ 𝓟 S) := Filter.frequently_iff_neBot.1 hfr
     obtain ⟨x, -, hx⟩ := isCompact_univ.exists_clusterPt (f := map u (atTop ⊓ 𝓟 S))
       (le_principal_iff.2 univ_mem)
     have hgx := h x (hx.mono (map_mono inf_le_left))
@@ -128,7 +128,7 @@ theorem tendsto_comp_iff_forall_mapClusterPt {X : Type*} [TopologicalSpace X] [C
     have hmem : g x ∈ closure {y | ε ≤ dist y L} := mem_closure_iff_clusterPt.2 (hcl.mono hsub)
     have hS : IsClosed {y : ℝ | ε ≤ dist y L} :=
       isClosed_le continuous_const (continuous_id.dist continuous_const)
-    rw [hS.closure_eq, Set.mem_setOf_eq, hgx, dist_self] at hmem
+    rw [hS.closure_eq, Set.mem_ofPred_eq, hgx, dist_self] at hmem
     linarith
 
 /-- **Density `1/2` through empirical measures**, for every bit sequence: every limit point of
@@ -236,7 +236,7 @@ theorem not_eventuallyPeriodic_of_nonatomic {b : ℕ → Bool} {ν : Probability
     push_cast
     exact ENNReal.inv_mul_cancel (by simp) (by simp)
   -- so is `ν`
-  haveI : NeBot (comap (empirical b) (𝓝 ν) ⊓ atTop) := neBot_inf_comap_iff_map'.2 hν.neBot
+  have : NeBot (comap (empirical b) (𝓝 ν) ⊓ atTop) := neBot_inf_comap_iff_map'.2 hν.neBot
   have hlim : Tendsto (empirical b) (comap (empirical b) (𝓝 ν) ⊓ atTop) (𝓝 ν) :=
     tendsto_comap.mono_left inf_le_left
   have hle := ProbabilityMeasure.limsup_measure_closed_le_of_tendsto hlim
@@ -274,15 +274,15 @@ theorem coinsPM_cyl {n : ℕ} (w : Fin n → Bool) :
   have hset : cyl w = Set.pi (Finset.range n : Set ℕ)
       (fun j => {if h : j < n then w ⟨j, h⟩ else false}) := by
     ext v
-    simp only [cyl, Set.mem_setOf_eq, Set.mem_pi, Finset.coe_range, Set.mem_Iio,
+    simp only [cyl, Set.mem_ofPred_eq, Set.mem_pi, Finset.coe_range, Set.mem_Iio,
       Set.mem_singleton_iff]
     constructor
     · intro h j hj
-      rw [dif_pos hj]
+      rw [dite_eq_left hj]
       exact h ⟨j, hj⟩
     · intro h j
       have := h j j.2
-      rwa [dif_pos j.2] at this
+      rwa [dite_eq_left j.2] at this
   rw [ProbabilityMeasure.coeFn_def, ENNReal.coe_toNNReal_eq_toReal]
   show (RandomConfigurations.coins ℕ (cyl w)).toReal = _
   rw [hset, RandomConfigurations.coins_pi, Finset.prod_congr rfl fun j _ =>
@@ -303,7 +303,7 @@ theorem isNormal_iff_tendsto_empirical (b : ℕ → Bool) :
     rw [empirical_apply b N (measurableSet_cyl w)]
     congr 3
     refine filter_congr fun i _ => ?_
-    simp only [cyl, Set.mem_setOf_eq, ShiftOrbit.shift_iterate]
+    simp only [cyl, Set.mem_ofPred_eq, ShiftOrbit.shift_iterate]
   have hnorm : StrongerStatements.IsNormal b ↔ ∀ n (w : Fin n → Bool),
       Tendsto (fun N => ((empirical b N) (cyl w) : ℝ)) atTop (𝓝 ((2 : ℝ)⁻¹ ^ n)) := by
     refine forall_congr' fun n => forall_congr' fun w => ?_

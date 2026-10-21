@@ -214,9 +214,9 @@ theorem exists_pow_dvd_of_eventuallyPeriodic {p : ℕ} (hp : 2 ≤ p) {x : ℕ �
 theorem abs_sub_mul_ite_le (u v : ℤ) (e : Bool) :
     |u - v * (if e then 1 else 0)| ≤ |u| + |v| := by
   cases e
-  · rw [if_neg Bool.false_ne_true, mul_zero, sub_zero]
+  · rw [ite_eq_right Bool.false_ne_true, mul_zero, sub_zero]
     exact le_add_of_nonneg_right (abs_nonneg v)
-  · rw [if_pos rfl, mul_one, sub_eq_add_neg]
+  · rw [ite_eq_left rfl, mul_one, sub_eq_add_neg]
     calc |u + -v| ≤ |u| + |-v| := abs_add_le _ _
       _ = |u| + |v| := by rw [abs_neg]
 
@@ -277,13 +277,13 @@ theorem eventuallyPeriodic_of_pow_dvd {p : ℕ} (hp : 2 ≤ p) {x : ℕ → Bool
     intro n
     have e := hrec n
     cases hxn : x n
-    · rw [hxn, if_neg Bool.false_ne_true, mul_zero, add_zero] at e
+    · rw [hxn, ite_eq_right Bool.false_ne_true, mul_zero, add_zero] at e
       simp only [Bool.false_eq_true, false_iff]
       intro hd
       apply hb
       have := dvd_sub (⟨r (n + 1), e⟩ : (p : ℤ) ∣ r n) hd
       rwa [sub_sub_cancel] at this
-    · rw [hxn, if_pos rfl, mul_one] at e
+    · rw [hxn, ite_eq_left rfl, mul_one] at e
       simp only [true_iff]
       exact ⟨r (n + 1), by linarith⟩
   -- So the remainders, and with them the digits, repeat from `N + i` on with period `j - i`.

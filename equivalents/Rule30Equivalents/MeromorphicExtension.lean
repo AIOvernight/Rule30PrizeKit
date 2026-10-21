@@ -112,7 +112,7 @@ theorem eval_mul_genFun (Q : ℂ[X]) (b : ℕ → Bool) {z : ℂ} (hz : ‖z‖ 
 /-- A sequence with finitely many values that tends to `0` is eventually `0`. -/
 theorem eventually_eq_zero {u : ℕ → ℂ} (hfin : (Set.range u).Finite)
     (hu : Tendsto u atTop (𝓝 0)) : ∀ᶠ n in atTop, u n = 0 := by
-  have hcl : IsClosed (Set.range u \ {0}) := (hfin.diff).isClosed
+  have hcl : IsClosed (Set.range u \ {0}) := (hfin.sdiff).isClosed
   have hmem : (Set.range u \ {0})ᶜ ∈ 𝓝 (0 : ℂ) := hcl.isOpen_compl.mem_nhds (by simp)
   filter_upwards [hu hmem] with n hn
   by_contra hne
@@ -174,7 +174,7 @@ theorem hasMeromorphicExtension_of_eventuallyPeriodic {b : ℕ → Bool} (h : Ev
     (coef b t - if P ≤ t then coef b (t - P) else 0) * z ^ t, ?_, fun z hz => ?_⟩
   · have := congrArg (Polynomial.coeff · 0) h0
     simp only [coeff_sub, coeff_one_zero, coeff_X_pow, coeff_zero] at this
-    rw [if_neg (by omega)] at this
+    rw [ite_eq_right (by omega)] at this
     norm_num at this
   · exact Differentiable.differentiableOn (by fun_prop)
   · rw [eval_sub, eval_one, eval_pow, eval_X, mul_genFun_eq hTP hz]

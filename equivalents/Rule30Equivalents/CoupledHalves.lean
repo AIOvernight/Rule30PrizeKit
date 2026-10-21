@@ -34,8 +34,8 @@ theorem L_congr_start {c : Nat → Bool} {s s' : Int → Bool} (h : ∀ p, p < 0
   | 0, p => by
     show (if p < 0 then s p else c 0) = (if p < 0 then s' p else c 0)
     by_cases hp : p < 0
-    · rw [if_pos hp, if_pos hp, h p hp]
-    · rw [if_neg hp, if_neg hp]
+    · rw [ite_eq_left hp, ite_eq_left hp, h p hp]
+    · rw [ite_eq_right hp, ite_eq_right hp]
   | t + 1, p => by
     show (if p < 0 then rule (L c s t (p - 1)) (L c s t p) (L c s t (p + 1)) else c (t + 1)) =
       (if p < 0 then rule (L c s' t (p - 1)) (L c s' t p) (L c s' t (p + 1)) else c (t + 1))

@@ -45,10 +45,11 @@ theorem vk_zero (k : ℕ) : vk k 0 = 0 := by
 theorem vk_mul (hk : 2 ≤ k) (x : ℕ) : vk k (k * x) = k * vk k x := by
   rcases Nat.eq_zero_or_pos x with rfl | hx
   · rw [mul_zero, vk_zero, mul_zero]
-  · rw [vk, dif_pos ⟨hk, by positivity, dvd_mul_right k x⟩, Nat.mul_div_cancel_left _ (by omega)]
+  · rw [vk, dite_eq_left ⟨hk, by positivity, dvd_mul_right k x⟩,
+      Nat.mul_div_cancel_left _ (by omega)]
 
 theorem vk_of_not_dvd {x : ℕ} (hx : 0 < x) (hkx : ¬ k ∣ x) : vk k x = 1 := by
-  rw [vk, dif_neg (fun h => hkx h.2.2), if_neg (by omega)]
+  rw [vk, dite_eq_right (fun h => hkx h.2.2), ite_eq_right (by omega)]
 
 theorem vk_pow_mul (hk : 2 ≤ k) (e x : ℕ) : vk k (k ^ e * x) = k ^ e * vk k x := by
   induction e with
@@ -146,7 +147,7 @@ theorem Recognizable.exists (hk : 0 < k) {κ : Type*} {R : Set (ι ⊕ κ → �
   · rintro _ ⟨s, hs, rfl⟩
     exact ⟨e, Sum.elim r s, fun x => by cases x <;> simp [hr, hs], rfl⟩
   · ext w
-    simp only [sect, Set.mem_setOf_eq]
+    simp only [sect, Set.mem_ofPred_eq]
     constructor
     · rintro ⟨S, ⟨s, hs, rfl⟩, u, hu⟩
       refine ⟨fun j => k ^ e * u j + s j, ?_⟩
@@ -332,29 +333,29 @@ theorem recognizable_funGraph (hk : 2 ≤ k) {A : Set ℕ} {l : ℕ} (f : (buchi
     | zero =>
       refine ((recognizable_constRel (by omega) 0).comap fun _ => Sum.inr ()).congr ?_
       ext z
-      simp only [funGraph, constRel, Set.mem_setOf_eq, Function.comp_apply]
+      simp only [funGraph, constRel, Set.mem_ofPred_eq, Function.comp_apply]
       rfl
     | one =>
       refine ((recognizable_constRel (by omega) 1).comap fun _ => Sum.inr ()).congr ?_
       ext z
-      simp only [funGraph, constRel, Set.mem_setOf_eq, Function.comp_apply]
+      simp only [funGraph, constRel, Set.mem_ofPred_eq, Function.comp_apply]
       rfl
     | add =>
       refine ((recognizable_addRel (by omega)).comap
         ![Sum.inl 0, Sum.inl 1, Sum.inr ()]).congr ?_
       ext z
-      simp only [funGraph, addRel, Set.mem_setOf_eq, Function.comp_apply]
+      simp only [funGraph, addRel, Set.mem_ofPred_eq, Function.comp_apply]
       exact eq_comm
     | v =>
       refine ((recognizable_vkRel hk).comap ![Sum.inl 0, Sum.inr ()]).congr ?_
       ext z
-      simp only [funGraph, vkRel, Set.mem_setOf_eq, Function.comp_apply]
+      simp only [funGraph, vkRel, Set.mem_ofPred_eq, Function.comp_apply]
       exact eq_comm
   · cases l with
     | zero =>
       refine ((recognizable_constRel (by omega) (c : ℕ)).comap fun _ => Sum.inr ()).congr ?_
       ext z
-      simp only [funGraph, constRel, Set.mem_setOf_eq, Function.comp_apply]
+      simp only [funGraph, constRel, Set.mem_ofPred_eq, Function.comp_apply]
       rfl
     | succ l => exact c.elim
 
@@ -368,7 +369,7 @@ theorem recognizable_termGraph (hk : 2 ≤ k) {A : Set ℕ} {β : Type*} (t : (b
   | var b =>
     refine ((recognizable_eqRel (by omega)).comap ![Sum.inr (), Sum.inl b]).congr ?_
     ext w
-    simp only [termGraph, eqRel, Set.mem_setOf_eq, Function.comp_apply]
+    simp only [termGraph, eqRel, Set.mem_ofPred_eq, Function.comp_apply]
     rfl
   | @func l f ts ih =>
     let σ : Fin l → β ⊕ Unit → (β ⊕ Unit) ⊕ Fin l := fun j =>
@@ -380,7 +381,7 @@ theorem recognizable_termGraph (hk : 2 ≤ k) {A : Set ℕ} {β : Type*} (t : (b
         ((recognizable_funGraph hk f).comap τ)
     refine (hR.exists (by omega)).congr ?_
     ext w
-    simp only [termGraph, funGraph, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter,
+    simp only [termGraph, funGraph, Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iInter,
       Term.realize_func]
     constructor
     · rintro ⟨u, hu, hf⟩
@@ -409,7 +410,7 @@ theorem recognizable_formRel (hk : 2 ≤ k) {A : Set ℕ} {α : Type*} {n : ℕ}
     refine (((recognizable_termGraph hk t₁).inter (recognizable_termGraph hk t₂)).exists
       (κ := Unit) hk0).congr ?_
     ext w
-    simp only [termGraph, formRel, Set.mem_setOf_eq, Set.mem_inter_iff, BoundedFormula.Realize,
+    simp only [termGraph, formRel, Set.mem_ofPred_eq, Set.mem_inter_iff, BoundedFormula.Realize,
       Sum.elim_comp_inl_inr]
     constructor
     · rintro ⟨u, h₁, h₂⟩
@@ -422,7 +423,7 @@ theorem recognizable_formRel (hk : 2 ≤ k) {A : Set ℕ} {α : Type*} {n : ℕ}
   | imp φ ψ ihφ ihψ =>
     refine (ihφ.inter ihψ.compl).compl.congr ?_
     ext w
-    simp only [formRel, Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+    simp only [formRel, Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
       BoundedFormula.Realize]
     tauto
   | @all n φ ih =>
@@ -438,7 +439,7 @@ theorem recognizable_formRel (hk : 2 ≤ k) {A : Set ℕ} {α : Type*} {n : ℕ}
       · simp [σ]
     refine ((ih.comap σ).compl.exists (κ := Unit) hk0).compl.congr ?_
     ext w
-    simp only [formRel, Set.mem_compl_iff, Set.mem_setOf_eq, not_exists, not_not,
+    simp only [formRel, Set.mem_compl_iff, Set.mem_ofPred_eq, not_exists, not_not,
       BoundedFormula.realize_all]
     constructor
     · intro h x
@@ -464,7 +465,7 @@ theorem isAutomatic_of_definable (hk : 2 ≤ k) {A : Set ℕ} {f : ℕ → Bool}
   refine ⟨sect k (formRel φ) e (fun _ => r), ⟨e, fun _ => r, fun _ => hr, rfl⟩, ?_⟩
   funext n
   have hmem := congrArg (fun s : Set (Fin 1 → ℕ) => (fun _ => k ^ e * n + r) ∈ s) hφ
-  simp only [Set.mem_setOf_eq, eq_iff_iff] at hmem
+  simp only [Set.mem_ofPred_eq, eq_iff_iff] at hmem
   rw [Bool.eq_iff_iff, decide_eq_true_iff, hmem]
   exact Iff.of_eq (congrArg (BoundedFormula.Realize φ (fun _ => k ^ e * n + r))
     (Subsingleton.elim _ _))

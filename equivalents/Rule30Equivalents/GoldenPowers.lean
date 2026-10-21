@@ -151,13 +151,13 @@ noncomputable def pmin (b : ℕ → α) (n : ℕ) : ℕ := if h : ∃ d, GP b n 
 theorem gp_pmin {n : ℕ} (h : ∃ d, GP b n d) : GP b n (pmin b n) := by
   classical
   unfold pmin
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact Nat.find_spec h
 
 theorem pmin_le {n d : ℕ} (h : GP b n d) : pmin b n ≤ d := by
   classical
   unfold pmin
-  rw [dif_pos ⟨d, h⟩]
+  rw [dite_eq_left ⟨d, h⟩]
   exact Nat.find_min' _ h
 
 /-! ### Theorem 1 -/

@@ -41,7 +41,7 @@ theorem indepFun_indicator {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
   have hind := (IndepSet_iff_Indep E F μ).1 ((indepSet_iff_measure_inter_eq_mul hE hF μ).2 h)
   have hle : ∀ G : Set Ω, MeasurableSpace.comap (G.indicator (1 : Ω → ℝ)) inferInstance ≤
       MeasurableSpace.generateFrom {G} := fun G => by
-    letI : MeasurableSpace Ω := MeasurableSpace.generateFrom {G}
+    let : MeasurableSpace Ω := MeasurableSpace.generateFrom {G}
     exact Measurable.comap_le (measurable_one.indicator
       (MeasurableSpace.measurableSet_generateFrom (Set.mem_singleton G)))
   rw [IndepFun_iff_Indep]
@@ -67,7 +67,7 @@ theorem measure_inter_window_time {I : Finset ℤ} {w : ℤ → Bool} {s t : ℕ
   have hAm : ∀ x p, p < m → (Function.update x p (!x p) ∈ {x : ℤ → Bool | ∀ i ∈ I,
       evol x s i = w i} ↔ x ∈ {x : ℤ → Bool | ∀ i ∈ I, evol x s i = w i}) := by
     intro x p hp
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     refine forall₂_congr fun i hi => ?_
     rw [AlgebraicDegree.evol_update_of_far (Or.inl (by have := hs i hi; omega))]
   rw [measure_inter_window (measurableSet_window s I w) hAm t w I ht, measure_window t I w]

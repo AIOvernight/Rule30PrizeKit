@@ -147,7 +147,7 @@ theorem closure_shifts_of_disjunctive {b : ℕ → Bool} (hb : Disjunctive b) :
 /-- `{0,1}^ℕ` is uncountable (Cantor's diagonal argument). -/
 theorem not_countable_univ : ¬ (Set.univ : Set (ℕ → Bool)).Countable := by
   intro h
-  haveI := Set.countable_univ_iff.1 h
+  have := Set.countable_univ_iff.1 h
   obtain ⟨f, hf⟩ := exists_surjective_nat (ℕ → Bool)
   obtain ⟨m, hm⟩ := hf fun n => !f n n
   have := congrFun hm m
@@ -309,7 +309,7 @@ theorem finite_roots_series {g : Polynomial (Polynomial (ZMod 2))} (hg : g ≠ 0
   have hG : G ≠ 0 := (Polynomial.map_ne_zero_iff (Polynomial.coe_injective (ZMod 2))).2 hg
   refine (G.roots.toFinset.finite_toSet.preimage (injective_series (ZMod 2)).injOn).subset
     fun b hb => ?_
-  simp only [Set.mem_setOf_eq] at hb
+  simp only [Set.mem_ofPred_eq] at hb
   simp only [Set.mem_preimage, Finset.mem_coe, Multiset.mem_toFinset]
   rw [Polynomial.mem_roots hG, Polynomial.IsRoot, hGdef, Polynomial.eval_map]
   exact hb
@@ -317,12 +317,12 @@ theorem finite_roots_series {g : Polynomial (Polynomial (ZMod 2))} (hg : g ≠ 0
 /-- **Almost every generating function over `𝔽₂` is a root of no nonzero `g(X, Y)`**. -/
 theorem ae_not_root_series : ∀ᵐ v ∂(coins ℕ), ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 →
     g.eval₂ Polynomial.coeToPowerSeries.ringHom (LinearRelations.series (ZMod 2) v) ≠ 0 := by
-  haveI : Countable (AddMonoidAlgebra (ZMod 2) ℕ) :=
+  have : Countable (AddMonoidAlgebra (ZMod 2) ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := ZMod 2) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial (ZMod 2)) := Polynomial.toFinsupp_injective.countable
-  haveI : Countable (AddMonoidAlgebra (Polynomial (ZMod 2)) ℕ) :=
+  have : Countable (Polynomial (ZMod 2)) := Polynomial.toFinsupp_injective.countable
+  have : Countable (AddMonoidAlgebra (Polynomial (ZMod 2)) ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := Polynomial (ZMod 2)) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial (Polynomial (ZMod 2))) :=
+  have : Countable (Polynomial (Polynomial (ZMod 2))) :=
     Polynomial.toFinsupp_injective.countable
   refine ae_all_iff.2 fun g => ?_
   by_cases hg : g = 0
@@ -370,9 +370,9 @@ theorem ae_expansionComplexity_unbounded : ∀ᵐ v ∂(coins ℕ), ∀ D : ℕ,
   intro htrunc
   have := congrArg (Polynomial.coeff · (k g)) htrunc
   simp only [PowerSeries.coeff_trunc, Polynomial.coeff_zero] at this
-  rw [if_pos (by omega)] at this
+  rw [ite_eq_left (by omega)] at this
   have hspec := (hk g hg).choose_spec
-  simp only [k, dif_neg hg] at this
+  simp only [k, dite_eq_right hg] at this
   exact hspec this
 
 theorem ae_expansionComplexity_unbounded_trace : ∀ᵐ x ∂(coins ℤ), ∀ D : ℕ, ∃ n : ℕ,

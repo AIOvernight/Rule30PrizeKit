@@ -199,7 +199,7 @@ theorem extendLeft_eq (y : ℤ → Bool) (N : ℤ) (z : ℤ → Bool) (k : ℕ) 
   unfold extendLeft
   rcases Nat.eq_zero_or_pos k with rfl | hk
   · simp [leftPair]
-  · rw [if_neg (by omega), show (N - (N - k)).toNat = k by omega]
+  · rw [ite_eq_right (by omega), show (N - (N - k)).toNat = k by omega]
 
 theorem extendLeft_succ (y : ℤ → Bool) (N : ℤ) (z : ℤ → Bool) (k : ℕ) :
     extendLeft y N z (N - k + 1) = (leftPair y N z k).2 := by
@@ -220,8 +220,8 @@ theorem evol_extendLeft {y z : ℤ → Bool} {N : ℤ} (hz : ∀ q, N < q → ev
       extendLeft_eq, extendLeft_succ]
     simp only [leftPair]
     cases y (N - k) <;> cases (leftPair y N z k).1 || (leftPair y N z k).2 <;> rfl
-  · simp only [extendLeft, if_pos (show N ≤ q - 1 by omega), if_pos hq.le,
-      if_pos (show N ≤ q + 1 by omega)]
+  · simp only [extendLeft, ite_eq_left (show N ≤ q - 1 by omega), ite_eq_left hq.le,
+      ite_eq_left (show N ≤ q + 1 by omega)]
     have := hz q hq
     rwa [evol_one] at this
 
@@ -443,16 +443,16 @@ theorem dense_three_preimages : Dense {y : ℤ → Bool | ∃ x₀ x₁ x₂, x�
   all_goals intro h
   -- the three tails differ at `N` or at `N + 1`
   · have := congrFun h N
-    rw [show extendLeft y N (third N) N = third N N from if_pos le_rfl,
-      show extendLeft y N (third (N + 1)) N = third (N + 1) N from if_pos le_rfl] at this
+    rw [show extendLeft y N (third N) N = third N N from ite_eq_left le_rfl,
+      show extendLeft y N (third (N + 1)) N = third (N + 1) N from ite_eq_left le_rfl] at this
     have h2 : third (N + 1) N = false := by
       simp only [third, decide_eq_false_iff_not]
       omega
     rw [h2] at this
     simp [third] at this
   · have := congrFun h N
-    rw [show extendLeft y N (third N) N = third N N from if_pos le_rfl,
-      show extendLeft y N (third (N + 2)) N = third (N + 2) N from if_pos le_rfl] at this
+    rw [show extendLeft y N (third N) N = third N N from ite_eq_left le_rfl,
+      show extendLeft y N (third (N + 2)) N = third (N + 2) N from ite_eq_left le_rfl] at this
     have h2 : third (N + 2) N = false := by
       simp only [third, decide_eq_false_iff_not]
       omega
@@ -460,9 +460,9 @@ theorem dense_three_preimages : Dense {y : ℤ → Bool | ∃ x₀ x₁ x₂, x�
     simp [third] at this
   · have := congrFun h (N + 1)
     rw [show extendLeft y N (third (N + 1)) (N + 1) = third (N + 1) (N + 1) from
-        if_pos (by omega),
+        ite_eq_left (by omega),
       show extendLeft y N (third (N + 2)) (N + 1) = third (N + 2) (N + 1) from
-        if_pos (by omega)] at this
+        ite_eq_left (by omega)] at this
     have h2 : third (N + 2) (N + 1) = false := by
       simp only [third, decide_eq_false_iff_not]
       omega
@@ -532,14 +532,16 @@ theorem evol_one_pairL_eq : evol pairL 1 = evol pairR 1 := by
   funext q
   rw [evol_one, evol_one]
   rcases le_or_gt q (-1) with hq | hq
-  · simp only [pairL, pairR, if_pos (show q - 1 ≤ 0 by omega), if_pos (show q ≤ 0 by omega),
-      if_pos (show q + 1 ≤ 0 by omega)]
+  · simp only [pairL, pairR, ite_eq_left (show q - 1 ≤ 0 by omega),
+      ite_eq_left (show q ≤ 0 by omega),
+      ite_eq_left (show q + 1 ≤ 0 by omega)]
   rcases (show q = 0 ∨ q = 1 ∨ 2 ≤ q by omega) with rfl | rfl | hq2
   · decide
   · decide
   · have h4 : q % 4 = 0 ∨ q % 4 = 1 ∨ q % 4 = 2 ∨ q % 4 = 3 := by omega
-    simp only [pairL, pairR, if_neg (show ¬ q - 1 ≤ 0 by omega), if_neg (show ¬ q ≤ 0 by omega),
-      if_neg (show ¬ q + 1 ≤ 0 by omega)]
+    simp only [pairL, pairR, ite_eq_right (show ¬ q - 1 ≤ 0 by omega),
+        ite_eq_right (show ¬ q ≤ 0 by omega),
+      ite_eq_right (show ¬ q + 1 ≤ 0 by omega)]
     rcases h4 with h | h | h | h
     · rw [show (q - 1) % 4 = 3 by omega, show (q + 1) % 4 = 1 by omega, h]
       decide

@@ -906,7 +906,7 @@ theorem cylinder_mem_nhds (y : ℕ → Bool) (m : ℕ) :
     {x : ℕ → Bool | ∀ i < m, x i = y i} ∈ nhds y := by
   have e : {x : ℕ → Bool | ∀ i < m, x i = y i} = prefixWord m ⁻¹' {prefixWord m y} := by
     ext x
-    simp only [Set.mem_setOf_eq, Set.mem_preimage, Set.mem_singleton_iff, funext_iff, prefixWord]
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_singleton_iff, funext_iff, prefixWord]
     exact ⟨fun h j => h j j.isLt, fun h i hi => h ⟨i, hi⟩⟩
   rw [e]
   exact ((isOpen_discrete _).preimage (continuous_prefixWord m)).mem_nhds rfl
@@ -1024,8 +1024,8 @@ theorem finite_of_forall_periodic {Ω : Set (ℕ → Bool)} (hc : IsClosed Ω)
   have hYc : IsClosed (derivedSet Ω) := isClosed_derivedSet Ω
   obtain ⟨y₀, hy₀⟩ := (show Ω.Infinite from hinf).exists_accPt_principal
   have hYΩ : derivedSet Ω ⊆ Ω := (isClosed_iff_derivedSet_subset Ω).1 hc
-  haveI : CompactSpace (derivedSet Ω) := isCompact_iff_compactSpace.mp hYc.isCompact
-  haveI : Nonempty (derivedSet Ω) := ⟨⟨y₀, hy₀⟩⟩
+  have : CompactSpace (derivedSet Ω) := isCompact_iff_compactSpace.mp hYc.isCompact
+  have : Nonempty (derivedSet Ω) := ⟨⟨y₀, hy₀⟩⟩
   obtain ⟨q, hq⟩ := nonempty_interior_of_iUnion_of_closed
     (f := fun q : ℕ => {y : derivedSet Ω |
       Function.IsPeriodicPt ShiftOrbit.shift (q + 1) (y : ℕ → Bool)})
@@ -1047,7 +1047,7 @@ theorem finite_of_forall_periodic {Ω : Set (ℕ → Bool)} (hc : IsClosed Ω)
   have hyopen : IsOpen ({y} : Set (derivedSet Ω)) := by
     have e : ({y} : Set (derivedSet Ω)) = U ∩ (U \ {y})ᶜ := by
       ext w
-      simp only [Set.mem_singleton_iff, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_diff,
+      simp only [Set.mem_singleton_iff, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_sdiff,
         not_and, not_not]
       constructor
       · rintro rfl
@@ -1055,7 +1055,7 @@ theorem finite_of_forall_periodic {Ω : Set (ℕ → Bool)} (hc : IsClosed Ω)
       · rintro ⟨hw, h⟩
         exact h hw
     rw [e]
-    exact isOpen_interior.inter (hUfin.diff.isClosed.isOpen_compl)
+    exact isOpen_interior.inter (hUfin.sdiff.isClosed.isOpen_compl)
   obtain ⟨V, hVo, hV⟩ := isOpen_induced_iff.1 hyopen
   have hyV : (y : ℕ → Bool) ∈ V := by
     have : y ∈ Subtype.val ⁻¹' V := by rw [hV]; rfl
@@ -1349,7 +1349,7 @@ theorem eventuallyPeriodic_iff_feedback_from_zero (b : ℕ → Bool) :
     refine ⟨m, fun w => if hw : ∃ i, ∀ k : Fin m, b (i + k) = w k then b (hw.choose + m) else false,
       fun i => ?_⟩
     have hex : ∃ i', ∀ k : Fin m, b (i' + k) = b (i + k) := ⟨i, fun _ => rfl⟩
-    simp only [dif_pos hex]
+    simp only [dite_eq_left hex]
     exact hm i hex.choose fun k hk => (hex.choose_spec ⟨k, hk⟩).symm
   · rintro ⟨m, F, hF⟩
     exact (eventuallyPeriodic_iff_feedback b).2 ⟨m, F, 0, fun t _ => hF t⟩

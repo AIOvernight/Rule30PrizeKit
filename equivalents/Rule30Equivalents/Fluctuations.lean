@@ -131,7 +131,7 @@ theorem iIndep_coinAlg : iIndep coinAlg (coins ℕ) := by
 /-- `HighAtScale` for the coins from `m` on is measurable for the coins from `m` on. -/
 theorem measurableSet_highAtScale_tail (K : ℝ) (m : ℕ) :
     MeasurableSet[⨆ i ≥ m, coinAlg i] {v | HighAtScale K (tailImbalance v m)} := by
-  letI : MeasurableSpace (ℕ → Bool) := ⨆ i ≥ m, coinAlg i
+  let : MeasurableSpace (ℕ → Bool) := ⨆ i ≥ m, coinAlg i
   have hk : ∀ k, m ≤ k → Measurable fun v : ℕ → Bool => black (v k) - 1 / 2 := fun k hk => by
     have : Measurable fun v : ℕ → Bool => v k :=
       Measurable.of_comap_le (le_iSup₂ (f := fun i (_ : i ≥ m) => coinAlg i) k hk)
@@ -354,9 +354,9 @@ theorem measurePreserving_flipIco (m n : ℕ) :
     MeasurePreserving (flipIco m n) (coins ℕ) (coins ℕ) := by
   refine ⟨Measurable.of_eval fun k => ?_, ?_⟩
   · by_cases hk : k ∈ Finset.Ico m n
-    · simp only [flipIco, hk, if_true]
+    · simp only [flipIco, hk, ite_true]
       exact (Measurable.of_discrete (f := fun b : Bool => !b)).comp (measurable_pi_apply k)
-    · simp only [flipIco, hk, if_false]
+    · simp only [flipIco, hk, ite_false]
       exact measurable_pi_apply k
   · let f : ℕ → Bool → Bool := fun k => if k ∈ Finset.Ico m n then (fun b => !b) else id
     have hf : flipIco m n = fun v k => f k (v k) := by
@@ -381,14 +381,14 @@ theorem imbalance_flipIco_of_le (v : ℕ → Bool) {m n j : ℕ} (hj : j ≤ m) 
   refine Finset.sum_congr rfl fun i hi => ?_
   rw [Finset.mem_range] at hi
   simp only [flipIco, Finset.mem_Ico]
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
 
 theorem tailImbalance_flipIco (v : ℕ → Bool) (m n : ℕ) :
     tailImbalance (flipIco m n v) m n = -tailImbalance v m n := by
   unfold tailImbalance
   rw [← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun i hi => ?_
-  simp only [flipIco, if_pos hi]
+  simp only [flipIco, ite_eq_left hi]
   cases v i <;> norm_num [black]
 
 /-- **Lévy's maximal inequality**: the imbalance reaches `x` at some time `k ≤ n` with probability
@@ -401,7 +401,7 @@ theorem measure_exists_le_imbalance_le (n : ℕ) (x : ℝ) :
   let A : ℕ → Set (ℕ → Bool) := fun k => {v | x ≤ imbalance v k ∧ ∀ j < k, imbalance v j < x}
   have hAm : ∀ k, MeasurableSet (A k) := fun k => by
     have h2 : MeasurableSet {v : ℕ → Bool | ∀ j < k, imbalance v j < x} := by
-      simp only [Set.setOf_forall]
+      simp only [Set.ofPred_forall]
       exact MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ =>
         measurableSet_lt (measurable_imbalance j) measurable_const
     exact (measurableSet_le measurable_const (measurable_imbalance k)).inter h2
@@ -412,7 +412,7 @@ theorem measure_exists_le_imbalance_le (n : ℕ) (x : ℝ) :
   have hk : ∀ k ≤ n, coins ℕ (A k) ≤ 2 * coins ℕ (A k ∩ {v | x ≤ imbalance v n}) := by
     intro k hkn
     have hρA : ∀ v, flipIco k n v ∈ A k ↔ v ∈ A k := fun v => by
-      simp only [A, Set.mem_setOf_eq, imbalance_flipIco_of_le v (le_refl k)]
+      simp only [A, Set.mem_ofPred_eq, imbalance_flipIco_of_le v (le_refl k)]
       exact and_congr_right fun _ => forall₂_congr fun j hj => by
         rw [imbalance_flipIco_of_le v hj.le]
     have htm : Measurable fun v : ℕ → Bool => tailImbalance v k n :=
@@ -423,7 +423,7 @@ theorem measure_exists_le_imbalance_le (n : ℕ) (x : ℝ) :
     have hBnegm : MeasurableSet Bneg := (hAm k).inter (measurableSet_lt htm measurable_const)
     have hunion : A k = Bpos ∪ Bneg := by
       ext v
-      simp only [hBpos, hBneg, Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [hBpos, hBneg, Set.mem_union, Set.mem_inter_iff, Set.mem_ofPred_eq]
       constructor
       · intro hv
         rcases le_or_gt 0 (tailImbalance v k n) with h | h
@@ -433,20 +433,20 @@ theorem measure_exists_le_imbalance_le (n : ℕ) (x : ℝ) :
     have hdisj' : Disjoint Bpos Bneg := by
       rw [Set.disjoint_left]
       rintro v ⟨-, h1⟩ ⟨-, h2⟩
-      simp only [Set.mem_setOf_eq] at h1 h2
+      simp only [Set.mem_ofPred_eq] at h1 h2
       linarith
     have hsplit : coins ℕ (A k) = coins ℕ Bpos + coins ℕ Bneg := by
       rw [hunion, measure_union hdisj' hBnegm]
     have hneg : coins ℕ Bneg ≤ coins ℕ Bpos := by
       calc coins ℕ Bneg ≤ coins ℕ (flipIco k n ⁻¹' Bpos) := measure_mono fun v hv => by
-            simp only [hBpos, hBneg, Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq,
+            simp only [hBpos, hBneg, Set.mem_preimage, Set.mem_inter_iff, Set.mem_ofPred_eq,
               hρA, tailImbalance_flipIco] at hv ⊢
             exact ⟨hv.1, by linarith [hv.2]⟩
         _ = coins ℕ Bpos := (measurePreserving_flipIco k n).measure_preimage
             ((hAm k).inter (hBm k)).nullMeasurableSet
     have hpos : Bpos ⊆ A k ∩ {v | x ≤ imbalance v n} := fun v hv => by
       refine ⟨hv.1, ?_⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       rw [imbalance_eq_add v hkn]
       have h1 := hv.1.1
       have h2 : 0 ≤ tailImbalance v k n := hv.2
@@ -570,7 +570,7 @@ theorem ae_eventually_imbalance_lt :
   have hlo : 2 ^ j ≤ n := Nat.pow_log_le_self 2 hn0
   have hhi : n < 2 ^ (j + 1) := Nat.lt_pow_succ_log_self (by norm_num) n
   have hvj := hJ j (le_of_max_le_left hJj)
-  simp only [hE, Set.mem_setOf_eq, not_exists, not_and, not_le] at hvj
+  simp only [hE, Set.mem_ofPred_eq, not_exists, not_and, not_le] at hvj
   refine (hvj n hhi.le).trans_le (Real.sqrt_le_sqrt ?_)
   -- `2^j ≤ n` and `log log 2^j ≤ log log n`
   have hj2 : 2 ≤ j := le_of_max_le_right hJj

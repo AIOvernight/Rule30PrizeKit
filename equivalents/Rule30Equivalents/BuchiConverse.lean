@@ -124,15 +124,15 @@ theorem digit_sum (hk : 2 ≤ k) (b : ℕ → ℕ) (hb : ∀ j, b j < k) :
     have hlt := sum_lt hk b hb m
     rw [Finset.sum_range_succ]
     rcases lt_trichotomy i m with him | rfl | him
-    · rw [if_pos (by omega)]
-      rw [if_pos him] at ih
+    · rw [ite_eq_left (by omega)]
+      rw [ite_eq_left him] at ih
       obtain ⟨d, rfl⟩ : ∃ d, m = i + 1 + d := ⟨m - (i + 1), by omega⟩
       rw [show b (i + 1 + d) * k ^ (i + 1 + d) = k ^ i * (k * (b (i + 1 + d) * k ^ d)) by
           rw [pow_add, pow_add, pow_one]; ring,
         Nat.add_mul_div_left _ _ (hpos i), Nat.add_mul_mod_self_left, ih]
-    · rw [if_pos (by omega), mul_comm, Nat.add_mul_div_left _ _ (hpos i), Nat.div_eq_of_lt hlt,
+    · rw [ite_eq_left (by omega), mul_comm, Nat.add_mul_div_left _ _ (hpos i), Nat.div_eq_of_lt hlt,
         zero_add, Nat.mod_eq_of_lt (hb i)]
-    · rw [if_neg (by omega), Nat.div_eq_of_lt, Nat.zero_mod]
+    · rw [ite_eq_right (by omega), Nat.div_eq_of_lt, Nat.zero_mod]
       calc ∑ j ∈ Finset.range m, b j * k ^ j + b m * k ^ m
           = ∑ j ∈ Finset.range (m + 1), b j * k ^ j := (Finset.sum_range_succ _ _).symm
         _ < k ^ (m + 1) := sum_lt hk b hb (m + 1)
@@ -232,7 +232,7 @@ theorem exists_good_iff (n : ℕ) :
         split_ifs at h with h'
         · exact ⟨by omega, h'.2⟩
       · rintro ⟨hi, hg⟩
-        exact ⟨⟨i, rfl⟩, by rw [hdig, if_pos ⟨by omega, hg⟩]⟩
+        exact ⟨⟨i, rfl⟩, by rw [hdig, ite_eq_left ⟨by omega, hg⟩]⟩
     refine ⟨X, k ^ L, ⟨L, rfl⟩, hnL, ?_, ?_, ?_⟩
     · show Dig k (X (start f)) (k ^ 0) 1
       rw [hDig]
@@ -298,7 +298,7 @@ theorem bfun_comp_inl {α β : Type} [Finite α] {f : (α → ℕ) → ℕ} (hf 
 
 theorem bdef_eq {α : Type} {f g : (α → ℕ) → ℕ} (hf : BFun k f) (hg : BFun k g) :
     BDef k {v | f v = g v} :=
-  hf.setOf_eq hg
+  hf.ofPred_eq hg
 
 theorem bdef_le {α : Type} [Finite α] {f g : (α → ℕ) → ℕ} (hf : BFun k f) (hg : BFun k g) :
     BDef k {v | f v ≤ g v} := by
@@ -306,7 +306,7 @@ theorem bdef_le {α : Type} [Finite α] {f g : (α → ℕ) → ℕ} (hf : BFun 
     bdef_eq (bfun_add (bfun_comp_inl hf) (bfun_var _)) (bfun_comp_inl hg)
   convert h.exists_of_finite using 1
   ext v
-  simp only [Set.mem_setOf_eq, Sum.elim_comp_inl, Sum.elim_inr]
+  simp only [Set.mem_ofPred_eq, Sum.elim_comp_inl, Sum.elim_inr]
   constructor
   · intro hle
     exact ⟨fun _ => g v - f v, Nat.add_sub_of_le hle⟩
@@ -341,7 +341,7 @@ theorem bdef_digit (hk : 2 ≤ k) {α : Type} [Finite α] {j : ℕ} (hj : j < k)
       ((bdef_eq (bfun_var _) (bfun_const 0)).union (bdef_le (bfun_mul hG k) (bfun_vk (bfun_var _))))
   convert (bdef_pow hk hg).inter hS.exists_of_finite using 1
   ext v
-  simp only [Dig, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_union, Sum.elim_comp_inl,
+  simp only [Dig, Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_union, Sum.elim_comp_inl,
     Sum.elim_inr]
   constructor
   · rintro ⟨⟨e, he⟩, hd⟩
@@ -365,7 +365,7 @@ kernel automaton is coded by one number per state. -/
 theorem definable_of_isAutomatic (hk : 2 ≤ k) {f : ℕ → Bool} (hf : IsAutomatic k f) :
     (∅ : Set ℕ).Definable₁ (buchi k) {t | f t = true} := by
   classical
-  haveI : Finite (State f k) := hf.to_subtype
+  have : Finite (State f k) := hf.to_subtype
   have h1k : 1 < k := by omega
   -- the transition condition, with the position `y` as an extra variable
   have hT : BDef k {w : (Fin 1 ⊕ (State f k ⊕ Unit)) ⊕ Unit → ℕ |
@@ -386,7 +386,7 @@ theorem definable_of_isAutomatic (hk : 2 ≤ k) {f : ℕ → Bool} (hf : IsAutom
             {w | Dig k (w (Sum.inl (Sum.inr (Sum.inl (step f p.1 p.2)))))
               (k * w (Sum.inr ())) 1}) := by
       ext w
-      simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_compl_iff, Set.mem_inter_iff,
+      simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_compl_iff, Set.mem_inter_iff,
         Set.mem_iInter, imp_iff_not_or, or_assoc]
     rw [e]
     refine (((bdef_pow hk (bfun_var _)).inter (bdef_lt (bfun_var _) (bfun_var _))).compl).union
@@ -397,7 +397,7 @@ theorem definable_of_isAutomatic (hk : 2 ≤ k) {f : ℕ → Bool} (hf : IsAutom
   -- the output condition
   have hO : BDef k {v : Fin 1 ⊕ (State f k ⊕ Unit) → ℕ | ∀ g : State f k, g.1 0 = false →
       ¬ Dig k (v (Sum.inr (Sum.inl g))) (v (Sum.inr (Sum.inr ()))) 1} := by
-    rw [Set.setOf_forall]
+    rw [Set.ofPred_forall]
     refine definable_iInter_of_finite fun g => ?_
     by_cases hg : g.1 0 = false
     · simp only [hg, true_implies]
@@ -417,7 +417,7 @@ theorem definable_of_isAutomatic (hk : 2 ≤ k) {f : ℕ → Bool} (hf : IsAutom
           Dig k (v (Sum.inr (Sum.inl (step f p.1 p.2)))) (k * y) 1} := by
       convert hT.forall_of_finite using 1
       ext v
-      simp only [Set.mem_setOf_eq, Sum.elim_inl, Sum.elim_inr]
+      simp only [Set.mem_ofPred_eq, Sum.elim_inl, Sum.elim_inr]
       constructor
       · intro h u
         exact h (u ())
@@ -429,11 +429,11 @@ theorem definable_of_isAutomatic (hk : 2 ≤ k) {f : ℕ → Bool} (hf : IsAutom
     convert ((((bdef_pow hk hY).inter (bdef_lt hn hY)).inter
       (bdef_digit hk h1k hX0 (bfun_const 1))).inter hA4).inter hO using 1
     ext v
-    simp only [Good, start, Set.mem_setOf_eq, Set.mem_inter_iff, and_assoc]
+    simp only [Good, start, Set.mem_ofPred_eq, Set.mem_inter_iff, and_assoc]
   unfold Set.Definable₁
   convert hgood.exists_of_finite using 1
   ext x
-  simp only [Set.mem_setOf_eq, Sum.elim_inl, Sum.elim_inr]
+  simp only [Set.mem_ofPred_eq, Sum.elim_inl, Sum.elim_inr]
   rw [← exists_good_iff f hk (x 0)]
   constructor
   · rintro ⟨X, Y, h⟩

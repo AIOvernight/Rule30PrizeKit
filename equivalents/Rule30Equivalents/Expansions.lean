@@ -83,7 +83,7 @@ theorem engelStep_rat (m d : ℕ) (hm : 0 < m) (hd : 0 < d) :
   have hd' : (d : ℝ) ≠ 0 := by exact_mod_cast hd.ne'
   refine ⟨(⌈((m : ℝ) / d)⁻¹⌉ * m - d).toNat, by omega, ?_⟩
   unfold engelStep
-  rw [if_neg (div_ne_zero (by exact_mod_cast hm.ne') hd')]
+  rw [ite_eq_right (div_ne_zero (by exact_mod_cast hm.ne') hd')]
   have hcast : (((⌈((m : ℝ) / d)⁻¹⌉ * m - d).toNat : ℕ) : ℝ) =
       ((⌈((m : ℝ) / d)⁻¹⌉ : ℝ) * m - d) := by
     rw [show (((⌈((m : ℝ) / d)⁻¹⌉ * m - d).toNat : ℕ) : ℝ) =
@@ -112,7 +112,7 @@ theorem engelStep_irrational {r : ℝ} (h : Irrational r) (hr : 0 < r) :
     have := mul_le_mul_of_nonneg_right (Int.le_ceil r⁻¹) hr.le
     rwa [inv_mul_cancel₀ hr.ne'] at this
   unfold engelStep
-  rw [if_neg hr.ne']
+  rw [ite_eq_right hr.ne']
   exact ⟨hirr, lt_of_le_of_ne (by linarith) (Ne.symm hirr.ne_zero)⟩
 
 /-- **For `x ≥ 0`, the Engel expansion is infinite iff `x` is irrational.** -/
@@ -162,7 +162,7 @@ theorem sylvesterStep_rat (m d : ℕ) (hm : 0 < m) (hd : 0 < d) :
     by have : (0 : ℤ) < ⌈((m : ℝ) / d)⁻¹⌉ * d := by positivity
        omega, ?_⟩
   unfold sylvesterStep
-  rw [if_neg (div_ne_zero (by exact_mod_cast hm.ne') hd')]
+  rw [ite_eq_right (div_ne_zero (by exact_mod_cast hm.ne') hd')]
   have c1 : (((⌈((m : ℝ) / d)⁻¹⌉ * m - d).toNat : ℕ) : ℝ) =
       ((⌈((m : ℝ) / d)⁻¹⌉ : ℝ) * m - d) := by
     rw [show (((⌈((m : ℝ) / d)⁻¹⌉ * m - d).toNat : ℕ) : ℝ) =
@@ -199,7 +199,7 @@ theorem sylvesterStep_irrational {r : ℝ} (h : Irrational r) (hr : 0 < r) :
     rw [inv_le_comm₀ ha' hr]
     exact Int.le_ceil r⁻¹
   unfold sylvesterStep
-  rw [if_neg hr.ne']
+  rw [ite_eq_right hr.ne']
   exact ⟨hirr, lt_of_le_of_ne (by linarith) (Ne.symm hirr.ne_zero)⟩
 
 /-- **For `x ≥ 0`, the Sylvester expansion is infinite iff `x` is irrational.** -/

@@ -162,7 +162,7 @@ theorem exists_rat_approx_den_ge {x : ℝ} (hx : Irrational x) (N : ℕ) :
   refine (((Set.finite_Icc (-(K : ℤ)) K).prod (Set.finite_Iio N)).image
     (fun z : ℤ × ℕ => (z.1 : ℚ) / z.2)).subset ?_
   intro q hq
-  simp only [Set.mem_setOf_eq] at hq
+  simp only [Set.mem_ofPred_eq] at hq
   have hden : q.den < N := by
     by_contra hge
     exact (h q (not_lt.1 hge)).not_gt hq
@@ -615,10 +615,10 @@ theorem eq_of_lead_eq {b b' : ℕ → Bool} :
       cases hb : b m <;> cases hb' : b' m
       · rfl
       · rw [hb, hb'] at h
-        simp only [Bool.false_eq_true, if_false, if_true, add_zero] at h
+        simp only [Bool.false_eq_true, ite_false, ite_true, add_zero] at h
         omega
       · rw [hb, hb'] at h
-        simp only [Bool.false_eq_true, if_false, if_true, add_zero] at h
+        simp only [Bool.false_eq_true, ite_false, ite_true, add_zero] at h
         omega
       · rfl
     rw [hd] at h
@@ -657,12 +657,12 @@ theorem occurs_iff_fract (t : ℕ) {m : ℕ} (w : Fin m → Bool) :
     constructor
     · intro h
       exact lead_congr fun j hj => by
-        simp only [tail, dif_pos hj]
+        simp only [tail, dite_eq_left hj]
         rw [add_comm]
         exact h ⟨j, hj⟩
     · intro h j
       have := eq_of_lead_eq h j.1 j.2
-      simp only [tail, dif_pos j.2] at this
+      simp only [tail, dite_eq_left j.2] at this
       rw [add_comm]
       exact this
   rw [hword]

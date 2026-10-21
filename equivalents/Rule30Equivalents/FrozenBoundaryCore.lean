@@ -127,14 +127,14 @@ theorem transfer {g h : ℕ → ℕ} (hconj : NoPeriodicReadout h) {x y j : ℕ}
 theorem step_of_even (α β γ : Bool) {x : ℕ} (hx : x % 2 = 0) :
     step α β γ x = Phi x ^^^ ((if α then 1 else 0) + (if β then 2 else 0)) := by
   unfold step bdry
-  rw [Phi_mod_two, if_pos hx]
+  rw [Phi_mod_two, ite_eq_left hx]
   cases β <;> rfl
 
 /-- On odd seeds a step is `Φ` followed by flipping bit `0` if `α` and bit `1` if `γ`. -/
 theorem step_of_odd (α β γ : Bool) {x : ℕ} (hx : x % 2 = 1) :
     step α β γ x = Phi x ^^^ ((if α then 1 else 0) + (if γ then 2 else 0)) := by
   unfold step bdry
-  rw [Phi_mod_two, if_neg (show ¬ (x % 2 = 0) by omega)]
+  rw [Phi_mod_two, ite_eq_right (show ¬ (x % 2 = 0) by omega)]
   cases γ <;> rfl
 
 theorem iterate_Phi_mod_two (x : ℕ) : ∀ t, Phi^[t] x % 2 = x % 2
@@ -163,7 +163,7 @@ theorem step_two_mul (γ : Bool) (z : ℕ) :
 /-- `(0,β,1)` maps `2y + 1` to `2·Φ(y) + 1` when `y` is odd: bits `0` and `1` stay black. -/
 theorem step_two_mul_add_one (β : Bool) {y : ℕ} (hy : y % 2 = 1) :
     step false β true (2 * y + 1) = 2 * Phi y + 1 := by
-  rw [step_of_odd _ _ _ (by omega), Phi_two_mul_add_one, PhiS_three, if_neg (by omega)]
+  rw [step_of_odd _ _ _ (by omega), Phi_two_mul_add_one, PhiS_three, ite_eq_right (by omega)]
   apply Nat.eq_of_testBit_eq
   intro j
   simp only [Nat.testBit_xor, testBit_two_mul_add_one, testBit_one_eq, testBit_two_eq,
@@ -175,7 +175,7 @@ theorem step_two_mul_add_one (β : Bool) {y : ℕ} (hy : y % 2 = 1) :
 theorem step_four_mul_add_one (β : Bool) (z : ℕ) :
     step false β true (4 * z + 1) = 4 * step true false false z + 1 := by
   rw [step_b, PhiS_one, step_of_odd _ _ _ (by omega), show 4 * z + 1 = 2 * (2 * z) + 1 by omega,
-    Phi_two_mul_add_one, PhiS_three, Phi_two_mul, if_pos (by omega),
+    Phi_two_mul_add_one, PhiS_three, Phi_two_mul, ite_eq_left (by omega),
     show 4 * (Phi z ^^^ 1) + 1 = 2 * (2 * (Phi z ^^^ 1)) + 1 by omega]
   apply Nat.eq_of_testBit_eq
   intro j
@@ -194,7 +194,7 @@ theorem step_101 {y : ℕ} (hy : y % 2 = 1) {e : ℕ} (he : e < 2) :
     simp only [Nat.testBit_xor, testBit_two_mul, testBit_one_eq, testBit_two_mul_add_one,
       Bool.false_eq_true, ↓reduceIte, Nat.add_zero, Nat.sub_zero]
     rcases j with _ | j <;> simp
-  · rw [step_of_odd _ _ _ (by omega), Phi_two_mul_add_one, PhiS_three, if_neg (by omega)]
+  · rw [step_of_odd _ _ _ (by omega), Phi_two_mul_add_one, PhiS_three, ite_eq_right (by omega)]
     apply Nat.eq_of_testBit_eq
     intro j
     simp only [Nat.testBit_xor, testBit_two_mul_add_one, testBit_two_mul, testBit_one_eq,
@@ -381,7 +381,8 @@ theorem Phi_four_mul (y : ℕ) : Phi (4 * y) = 2 * (2 * Phi y) := by
   rw [show 4 * y = 2 * (2 * y) by omega, Phi_two_mul, Phi_two_mul]
 
 theorem Phi_four_mul_add_one (y : ℕ) : Phi (4 * y + 1) = 2 * (2 * Phi y ^^^ 3) + 1 := by
-  rw [show 4 * y + 1 = 2 * (2 * y) + 1 by omega, Phi_two_mul_add_one, PhiS_three, if_pos (by omega),
+  rw [show 4 * y + 1 = 2 * (2 * y) + 1 by omega, Phi_two_mul_add_one, PhiS_three,
+      ite_eq_left (by omega),
     Phi_two_mul]
 
 theorem Phi_four_mul_add_two (y : ℕ) : Phi (4 * y + 2) = 2 * (2 * PhiS 3 y + 1) := by
@@ -390,7 +391,7 @@ theorem Phi_four_mul_add_two (y : ℕ) : Phi (4 * y + 2) = 2 * (2 * PhiS 3 y + 1
 theorem Phi_four_mul_add_three (y : ℕ) :
     Phi (4 * y + 3) = 2 * ((2 * PhiS 3 y + 1) ^^^ 1) + 1 := by
   rw [show 4 * y + 3 = 2 * (2 * y + 1) + 1 by omega, Phi_two_mul_add_one, PhiS_three,
-    if_neg (by omega), Phi_two_mul_add_one]
+    ite_eq_right (by omega), Phi_two_mul_add_one]
 
 /-- **The white-blinking edge applies `Φ` and `b` in turn** to the bits above the edge:
 `(1,0,1)(4y) = 4·Φ(y) + 1` and `(1,0,1)(4y + 1) = 4·b(y)`. -/

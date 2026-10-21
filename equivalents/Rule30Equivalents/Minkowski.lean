@@ -89,10 +89,10 @@ theorem problem1_iff_minkowski_not_quadratic : Rule30Prize.Problem1 ↔
     fun ⟨K, T, hT, h⟩ => ⟨K, T, hT, fun k hk => ?_⟩⟩
   · obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
     have := h m (by omega)
-    simp only [yDigits, show m + 2 + P ≠ 0 by omega, show m + 2 ≠ 0 by omega, if_false,
+    simp only [yDigits, show m + 2 + P ≠ 0 by omega, show m + 2 ≠ 0 by omega, ite_false,
       show m + 2 + P - 1 = (m + P) + 1 by omega, show m + 2 - 1 = m + 1 by omega, runLen, this]
   · have := h (k + 2) (by omega)
-    simp only [yDigits, show k + 2 + T ≠ 0 by omega, show k + 2 ≠ 0 by omega, if_false,
+    simp only [yDigits, show k + 2 + T ≠ 0 by omega, show k + 2 ≠ 0 by omega, ite_false,
       show k + 2 + T - 1 = (k + T) + 1 by omega, show k + 2 - 1 = k + 1 by omega, runLen] at this
     exact_mod_cast this
 
@@ -127,11 +127,10 @@ abbrev ChgAt (t : ℕ) : Prop := Rule30Prize.center t ≠ Rule30Prize.center (t 
 /-- The change points of the center column. -/
 noncomputable def chg (k : ℕ) : ℕ := Nat.nth ChgAt k
 
-theorem infinite_chg : (setOf ChgAt).Infinite := by
+theorem infinite_chg : (Set.ofPred ChgAt).Infinite := by
   convert WordForms.infinite_changes using 1
   ext t
   simp [TransformsSeeds.xorDeriv]
-  rfl
 
 /-- `R_k = r₁ + ⋯ + r_k`, where the `k`-th run (from `0`) starts. -/
 noncomputable def runStart (k : ℕ) : ℕ := ∑ j ∈ Finset.range k, runLen j
@@ -162,13 +161,13 @@ theorem center_eq_even (t : ℕ) : Rule30Prize.center t = decide (Even (Nat.coun
   | succ t ih =>
     have hc := Nat.count_succ ChgAt t
     by_cases h : ChgAt t
-    · rw [if_pos h] at hc
+    · rw [ite_eq_left h] at hc
       have hct : Rule30Prize.center (t + 1) = !Rule30Prize.center t := by
         unfold ChgAt at h
         cases ht : Rule30Prize.center t <;> cases ht' : Rule30Prize.center (t + 1) <;> simp_all
       rw [hct, ih, hc]
       by_cases he : Even (Nat.count ChgAt t) <;> simp [he, Nat.even_add_one]
-    · rw [if_neg h, Nat.add_zero] at hc
+    · rw [ite_eq_right h, Nat.add_zero] at hc
       have hct : Rule30Prize.center (t + 1) = Rule30Prize.center t := by
         unfold ChgAt at h
         exact (not_not.1 h).symm
@@ -190,7 +189,7 @@ theorem center_of_mem_run {k t : ℕ} (h1 : runStart k ≤ t) (h2 : t < runStart
     · rw [runStart_succ] at h1
       have hm : ChgAt (chg k) := Nat.nth_mem_of_infinite infinite_chg k
       have := Nat.count_monotone ChgAt h1
-      rwa [Nat.count_succ, if_pos hm, chg, Nat.count_nth_of_infinite infinite_chg] at this
+      rwa [Nat.count_succ, ite_eq_left hm, chg, Nat.count_nth_of_infinite infinite_chg] at this
   omega
 
 theorem sum_Ico_inv_two_pow {a b : ℕ} (h : a ≤ b) :
@@ -221,17 +220,18 @@ theorem partial_sum_eq (K : ℕ) :
       split_ifs with hK
       · refine Finset.sum_congr rfl fun t ht => ?_
         rw [Finset.mem_Ico] at ht
-        rw [center_of_mem_run ht.1 ht.2, decide_eq_true hK, if_pos rfl]
+        rw [center_of_mem_run ht.1 ht.2, decide_eq_true hK, ite_eq_left rfl]
       · refine Finset.sum_eq_zero fun t ht => ?_
         rw [Finset.mem_Ico] at ht
         rw [center_of_mem_run ht.1 ht.2, decide_eq_false hK]
         simp
     rw [hblock]
     rcases Nat.even_or_odd K with hK | hK
-    · rw [if_pos hK, if_pos hK, if_neg (by simpa [Nat.even_add_one] using hK), hK.neg_one_pow]
+    · rw [ite_eq_left hK, ite_eq_left hK, ite_eq_right (by simpa [Nat.even_add_one] using hK),
+        hK.neg_one_pow]
       ring
-    · rw [if_neg (Nat.not_even_iff_odd.2 hK), if_neg (Nat.not_even_iff_odd.2 hK),
-        if_pos (by simpa [Nat.even_add_one] using hK), hK.neg_one_pow]
+    · rw [ite_eq_right (Nat.not_even_iff_odd.2 hK), ite_eq_right (Nat.not_even_iff_odd.2 hK),
+        ite_eq_left (by simpa [Nat.even_add_one] using hK), hK.neg_one_pow]
       ring
 
 /-- **Denjoy's formula for `y`**: `?(y) = x₂`, that is `y = ?⁻¹(x₂)`. -/
@@ -240,7 +240,7 @@ theorem questionMark_yMink : questionMark yMink = BinaryIrrational.centerBinary 
   have hS : ∀ k, ∑ i ∈ Finset.range (k + 1), (Lagrange.digit yMink (i + 1)).toNat =
       runStart k + 1 := fun k => by
     rw [Finset.sum_range_succ', digit_yMink]
-    simp only [digit_yMink, yDigits, Nat.add_sub_cancel, if_neg (Nat.succ_ne_zero _),
+    simp only [digit_yMink, yDigits, Nat.add_sub_cancel, ite_eq_right (Nat.succ_ne_zero _),
       Int.toNat_natCast]
     rfl
   -- the alternating series `A = ∑ (-1)^k 2^-R_k`

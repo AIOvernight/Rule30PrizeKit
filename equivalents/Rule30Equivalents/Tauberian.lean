@@ -242,7 +242,7 @@ theorem le_rampHi {δ : ℝ} (hδ : 0 < δ) (t : ℝ) :
   · exact le_max_left _ _
 
 theorem rampLo_eq_zero {δ : ℝ} (hδ : 0 < δ) {t : ℝ} (ht : t < Real.exp (-1)) : rampLo δ t = 0 :=
-  le_antisymm ((rampLo_le hδ t).trans (by rw [if_neg (not_le.2 ht)])) (rampLo_nonneg δ t)
+  le_antisymm ((rampLo_le hδ t).trans (by rw [ite_eq_right (not_le.2 ht)])) (rampLo_nonneg δ t)
 
 theorem rampLo_eq_one {δ : ℝ} (hδ : 0 < δ) {t : ℝ} (ht : Real.exp (-1) + δ ≤ t) :
     rampLo δ t = 1 := by
@@ -360,13 +360,14 @@ theorem tendsto_cesaro_of_tendsto_abel (ha : ∀ n, 0 ≤ a n)
       rw [← hhi]; exact summable_weighted ha hs hBh (hx0 N).le (hx1 N hN)
     have hsi : Summable fun n => a n * (if c ≤ x N ^ n then 1 else 0) := by
       refine summable_of_ne_finset_zero (s := Finset.range (N + 1)) fun n hn => ?_
-      rw [if_neg (fun h' => hn (Finset.mem_range_succ_iff.2 ((hind N hN n).1 h'))), mul_zero]
+      rw [ite_eq_right (fun h' => hn (Finset.mem_range_succ_iff.2 ((hind N hN n).1 h'))), mul_zero]
     have hsum : ∑' n, a n * (if c ≤ x N ^ n then 1 else 0) = S N := by
       rw [tsum_eq_sum (s := Finset.range (N + 1))]
       · refine Finset.sum_congr rfl fun n hn => ?_
-        rw [if_pos ((hind N hN n).2 (Finset.mem_range_succ_iff.1 hn)), mul_one]
+        rw [ite_eq_left ((hind N hN n).2 (Finset.mem_range_succ_iff.1 hn)), mul_one]
       · intro n hn
-        rw [if_neg (fun h' => hn (Finset.mem_range_succ_iff.2 ((hind N hN n).1 h'))), mul_zero]
+        rw [ite_eq_right (fun h' => hn (Finset.mem_range_succ_iff.2 ((hind N hN n).1 h'))),
+            mul_zero]
     simp only [abelMean]
     rw [hlo, hhi, ← hsum]
     constructor
@@ -398,7 +399,7 @@ theorem tendsto_cesaro_of_tendsto_abel (ha : ∀ n, 0 ≤ a n)
     · intro b hb
       have hcont : ContinuousAt (fun δ : ℝ => L * -Real.log (c - δ)) 0 :=
         continuousAt_const.mul ((continuousAt_const.sub continuousAt_id).log
-          (by simpa using hc0.ne')).neg
+          (by simp)).neg
       have hlim : Tendsto (fun δ : ℝ => L * -Real.log (c - δ)) (𝓝[>] 0) (𝓝 L) := by
         simpa [hlogc] using hcont.tendsto.mono_left nhdsWithin_le_nhds
       obtain ⟨δ, hbδ, hδ⟩ := ((hlim.eventually (gt_mem_nhds hb)).and

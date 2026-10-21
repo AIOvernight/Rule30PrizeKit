@@ -6,7 +6,7 @@ import Mathlib.Computability.PartrecCode
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Zify
 import Mathlib.Tactic.Tauto
-import Mathlib.Data.Finite.Prod
+import Mathlib.Basic.Finite.Prod
 import Mathlib.Algebra.Order.Ring.Abs
 
 /-!
@@ -68,9 +68,9 @@ theorem getD_stepList (l : List Bool) (i : ℕ) :
         ((false :: false :: l).getD (i + 2) false) else false := by
   unfold stepList
   by_cases hi : i < l.length + 2
-  · rw [if_pos hi, List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range hi]
+  · rw [ite_eq_left hi, List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range hi]
     rfl
-  · rw [if_neg hi, List.getD_eq_getElem?_getD, List.getElem?_eq_none (by simp; omega)]
+  · rw [ite_eq_right hi, List.getD_eq_getElem?_getD, List.getElem?_eq_none (by simp; omega)]
     rfl
 
 /-- **The list rows are the rows of the single-seed pattern**: entry `i` of row `t` is the cell
@@ -179,7 +179,7 @@ theorem partrec_firstDefect : Partrec firstDefect := by
 
 theorem firstDefect_dom (TP : ℕ × ℕ) :
     (firstDefect TP).Dom ↔ ∃ t, defect TP.1 TP.2 t = true := by
-  simp only [firstDefect, Nat.rfind_dom]
+  simp only [firstDefect]
   exact ⟨fun ⟨t, h, _⟩ => ⟨t, (Part.mem_some_iff.1 h).symm⟩,
     fun ⟨t, h⟩ => ⟨t, Part.mem_some_iff.2 h.symm, fun _ _ => trivial⟩⟩
 

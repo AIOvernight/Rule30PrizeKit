@@ -154,7 +154,7 @@ theorem flipsLeft_id : FlipsLeft id := fun _ _ _ => rfl
 
 theorem measurableSet_prefix {G : (ℤ → Bool) → (ℤ → Bool)} (hG : Measurable G) (w : ℕ → Bool)
     (n : ℕ) : MeasurableSet {x : ℤ → Bool | ∀ t ≤ n, trace (G x) t = w t} := by
-  simp only [Set.setOf_forall]
+  simp only [Set.ofPred_forall]
   exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
     ((measurable_evol t 0).comp hG) (measurableSet_singleton (w t))
 
@@ -171,7 +171,7 @@ theorem two_mul_measure_flip {ι : Type*} [DecidableEq ι] {A : Set (ι → Bool
       A ∩ {x | f x = !b} := by
     intro b
     ext x
-    simp only [Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq, hAj]
+    simp only [Set.mem_preimage, Set.mem_inter_iff, Set.mem_ofPred_eq, hAj]
     constructor
     · rintro ⟨hx, h⟩
       refine ⟨hx, ?_⟩
@@ -185,11 +185,11 @@ theorem two_mul_measure_flip {ι : Type*} [DecidableEq ι] {A : Set (ι → Bool
     rw [← measure_union _ (hB _)]
     · congr 1
       ext x
-      simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_ofPred_eq]
       cases f x <;> cases b <;> simp
     · rw [Set.disjoint_left]
       rintro x ⟨-, h1⟩ ⟨-, h2⟩
-      simp only [Set.mem_setOf_eq] at h1 h2
+      simp only [Set.mem_ofPred_eq] at h1 h2
       rw [h1] at h2
       cases b <;> simp at h2
   rw [two_mul]
@@ -223,16 +223,16 @@ theorem measure_triangular {ι : Type*} [DecidableEq ι] (g : ℕ → (ι → Bo
   | m + 1 => by
     set E := {v : ι → Bool | ∀ j < m, g j v = β j} with hEdef
     have hE : MeasurableSet E := by
-      simp only [hEdef, Set.setOf_forall]
+      simp only [hEdef, Set.ofPred_forall]
       exact MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ =>
         hg j (measurableSet_singleton _)
     have hinv : ∀ v, Function.update v (p m) (!v (p m)) ∈ E ↔ v ∈ E := fun v => by
-      simp only [hEdef, Set.mem_setOf_eq]
+      simp only [hEdef, Set.mem_ofPred_eq]
       exact forall₂_congr fun j hj => by rw [hfix m v j hj]
     have h := two_mul_measure_flip hE (hg m) (p m) hinv (fun v _ => hflip m v) (β m)
     have hset : {v : ι → Bool | ∀ j < m + 1, g j v = β j} = E ∩ {v | g m v = β m} := by
       ext v
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_ofPred_eq]
       constructor
       · intro hv
         exact ⟨fun j hj => hv j (by omega), hv m (by omega)⟩
@@ -262,7 +262,7 @@ theorem measure_inter_prefix_of_adapted {g : (ℤ → Bool) → ℕ → Bool}
   | 0 => by
     have hset : A ∩ {x : ℤ → Bool | ∀ t ≤ 0, g x t = w t} = A ∩ {x | g x 0 = w 0} := by
       ext x
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [Set.mem_inter_iff, Set.mem_ofPred_eq]
       refine and_congr_right fun _ => ⟨fun h => h 0 le_rfl, fun h t ht => ?_⟩
       obtain rfl : t = 0 := by omega
       exact h
@@ -274,14 +274,14 @@ theorem measure_inter_prefix_of_adapted {g : (ℤ → Bool) → ℕ → Bool}
     set E := A ∩ {x : ℤ → Bool | ∀ t ≤ n, g x t = w t} with hEdef
     have hEm : MeasurableSet E := by
       refine hA.inter ?_
-      simp only [Set.setOf_forall]
+      simp only [Set.ofPred_forall]
       exact MeasurableSet.iInter fun t => MeasurableSet.iInter fun _ =>
         hg t (measurableSet_singleton (w t))
     -- the prefix up to time `n` and `A` do not see the coin at `-(n+1)`
     have hinv : ∀ x, Function.update x (-((n + 1 : ℕ) : ℤ)) (!x (-((n + 1 : ℕ) : ℤ))) ∈ E ↔
         x ∈ E := by
       intro x
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_ofPred_eq]
       rw [hAm x _ (by omega)]
       refine and_congr_right fun _ => forall_congr' fun t => imp_congr_right fun ht => ?_
       rw [(hadapt x (n + 1)).2 t (by omega)]
@@ -290,7 +290,7 @@ theorem measure_inter_prefix_of_adapted {g : (ℤ → Bool) → ℕ → Bool}
     have htarget : A ∩ {x : ℤ → Bool | ∀ t ≤ n + 1, g x t = w t} =
         E ∩ {x | g x (n + 1) = w (n + 1)} := by
       ext x
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_ofPred_eq]
       constructor
       · rintro ⟨hx, h⟩
         exact ⟨⟨hx, fun t ht => h t (by omega)⟩, h (n + 1) le_rfl⟩
@@ -369,16 +369,16 @@ theorem measurePreserving_of_measure_prefix {ρ : Measure (ℤ → Bool)} [IsPro
   let w : ℕ → Bool := fun t => if h : t ≤ a then v ⟨t, Finset.mem_Iic.2 h⟩ else false
   have hset : ((Finset.Iic a).restrict ∘ g) ⁻¹' {v} = {x | ∀ t ≤ a, g x t = w t} := by
     ext x
-    simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff, Set.mem_ofPred_eq]
     constructor
     · rintro h t ht
-      simp only [w, dif_pos ht]
+      simp only [w, dite_eq_left ht]
       rw [← h]
       rfl
     · intro h
       funext i
       have := h i.1 (Finset.mem_Iic.1 i.2)
-      simp only [w, dif_pos (Finset.mem_Iic.1 i.2)] at this
+      simp only [w, dite_eq_left (Finset.mem_Iic.1 i.2)] at this
       exact this
   rw [hset, hpre, Finset.prod_congr rfl fun i _ => coin_singleton (v i), Finset.prod_const,
     Finset.card_univ, Fintype.card_coe, Nat.card_Iic]
@@ -420,7 +420,7 @@ theorem indepFun_trace_rightHalf : IndepFun trace rightHalf (coins ℤ) := by
   rcases eq_or_ne (coins ℤ A) 0 with h0 | h0
   · rw [h0, mul_zero]
     exact measure_mono_null Set.inter_subset_right h0
-  · haveI := cond_isProbabilityMeasure (μ := coins ℤ) h0
+  · have := cond_isProbabilityMeasure (μ := coins ℤ) h0
     -- conditioned on `A`, the trace is a fair-coin sequence
     have hcond : MeasurePreserving trace ((coins ℤ)[|A]) (coins ℕ) := by
       refine measurePreserving_of_measure_prefix measurable_trace fun w n => ?_
@@ -444,7 +444,7 @@ theorem measurePreserving_rightHalf : MeasurePreserving rightHalf (coins ℤ) (c
   have hset : {x : ℤ → Bool | ∀ t ≤ n, rightHalf x t = w t} =
       Set.pi (S : Set ℤ) fun p => {w (p - 1).toNat} := by
     ext x
-    simp only [Set.mem_setOf_eq, Set.mem_pi, S, Finset.coe_image, Finset.coe_range, Set.mem_image,
+    simp only [Set.mem_ofPred_eq, Set.mem_pi, S, Finset.coe_image, Finset.coe_range, Set.mem_image,
       Set.mem_Iio, rightHalf, Set.mem_singleton_iff]
     constructor
     · rintro h p ⟨t, ht, rfl⟩
@@ -851,7 +851,7 @@ theorem measureReal_abs_count_trace_ge_le (n : ℕ) {δ : ℝ} (hδ : 0 ≤ δ) 
         -(∑ k ∈ Finset.range n, black (v k) - n / 2) := by
       rw [Finset.sum_sub_distrib]
       simp [div_eq_mul_inv]
-    simp only [Set.mem_union, Set.mem_setOf_eq, e1, e2]
+    simp only [Set.mem_union, Set.mem_ofPred_eq, e1, e2]
     exact (le_abs'.1 hv).symm.imp_right fun h => le_neg_of_le_neg h
   calc (coins ℤ).real {x | n * δ ≤ |∑ k ∈ Finset.range n, black (trace x k) - n / 2|}
       = (coins ℕ).real S := measurePreserving_trace.measureReal_preimage hS.nullMeasurableSet
@@ -917,9 +917,9 @@ def glue (R x : ℤ → Bool) (p : ℤ) : Bool := if p ≤ 0 then x p else R p
 theorem measurable_glue (R : ℤ → Bool) : Measurable (glue R) :=
   Measurable.of_eval fun p => by
     by_cases hp : p ≤ 0
-    · simp only [glue, if_pos hp]
+    · simp only [glue, ite_eq_left hp]
       exact measurable_pi_apply p
-    · simp only [glue, if_neg hp]
+    · simp only [glue, ite_eq_right hp]
       exact measurable_const
 
 theorem flipsLeft_glue (R : ℤ → Bool) : FlipsLeft (glue R) := by

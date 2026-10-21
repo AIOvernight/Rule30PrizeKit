@@ -250,10 +250,10 @@ theorem left_iff_even {b : ℤ} (h0 : (X 0).h < b) (t : ℕ) :
   | succ t ih =>
     rw [cs_succ]
     by_cases hc : Cross X b t
-    · rw [if_pos hc, List.length_append, List.length_singleton, Nat.even_add_one, ← ih]
+    · rw [ite_eq_left hc, List.length_append, List.length_singleton, Nat.even_add_one, ← ih]
       unfold Cross at hc
       tauto
-    · rw [if_neg hc, List.append_nil, ← ih]
+    · rw [ite_eq_right hc, List.append_nil, ← ih]
       unfold Cross at hc
       tauto
 
@@ -265,7 +265,7 @@ theorem cs_eq_of_no_cross {b : ℤ} {s T : ℕ} (hsT : s ≤ T)
             rfl
   | succ T ih =>
     rcases Nat.lt_or_eq_of_le hsT with hlt | rfl
-    · rw [cs_succ, if_neg (h T (by omega) (by omega)), List.append_nil,
+    · rw [cs_succ, ite_eq_right (h T (by omega) (by omega)), List.append_nil,
         ih (by omega) fun t h1 h2 => h t h1 (by omega)]
     · rfl
 
@@ -342,8 +342,8 @@ theorem cs_succ_congr {X Y : ℕ → Cfg M} {s t : ℕ} {b b' : ℤ} (hcs : cs X
     cs X b (s + 1) = cs Y b' (t + 1) := by
   rw [cs_succ, cs_succ, hcs, hq]
   by_cases h : Cross X b s
-  · rw [if_pos h, if_pos (hcr.1 h)]
-  · rw [if_neg h, if_neg fun h' => h (hcr.2 h')]
+  · rw [ite_eq_left h, ite_eq_left (hcr.1 h)]
+  · rw [ite_eq_right h, ite_eq_right fun h' => h (hcr.2 h')]
 
 theorem not_cross_of_lt {X : ℕ → Cfg M} {t : ℕ} {b : ℤ} (h0 : (X t).h < b)
     (h1 : (X (t + 1)).h < b) : ¬ Cross X b t := by
@@ -359,7 +359,7 @@ theorem no_cross_of_length_eq {X : ℕ → Cfg M} {b : ℤ} {s T : ℕ}
   intro t hst htT hc
   have h1 := (cs_mono X b hst).length_le
   have h2 := (cs_mono X b (by omega : t + 1 ≤ T)).length_le
-  rw [cs_succ, if_pos hc, List.length_append, List.length_singleton] at h2
+  rw [cs_succ, ite_eq_left hc, List.length_append, List.length_singleton] at h2
   omega
 
 theorem lt_of_no_cross {X : ℕ → Cfg M} {b : ℤ} {s t : ℕ} (hst : s ≤ t)
@@ -396,7 +396,7 @@ theorem SpliceInv.step_halt {τ l r : ℕ} (hZ : IsRun Z) (I : SpliceInv X Y Z b
     (hh : M.halt (Z τ).q = true) : SpliceInv X Y Z b₁ b₂ TX TY (τ + 1) l r := by
   have hZ1 : Z (τ + 1) = Z τ := by rw [hZ τ, step_of_halt hh]
   have hcs : ∀ b, cs Z b (τ + 1) = cs Z b τ := fun b => by
-    rw [cs_succ, if_neg (by unfold Cross; rw [hZ1]; simp), List.append_nil]
+    rw [cs_succ, ite_eq_right (by unfold Cross; rw [hZ1]; simp), List.append_nil]
   refine ⟨fun b hb => (hcs b).trans (I.csL b hb), fun b hb => (hcs b).trans (I.csR b hb), I.bl,
     I.br, Or.inr (by rw [hZ1]; exact hh), ?_, ?_, ?_, ?_, I.visL, I.visR⟩ <;> rw [hZ1]
   exacts [I.tapeL, I.tapeR, I.left, I.right]
@@ -433,7 +433,7 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
   rcases lt_or_ge (Z (τ + 1)).h b₁ with hL' | hR'
   · refine ⟨l + 1, r, hcsL, fun b hb => ?_, hlt, I.br, Or.inl (by omega), htL, fun i hi => ?_,
       fun _ => ⟨h1, hXh.symm, hYr⟩, fun h => absurd h (not_le.2 hL'), hvisL, I.visR⟩
-    · rw [cs_succ, if_neg (not_cross_of_lt (by omega) (by omega)), List.append_nil]
+    · rw [cs_succ, ite_eq_right (not_cross_of_lt (by omega) (by omega)), List.append_nil]
       exact I.csR b hb
     · rw [hZ τ, step_tape_of_ne _ (by omega)]
       exact I.tapeR i hi
@@ -441,7 +441,7 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
     have hz' : (Z (τ + 1)).h = b₁ := by omega
     have hcrX : Cross X b₁ l := by unfold Cross; omega
     have hlenX : (cs X b₁ (l + 1)).length = (cs X b₁ l).length + 1 := by
-      rw [cs_succ, if_pos hcrX, List.length_append, List.length_singleton]
+      rw [cs_succ, ite_eq_left hcrX, List.length_append, List.length_singleton]
     have hXY : cs X b₁ l = cs Y b₂ r := by rw [← I.csL b₁ le_rfl, I.csR b₁ le_rfl, hb12]
     have hpreX : cs X b₁ (l + 1) <+: cs Y b₂ TY := by rw [← hC]; exact cs_mono X b₁ hlt
     obtain ⟨r', hr', hr'T, hcrY, hnoY⟩ := exists_next_cross (X := Y) (b := b₂) I.br (by
@@ -454,12 +454,12 @@ theorem SpliceInv.step_left {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : I
     have hcsY : cs Y b₂ r' = cs Y b₂ r := cs_eq_of_no_cross hr' hnoY
     have hpreY : cs Y b₂ (r' + 1) <+: cs Y b₂ TY := cs_mono Y b₂ hr'T
     have hlenY : (cs Y b₂ (r' + 1)).length = (cs Y b₂ r).length + 1 := by
-      rw [cs_succ, if_pos hcrY, List.length_append, List.length_singleton, hcsY]
+      rw [cs_succ, ite_eq_left hcrY, List.length_append, List.length_singleton, hcsY]
     have hXYs : cs X b₁ (l + 1) = cs Y b₂ (r' + 1) :=
       eq_of_prefix_of_length_eq hpreX hpreY (by rw [hlenX, hlenY, hXY])
     have hq' : (X (l + 1)).q = (Y (r' + 1)).q := by
       have := hXYs
-      rw [cs_succ, if_pos hcrX, cs_succ, if_pos hcrY, hcsY, hXY] at this
+      rw [cs_succ, ite_eq_left hcrX, cs_succ, ite_eq_left hcrY, hcsY, hXY] at this
       simpa using this
     refine ⟨l + 1, r' + 1, hcsL, fun b hb => ?_, hlt, hr'T, Or.inl (by omega), htL, fun i hi => ?_,
       fun h => absurd h (by omega), fun _ => ⟨h1.trans hq', by omega, by omega⟩, hvisL,
@@ -509,7 +509,7 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
   rcases le_or_gt b₁ (Z (τ + 1)).h with hR' | hL'
   · refine ⟨l, r + 1, fun b hb => ?_, hcsR, I.bl, hlt, Or.inl (by omega), fun i hi => ?_, htR,
       fun h => absurd h (not_lt.2 hR'), fun _ => ⟨h1, hYh.symm, hXl⟩, I.visL, hvisR⟩
-    · rw [cs_succ, if_neg (not_cross_of_ge (by omega) (by omega)), List.append_nil]
+    · rw [cs_succ, ite_eq_right (not_cross_of_ge (by omega) (by omega)), List.append_nil]
       exact I.csL b hb
     · rw [hZ τ, step_tape_of_ne _ (by omega)]
       exact I.tapeL i hi
@@ -517,7 +517,7 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
     have hz' : (Z (τ + 1)).h = b₁ - 1 := by omega
     have hcrY : Cross Y b₂ r := by unfold Cross; omega
     have hlenY : (cs Y b₂ (r + 1)).length = (cs Y b₂ r).length + 1 := by
-      rw [cs_succ, if_pos hcrY, List.length_append, List.length_singleton]
+      rw [cs_succ, ite_eq_left hcrY, List.length_append, List.length_singleton]
     have hXY : cs X b₁ l = cs Y b₂ r := by rw [← I.csL b₁ le_rfl, I.csR b₁ le_rfl, hb12]
     have hpreY : cs Y b₂ (r + 1) <+: cs X b₁ TX := by rw [hC]; exact cs_mono Y b₂ hlt
     obtain ⟨l', hl', hl'T, hcrX, hnoX⟩ := exists_next_cross (X := X) (b := b₁) I.bl (by
@@ -530,12 +530,12 @@ theorem SpliceInv.step_right {τ l r : ℕ} (hX : IsRun X) (hY : IsRun Y) (hZ : 
     have hcsX : cs X b₁ l' = cs X b₁ l := cs_eq_of_no_cross hl' hnoX
     have hpreX : cs X b₁ (l' + 1) <+: cs X b₁ TX := cs_mono X b₁ hl'T
     have hlenX : (cs X b₁ (l' + 1)).length = (cs X b₁ l).length + 1 := by
-      rw [cs_succ, if_pos hcrX, List.length_append, List.length_singleton, hcsX]
+      rw [cs_succ, ite_eq_left hcrX, List.length_append, List.length_singleton, hcsX]
     have hXYs : cs X b₁ (l' + 1) = cs Y b₂ (r + 1) :=
       eq_of_prefix_of_length_eq hpreX hpreY (by rw [hlenX, hlenY, hXY])
     have hq' : (X (l' + 1)).q = (Y (r + 1)).q := by
       have := hXYs
-      rw [cs_succ, if_pos hcrX, cs_succ, if_pos hcrY, hcsX, hXY] at this
+      rw [cs_succ, ite_eq_left hcrX, cs_succ, ite_eq_left hcrY, hcsX, hXY] at this
       simpa using this
     refine ⟨l' + 1, r + 1, fun b hb => ?_, hcsR, hl'T, hlt, Or.inl (by omega), fun i hi => ?_, htR,
       fun _ => ⟨h1.trans hq'.symm, by omega, by omega⟩, fun h => absurd h (by omega),
@@ -611,7 +611,8 @@ theorem splice (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z) (hXT : M.halt (X TX)
     refine ⟨by rw [hq']; exact hXl, fun b hb => (I.csL b hb).trans (hXeq b).symm,
       fun b hb => (I.csR b hb).trans (hYeq _ (by omega)).symm, ?_, fun t _ hxt => ?_,
       fun t ht hyt => ?_⟩
-    · rw [if_pos (by rw [hXeq, ← I.csL b₁ le_rfl]; exact hpar.1 hL), hq', eq_of_halt hX hXl I.bl]
+    · rw [ite_eq_left (by rw [hXeq, ← I.csL b₁ le_rfl]; exact hpar.1 hL), hq',
+        eq_of_halt hX hXl I.bl]
     · rcases lt_or_ge t l with h | h
       · exact I.visL t h hxt
       · exact ⟨TX + TY, by rw [hq', eq_of_halt hX hXl h]⟩
@@ -636,7 +637,7 @@ theorem splice (hX : IsRun X) (hY : IsRun Y) (hZ : IsRun Z) (hXT : M.halt (X TX)
               (fun u hu1 hu2 => hno u hu1 (by omega)) hXl; omega)
     refine ⟨by rw [hq']; exact hYr, fun b hb => (I.csL b hb).trans (hXeq b hb).symm,
       fun b hb => (I.csR b hb).trans (hYeq _).symm, ?_, fun t ht hxt => ?_, fun t _ hyt => ?_⟩
-    · rw [if_neg (by
+    · rw [ite_eq_right (by
           rw [hXeq b₁ le_rfl, ← I.csL b₁ le_rfl]; exact fun he => not_lt.2 hR (hpar.2 he)),
         hq', eq_of_halt hY hYr I.br]
     · rcases lt_or_ge t l with h | h
@@ -841,7 +842,7 @@ theorem DecidesInTime.eventuallyPeriodic_of_finite (hM : DecidesInTime M f T)
       f (a + 1 + r') = f (a + 1 + r) := fun a r r' hC he => by
     have := (hM.splice (n := a + 1 + r) (m := a + 1 + r') (n' := a + 1 + r') (a₁ := a + 1)
       (a₂ := a + 1) (by omega) (by omega) (by omega) (by omega) (by omega) hC).2.2
-    rwa [if_pos he] at this
+    rwa [ite_eq_left he] at this
   -- the key step: equal types give equal values from `a + 1` and `a' + 1` on
   have key : ∀ a a', typ a = typ a' → ∀ r, f (a' + 1 + r) = f (a + 1 + r) := by
     intro a a' htyp r
@@ -850,7 +851,7 @@ theorem DecidesInTime.eventuallyPeriodic_of_finite (hM : DecidesInTime M f T)
     have hta := congrFun htyp ⟨C, a + 1 + r, _, rfl⟩
     have hocc' : occ a' C := by
       by_contra hn
-      simp only [typ, dif_pos hocc, dif_neg hn] at hta
+      simp only [typ, dite_eq_left hocc, dite_eq_right hn] at hta
       exact absurd hta (by simp)
     have ⟨r', hr'⟩ := hocc'
     have hsp := hM.splice (n := a' + 1 + r') (m := a + 1 + r) (n' := a' + 1 + r)
@@ -858,7 +859,8 @@ theorem DecidesInTime.eventuallyPeriodic_of_finite (hM : DecidesInTime M f T)
       (hr'.trans hCdef)
     rw [hsp.2.2, hr']
     split_ifs with he
-    · simp only [typ, dif_pos hocc, dif_pos hocc', if_pos he, Option.some.injEq] at hta
+    · simp only [typ, dite_eq_left hocc, dite_eq_left hocc', ite_eq_left he,
+        Option.some.injEq] at hta
       rw [heven a' _ r' (hocc'.choose_spec.trans hr'.symm) (by rw [hocc'.choose_spec]; exact he),
         heven a _ r hocc.choose_spec (by rw [hocc.choose_spec]; exact he)]
       exact hta.symm
@@ -1064,7 +1066,7 @@ theorem run_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) {n t : ℕ} (
   | succ t ih =>
     rw [run_succ, ih (by omega), step_eq rfl]
     have htape : (init (periodicTM f N P hP).toMachine n).tape (t : ℤ) = true := by
-      simp only [init]; rw [if_pos (by omega)]; rfl
+      simp only [init]; rw [ite_eq_left (by omega)]; rfl
     dsimp only
     rw [htape]
     refine (Cfg.mk.injEq ..).mpr ?_
@@ -1077,7 +1079,7 @@ theorem decidesInTime_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P)
   intro n
   rw [run_succ, run_periodicTM hP le_rfl, step_eq rfl]
   have htape : (init (periodicTM f N P hP).toMachine n).tape (n : ℤ) = false := by
-    simp only [init]; rw [if_neg (by omega)]; rfl
+    simp only [init]; rw [ite_eq_right (by omega)]; rfl
   dsimp only
   rw [htape]
   exact ⟨rfl, apply_cnt hP hf n⟩

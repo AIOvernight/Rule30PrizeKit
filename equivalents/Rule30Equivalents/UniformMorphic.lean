@@ -61,7 +61,7 @@ theorem isAutomatic_iff_isUniformMorphic (hk : 2 ≤ k) (f : ℕ → Bool) :
     IsAutomatic k f ↔ IsUniformMorphic k f := by
   constructor
   · intro hf
-    haveI : Finite (kernel k f) := hf.to_subtype
+    have : Finite (kernel k f) := hf.to_subtype
     -- the letter at `n` is the column of the kernel at `n`
     refine ⟨kernel k f → Bool, inferInstance,
       fun a d g => a ⟨fun m => g.1 (k * m + d), mem_kernel_step g.2 d.2⟩,

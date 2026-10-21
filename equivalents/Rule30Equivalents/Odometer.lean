@@ -273,7 +273,7 @@ theorem bits_orbit_one (t : ℕ) : bits (TFunction.orbit 1 t) = row t := by
     funext p
     simp only [TFunction.row, Rule30Realization.seed]
     by_cases hp : p ≤ 0
-    · rw [if_pos hp]
+    · rw [ite_eq_left hp]
       by_cases hp0 : p = 0
       · subst hp0
         rfl
@@ -281,7 +281,7 @@ theorem bits_orbit_one (t : ℕ) : bits (TFunction.orbit 1 t) = row t := by
         obtain ⟨n, hn⟩ : ∃ n, (-p).toNat = n + 1 := ⟨(-p).toNat - 1, by omega⟩
         rw [hn, Nat.testBit_succ]
         simp
-    · rw [if_neg hp, decide_eq_false (by omega)]
+    · rw [ite_eq_right hp, decide_eq_false (by omega)]
   funext j
   simp only [bits, row, TFunction.testBit_orbit, hseed, Rule30Realization.evol_seed,
     Rule30Diagonals.R]

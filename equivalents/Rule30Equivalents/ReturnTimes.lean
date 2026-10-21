@@ -40,13 +40,13 @@ theorem returnTime_le {v : ℕ → Bool} {n s : ℕ} (hs : 0 < s) (h : Recurs v 
     returnTime v n ≤ s := by
   classical
   have hex : ∃ s, 0 < s ∧ Recurs v n s := ⟨s, hs, h⟩
-  rw [returnTime, dif_pos hex]
+  rw [returnTime, dite_eq_left hex]
   exact Nat.find_min' hex ⟨hs, h⟩
 
 theorem recurs_returnTime {v : ℕ → Bool} {n : ℕ} (h : ∃ s, 0 < s ∧ Recurs v n s) :
     0 < returnTime v n ∧ Recurs v n (returnTime v n) := by
   classical
-  rw [returnTime, dif_pos h]
+  rw [returnTime, dite_eq_left h]
   exact Nat.find_spec h
 
 /-! ### Probabilities -/
@@ -104,7 +104,7 @@ theorem measure_not_recurs_blocks {n : ℕ} (hn : 0 < n) (K : ℕ) :
   have hpre : {v | ∀ k ∈ Finset.Icc 1 K, ¬ Recurs v n (k * n)} =
       B ⁻¹' ⋃ w, Set.pi (Finset.range (K + 1) : Set ℕ) (t w) := by
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_preimage, Set.mem_iUnion, Set.mem_pi, Finset.coe_range,
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_iUnion, Set.mem_pi, Finset.coe_range,
       Set.mem_Iio, t]
     constructor
     · intro hv
@@ -133,17 +133,17 @@ theorem measure_not_recurs_blocks {n : ℕ} (hn : 0 < n) (K : ℕ) :
     intro ω hω hω'
     have h0 := hω 0 (by simp)
     have h0' := hω' 0 (by simp)
-    simp only [t, if_pos rfl, Set.mem_singleton_iff] at h0 h0'
+    simp only [t, ite_eq_left rfl, Set.mem_singleton_iff] at h0 h0'
     exact hww' (h0.symm.trans h0')
   have hpiece : ∀ w, (Measure.infinitePi fun _ : ℕ => coins (Fin n))
       (Set.pi (Finset.range (K + 1) : Set ℕ) (t w)) = 2⁻¹ ^ n * (1 - 2⁻¹ ^ n) ^ K := by
     intro w
     rw [Measure.infinitePi_pi _ fun k _ => ht w k, Finset.prod_range_succ', mul_comm]
     congr 1
-    · simp only [t, if_pos rfl]
+    · simp only [t, ite_eq_left rfl]
       exact LongestRuns.coins_fin_singleton n w
     · rw [Finset.prod_congr rfl fun k _ => show coins (Fin n) (t w (k + 1)) = 1 - 2⁻¹ ^ n by
-          simp only [t, if_neg (Nat.succ_ne_zero k)]
+          simp only [t, ite_eq_right (Nat.succ_ne_zero k)]
           rw [prob_compl_eq_one_sub (measurableSet_singleton w), LongestRuns.coins_fin_singleton],
         Finset.prod_const, Finset.card_range]
   rw [hpre, ← Measure.map_apply hB (MeasurableSet.iUnion fun w =>

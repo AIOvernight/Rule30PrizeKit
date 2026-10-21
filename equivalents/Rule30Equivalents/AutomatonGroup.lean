@@ -94,7 +94,7 @@ theorem PhiS_three (x : ℕ) : PhiS 3 x = Phi x ^^^ (if x % 2 = 0 then 3 else 1)
   intro i
   have h0 : x.testBit 0 = decide (x % 2 = 1) := Nat.testBit_zero x
   by_cases h : x % 2 = 0
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     have hx0 : x.testBit 0 = false := by rw [h0]; simp [h]
     simp only [PhiS, Phi, Nat.testBit_xor, Nat.testBit_or, testBit_two_mul, testBit_four_mul,
       testBit_three_eq]
@@ -103,7 +103,7 @@ theorem PhiS_three (x : ℕ) : PhiS 3 x = Phi x ^^^ (if x % 2 = 0 then 3 else 1)
     · simp [hx0]
     · have hi : ¬ (i + 1 + 1 < 2) := by omega
       simp [hi]
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     have hx0 : x.testBit 0 = true := by
       rw [h0]
       simp only [decide_eq_true_eq]
@@ -150,7 +150,7 @@ theorem testBit_orbit_one_two_mul (n : ℕ) : (orbit 1 n).testBit (2 * n) = true
   have := Ruliology.CellularAutomata.Rule30FiniteConfigs.evol_left_edge (x := TFunction.row 1) (lo := 0)
     (by simp [TFunction.row]) (fun p hp => by
       simp only [TFunction.row]
-      rw [if_pos (by omega), testBit_one_eq]
+      rw [ite_eq_left (by omega), testBit_one_eq]
       simp only [decide_eq_false_iff_not]
       omega) n
   rw [show ((n : Int) - ((2 * n : ℕ) : Int)) = 0 - (n : Int) by omega]

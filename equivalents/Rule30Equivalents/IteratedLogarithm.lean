@@ -186,7 +186,7 @@ theorem ae_eventually_two_mul_imbalance_lt {c : ℝ} (hc : 1 < c) :
   set i := Nat.find hex with hidef
   have hvi := hJ' (i - J) (by omega)
   have hiJ' : i - J + J = i := by omega
-  simp only [hE, Set.mem_setOf_eq, not_exists, not_and, not_le, hiJ'] at hvi
+  simp only [hE, Set.mem_ofPred_eq, not_exists, not_and, not_le, hiJ'] at hvi
   have hlt : imbalance v n < x i := hvi n hi1.le
   obtain ⟨-, -, h16, -⟩ := hJ i (by omega)
   have hNi : (16 : ℝ) ≤ N i := by exact_mod_cast h16
@@ -332,9 +332,9 @@ theorem le_measureReal_sum_ge {M : ℕ} (hM : 0 < M) {y : ℝ} (hy : 0 ≤ y)
   have hTsub : (T : Set (Fin (2 * M) → Bool)) ⊆ {u | y ≤ ∑ j, (black (u j) - 1 / 2)} := by
     intro u hu
     simp only [hT, hA, Finset.coe_biUnion, Finset.coe_range, Set.mem_iUnion, Set.mem_Iio,
-      Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hu
+      Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hu
     obtain ⟨l, -, hl⟩ := hu
-    rw [Set.mem_setOf_eq, hsum, hl]
+    rw [Set.mem_ofPred_eq, hsum, hl]
     push_cast
     linarith [(Nat.cast_nonneg l : (0 : ℝ) ≤ l)]
   have hTcard : T.card = ∑ l ∈ Finset.range (r + 1), (2 * M).choose (M + (i₀ + l)) := by
@@ -1020,10 +1020,10 @@ theorem ae_clusterPt_walk :
       have := hc.continuousAt_comp continuous_neg.continuousAt
       simpa [Function.comp_def, neg_div] using this
   have hclosed : IsClosed {y | MapClusterPt y atTop fun n => (walk v n : ℝ) / g n} :=
-    isClosed_setOf_clusterPt
+    isClosed_setOfPred_clusterPt
   refine Set.Subset.antisymm ?_ ?_
   · intro y hy
-    simp only [Set.mem_setOf_eq] at hy
+    simp only [Set.mem_ofPred_eq] at hy
     rw [Set.mem_Icc]
     by_contra hy'
     rcases not_and_or.1 hy' with hy1 | hy1
@@ -1074,7 +1074,7 @@ theorem walk_eq_count (v : ℕ → Bool) : ∀ n, walk v n = 2 * (count v n : �
   | 0 => by simp [walk, count]
   | n + 1 => by
     rw [walk, Finset.sum_range_succ, ← walk, walk_eq_count v n, count_succ]
-    cases v n <;> simp only [Bool.false_eq_true, if_true, if_false] <;>
+    cases v n <;> simp only [Bool.false_eq_true, ite_true, ite_false] <;>
       push_cast <;> ring
 
 /-- **Generic sequences oscillate maximally**: for a comeager set of sequences and every `k`, the
@@ -1089,7 +1089,7 @@ theorem residual_oscillation : {v : ℕ → Bool | ∀ k N : ℕ,
       (⋂ k : ℕ, ⋂ N : ℕ, ⋃ n : ℕ, {v | N < n ∧ k * n ≤ (k + 1) * count v n}) ∩
         ⋂ k : ℕ, ⋂ N : ℕ, ⋃ n : ℕ, {v | N < n ∧ (k + 1) * count v n ≤ n} := by
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iInter, Set.mem_iUnion]
     exact ⟨fun h => ⟨fun k N => (h k N).1, fun k N => (h k N).2⟩,
       fun h k N => ⟨h.1 k N, h.2 k N⟩⟩
   have hopen : ∀ (P : ℕ → ℕ → Prop) (n : ℕ), IsOpen {v : ℕ → Bool | P n (count v n)} :=
@@ -1097,7 +1097,7 @@ theorem residual_oscillation : {v : ℕ → Bool | ∀ k N : ℕ,
       rw [isOpen_iff_mem_nhds]
       intro v hv
       refine Filter.mem_of_superset (prefix_mem_nhds v n) fun u hu => ?_
-      rw [Set.mem_setOf_eq, count_congr fun t ht => hu t ht.le]
+      rw [Set.mem_ofPred_eq, count_congr fun t ht => hu t ht.le]
       exact hv
   rw [hset]
   refine Filter.inter_mem (countable_iInter_mem.2 fun k => countable_iInter_mem.2 fun N =>
@@ -1110,11 +1110,11 @@ theorem residual_oscillation : {v : ℕ → Bool | ∀ k N : ℕ,
     rintro U hU ⟨v, hv⟩
     obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
     -- copy the prefix of `v`, then only ones
-    refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [if_pos ht], ?_⟩
+    refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [ite_eq_left ht], ?_⟩
     refine Set.mem_iUnion.2 ⟨(k + 1) * (L + N + 1), ?_, ?_⟩
     · nlinarith
     · have h1 := le_count (v := fun t => if t < L then v t else true) (L := L)
-        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) ((k + 1) * (L + N + 1))
+        (fun t ht => by simp only [show ¬ t < L by omega, ite_false]) ((k + 1) * (L + N + 1))
       have h2 : (k + 1) * (L + N + 1) ≤
           count (fun t => if t < L then v t else true) ((k + 1) * (L + N + 1)) + L := by omega
       have h3 := Nat.mul_le_mul_left (k + 1) h2
@@ -1123,11 +1123,11 @@ theorem residual_oscillation : {v : ℕ → Bool | ∀ k N : ℕ,
     rintro U hU ⟨v, hv⟩
     obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
     -- copy the prefix of `v`, then only zeros
-    refine ⟨fun t => if t < L then v t else false, hL fun t ht => by simp only [if_pos ht], ?_⟩
+    refine ⟨fun t => if t < L then v t else false, hL fun t ht => by simp only [ite_eq_left ht], ?_⟩
     refine Set.mem_iUnion.2 ⟨(k + 1) * (L + N + 1), ?_, ?_⟩
     · nlinarith
     · have h1 := count_le_of_false (v := fun t => if t < L then v t else false) (L := L)
-        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) ((k + 1) * (L + N + 1))
+        (fun t ht => by simp only [show ¬ t < L by omega, ite_false]) ((k + 1) * (L + N + 1))
       have h2 := Nat.mul_le_mul_left (k + 1) h1
       nlinarith
 
@@ -1141,7 +1141,7 @@ theorem residual_limsup_liminf_walk_div_trace :
   have h : {v : ℕ → Bool | limsup (fun n : ℕ => (walk v n : ℝ) / n) atTop = 1 ∧
       liminf (fun n : ℕ => (walk v n : ℝ) / n) atTop = -1} ∈ residual (ℕ → Bool) := by
     refine Filter.mem_of_superset residual_oscillation fun v hv => ?_
-    simp only [Set.mem_setOf_eq] at hv ⊢
+    simp only [Set.mem_ofPred_eq] at hv ⊢
     -- `W(n)/n = 2 N(n)/n - 1` lies in `[-1, 1]`
     have hW : ∀ n : ℕ, 0 < n → (walk v n : ℝ) / n = 2 * (count v n : ℝ) / n - 1 := fun n hn => by
       have hn' : (0 : ℝ) < n := by exact_mod_cast hn

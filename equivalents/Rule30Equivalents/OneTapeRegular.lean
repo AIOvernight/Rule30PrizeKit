@@ -60,21 +60,21 @@ theorem splice_word (enc : α → M.Γ) {u v u' v' : List α} (hu : 1 ≤ u.leng
     intro i hi
     simp only [runW_zero, initW]
     by_cases h0 : 0 ≤ i
-    · rw [dif_pos ⟨h0, by simp; omega⟩, dif_pos ⟨h0, by simp; omega⟩]
+    · rw [dite_eq_left ⟨h0, by simp; omega⟩, dite_eq_left ⟨h0, by simp; omega⟩]
       congr 1
       rw [List.getElem_append_left (by omega), List.getElem_append_left (by omega)]
-    · rw [dif_neg (fun h => h0 h.1), dif_neg (fun h => h0 h.1)]
+    · rw [dite_eq_right (fun h => h0 h.1), dite_eq_right (fun h => h0 h.1)]
   have htR : ∀ i : ℤ, (u.length : ℤ) ≤ i → (runW M enc (u ++ v') 0).tape i =
       (runW M enc (u' ++ v') 0).tape (i + ((u'.length : ℤ) - u.length)) := by
     intro i hi
     simp only [runW_zero, initW, List.length_append]
     by_cases hlt : i < (u.length : ℤ) + v'.length
-    · rw [dif_pos ⟨by omega, by omega⟩, dif_pos ⟨by omega, by omega⟩]
+    · rw [dite_eq_left ⟨by omega, by omega⟩, dite_eq_left ⟨by omega, by omega⟩]
       congr 1
       rw [List.getElem_append_right (by omega), List.getElem_append_right (by omega)]
       congr 1
       omega
-    · rw [dif_neg (fun h => hlt h.2), dif_neg (fun h => by omega)]
+    · rw [dite_eq_right (fun h => hlt h.2), dite_eq_right (fun h => by omega)]
   exact splice (isRun_runW enc (u ++ v)) (isRun_runW enc (u' ++ v'))
     (isRun_runW enc (u ++ v')) hXT hYT hC rfl rfl (by simp only [runW_zero, initW]; omega)
     (by simp only [runW_zero, initW]; omega) htL htR
@@ -271,7 +271,7 @@ theorem DecidesLang.mem_iff_of_even (hM : DecidesLang M enc L T) {u v v' : List 
     (he : Even (cs (runW M enc (u ++ v)) u.length (T (u ++ v).length)).length) :
     u ++ v' ∈ L ↔ u ++ v ∈ L := by
   have := (hM.splice (u := u) (v := v) (u' := u) (v' := v') hu hu hC).2.2
-  rwa [if_pos he] at this
+  rwa [ite_eq_left he] at this
 
 /-- **Equal types give equal left quotients.** -/
 theorem DecidesLang.leftQuotient_eq_of_ctype_eq (hM : DecidesLang M enc L T) {u u' : List α}
@@ -290,13 +290,13 @@ theorem DecidesLang.leftQuotient_eq_of_ctype_eq (hM : DecidesLang M enc L T) {u 
   have hsp := (hM.splice (u := u') (v := v') (u' := u) (v' := v) hu' hu hv').2.2
   rw [hv'] at hsp
   by_cases he : Even C.length
-  · rw [if_pos he] at hsp
+  · rw [ite_eq_left he] at hsp
     apply hsp.2
     have hC2 : C ∈ (ctype M enc L T u).2 := ⟨v, rfl, he, hv⟩
     rw [h] at hC2
     obtain ⟨v'', hv'', -, hv''L⟩ := hC2
     exact (hM.mem_iff_of_even hu' (hv''.trans hv'.symm) (by rw [hv'']; exact he)).2 hv''L
-  · rw [if_neg he] at hsp
+  · rw [ite_eq_right he] at hsp
     exact hsp.2 hv
 
 /-- **Finitely many crossing sequences give a regular language** (Myhill–Nerode): the types of the
@@ -326,7 +326,7 @@ theorem DecidesLang.isRegular_of_finite (hM : DecidesLang M enc L T)
     · obtain ⟨v, hv, -⟩ := hC
       exact ⟨u ++ v, u.length, hv⟩
     have h : ∃ u' : List α, 1 ≤ u'.length ∧ ctype M enc L T u' = ctype M enc L T u := ⟨u, h0, rfl⟩
-    simp only [G, dif_pos h]
+    simp only [G, dite_eq_left h]
     exact hM.leftQuotient_eq_of_ctype_eq h.choose_spec.1 h0 h.choose_spec.2
 
 /-- **Bounded crossing sequences give a regular language.** -/
@@ -374,7 +374,7 @@ theorem runW_dfaTM (w : List β) {t : ℕ} (ht : t ≤ w.length) :
     rw [(isRun_runW (M := (dfaTM D).toMachine) some w) t, ih (by omega), step_eq rfl]
     have htape : (initW (dfaTM D).toMachine some w).tape (t : ℤ) = some (w[t]'(by omega)) := by
       simp only [initW]
-      erw [dif_pos (by simp; omega)]
+      erw [dite_eq_left (by simp; omega)]
       simp only [Int.toNat_natCast]; rfl
     refine Cfg.ext' ?_ ?_ ?_
     · dsimp only
@@ -398,7 +398,7 @@ theorem decidesLang_dfaTM : DecidesLang (dfaTM D).toMachine some D.accepts fun n
     step_eq rfl]
   have htape : (initW (dfaTM D).toMachine some w).tape (w.length : ℤ) = none := by
     simp only [initW]
-    erw [dif_neg (by simp <;> omega)]
+    erw [dite_eq_right (by simp)]
     rfl
   dsimp only
   rw [htape]
@@ -418,7 +418,7 @@ theorem isRegular_iff_exists_fast_decider {β : Type} [Fintype β] (L : Language
   · rintro ⟨σ, _, D, rfl⟩
     exact ⟨dfaTM D, some, fun n => n + 1, isLittleO_succ_mul_log, decidesLang_dfaTM D⟩
   · rintro ⟨M, enc, T, hT, hM⟩
-    haveI := M.instFintype
+    have := M.instFintype
     exact hM.isRegular hT
 
 /-! ### Digit input for Rule 30 -/

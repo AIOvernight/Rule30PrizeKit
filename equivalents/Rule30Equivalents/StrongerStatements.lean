@@ -427,7 +427,7 @@ theorem eq_zero_of_mahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) {d : ℕ}
     by_cases hpi : p i = 0
     · rw [hTdef]
       simp only [hpi, Polynomial.coe_zero, zero_mul, PowerSeries.order_zero]
-      exact ENat.coe_lt_top _
+      exact ENat.natCast_lt_top _
     have hlt : i₀ < i := lt_of_le_of_ne (not_lt.1 fun h => hpi (hlow i h)) hi.symm
     have hpow : k ^ ((i₀ : ℕ) + 1) ≤ k ^ (i : ℕ) := Nat.pow_le_pow_right (by omega) hlt
     have hk1 : 1 ≤ k ^ (i₀ : ℕ) := Nat.one_le_pow _ _ (by omega)
@@ -445,7 +445,7 @@ theorem eq_zero_of_mahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) {d : ℕ}
         exact le_add_self
   have hrest : ((ν + k ^ (i₀ : ℕ) * n : ℕ) : ℕ∞) <
       (∑ i ∈ Finset.univ.erase i₀, T i).order := by
-    refine lt_of_lt_of_le (ENat.coe_lt_coe.2 (Nat.lt_succ_self _)) (PowerSeries.le_order _ _
+    refine lt_of_lt_of_le (ENat.natCast_lt_natCast.2 (Nat.lt_succ_self _)) (PowerSeries.le_order _ _
       fun j hj => ?_)
     rw [map_sum]
     refine Finset.sum_eq_zero fun i hi => PowerSeries.coeff_of_lt_order _ ?_
@@ -460,7 +460,7 @@ theorem eq_zero_of_mahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) {d : ℕ}
     exact min_eq_left hrest.le
   rw [hTdef] at hsum
   rw [hD, PowerSeries.order_zero] at hsum
-  exact ENat.top_ne_coe _ hsum
+  exact ENat.top_ne_natCast _ hsum
 
 /-- **`k`-Mahler series with `0/1` coefficients are countably many**, for `k ≥ 2`: a solution of a
 given equation is determined by its first `ord p_{i₀} + 1` coefficients (`eq_zero_of_mahler`), and
@@ -468,9 +468,9 @@ there are countably many equations. -/
 theorem countable_setOf_isMahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) :
     {b : ℕ → Bool | IsMahler k hk0 (LinearRelations.series ℚ b)}.Countable := by
   classical
-  haveI : Countable (AddMonoidAlgebra ℚ ℕ) :=
+  have : Countable (AddMonoidAlgebra ℚ ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := ℚ) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
+  have : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
   let Sol : (Σ d : ℕ, Fin (d + 1) → Polynomial ℚ) → Set (ℕ → Bool) := fun e =>
     {b | (∃ i, e.2 i ≠ 0) ∧ ∑ i, (e.2 i : PowerSeries ℚ) *
       PowerSeries.expand (k ^ (i : ℕ)) (pow_ne_zero _ hk0) (LinearRelations.series ℚ b) = 0}
@@ -499,7 +499,7 @@ theorem countable_setOf_isMahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) :
           simp only [map_sub, mul_sub, Finset.sum_sub_distrib]
           rw [hb.2, hb'.2, sub_zero]) (by
           rw [← hν]
-          refine lt_of_lt_of_le (ENat.coe_lt_coe.2 (Nat.lt_succ_self ν))
+          refine lt_of_lt_of_le (ENat.natCast_lt_natCast.2 (Nat.lt_succ_self ν))
             (PowerSeries.le_order _ _ fun j hj => ?_)
           have hj' : j < ν + 1 := by exact_mod_cast hj
           have := congrFun hbb' ⟨j, hj'⟩
@@ -623,11 +623,11 @@ theorem posOf_succ {T Q : ℕ} (hQ : 0 < Q) (n : ℕ) :
     posOf T Q (n + 1) = nxtOf T Q (posOf T Q n) := by
   unfold posOf nxtOf
   by_cases h1 : n + 1 < T + Q
-  · rw [if_pos h1, if_pos (show n < T + Q by omega), if_pos h1]
-  · rw [if_neg h1]
+  · rw [ite_eq_left h1, ite_eq_left (show n < T + Q by omega), ite_eq_left h1]
+  · rw [ite_eq_right h1]
     by_cases h2 : n < T + Q
-    · rw [if_pos h2, if_neg h1, show n + 1 - T = Q by omega, Nat.mod_self, Nat.add_zero]
-    · rw [if_neg h2]
+    · rw [ite_eq_left h2, ite_eq_right h1, show n + 1 - T = Q by omega, Nat.mod_self, Nat.add_zero]
+    · rw [ite_eq_right h2]
       have hlt := Nat.mod_lt (n - T) hQ
       have e : (n + 1 - T) % Q = ((n - T) % Q + 1) % Q := by
         rw [show n + 1 - T = (n - T) + 1 by omega, Nat.add_mod (n - T)]
@@ -637,9 +637,9 @@ theorem posOf_succ {T Q : ℕ} (hQ : 0 < Q) (n : ℕ) :
           simp
       rw [e]
       by_cases h3 : (n - T) % Q + 1 < Q
-      · rw [Nat.mod_eq_of_lt h3, if_pos (by omega)]
+      · rw [Nat.mod_eq_of_lt h3, ite_eq_left (by omega)]
         omega
-      · rw [show (n - T) % Q + 1 = Q by omega, Nat.mod_self, if_neg (by omega), Nat.add_zero]
+      · rw [show (n - T) % Q + 1 = Q by omega, Nat.mod_self, ite_eq_right (by omega), Nat.add_zero]
 
 /-- **Eventually periodic sequences are morphic.** The alphabet is the positions `0, …, T + Q - 1`
 of a transient and a period, `σ(0) = 0 1` and `σ(i) = i + 1` for `i ≠ 0`, wrapping from the last
@@ -671,12 +671,12 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
       have : (σ (x n)).length = if n = 0 then 2 else 1 := by
         simp only [σ, x]
         by_cases hn : n = 0
-        · rw [if_pos ((hpos0 n).2 hn), if_pos hn]; rfl
-        · rw [if_neg (fun h => hn ((hpos0 n).1 h)), if_neg hn]; rfl
+        · rw [ite_eq_left ((hpos0 n).2 hn), ite_eq_left hn]; rfl
+        · rw [ite_eq_right (fun h => hn ((hpos0 n).1 h)), ite_eq_right hn]; rfl
       rw [this]
       split_ifs <;> omega
   have hx0 : (x 0 : ℕ) = 0 := (hpos0 0).2 rfl
-  have hσ : σ (x 0) = [⟨0, by omega⟩, ⟨1, by omega⟩] := by simp only [σ, if_pos hx0]
+  have hσ : σ (x 0) = [⟨0, by omega⟩, ⟨1, by omega⟩] := by simp only [σ, ite_eq_left hx0]
   refine ⟨Fin N, inferInstance, σ, x, fun i => b i,
     ⟨fun a => ?_, by rw [hσ]; simp, fun n j hj => ?_⟩, fun n => ?_⟩
   · simp only [σ]
@@ -684,7 +684,7 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
   · rw [hlen]
     by_cases hn : n = 0
     · subst hn
-      rw [if_pos rfl, Nat.zero_add]
+      rw [ite_eq_left rfl, Nat.zero_add]
       simp only [hσ, List.length_cons, List.length_nil] at hj
       apply Fin.ext
       simp only [hσ, x]
@@ -694,10 +694,10 @@ theorem isMorphic_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriod
         omega
     · have hxn : (x n : ℕ) ≠ 0 := fun h => hn ((hpos0 n).1 h)
       have hσ : σ (x n) = [⟨nxtOf T Q (x n), by unfold nxtOf; split_ifs <;> omega⟩] := by
-        simp only [σ, if_neg hxn]
+        simp only [σ, ite_eq_right hxn]
       simp only [hσ, List.length_cons, List.length_nil] at hj
       obtain rfl : j = 0 := by omega
-      rw [if_neg hn, Nat.add_zero]
+      rw [ite_eq_right hn, Nat.add_zero]
       apply Fin.ext
       simp only [hσ, List.getElem_cons_zero, x]
       exact posOf_succ hQ n

@@ -147,7 +147,7 @@ theorem value_le (b : ℕ → Bool) : value β b ≤ 1 / (β - 1) := by
 theorem value_pos (b : ℕ → Bool) {s : ℕ} (hs : b s = true) : 0 < value β b := by
   refine (summable_term hβ b).tsum_pos (term_nonneg hβ b) s ?_
   have : (0 : ℝ) < β := by linarith
-  simp only [hs, if_true]
+  simp only [hs, ite_true]
   positivity
 
 /-- Peeling off the first digit: `β · 0.b₀b₁b₂… = b₀ + 0.b₁b₂…`. -/
@@ -240,9 +240,9 @@ theorem value_injective {β : ℝ} (hβ : 2 < β) : Function.Injective (value β
     have h0 := value_nonneg hβ1 (tail b (t + 1))
     have h1 := hsmall (tail b (t + 1))
     cases b t
-    · simp only [Bool.false_eq_true, if_false, zero_add, false_iff, not_le]
+    · simp only [Bool.false_eq_true, ite_false, zero_add, false_iff, not_le]
       exact h1
-    · simp only [if_true, true_iff]
+    · simp only [ite_true, true_iff]
       linarith
   intro b b' h
   have hval : ∀ t, value β (tail b t) = value β (tail b' t) := by
@@ -388,7 +388,7 @@ theorem baseValue_lt_one {b : ℕ → Bool} {s : ℕ} (hs : b s = false) :
     baseValue B b < 1 := by
   have h := Summable.tsum_lt_tsum_of_nonneg (i := s) (term_nonneg (one_lt_cast hB) b)
     (term_le_two hB b)
-    (by rw [hs]; simp only [Bool.false_eq_true, if_false, zero_div]; positivity)
+    (by rw [hs]; simp only [Bool.false_eq_true, ite_false, zero_div]; positivity)
     (summable_geometric_two' 1)
   rwa [tsum_geometric_two' 1] at h
 

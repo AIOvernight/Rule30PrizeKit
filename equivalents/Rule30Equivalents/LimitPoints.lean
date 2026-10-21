@@ -61,12 +61,12 @@ theorem W_nonempty (i n : ℕ) : (W X i n).Nonempty := by
 /-- A word that occurs infinitely often extends to a limit point. -/
 theorem exists_limitPoint {i n : ℕ} {u : Fin n → Bool} (hu : u ∈ W X i n) :
     ∃ y ∈ limitPoints X, ∀ m : Fin n, y (i + m) = u m := by
-  haveI : NeBot (atTop ⊓ 𝓟 {t | win X t i n = u}) := frequently_iff_neBot.1 hu
+  have : NeBot (atTop ⊓ 𝓟 {t | win X t i n = u}) := frequently_iff_neBot.1 hu
   obtain ⟨y, hy⟩ := exists_clusterPt_of_compactSpace
     (map (half X) (atTop ⊓ 𝓟 {t | win X t i n = u}))
   refine ⟨y, hy.mono (map_mono inf_le_left), ?_⟩
   have hC : IsClosed {z : ℕ → Bool | ∀ m : Fin n, z (i + m) = u m} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     exact isClosed_iInter fun m => isClosed_eq (continuous_apply _) continuous_const
   have hmem : {z : ℕ → Bool | ∀ m : Fin n, z (i + m) = u m} ∈
       map (half X) (atTop ⊓ 𝓟 {t | win X t i n = u}) := by

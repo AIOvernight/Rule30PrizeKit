@@ -32,7 +32,7 @@ theorem length_filter_eq_count (b : ℕ → Bool) (n : ℕ) :
 
 /-- **Density through the times of the black cells**: if `p` holds infinitely often, the density
 of `p` is `L > 0` iff its `k`-th occurrence is at time `k / L + o(k)`. -/
-theorem tendsto_count_div_iff {p : ℕ → Prop} [DecidablePred p] (hinf : (setOf p).Infinite)
+theorem tendsto_count_div_iff {p : ℕ → Prop} [DecidablePred p] (hinf : (Set.ofPred p).Infinite)
     {L : ℝ} (hL : 0 < L) :
     Tendsto (fun n : ℕ => (Nat.count p n : ℝ) / n) atTop (𝓝 L) ↔
       Tendsto (fun k : ℕ => (Nat.nth p k : ℝ) / k) atTop (𝓝 L⁻¹) := by

@@ -32,11 +32,11 @@ theorem eventuallyPeriodic_iff_ultimately_periodic (b : ℕ → Bool) :
       ∃ k, ∃ p > 0, ∀ x ≥ k, x ∈ {t | b t = true} ↔ x + p ∈ {t | b t = true} := by
   constructor
   · rintro ⟨T, P, hP, h⟩
-    exact ⟨T, P, hP, fun x hx => by simp only [Set.mem_setOf_eq, h x hx]⟩
+    exact ⟨T, P, hP, fun x hx => by simp only [Set.mem_ofPred_eq, h x hx]⟩
   · rintro ⟨k, p, hp, h⟩
     refine ⟨k, p, hp, fun t ht => ?_⟩
     have := h t ht
-    simp only [Set.mem_setOf_eq] at this
+    simp only [Set.mem_ofPred_eq] at this
     cases h1 : b t <;> cases h2 : b (t + p) <;> simp_all
 
 /-! ### Presburger arithmetic and semilinear sets -/

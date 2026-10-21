@@ -35,7 +35,8 @@ theorem isAlgebraic_of_eventuallyPeriodic {K : Type*} [Field K] {b : ℕ → Boo
   obtain ⟨P, Q, hQ, hPQ⟩ := (LinearRelations.eventuallyPeriodic_iff_rational (K := K) b).1 h
   refine ⟨C (Q : RatFunc K) * X - C (P : RatFunc K), fun h0 => ?_, ?_⟩
   · have h1 := congrArg (fun p : (RatFunc K)[X] => p.coeff 1) h0
-    simp only [coeff_sub, coeff_C_mul_X, coeff_C, coeff_zero, if_neg one_ne_zero, sub_zero] at h1
+    simp only [coeff_sub, coeff_C_mul_X, coeff_C, coeff_zero, ite_eq_right one_ne_zero,
+        sub_zero] at h1
     exact hQ ((RatFunc.algebraMap_injective K).eq_iff.1 (by simpa using h1))
   · simp only [map_sub, map_mul, aeval_C, aeval_X]
     rw [show algebraMap (RatFunc K) K⸨X⸩ (Q : RatFunc K) = ((Q : PowerSeries K) : K⸨X⸩) from

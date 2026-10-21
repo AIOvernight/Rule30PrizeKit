@@ -187,7 +187,7 @@ theorem measureReal_pos (n : ℕ) {a : ℝ} (ha1 : a ≤ 1) :
     0 < (coins (Fin n)).real {w | a * n ≤ ∑ j, black (w j)} := by
   have hsub : ({fun _ => true} : Set (Fin n → Bool)) ⊆ {w | a * n ≤ ∑ j, black (w j)} := by
     rintro w rfl
-    simp only [Set.mem_setOf_eq, black, if_true, Finset.sum_const, Finset.card_univ,
+    simp only [Set.mem_ofPred_eq, black, ite_true, Finset.sum_const, Finset.card_univ,
       Fintype.card_fin, nsmul_eq_mul, mul_one]
     nlinarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
   refine lt_of_lt_of_le ?_ (measureReal_mono hsub)
@@ -211,7 +211,7 @@ theorem log_measureReal_ge {n : ℕ} (hn : 0 < n) {a : ℝ} (ha1 : a ≤ 1) :
     (Finset.univ.filter fun j => w j = true).card = k with hS
   have hSsub : (S : Set (Fin n → Bool)) ⊆ {w | a * n ≤ ∑ j, black (w j)} := by
     intro w hw
-    simp only [hS, Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hw ⊢
+    simp only [hS, Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hw ⊢
     have : ∑ j, black (w j) = (k : ℝ) := by
       rw [← hw]
       simp [black, Finset.sum_boole]
@@ -314,7 +314,7 @@ theorem tendsto_log_measureReal_trace {a : ℝ} (ha : 1 / 2 ≤ a) (ha1 : a < 1)
     rw [← map_prefix n, measureReal_def, Measure.map_apply hm hS, measureReal_def]
     congr 2
     ext v
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     rw [Fin.sum_univ_eq_sum_range (fun t => black (v t)) n]
   have h2 : (coins ℕ).real {v | a * n ≤ ∑ t ∈ Finset.range n, black (v t)} =
       (coins ℤ).real {x | a * n ≤ ∑ t ∈ Finset.range n, black (trace x t)} := by

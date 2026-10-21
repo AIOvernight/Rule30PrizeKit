@@ -51,13 +51,13 @@ theorem ones_of_forall_true {g : ℕ → Bool} : ∀ {m : ℕ}, (∀ j < m, g j 
   | 0, _ => by simp [ones]
   | m + 1, h => by
     rw [ones, Nat.count_succ, ← ones, ones_of_forall_true fun j hj => h j (by omega),
-      if_pos (h m (by omega))]
+      ite_eq_left (h m (by omega))]
 
 theorem ones_of_forall_false {g : ℕ → Bool} : ∀ {m : ℕ}, (∀ j < m, g j = false) → ones g m = 0
   | 0, _ => by simp [ones]
   | m + 1, h => by
     rw [ones, Nat.count_succ, ← ones, ones_of_forall_false fun j hj => h j (by omega),
-      if_neg (by simp [h m (by omega)])]
+      ite_eq_right (by simp [h m (by omega)])]
 
 /-- Along a sequence that is periodic from the start, `q` full periods contribute `q` times the
 black cells of one period. -/
@@ -329,7 +329,7 @@ theorem measurable_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g :
     show xor (g (WordsAutomata.readState (trace x) s₀ δ n)) (trace x n) =
       xor (g (WordsAutomata.readState (fun i => if h : i < n + 1 then trace x i else false) s₀ δ n))
         (if h : n < n + 1 then trace x n else false)
-    rw [dif_pos (Nat.lt_succ_self n),
+    rw [dite_eq_left (Nat.lt_succ_self n),
       readState_congr (b' := fun i => if h : i < n + 1 then trace x i else false)
         fun i hi => by simp [show i < n + 1 by omega]]
   rw [h]

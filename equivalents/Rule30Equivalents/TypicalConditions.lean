@@ -101,9 +101,9 @@ theorem ae_transcendental_series_trace : ∀ᵐ x ∂(coins ℤ), ∀ (p : ℕ) 
 
 /-- `K(X)` is countable for a countable field `K`: `x = num x / denom x`. -/
 instance {K : Type*} [Field K] [Countable K] : Countable (RatFunc K) := by
-  haveI : Countable (AddMonoidAlgebra K ℕ) :=
+  have : Countable (AddMonoidAlgebra K ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := K) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial K) := Polynomial.toFinsupp_injective.countable
+  have : Countable (Polynomial K) := Polynomial.toFinsupp_injective.countable
   refine Function.Injective.countable (f := fun x : RatFunc K => (x.num, x.denom)) fun x y h => ?_
   simp only [Prod.mk.injEq] at h
   rw [← RatFunc.num_div_denom x, ← RatFunc.num_div_denom y, h.1, h.2]
@@ -114,9 +114,9 @@ are countably many such polynomials. -/
 theorem ae_transcendental_rat : ∀ᵐ v ∂(coins ℕ), Transcendental (RatFunc ℚ)
     ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) := by
   classical
-  haveI : Countable (AddMonoidAlgebra (RatFunc ℚ) ℕ) :=
+  have : Countable (AddMonoidAlgebra (RatFunc ℚ) ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := RatFunc ℚ) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial (RatFunc ℚ)) := Polynomial.toFinsupp_injective.countable
+  have : Countable (Polynomial (RatFunc ℚ)) := Polynomial.toFinsupp_injective.countable
   have hinj : Function.Injective fun v : ℕ → Bool =>
       ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) :=
     (HahnSeries.ofPowerSeries_injective).comp (Typicality.injective_series ℚ)
@@ -127,7 +127,7 @@ theorem ae_transcendental_rat : ∀ᵐ v ∂(coins ℕ), Transcendental (RatFunc
     set Q := q.map (algebraMap (RatFunc ℚ) ℚ⸨X⸩) with hQdef
     have hQ : Q ≠ 0 := (Polynomial.map_ne_zero_iff (algebraMap (RatFunc ℚ) ℚ⸨X⸩).injective).2 hq
     refine (Q.roots.toFinset.finite_toSet.preimage hinj.injOn).subset fun v hv => ?_
-    simp only [Set.mem_setOf_eq] at hv
+    simp only [Set.mem_ofPred_eq] at hv
     simp only [Set.mem_preimage, Finset.mem_coe, Multiset.mem_toFinset]
     rw [Polynomial.mem_roots hQ, Polynomial.IsRoot, hQdef, Polynomial.eval_map,
       ← Polynomial.aeval_def]
@@ -162,7 +162,7 @@ theorem measure_autComplexityLE_le (K n : ℕ) :
     coins ℕ {v | Automatic.AutComplexityLE ((List.range n).map v) K} ≤
       Nat.card (DFA Bool (Fin K)) * 2⁻¹ ^ n := by
   classical
-  haveI := Fintype.ofFinite (DFA Bool (Fin K))
+  have := Fintype.ofFinite (DFA Bool (Fin K))
   -- one automaton accepts at most one prefix
   have hone : ∀ M : DFA Bool (Fin K),
       coins ℕ {v | Automatic.UniquelyAccepts M ((List.range n).map v)} ≤ 2⁻¹ ^ n := by
@@ -370,7 +370,7 @@ theorem ae_mul_definable_trace : ∀ᵐ x ∂(coins ℤ),
   ae_disjunctive_trace.mono fun x hx => PresburgerExpansion.mul_definable_of_disjunctive
     fun n w => by
       obtain ⟨i, hi⟩ := hx n w
-      exact ⟨i, fun j => by rw [Set.mem_setOf_eq, hi j]⟩
+      exact ⟨i, fun j => by rw [Set.mem_ofPred_eq, hi j]⟩
 
 /-- The word `1 0^L` is unbordered: its nonempty prefixes start with `1`, its proper suffixes with
 `0`. -/
@@ -380,7 +380,7 @@ theorem not_bordered_one_zeros (L : ℕ) : ¬ Lyndon.Bordered (true :: List.repl
   have h0 := congrArg (fun l => l[0]?) heq
   obtain ⟨m, hm⟩ : ∃ m, L + 1 - k = m + 1 := ⟨L - k, by omega⟩
   simp only [List.length_cons, List.length_replicate, hm, List.drop_succ_cons,
-    List.getElem?_drop, add_zero, List.getElem?_take, if_pos hk0, List.getElem?_cons_zero,
+    List.getElem?_drop, add_zero, List.getElem?_take, ite_eq_left hk0, List.getElem?_cons_zero,
     List.getElem?_replicate] at h0
   split_ifs at h0 with h
   simp at h0
@@ -433,7 +433,7 @@ theorem ae_not_zero_set_rat_trace : ∀ᵐ x ∂(coins ℤ), ∀ (E : LinearRecu
     refine ⟨T, P, hP, fun t ht => ?_⟩
     have := hTP t ht
     rw [hS] at this
-    simp only [Set.mem_setOf_eq] at this
+    simp only [Set.mem_ofPred_eq] at this
     cases h1 : trace x (t + P) <;> cases h2 : trace x t <;> simp_all)
 
 /-- The same over every finite field. -/
@@ -464,7 +464,7 @@ theorem countable_zero_sets (K : Type*) [Field K] [Countable K] :
   rintro S ⟨E, u, hu, rfl⟩
   refine ⟨⟨E, fun i => u i⟩, ?_⟩
   ext t
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [← E.eq_mk_of_is_sol_of_eq_init hu fun _ => rfl]
 
 /-- **The same over every countable field**: for almost every configuration the black times of the
@@ -477,7 +477,7 @@ theorem ae_not_zero_set_countable_trace (K : Type*) [Field K] [Countable K] :
   have hinj : Function.Injective fun v : ℕ → Bool => {t | v t = true} := fun v w h =>
     funext fun t => by
       have := congrArg (t ∈ ·) h
-      simp only [Set.mem_setOf_eq, eq_iff_iff] at this
+      simp only [Set.mem_ofPred_eq, eq_iff_iff] at this
       cases hv : v t <;> cases hw : w t <;> simp_all
   have hcount := (countable_zero_sets K).preimage hinj
   have hae : ∀ᵐ v ∂(coins ℕ), ∀ (E : LinearRecurrence K) (u : ℕ → K),
@@ -498,9 +498,9 @@ theorem ae_not_zero_set_ratFunc_trace (p : ℕ) [Fact p.Prime] :
 /-- `ℚ(β)` is countable: its elements are quotients of polynomials in `β`. -/
 theorem countable_adjoin (β : ℝ) :
     ((IntermediateField.adjoin ℚ ({β} : Set ℝ) : IntermediateField ℚ ℝ) : Set ℝ).Countable := by
-  haveI : Countable (AddMonoidAlgebra ℚ ℕ) :=
+  have : Countable (AddMonoidAlgebra ℚ ℕ) :=
     (AddMonoidAlgebra.coeffEquiv (R := ℚ) (M := ℕ)).injective.countable
-  haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
+  have : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
   refine (Set.countable_range fun q : Polynomial ℚ × Polynomial ℚ =>
     Polynomial.aeval β q.1 / Polynomial.aeval β q.2).mono fun y hy => ?_
   obtain ⟨r, s, rfl⟩ := (IntermediateField.mem_adjoin_simple_iff ℚ y).1 hy
@@ -605,7 +605,7 @@ at most one sequence (`eq_of_decidesBinInTime`), and after relabeling its states
 `Fin` there are countably many machines (`decidesBinInTime_relabel`). -/
 theorem countable_setOf_decidesBin : {f : ℕ → Bool | ∃ (M : OneTapeGap.TM) (zero : M.Γ)
     (T : ℕ → ℕ), ProblemThree.DecidesBinInTime M.toMachine zero f T}.Countable := by
-  haveI : Countable OneTapeGap.Move := Function.Injective.countable (f := OneTapeGap.Move.shift)
+  have : Countable OneTapeGap.Move := Function.Injective.countable (f := OneTapeGap.Move.shift)
     (by intro a b h; cases a <;> cases b <;> simp_all [OneTapeGap.Move.shift])
   let canon : (Σ q g : ℕ, (Fin g × Fin g × Fin q × (Fin q → Bool) × (Fin q → Bool) ×
       (Fin q → Fin g → Fin q × Fin g × OneTapeGap.Move)) × Fin g) → OneTapeGap.Machine :=

@@ -260,7 +260,7 @@ theorem epSet_zeros_matrix (hp2 : p ≠ 2) {d : ℕ} (A : Matrix (Fin d) (Fin d)
     · right
       have hz : {n : ℕ | Strassmann.psum (coef (gam β)) n = 0}.Infinite :=
         hinf.mono fun n hn => by
-          simp only [Set.mem_setOf_eq] at hn ⊢
+          simp only [Set.mem_ofPred_eq] at hn ⊢
           rw [psum_coef_natCast hγ, ← hf, hn, PadicInt.coe_zero]
       have h0 := Strassmann.eq_zero_of_infinite_natCast_zeros (tendsto_coef hγ) hz
       intro n
@@ -270,7 +270,7 @@ theorem epSet_zeros_matrix (hp2 : p ≠ 2) {d : ℕ} (A : Matrix (Fin d) (Fin d)
       rw [h2, eq_comm, PadicInt.coe_eq_zero] at h1
       exact h1
     · exact Or.inl (Set.not_infinite.1 hinf)
-  simpa only [Set.mem_setOf_eq] using hdich
+  simpa only [Set.mem_ofPred_eq] using hdich
 
 /-! ### Recurrences over `ℚ` -/
 
@@ -281,9 +281,9 @@ def companion {R : Type*} [CommRing R] {d : ℕ} (c : Fin (d + 1) → R) :
 
 theorem companion_mulVec_of_lt {R : Type*} [CommRing R] {d : ℕ} (c x : Fin (d + 1) → R)
     (i : Fin (d + 1)) (hi : (i : ℕ) < d) : (companion c *ᵥ x) i = x ⟨i + 1, by omega⟩ := by
-  simp only [companion, Matrix.mulVec, dotProduct, Matrix.of_apply, if_pos hi]
+  simp only [companion, Matrix.mulVec, dotProduct, Matrix.of_apply, ite_eq_left hi]
   rw [Finset.sum_eq_single ⟨i + 1, by omega⟩ (fun b _ hb => by
-    rw [if_neg fun h => hb (Fin.ext h), zero_mul]) (by simp)]
+    rw [ite_eq_right fun h => hb (Fin.ext h), zero_mul]) (by simp)]
   simp
 
 theorem companion_mulVec_last {R : Type*} [CommRing R] {d : ℕ} (c x : Fin (d + 1) → R) :
@@ -308,7 +308,7 @@ theorem epSet_zeros_of_coeff_ne_zero {d : ℕ} (a : Fin (d + 1) → ℚ) (ha0 : 
   have hD : 0 < D := Nat.mul_pos (Nat.mul_pos (Finset.prod_pos fun i _ => (a i).den_pos)
     (Finset.prod_pos fun i _ => (u i).den_pos)) hnum0
   obtain ⟨p, hpD, hp⟩ := Nat.exists_infinite_primes (D + 3)
-  haveI := Fact.mk hp
+  have := Fact.mk hp
   have hp2 : p ≠ 2 := by omega
   have hndvd : ∀ x : ℕ, 0 < x → x ∣ D → ¬ p ∣ x := fun x hx hxD hpx =>
     absurd (Nat.le_of_dvd hx hpx) (not_le.2 ((Nat.le_of_dvd hD hxD).trans_lt (by omega)))
@@ -365,7 +365,7 @@ theorem epSet_zeros_of_coeff_ne_zero {d : ℕ} (a : Fin (d + 1) → ℚ) (ha0 : 
   have key : ∀ n, u n = 0 ↔ (A ^ n *ᵥ v) 0 = 0 := fun n => by
     rw [← PadicInt.coe_eq_zero, hstate n 0]
     simp
-  simpa only [Set.mem_setOf_eq, key] using h t ht
+  simpa only [Set.mem_ofPred_eq, key] using h t ht
 
 theorem epSet_zeros_aux (d : ℕ) : ∀ (a : Fin d → ℚ) (u : ℕ → ℚ),
     (∀ n, u (n + d) = ∑ i, a i * u (n + i)) → EPSet {n | u n = 0} := by
@@ -387,7 +387,7 @@ theorem epSet_zeros_aux (d : ℕ) : ∀ (a : Fin d → ℚ) (u : ℕ → ℚ),
       refine ⟨T + 1, P, hP, fun t ht => ?_⟩
       obtain ⟨s, rfl⟩ : ∃ s, t = s + 1 := ⟨t - 1, by omega⟩
       have := hTP s (by omega)
-      simp only [Set.mem_setOf_eq] at this ⊢
+      simp only [Set.mem_ofPred_eq] at this ⊢
       rwa [show s + 1 + P = s + P + 1 by ring]
     · exact epSet_zeros_of_coeff_ne_zero a ha0 u hu
 
@@ -406,7 +406,7 @@ theorem problem1_iff_not_LRS_zero_set : Rule30Prize.Problem1 ↔
   refine ⟨T, P, hP, fun t ht => ?_⟩
   have := hTP t ht
   rw [hS] at this
-  simp only [Set.mem_setOf_eq] at this
+  simp only [Set.mem_ofPred_eq] at this
   cases h1 : c (t + P) <;> cases h2 : c t <;> simp_all
 
 end Rule30Equivalents.SkolemMahlerLech

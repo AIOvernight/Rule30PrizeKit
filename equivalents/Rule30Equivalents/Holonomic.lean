@@ -57,7 +57,7 @@ theorem pRecursive_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPerio
     Finset.sum_eq_single 0 (fun i hi h0 => by
       rw [Finset.mem_range] at hi
       simp [h0, show i ≠ P by omega]) (fun h => absurd (Finset.mem_range.2 hP) h)]
-  simp only [if_neg hP.ne', Nat.add_zero]
+  simp only [ite_eq_right hP.ne', Nat.add_zero]
   rw [hper n hn]
   cases b n <;> simp
 
@@ -123,7 +123,7 @@ theorem eventually_recurrent {α : Type*} [Finite α] (W : ℕ → α) (N : ℕ)
       obtain ⟨B, hB⟩ := h
       exact ⟨B, Or.inr hB⟩
   choose B hB using this
-  haveI := Fintype.ofFinite α
+  have := Fintype.ofFinite α
   refine ⟨N + Finset.univ.sup B, by omega, fun n hn M => ?_⟩
   rcases hB (W n) with h | h
   · exact h M
@@ -140,7 +140,7 @@ theorem exists_const_relation {b : ℕ → Bool} (h : PRecursive b) :
   set D := S.sup' hS fun i => (p i).natDegree
   let q : ℕ → ℤ := fun n => if hn : n < d + 1 then (p ⟨n, hn⟩).coeff D else 0
   have hq1 : q i1 ≠ 0 := by
-    simp only [q, dif_pos i1.isLt]
+    simp only [q, dite_eq_left i1.isLt]
     rw [hi1D, ← Polynomial.leadingCoeff]
     exact leadingCoeff_ne_zero.2 (Finset.mem_filter.1 hi1S).2
   let W : ℕ → (Fin (d + 1) → Bool) := fun n i => b (n + i)
@@ -163,7 +163,7 @@ theorem exists_const_relation {b : ℕ → Bool} (h : PRecursive b) :
   simp only [Pa, finsetSum_coeff, coeff_mul_C, coeff_zero] at hcoeff
   rw [← hcoeff, ← Fin.sum_univ_eq_sum_range (fun i => q i * z b (n + i)) (d + 1)]
   refine Finset.sum_congr rfl fun i _ => ?_
-  simp only [q, dif_pos i.isLt, z]
+  simp only [q, dite_eq_left i.isLt, z]
 
 /-! ### The equivalence -/
 

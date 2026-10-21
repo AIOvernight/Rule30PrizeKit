@@ -88,8 +88,8 @@ theorem rs_succ (X : ℕ → Cfg M) (b : ℤ) (T : ℕ) :
   unfold rs
   rw [List.range_succ, List.filter_append, List.map_append]
   by_cases h : Cross X b T ∧ (X T).h < b
-  · rw [if_pos h]; simp [h.1, h.2]
-  · rw [if_neg h]; simp [h]
+  · rw [ite_eq_left h]; simp [h.1, h.2]
+  · rw [ite_eq_right h]; simp [h]
 
 theorem mem_cs {X : ℕ → Cfg M} {b : ℤ} {T : ℕ} {x : M.Q} (hx : x ∈ cs X b T) :
     ∃ t, (X (t + 1)).q = x := by
@@ -108,23 +108,25 @@ theorem length_cs_add (X : ℕ → Cfg M) (b : ℤ) (T : ℕ) :
     by_cases hc : Cross X b T
     · by_cases hl : (X T).h < b
       · have hr : ¬ (X (T + 1)).h < b := fun h => hc (iff_of_true hl h)
-        rw [if_pos hc, if_pos (show Cross X b T ∧ (X T).h < b from ⟨hc, hl⟩), if_neg hr,
+        rw [ite_eq_left hc, ite_eq_left (show Cross X b T ∧ (X T).h < b from ⟨hc, hl⟩),
+            ite_eq_right hr,
           List.length_append, List.length_append, List.length_singleton]
-        rw [if_pos hl] at ih
+        rw [ite_eq_left hl] at ih
         omega
       · have hr : (X (T + 1)).h < b := by
           by_contra h
           exact hc (iff_of_false hl h)
-        rw [if_pos hc, if_neg (show ¬ (Cross X b T ∧ (X T).h < b) from fun h => hl h.2), if_pos hr,
+        rw [ite_eq_left hc, ite_eq_right (show ¬ (Cross X b T ∧ (X T).h < b) from fun h => hl h.2),
+            ite_eq_left hr,
           List.length_append, List.length_append, List.length_singleton, List.length_nil]
-        rw [if_neg hl] at ih
+        rw [ite_eq_right hl] at ih
         omega
     · have hside : (X T).h < b ↔ (X (T + 1)).h < b := not_not.1 hc
-      rw [if_neg hc, if_neg (show ¬ (Cross X b T ∧ (X T).h < b) from fun h => hc h.1),
+      rw [ite_eq_right hc, ite_eq_right (show ¬ (Cross X b T ∧ (X T).h < b) from fun h => hc h.1),
         List.append_nil, List.append_nil]
       by_cases hl : (X T).h < b
-      · rw [if_pos (hside.1 hl)]; rw [if_pos hl] at ih; exact ih
-      · rw [if_neg (fun h => hl (hside.2 h))]; rw [if_neg hl] at ih; exact ih
+      · rw [ite_eq_left (hside.1 hl)]; rw [ite_eq_left hl] at ih; exact ih
+      · rw [ite_eq_right (fun h => hl (hside.2 h))]; rw [ite_eq_right hl] at ih; exact ih
 
 /-- **No repetition.** In a halting run that never writes, the states after two rightward
 crossings of one boundary differ: equal ones would give equal configurations, and the run would
@@ -595,7 +597,7 @@ theorem runW_dfaOTM (w : List α) {t : ℕ} (ht : t ≤ w.length) :
     rw [(isRun_runW (M := (dfaOTM D).toMachine) some w) t, ih (by omega), step_eq rfl]
     have htape : (initW (dfaOTM D).toMachine some w).tape (t : ℤ) = some (w[t]'(by omega)) := by
       simp only [initW]
-      erw [dif_pos (by omega)]
+      erw [dite_eq_left (by omega)]
       simp only [Int.toNat_natCast]; rfl
     refine Cfg.ext' ?_ ?_ ?_
     · dsimp only
@@ -620,7 +622,7 @@ theorem runW_dfaOTM_succ (w : List α) :
     step_eq rfl]
   have htape : (initW (dfaOTM D).toMachine some w).tape (w.length : ℤ) = none := by
     simp only [initW]
-    erw [dif_neg (by omega)]
+    erw [dite_eq_right (by omega)]
     rfl
   dsimp only
   rw [htape]

@@ -166,7 +166,7 @@ theorem bddDeg_coe (c : (ZMod p)[X]) : BddDeg c.natDegree (c : PowerSeries (ZMod
   fun n hn => by rw [Polynomial.coeff_coe]; exact Polynomial.coeff_eq_zero_of_natDegree_lt hn
 
 theorem finite_bddDeg (N : ℕ) : {g : PowerSeries (ZMod p) | BddDeg N g}.Finite := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   refine Set.Finite.of_finite_image (f := fun g (i : Fin (N + 1)) => PowerSeries.coeff i g)
     (Set.toFinite _) ?_
   intro g hg h hh he
@@ -210,19 +210,19 @@ theorem exists_relation {F : PowerSeries (ZMod p)} (hF : IsAlgebraic (ZMod p)[X]
     if h : j < d + 1 then ((g ⟨j, h⟩ * P.leadingCoeff ^ (p ^ j) : (ZMod p)[X]) : PowerSeries (ZMod p))
     else 0
   refine ⟨d, Finset.univ.sup fun j : Fin (d + 1) => (g j * P.leadingCoeff ^ (p ^ (j : ℕ))).natDegree,
-    c, ⟨i₀, ?_⟩, fun j => ?_, fun j hj => by simp only [c]; rw [dif_neg (by omega)], ?_⟩
-  · simp only [c, dif_pos i₀.isLt]
+    c, ⟨i₀, ?_⟩, fun j => ?_, fun j hj => by simp only [c]; rw [dite_eq_right (by omega)], ?_⟩
+  · simp only [c, dite_eq_left i₀.isLt]
     rw [Ne, Polynomial.coe_eq_zero_iff]
     exact mul_ne_zero hi₀ (pow_ne_zero _ (leadingCoeff_ne_zero.2 hP0))
   · by_cases hj : j < d + 1
-    · simp only [c, dif_pos hj]
+    · simp only [c, dite_eq_left hj]
       exact (bddDeg_coe _).mono (Finset.le_sup (f := fun j : Fin (d + 1) =>
         (g j * P.leadingCoeff ^ (p ^ (j : ℕ))).natDegree) (Finset.mem_univ (⟨j, hj⟩ : Fin (d + 1))))
-    · simp only [c, dif_neg hj]
+    · simp only [c, dite_eq_right hj]
       exact bddDeg_zero _
   · rw [← hg, ← Fin.sum_univ_eq_sum_range (fun j => c j * F ^ (p ^ j))]
     refine Finset.sum_congr rfl fun j _ => ?_
-    simp only [c, dif_pos j.isLt, w, Algebra.smul_def, Polynomial.coe_mul,
+    simp only [c, dite_eq_left j.isLt, w, Algebra.smul_def, Polynomial.coe_mul,
       AlgebraicDFinite.algebraMap_eq_coe, Fin.eta]
     ring
 
@@ -293,8 +293,8 @@ theorem isAutomatic_of_isAlgebraic {f : ℕ → Bool}
   have hFT : F ∈ T := by
     refine ⟨fun i => if i = 0 then c 0 else 0, fun i => ?_, ?_⟩
     · by_cases hi : i = 0
-      · simp only [if_pos hi]; exact hD 0
-      · simp only [if_neg hi]; exact bddDeg_zero D
+      · simp only [ite_eq_left hi]; exact hD 0
+      · simp only [ite_eq_right hi]; exact bddDeg_zero D
     · rw [Finset.sum_eq_single 0 (fun i _ hi => by simp [hi]) (by simp)]
       simp
   -- `T` is closed under the Cartier operators
@@ -323,18 +323,18 @@ theorem isAutomatic_of_isAlgebraic {f : ℕ → Bool}
       rw [e, hrel, mul_zero, sub_zero, hgh]
     refine ⟨fun j => if j < d then cartier p r (k (j + 1)) else 0, fun j => ?_, ?_⟩
     · by_cases hj : j < d
-      · simp only [if_pos hj]
+      · simp only [ite_eq_left hj]
         exact ((hkD (j + 1)).cartier r).mono (by rw [Nat.mul_div_cancel_left _ hp.out.pos])
-      · simp only [if_neg hj]
+      · simp only [ite_eq_right hj]
         exact bddDeg_zero D
     · show c 0 * cartier p r g = ∑ j ∈ Finset.range (d + 1),
         (if j < d then cartier p r (k (j + 1)) else 0) * F ^ (p ^ j)
       rw [← cartier_pow_mul hr, show c 0 ^ p * g = c 0 ^ (p - 1) * (c 0 * g) by
           rw [← mul_assoc, ← pow_succ, Nat.sub_add_cancel hp.out.one_le],
         hsum, cartier_sum, Finset.sum_range_succ', hk0, zero_mul, cartier_zero, add_zero,
-        Finset.sum_range_succ, if_neg (lt_irrefl d), zero_mul, add_zero]
+        Finset.sum_range_succ, ite_eq_right (lt_irrefl d), zero_mul, add_zero]
       refine Finset.sum_congr rfl fun i hi => ?_
-      rw [if_pos (Finset.mem_range.1 hi), pow_succ, pow_mul, mul_comm (k (i + 1)),
+      rw [ite_eq_left (Finset.mem_range.1 hi), pow_succ, pow_mul, mul_comm (k (i + 1)),
         cartier_pow_mul hr, mul_comm]
   -- every iterated Cartier image of `F` lies in `T`
   have hiter : ∀ e r, r < p ^ e → cartierPow p e r F ∈ T := by
@@ -375,7 +375,7 @@ theorem eq_sum_cartier (g : PowerSeries (ZMod p)) :
   simp only [PowerSeries.coeff_X_pow_mul', coeff_pow_p, coeff_cartier]
   have hp0 : 0 < p := hp.out.pos
   rw [Finset.sum_eq_single (n % p)]
-  · rw [if_pos (Nat.mod_le n p), if_pos (Nat.dvd_sub_mod n),
+  · rw [ite_eq_left (Nat.mod_le n p), ite_eq_left (Nat.dvd_sub_mod n),
       Nat.mul_div_cancel' (Nat.dvd_sub_mod n),
       Nat.sub_add_cancel (Nat.mod_le n p)]
   · intro r hr hne
@@ -416,7 +416,7 @@ theorem isAlgebraic_of_isAutomatic {f : ℕ → Bool} (hf : IsAutomatic p f) :
     IsAlgebraic (RatFunc (ZMod p))
       ((LinearRelations.series (ZMod p) f : PowerSeries (ZMod p)) : (ZMod p)⸨X⸩) := by
   classical
-  haveI : CharP (ZMod p)⸨X⸩ p :=
+  have : CharP (ZMod p)⸨X⸩ p :=
     charP_of_injective_algebraMap (algebraMap (ZMod p) (ZMod p)⸨X⸩).injective p
   let ser : (ℕ → Bool) → (ZMod p)⸨X⸩ := fun g =>
     ((LinearRelations.series (ZMod p) g : PowerSeries (ZMod p)) : (ZMod p)⸨X⸩)
@@ -451,11 +451,11 @@ theorem isAlgebraic_of_isAutomatic {f : ℕ → Bool} (hf : IsAutomatic p f) :
   -- the span of the `p`-th powers has no larger dimension
   obtain ⟨b, hbT, hbspan, hbli⟩ := exists_linearIndependent (RatFunc (ZMod p)) T
   have hbfin : b.Finite := hT.subset hbT
-  haveI : Fintype b := hbfin.fintype
-  haveI : FiniteDimensional (RatFunc (ZMod p)) U := FiniteDimensional.span_of_finite _ hT
-  haveI : FiniteDimensional (RatFunc (ZMod p)) U' :=
+  have : Fintype b := hbfin.fintype
+  have : FiniteDimensional (RatFunc (ZMod p)) U := FiniteDimensional.span_of_finite _ hT
+  have : FiniteDimensional (RatFunc (ZMod p)) U' :=
     FiniteDimensional.span_of_finite _ (hT.image _)
-  haveI : FiniteDimensional (RatFunc (ZMod p)) (Submodule.span (RatFunc (ZMod p)) ((· ^ p) '' b)) :=
+  have : FiniteDimensional (RatFunc (ZMod p)) (Submodule.span (RatFunc (ZMod p)) ((· ^ p) '' b)) :=
     FiniteDimensional.span_of_finite _ (hbfin.image _)
   have hrankU : Module.finrank (RatFunc (ZMod p)) U = b.toFinset.card := by
     rw [show U = Submodule.span (RatFunc (ZMod p)) b from hbspan.symm]
@@ -503,9 +503,9 @@ theorem isAlgebraic_of_isAutomatic {f : ℕ → Bool} (hf : IsAutomatic p f) :
     have h1 := congrArg (fun q : (RatFunc (ZMod p))[X] => q.coeff (p ^ (m₀ : ℕ))) h0
     simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow,
       Polynomial.coeff_zero] at h1
-    rw [Finset.sum_eq_single m₀ (fun m _ hm => if_neg fun heq =>
+    rw [Finset.sum_eq_single m₀ (fun m _ hm => ite_eq_right fun heq =>
         hm (Fin.ext (Nat.pow_right_injective hp.out.two_le heq.symm)))
-      (fun h => absurd (Finset.mem_univ _) h), if_pos rfl] at h1
+      (fun h => absurd (Finset.mem_univ _) h), ite_eq_left rfl] at h1
     exact hm₀ h1
   · simp only [map_sum, map_mul, Polynomial.aeval_C, Polynomial.aeval_X_pow, ← Algebra.smul_def]
     exact hc

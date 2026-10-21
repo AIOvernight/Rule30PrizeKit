@@ -202,14 +202,12 @@ theorem locPer_of_pair {a b : ℕ} {f : ℕ → Bool} (ha : 0 < a) (hb : 0 < b) 
   have hvξD : ((v : ℤ) + 1) * D ≤ ξ * D := mul_le_mul_of_nonneg_right (by exact_mod_cast hvξ) hD
   have hz' : (0 : ℤ) ≤ z - v * d := by
     have : (6 : ℤ) * R ≤ 4 * N := by exact_mod_cast (by omega : 6 * R ≤ 4 * N)
-    push_cast at hz1
     nlinarith
   obtain ⟨z', hz'eq⟩ : ∃ z' : ℕ, (z' : ℤ) = z - v * d := ⟨_, Int.toNat_of_nonneg hz'⟩
   have hz'le : z' ≤ 2 * A := by
     have : (6 : ℤ) * R ≤ 4 * N := by exact_mod_cast (by omega : 6 * R ≤ 4 * N)
     have hA : (5 : ℤ) * N < 6 * A := by nlinarith
     zify
-    push_cast at hz2
     nlinarith
   have e1 : v * N + z = v * A + z' := by
     zify
@@ -234,9 +232,9 @@ theorem eventuallyPeriodic_of_isAutomatic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤
     (hab : ∀ m n, 0 < m → 0 < n → a ^ m ≠ b ^ n) {f : ℕ → Bool} (hfa : IsAutomatic a f)
     (hfb : IsAutomatic b f) : EventuallyPeriodic f := by
   classical
-  haveI : Finite (kernel a f) := hfa.to_subtype
-  haveI : Finite (kernel b f) := hfb.to_subtype
-  haveI : Fintype (kernel b f → Fin 3 → Bool) := Fintype.ofFinite _
+  have : Finite (kernel a f) := hfa.to_subtype
+  have : Finite (kernel b f) := hfb.to_subtype
+  have : Fintype (kernel b f → Fin 3 → Bool) := Fintype.ofFinite _
   -- for each `b`-signature shared by infinitely many numbers, two of them with one `a`-signature
   have hpair : ∀ s : kernel b f → Fin 3 → Bool, {x | sig b f x = s}.Infinite →
       ∃ xy : ℕ × ℕ, xy.1 ≠ xy.2 ∧ sig b f xy.1 = s ∧ sig b f xy.2 = s ∧

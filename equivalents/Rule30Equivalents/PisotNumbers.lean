@@ -92,8 +92,8 @@ theorem eventuallyPeriodic_of_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) {b : �
     (h : value β b ∈ IntermediateField.adjoin ℚ ({β} : Set ℝ)) : EventuallyPeriodic b := by
   classical
   set K := IntermediateField.adjoin ℚ ({β} : Set ℝ)
-  haveI : FiniteDimensional ℚ K := IntermediateField.adjoin.finiteDimensional hP.1.tower_top
-  haveI : NumberField K := ⟨⟩
+  have : FiniteDimensional ℚ K := IntermediateField.adjoin.finiteDimensional hP.1.tower_top
+  have : NumberField K := ⟨⟩
   set βK : K := IntermediateField.AdjoinSimple.gen ℚ β
   set xK : K := ⟨value β b, h⟩
   have hval : ∀ y : K, (K.val : K →+* ℝ) y = y := fun _ => rfl
@@ -170,7 +170,7 @@ theorem eventuallyPeriodic_of_mem_adjoin (hP : IsPisot β) (hβ : 2 < β) {b : �
         abs_of_nonneg (value_nonneg (one_lt hβ) _)]
       have := value_lt_one hβ (tail b t)
       linarith [hterm φ]
-    · rw [if_pos hb] at hsum
+    · rw [ite_eq_left hb] at hsum
       -- `φ(x_t) = γᵗ φ(x_β) - lead γ`
       have e : φ (xt t) = φ βK ^ t * φ xK - lead (φ βK) b t := by
         simp only [xt, map_sub, map_mul, map_pow, map_lead]

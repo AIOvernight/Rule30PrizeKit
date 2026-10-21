@@ -153,7 +153,7 @@ theorem enc_even (v : ℕ → ℕ) (V : ℕ → Set ℕ) (i : ℕ) : enc v V (2 
 
 theorem enc_odd (v : ℕ → ℕ) (V : ℕ → Set ℕ) (j : ℕ) : enc v V (2 * j + 1) = V j := by
   simp only [enc]
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   congr 1
   omega
 
@@ -245,7 +245,7 @@ def Ty (m : ℕ) : ℕ → Type
 instance finiteTy (m : ℕ) : ∀ k, Finite (Ty m k)
   | 0 => inferInstanceAs (Finite (Set (Atom m)))
   | k + 1 => by
-    haveI := finiteTy m k
+    have := finiteTy m k
     exact inferInstanceAs (Finite (Set (Atom m) × Set (Fin m × Ty m k)))
 
 /-- The atomic facts of `ρ`. -/
@@ -520,7 +520,7 @@ theorem eventuallyPeriodic_of_msoDefinable {f : ℕ → Bool} (h : MSODefinable 
   have h2 := hφ t
   rw [MSO.holds_iff_toMSO0] at h1 h2
   have h3 := hNP t ht
-  simp only [Set.mem_setOf_eq] at h1 h2
+  simp only [Set.mem_ofPred_eq] at h1 h2
   rw [Bool.eq_iff_iff, h1, h2]
   exact h3
 
@@ -629,7 +629,7 @@ theorem holds_periodicBody {f : ℕ → Bool} {N P n : ℕ} (V : ℕ → Set ℕ
     MSO.holds_bigOr, MSO.Holds, List.forall_mem_map, Function.update_apply]
   simp only [List.mem_map, List.mem_range, List.mem_filter, exists_exists_and_eq_and, MSO.Holds,
     show (1 : ℕ) ≠ 3 by norm_num, show (1 : ℕ) ≠ 2 by norm_num, show (2 : ℕ) ≠ 3 by norm_num,
-    if_false, if_true]
+    ite_false, ite_true]
   have hinit : (∀ y : ℕ, (¬ ∃ w, w < y) → y ∈ V 0) ↔ 0 ∈ V 0 := by
     constructor
     · intro h
@@ -666,14 +666,14 @@ theorem holds_periodicFormula {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P)
   · intro h
     -- the sets of the counting automaton itself
     obtain ⟨s, hs, hfs, hn⟩ := h (fun j => if j < N + P then {t | (cnt N P hP t : ℕ) = j} else ∅)
-      (fun j hj => if_neg hj)
-      ⟨by rw [if_pos (by omega)]; rfl, fun y s hs hy => by
-        rw [if_pos hs] at hy
-        rw [if_pos (wrap_lt hP s)]
+      (fun j hj => ite_eq_right hj)
+      ⟨by rw [ite_eq_left (by omega)]; rfl, fun y s hs hy => by
+        rw [ite_eq_left hs] at hy
+        rw [ite_eq_left (wrap_lt hP s)]
         show (cnt N P hP (y + 1) : ℕ) = wrap N P s
         rw [← hy]
         rfl⟩
-    rw [if_pos hs] at hn
+    rw [ite_eq_left hs] at hn
     rw [← apply_cnt hP hf n, show (cnt N P hP n : ℕ) = s from hn]
     exact hfs
   · intro hfn V _ ⟨h0, hstep⟩

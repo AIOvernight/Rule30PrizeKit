@@ -210,14 +210,14 @@ theorem exists_mul_eq_of_eventuallyPeriodic [Nontrivial K] {b : ℕ → Bool}
   refine ⟨PowerSeries.trunc (T + p)
     (((1 - Polynomial.X ^ p : K[X]) : PowerSeries K) * series K b), 1 - Polynomial.X ^ p, ?_, ?_⟩
   · rw [Polynomial.coeff_sub, Polynomial.coeff_one_zero, Polynomial.coeff_X_pow,
-      if_neg (by omega), sub_zero]
+      ite_eq_right (by omega), sub_zero]
     exact one_ne_zero
   · refine PowerSeries.ext fun n => ?_
     rw [Polynomial.coeff_coe, PowerSeries.coeff_trunc]
     split_ifs with hn
     · rfl
     · rw [Polynomial.coe_sub, Polynomial.coe_one, Polynomial.coe_pow, Polynomial.coe_X, sub_mul,
-        one_mul, map_sub, PowerSeries.coeff_X_pow_mul', if_pos (by omega), coeff_series,
+        one_mul, map_sub, PowerSeries.coeff_X_pow_mul', ite_eq_left (by omega), coeff_series,
         coeff_series]
       have hn' := hper (n - p) (by omega)
       rw [Nat.sub_add_cancel (by omega)] at hn'
@@ -257,10 +257,10 @@ theorem eventuallyPeriodic_of_mul_eq {b : ℕ → Bool} {P Q : K[X]} (hQ : Q ≠
       (if b (t + m) then 1 else 0))
     unfold toK at h0
     cases hb : b (t + w)
-    · rw [hb, if_neg (by simp), mul_zero, add_zero] at h0
+    · rw [hb, ite_eq_right (by simp), mul_zero, add_zero] at h0
       rw [h0, neg_zero]
       exact (decide_eq_false hq).symm
-    · rw [hb, if_pos rfl, mul_one] at h0
+    · rw [hb, ite_eq_left rfl, mul_one] at h0
       exact (decide_eq_true (eq_neg_of_add_eq_zero_right h0)).symm
   refine WordsAutomata.eventuallyPeriodic_of_determined (n := w) (T := P.natDegree + 1)
     fun i i' hi hi' hw => ?_
@@ -399,12 +399,12 @@ theorem exists_isSolution_of_eventuallyPeriodic {b : ℕ → Bool} (h : Eventual
   show toK K b (n + (T + P)) =
     ∑ i : Fin (T + P), (if (i : ℕ) = T then (1 : K) else 0) * toK K b (n + i)
   rw [Finset.sum_eq_single (⟨T, by omega⟩ : Fin (T + P))]
-  · simp only [if_true, one_mul]
+  · simp only [ite_true, one_mul]
     unfold toK
     rw [show n + (T + P) = n + T + P by omega, hper (n + T) (by omega)]
   · intro j _ hj
     have hjT : (j : ℕ) ≠ T := fun h => hj (Fin.ext h)
-    simp only [hjT, if_false, zero_mul]
+    simp only [hjT, ite_false, zero_mul]
   · intro h
     exact absurd (Finset.mem_univ _) h
 
@@ -504,7 +504,7 @@ theorem exists_zero_set_of_eventuallyPeriodic {b : ℕ → Bool} (h : Eventually
     exact ⟨T, P, hP, fun t ht => by simp only [hper t ht]⟩
   obtain ⟨E, hE⟩ := exists_isSolution_of_eventuallyPeriodic (K := K) h'
   refine ⟨E, _, hE, Set.ext fun t => ?_⟩
-  simp only [Set.mem_setOf_eq, toK]
+  simp only [Set.mem_ofPred_eq, toK]
   rcases Bool.eq_false_or_eq_true (b t) with hb | hb <;> simp [hb]
 
 /-! ### Linear independence of the shifts -/
@@ -602,8 +602,8 @@ theorem eventuallyPeriodic_iff_exists_aeval_eq_zero (b : ℕ → Bool) :
   · rintro ⟨T, P, hP, hper⟩
     refine ⟨Polynomial.X ^ (T + P) - Polynomial.X ^ T, fun h0 => ?_, ?_⟩
     · have := congrArg (Polynomial.coeff · (T + P)) h0
-      simp only [Polynomial.coeff_sub, Polynomial.coeff_X_pow, if_true, Polynomial.coeff_zero,
-        if_neg (show T + P ≠ T by omega), sub_zero] at this
+      simp only [Polynomial.coeff_sub, Polynomial.coeff_X_pow, ite_true, Polynomial.coeff_zero,
+        ite_eq_right (show T + P ≠ T by omega), sub_zero] at this
       exact one_ne_zero this
     · funext t
       rw [map_sub, map_pow, map_pow, Polynomial.aeval_X, LinearMap.sub_apply, Pi.sub_apply,
@@ -708,13 +708,13 @@ theorem eventuallyPeriodic_of_hankel_rank_le {b : ℕ → Bool} {r : ℕ}
   refine eventuallyPeriodic_of_relation' (a := fun m => if h : m < r + 1 then a ⟨m, h⟩ else 0)
     (N := r + 1) (T := 0) ⟨j, j.isLt, by
       show (if h : (j : ℕ) < r + 1 then a ⟨j, h⟩ else 0) ≠ 0
-      rw [dif_pos j.isLt]
+      rw [dite_eq_left j.isLt]
       exact hj⟩ fun t _ => ?_
   rw [← Fin.sum_univ_eq_sum_range
     (fun m => (if h : m < r + 1 then a ⟨m, h⟩ else 0) * toK K b (t + m)) (r + 1)]
   rw [← ha t]
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [dif_pos i.isLt, mul_comm]
+  rw [dite_eq_left i.isLt, mul_comm]
 
 /-- **Hankel rank.** A bit sequence is eventually periodic iff the ranks over `K` of its Hankel
 matrices `(b(i + j))_{i,j<n}` are bounded. -/
@@ -779,7 +779,7 @@ theorem det_hankel_ne_zero_of_error {s : ℕ → K} {A : K[X]} (hA : A.Monic) {r
     rw [Finset.sum_eq_single j]
     · simp
     · intro k _ hk
-      rw [if_neg]
+      rw [ite_eq_right]
       intro h
       exact hk (Fin.ext h)
     · intro h

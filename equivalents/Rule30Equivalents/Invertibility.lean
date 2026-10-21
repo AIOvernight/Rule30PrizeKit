@@ -179,7 +179,7 @@ theorem measurePreserving_twoSidedTrace :
   have hset : {v : ℕ → Bool | ∀ i ∈ s, v (φ i) ∈ t i} =
       Set.pi ↑(s.image φ) fun k : ℕ => t ((k : ℤ) - m) := by
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_pi, Finset.coe_image, Set.mem_image, Finset.mem_coe]
+    simp only [Set.mem_ofPred_eq, Set.mem_pi, Finset.coe_image, Set.mem_image, Finset.mem_coe]
     constructor
     · rintro h k ⟨i, hi, rfl⟩
       rw [hφ i hi]
@@ -195,9 +195,9 @@ theorem measurePreserving_twoSidedTrace :
   -- almost surely the event is about the center column of `G^m x`
   have hae : twoSidedTrace ⁻¹' Set.pi s t =ᵐ[coins ℤ]
       (inv^[m]) ⁻¹' (Genericity.trace ⁻¹' {v : ℕ → Bool | ∀ i ∈ s, v (φ i) ∈ t i}) := by
-    rw [Filter.eventuallyEq_set]
+    rw [Filter.eventuallyEqSet_iff]
     filter_upwards [ae_evol_one_inv_iterate] with x hx
-    simp only [Set.mem_preimage, Set.mem_pi, Finset.mem_coe, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_pi, Finset.mem_coe, Set.mem_ofPred_eq]
     exact forall₂_congr fun i hi => by rw [twoSidedTrace_eq hx m (hm i hi)]
   rw [Measure.map_apply measurable_twoSidedTrace hpi, measure_congr hae,
     (measurePreserving_inv.iterate m).measure_preimage
@@ -214,12 +214,13 @@ theorem ae_twoSidedTrace_evol_one :
   funext t
   unfold twoSidedTrace
   by_cases h : 0 ≤ t
-  · rw [if_pos h, if_pos (by omega), ← evol_add_eq, show 1 + t.toNat = (t + 1).toNat by omega]
+  · rw [ite_eq_left h, ite_eq_left (by omega), ← evol_add_eq,
+      show 1 + t.toNat = (t + 1).toNat by omega]
   · obtain ⟨n, hn⟩ : ∃ n, (-t).toNat = n + 1 := ⟨(-t).toNat - 1, by omega⟩
-    rw [if_neg h, hn, Function.iterate_succ_apply, hx]
+    rw [ite_eq_right h, hn, Function.iterate_succ_apply, hx]
     by_cases h' : 0 ≤ t + 1
-    · rw [if_pos h', show n = 0 by omega, show (t + 1).toNat = 0 by omega]
+    · rw [ite_eq_left h', show n = 0 by omega, show (t + 1).toNat = 0 by omega]
       rfl
-    · rw [if_neg h', show (-(t + 1)).toNat = n by omega]
+    · rw [ite_eq_right h', show (-(t + 1)).toNat = n by omega]
 
 end Rule30Equivalents.Invertibility

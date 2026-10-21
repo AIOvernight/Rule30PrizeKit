@@ -148,8 +148,8 @@ theorem eval_full (f : (ℤ → Bool) → Bool) : ∀ (l : List ℤ) (ρ x : ℤ
           simp [hj, hb]
         · simp [hj, hji]
     cases hx : x i
-    · rw [if_neg (by simp), eval_full f l, key false hx]
-    · rw [if_pos rfl, eval_full f l, key true hx]
+    · rw [ite_eq_right (by simp), eval_full f l, key false hx]
+    · rw [ite_eq_left rfl, eval_full f l, key true hx]
 
 /-- **The matching upper bound**: querying the `2t + 1` cells of the light cone computes the
 center cell after `t` steps, so its query complexity lies between `2t − 1` and `2t + 1`. -/

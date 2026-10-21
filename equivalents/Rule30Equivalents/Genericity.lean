@@ -118,7 +118,7 @@ theorem exists_extend (x : ℤ → Bool) (n : ℕ) (w : ℕ → Bool) (hw : ∀ 
     · exact (hstable 0 k (Nat.zero_le k) p (by push_cast; omega)).symm
     · have hk : (-p).toNat - n ≤ k := by omega
       exact (hstable _ k hk p (by push_cast; omega)).symm
-  refine ⟨y, fun p hp => by simp only [y, if_pos hp], funext fun t => ?_⟩
+  refine ⟨y, fun p hp => by simp only [y, ite_eq_left hp], funext fun t => ?_⟩
   show evol y t 0 = w t
   rw [AlgebraicDegree.evol_congr t 0 (y := cfg t) fun j hj1 hj2 => hy t j (by push_cast; omega),
     htrace t t (by omega)]
@@ -192,12 +192,12 @@ theorem residual_disjunctive : {v : ℕ → Bool | Disjunctive v} ∈ residual (
   have h : {v : ℕ → Bool | Disjunctive v} =
       ⋂ p : (Σ n, Fin n → Bool), {v | ∃ i, ∀ j : Fin p.1, v (i + j) = p.2 j} := by
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_iInter, Disjunctive, Sigma.forall]
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, Disjunctive, Sigma.forall]
   rw [h]
   refine countable_iInter_mem.2 fun p => residual_of_dense_open ?_ ?_
-  · rw [Set.setOf_exists]
+  · rw [Set.ofPred_exists]
     refine isOpen_iUnion fun i => ?_
-    rw [Set.setOf_forall]
+    rw [Set.ofPred_forall]
     exact isOpen_iInter_of_finite fun j =>
       (isOpen_discrete ({p.2 j} : Set Bool)).preimage
         (continuous_apply (A := fun _ : ℕ => Bool) (i + (j : ℕ)))
@@ -206,9 +206,9 @@ theorem residual_disjunctive : {v : ℕ → Bool | Disjunctive v} ∈ residual (
     obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
     -- copy the prefix of `v`, then the word
     refine ⟨fun t => if t < L then v t else if h : t - L < p.1 then p.2 ⟨t - L, h⟩ else false,
-      hL fun t ht => by simp only [if_pos ht], L, fun j => ?_⟩
-    simp only [show ¬ (L + (j : ℕ) < L) by omega, if_false, show L + (j : ℕ) - L = j by omega,
-      dif_pos j.isLt]
+      hL fun t ht => by simp only [ite_eq_left ht], L, fun j => ?_⟩
+    simp only [show ¬ (L + (j : ℕ) < L) by omega, ite_false, show L + (j : ℕ) - L = j by omega,
+      dite_eq_left j.isLt]
 
 /-- The number of `true` values of `v` before `n`. -/
 def count (v : ℕ → Bool) (n : ℕ) : ℕ := ((List.range n).filter v).length
@@ -230,7 +230,7 @@ theorem le_count {v : ℕ → Bool} {L : ℕ} (h : ∀ t, L ≤ t → v t = true
     rw [count_succ]
     have := le_count h n
     by_cases hn : L ≤ n
-    · rw [h n hn, if_pos rfl]
+    · rw [h n hn, ite_eq_left rfl]
       omega
     · omega
 
@@ -245,19 +245,20 @@ theorem isMeagre_halfDensity : IsMeagre {v : ℕ → Bool | Symmetry.HalfDensity
       rw [isOpen_iff_mem_nhds]
       intro v hv
       refine Filter.mem_of_superset (prefix_mem_nhds v n) fun u hu => ?_
-      rw [Set.mem_setOf_eq, count_congr fun t ht => hu t ht.le]
+      rw [Set.mem_ofPred_eq, count_congr fun t ht => hu t ht.le]
       exact hv
     · rw [dense_iff_inter_open]
       rintro U hU ⟨v, hv⟩
       obtain ⟨L, hL⟩ := exists_prefix_subset (hU.mem_nhds hv)
       -- copy the prefix of `v`, then only ones
-      refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [if_pos ht], ?_⟩
+      refine ⟨fun t => if t < L then v t else true, hL fun t ht => by simp only [ite_eq_left ht],
+          ?_⟩
       refine Set.mem_iUnion.2 ⟨3 * (L + N + 1), by omega, ?_⟩
       have := le_count (v := fun t => if t < L then v t else true) (L := L)
-        (fun t ht => by simp only [show ¬ t < L by omega, if_false]) (3 * (L + N + 1))
+        (fun t ht => by simp only [show ¬ t < L by omega, ite_false]) (3 * (L + N + 1))
       omega
   refine Filter.mem_of_superset hA fun v hv hhalf => ?_
-  simp only [Set.mem_iInter, Set.mem_iUnion, Set.mem_setOf_eq] at hv
+  simp only [Set.mem_iInter, Set.mem_iUnion, Set.mem_ofPred_eq] at hv
   obtain ⟨N, hN⟩ := hhalf 10 (by norm_num)
   obtain ⟨n, hNn, hn⟩ := hv N
   have h1 := hN n hNn.le
@@ -290,7 +291,7 @@ def preimWin (y : ℤ → Bool) (n : ℕ) (p : ℤ) : Bool :=
 theorem preimWin_eq (y : ℤ → Bool) (n : ℕ) (k : ℕ) :
     preimWin y n ((n : ℤ) + 1 - k) = (preimPair y n k).1 := by
   unfold preimWin
-  rw [if_pos (by omega), show ((n : ℤ) + 1 - ((n : ℤ) + 1 - k)).toNat = k by omega]
+  rw [ite_eq_left (by omega), show ((n : ℤ) + 1 - ((n : ℤ) + 1 - k)).toNat = k by omega]
 
 theorem preimWin_succ (y : ℤ → Bool) (n : ℕ) (k : ℕ) :
     preimWin y n ((n : ℤ) + 1 - (k + 1 : ℕ) + 1) = (preimPair y n (k + 1)).2 := by
@@ -318,7 +319,7 @@ theorem surjective_evol_one : Function.Surjective fun x : ℤ → Bool => evol x
   intro y
   let F : ℕ → Set (ℤ → Bool) := fun n => {x | ∀ p, -(n : ℤ) ≤ p → p ≤ n → evol x 1 p = y p}
   have hclosed : ∀ n, IsClosed (F n) := fun n => by
-    simp only [F, Set.setOf_forall]
+    simp only [F, Set.ofPred_forall]
     refine isClosed_iInter fun p => isClosed_iInter fun _ => isClosed_iInter fun _ => ?_
     exact (isClosed_discrete {y p}).preimage (continuous_evol 1 p)
   have hne : ∀ n, (F n).Nonempty := fun n => ⟨preimWin y n, fun p _ hp => evol_preimWin y n p hp⟩
@@ -351,7 +352,7 @@ theorem image_omegaLimit_eq_mapClusterPt {X Y : Type*} [TopologicalSpace X] [Com
   · intro hz
     -- the times at which the images approach `z`
     set G := atTop ⊓ comap (fun t => π (ϕ t x)) (𝓝 z) with hG
-    haveI : NeBot G := by
+    have : NeBot G := by
       rw [hG, inf_comm]
       exact neBot_inf_comap_iff_map'.2 hz.neBot
     obtain ⟨y, -, hy⟩ := isCompact_univ.exists_clusterPt (f := map (fun t => ϕ t x) G)
@@ -376,7 +377,7 @@ theorem image_omegaLimit_eq {X Y : Type*} [TopologicalSpace X] [CompactSpace X]
   rw [image_omegaLimit_eq_mapClusterPt hπ ϕ x]
   ext z
   rw [mem_omegaLimit_singleton_iff_mapClusterPt]
-  simp only [mem_setOf_eq, hsemi]
+  simp only [mem_ofPred_eq, hsemi]
 
 /-- **The omega-limit set of the center column is the trace of that of the seed**: `ω_σ(c)` is
 the image under the center trace of the omega-limit set of the single black cell under rule 30. -/

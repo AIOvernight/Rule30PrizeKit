@@ -43,7 +43,7 @@ def vanishBelow (V : Submodule K (ℕ → K)) (N : ℕ) : Submodule K (ℕ → K
 theorem exists_eq_zero_of_vanish (V : Submodule K (ℕ → K)) [FiniteDimensional K V] :
     ∃ N, ∀ v ∈ V, (∀ n < N, v n = 0) → v = 0 := by
   classical
-  haveI : ∀ N, FiniteDimensional K (vanishBelow V N) := fun N =>
+  have : ∀ N, FiniteDimensional K (vanishBelow V N) := fun N =>
     Submodule.finiteDimensional_of_le fun _ hv => hv.1
   -- an `N` of least dimension
   have hex : ∃ m, ∃ N, finrank K (vanishBelow V N) = m := ⟨_, 0, rfl⟩
@@ -70,7 +70,7 @@ theorem isRegularSeq_iff_isAutomatic (k : ℕ) (f : ℕ → Bool) :
     IsRegularSeq K k f ↔ IsAutomatic k f := by
   constructor
   · intro h
-    haveI : FiniteDimensional K (Submodule.span K (toK K '' kernel k f)) := h
+    have : FiniteDimensional K (Submodule.span K (toK K '' kernel k f)) := h
     obtain ⟨N, hN⟩ := exists_eq_zero_of_vanish (Submodule.span K (toK K '' kernel k f))
     -- the kernel embeds into `Fin N → Bool`
     have hinj : Function.Injective fun g : kernel k f => fun i : Fin N => g.1 i := by

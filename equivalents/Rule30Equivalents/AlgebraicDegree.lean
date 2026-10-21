@@ -145,7 +145,7 @@ theorem evol_congr {x y : ℤ → Bool} (t : ℕ) (p : ℤ)
 theorem evol_update_of_far {t : ℕ} {p i : ℤ} (hi : i < p - t ∨ p + t < i) (x : ℤ → Bool)
     (b : Bool) : evol (Function.update x i b) t p = evol x t p :=
   evol_congr t p fun j h1 h2 => by
-    rw [Function.update_apply, if_neg (show j ≠ i by omega)]
+    rw [Function.update_apply, ite_eq_right (show j ≠ i by omega)]
 
 /-- Rule 30 is left-permutive: the cell `(t, p)` flips with `x_{p-t}`. -/
 theorem evol_update_left (x : ℤ → Bool) :
@@ -460,12 +460,12 @@ theorem side_congr {w w' : ℕ → Bool} :
 theorem side_update_of_le {w : ℕ → Bool} {k s i : ℕ} (hi : s + (k + 1) / 2 ≤ i) (b : Bool) :
     side (Function.update w i b) k s = side w k s :=
   side_congr k s fun j _ h2 => by
-    rw [Function.update_apply, if_neg (show j ≠ i by omega)]
+    rw [Function.update_apply, ite_eq_right (show j ≠ i by omega)]
 
 theorem side_update_of_lt {w : ℕ → Bool} {k s i : ℕ} (hi : i < s) (b : Bool) :
     side (Function.update w i b) k s = side w k s :=
   side_congr k s fun j h1 _ => by
-    rw [Function.update_apply, if_neg (show j ≠ i by omega)]
+    rw [Function.update_apply, ite_eq_right (show j ≠ i by omega)]
 
 /-- The odd diagonals are linear in their last variable. -/
 theorem side_update_flip (w : ℕ → Bool) : ∀ j s,
@@ -673,7 +673,7 @@ theorem card_filter_powerset_insert {S : Finset ℤ} {i : ℤ} (hi : i ∉ S) (P
   rw [Finset.powerset_insert, Finset.filter_union, Finset.card_union_of_disjoint]
   · rw [Finset.filter_image, Finset.card_image_of_injOn]
     intro U hU V hV h
-    simp only [Finset.coe_filter, Finset.mem_powerset, Set.mem_setOf_eq] at hU hV
+    simp only [Finset.coe_filter, Finset.mem_powerset, Set.mem_ofPred_eq] at hU hV
     have hiU : i ∉ U := fun h' => hi (hU.1 h')
     have hiV : i ∉ V := fun h' => hi (hV.1 h')
     rw [← Finset.erase_insert hiU, ← Finset.erase_insert hiV]
@@ -707,7 +707,7 @@ theorem card_trace (w : ℕ → Bool) : ∀ n : ℕ,
         · rfl
         · simp at h
       · intro h
-        rw [if_neg (by simp)] at h
+        rw [ite_eq_right (by simp)] at h
         subst h
         simp
     · constructor
@@ -715,7 +715,7 @@ theorem card_trace (w : ℕ → Bool) : ∀ n : ℕ,
         · simp at h
         · rfl
       · intro h
-        rw [if_pos rfl] at h
+        rw [ite_eq_left rfl] at h
         subst h
         simp
   | n + 1 => by

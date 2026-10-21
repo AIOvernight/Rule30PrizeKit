@@ -75,10 +75,10 @@ theorem pos_spec (hP : 0 < P) : ∀ t, ∃ k, t = pos T P t + k * P ∧ (0 < k �
     show ∃ k', t + 1 = succPos T P (pos T P t) + k' * P ∧ (0 < k' → T ≤ succPos T P (pos T P t))
     unfold succPos
     by_cases h : pos T P t + 1 < T + P
-    · rw [if_pos h]
+    · rw [ite_eq_left h]
       refine ⟨k, by omega, fun hk0 => ?_⟩
       have := hT hk0; omega
-    · rw [if_neg h]
+    · rw [ite_eq_right h]
       exact ⟨k + 1, by rw [Nat.add_mul]; omega, fun _ => le_refl T⟩
 
 theorem periodic_add_mul (hper : ∀ t, T ≤ t → b (t + P) = b t) {x : ℕ} (hx : T ≤ x) :
@@ -129,21 +129,21 @@ theorem lasso_accepts_iff (hP : 0 < P) (hper : ∀ t, T ≤ t → b (t + P) = b 
         refine ⟨h0, ?_⟩
         by_contra hne
         have h1 : r 1 = none := by
-          rw [hstep', h0]; show (if w 0 = b 0 then _ else none) = none; rw [if_neg hne]
+          rw [hstep', h0]; show (if w 0 = b 0 then _ else none) = none; rw [ite_eq_right hne]
         obtain ⟨m, hm, hmacc⟩ := hacc 1
         exact hmacc (by rw [show m = 1 + (m - 1) by omega]; exact hdead 1 h1 _)
       | succ n ih =>
         have hrn : r (n + 1) = some ⟨pos T P (n + 1), pos_lt T P hP (n + 1)⟩ := by
           rw [hstep', ih.1]
           show (if w n = b (pos T P n) then _ else none) = _
-          rw [if_pos (by rw [b_pos b T P hP hper]; exact ih.2)]
+          rw [ite_eq_left (by rw [b_pos b T P hP hper]; exact ih.2)]
           rfl
         refine ⟨hrn, ?_⟩
         by_contra hne
         have h2 : r (n + 2) = none := by
           rw [hstep', hrn]
           show (if w (n + 1) = b (pos T P (n + 1)) then _ else none) = none
-          rw [if_neg (by rw [b_pos b T P hP hper]; exact hne)]
+          rw [ite_eq_right (by rw [b_pos b T P hP hper]; exact hne)]
         obtain ⟨m, hm, hmacc⟩ := hacc (n + 2)
         exact hmacc (by rw [show m = n + 2 + (m - (n + 2)) by omega]; exact hdead _ h2 _)
     funext n
@@ -152,7 +152,7 @@ theorem lasso_accepts_iff (hP : 0 < P) (hper : ∀ t, T ≤ t → b (t + P) = b 
     refine ⟨fun n => some ⟨pos T P n, pos_lt T P hP n⟩, rfl, fun n => ?_,
       fun N => ⟨N, le_refl N, Option.some_ne_none _⟩⟩
     show some _ = (if w n = w (pos T P n) then _ else none)
-    rw [if_pos (b_pos w T P hP hper n).symm]
+    rw [ite_eq_left (b_pos w T P hP hper n).symm]
     rfl
 
 end Lasso
@@ -163,13 +163,13 @@ end Lasso
 theorem eventuallyPeriodic_of_accepts_iff {b : ℕ → Bool} (B : Buchi Bool)
     (hB : ∀ w, B.Accepts w ↔ w = b) : EventuallyPeriodic b := by
   obtain ⟨r, h0, hstep, hacc⟩ := (hB b).2 rfl
-  haveI := B.fin
+  have := B.fin
   -- an accepting state at two times `m < n`
   have hinf : Set.Infinite {k | r k ∈ B.acc} :=
     Set.infinite_of_forall_exists_gt fun a => by
       obtain ⟨k, hk, hkacc⟩ := hacc (a + 1)
       exact ⟨k, hkacc, by omega⟩
-  haveI := hinf.to_subtype
+  have := hinf.to_subtype
   obtain ⟨x, y, hxy, hxyr⟩ :=
     Finite.exists_ne_map_eq_of_infinite (fun k : {k | r k ∈ B.acc} => r k)
   have hne : (x : ℕ) ≠ y := fun h => hxy (Subtype.ext h)
@@ -182,7 +182,7 @@ theorem eventuallyPeriodic_of_accepts_iff {b : ℕ → Bool} (B : Buchi Bool)
   have hL : 0 < L := by omega
   let φ : ℕ → ℕ := fun t => if t < m then t else m + (t - m) % L
   have hφ_ge : ∀ t, m ≤ t → φ t = m + (t - m) % L := fun t ht => by
-    simp only [φ, if_neg (show ¬ t < m by omega)]
+    simp only [φ, ite_eq_right (show ¬ t < m by omega)]
   have hφ_lt : ∀ t, φ t < n := fun t => by
     simp only [φ]; split_ifs
     · omega
@@ -190,11 +190,11 @@ theorem eventuallyPeriodic_of_accepts_iff {b : ℕ → Bool} (B : Buchi Bool)
   have hrφ : ∀ t, r (φ (t + 1)) = r (φ t + 1) := by
     intro t
     by_cases ht : t + 1 < m
-    · simp only [φ, if_pos ht, if_pos (show t < m by omega)]
+    · simp only [φ, ite_eq_left ht, ite_eq_left (show t < m by omega)]
     · by_cases ht' : t < m
       · have : t + 1 = m := by omega
         rw [hφ_ge (t + 1) (by omega), this, Nat.sub_self, Nat.zero_mod, Nat.add_zero]
-        simp only [φ, if_pos ht']
+        simp only [φ, ite_eq_left ht']
         rw [this]
       · rw [hφ_ge t (by omega), hφ_ge (t + 1) (by omega), show t + 1 - m = (t - m) + 1 by omega]
         have hj := Nat.mod_lt (t - m) hL

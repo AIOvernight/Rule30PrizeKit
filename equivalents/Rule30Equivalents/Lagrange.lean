@@ -328,7 +328,7 @@ theorem finite_roots {A B C : ℤ} (hA : A ≠ 0) :
   by_cases h : ∃ r₀ : ℝ, (A : ℝ) * r₀ ^ 2 + B * r₀ + C = 0
   · obtain ⟨r₀, hr₀⟩ := h
     refine (Set.toFinite ({r₀, -(B : ℝ) / A - r₀} : Set ℝ)).subset fun X hX => ?_
-    simp only [Set.mem_setOf_eq] at hX
+    simp only [Set.mem_ofPred_eq] at hX
     have hAR : (A : ℝ) ≠ 0 := by exact_mod_cast hA
     have h1 : (X - r₀) * ((A : ℝ) * (X + r₀) + B) = 0 := by linear_combination hX - hr₀
     rcases mul_eq_zero.1 h1 with h | h
@@ -521,12 +521,12 @@ theorem digit_periodic_of_quadratic {x : ℝ} (hx : Irrational x) {A B C : ℤ}
     fun t => t.1 ≠ 0
   set S : Set ℝ := ⋃ t ∈ box, {X : ℝ | (t.1 : ℝ) * X ^ 2 + t.2.1 * X + t.2.2 = 0}
   have hS : S.Finite := Set.Finite.biUnion box.finite_toSet fun t ht => by
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, box] at ht
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, box] at ht
     exact finite_roots ht.2
   have hmem : ∀ n, cq x (n + 2) ∈ S := by
     intro n
     obtain ⟨b1, b2, b3⟩ := hbox (n + 1) (by omega)
-    simp only [S, Set.mem_iUnion, Set.mem_setOf_eq]
+    simp only [S, Set.mem_iUnion, Set.mem_ofPred_eq]
     refine ⟨⟨F (contP (digit x) (n + 1 + 2)) (contQ (digit x) (n + 1 + 2)),
       2 * A * contP (digit x) (n + 1 + 2) * contP (digit x) (n + 1 + 1) +
         B * (contP (digit x) (n + 1 + 2) * contQ (digit x) (n + 1 + 1) +

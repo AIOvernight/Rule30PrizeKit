@@ -50,7 +50,7 @@ theorem summable_of_rows {ψ : ℕ × ℕ → ℚ_[p]} {g : ℕ → ℝ} (hg : T
   rw [Filter.eventually_cofinite]
   refine ((Finset.range J ×ˢ Finset.range J : Finset (ℕ × ℕ)) : Set (ℕ × ℕ)).toFinite.subset ?_
   rintro ⟨j, i⟩ hji
-  simp only [Set.mem_setOf_eq, dist_zero_right, not_lt] at hji
+  simp only [Set.mem_ofPred_eq, dist_zero_right, not_lt] at hji
   have hj : j < J := by
     by_contra hj
     have := hJ j (not_lt.1 hj)
@@ -115,24 +115,25 @@ theorem psum_sub_psum {b : ℕ → ℚ_[p]} (hb : Tendsto b atTop (𝓝 0)) {x �
     split_ifs
     · rw [norm_mul, norm_mul, norm_pow, norm_pow]
       exact mul_le_of_le_one_right (norm_nonneg _)
-        (mul_le_one₀ (pow_le_one₀ (norm_nonneg _) hx) (pow_nonneg (norm_nonneg _) _)
-          (pow_le_one₀ (norm_nonneg _) hα))
+        ((mul_le_of_le_one_left (pow_nonneg (norm_nonneg _) _)
+          (pow_le_one₀ (norm_nonneg _) hx)).trans (pow_le_one₀ (norm_nonneg _) hα))
     · rw [norm_zero]; exact norm_nonneg _
   have hsum : Summable (Function.uncurry ψ) :=
     summable_of_rows (tendsto_zero_iff_norm_tendsto_zero.1 hb) (fun j i => hψ j i)
-      fun j i hji => by simp only [Function.uncurry_apply_pair, ψ, if_neg (by omega : ¬ i < j)]
+      fun j i hji => by simp only [Function.uncurry_apply_pair, ψ,
+          ite_eq_right (by omega : ¬ i < j)]
   have hrow : ∀ j, ∑' i, ψ j i = b j * ∑ i ∈ range j, x ^ i * α ^ (j - 1 - i) := fun j => by
     rw [tsum_eq_sum (s := range j) fun i hi => by
-      simp only [ψ, if_neg (by simpa using hi : ¬ i < j)], Finset.mul_sum]
+      simp only [ψ, ite_eq_right (by simpa using hi : ¬ i < j)], Finset.mul_sum]
     exact Finset.sum_congr rfl fun i hi => by simp [ψ, Finset.mem_range.1 hi]
   have hcol : ∀ i, ∑' j, ψ j i = x ^ i * quot b α i := fun i => by
     have hc : Summable fun j => ψ j i := hsum.prod_symm.prod_factor i
     rw [← hc.sum_add_tsum_nat_add (i + 1)]
     rw [Finset.sum_eq_zero fun j hj => by
-      simp only [ψ, if_neg (by simp at hj; omega : ¬ i < j)], zero_add, quot,
+      simp only [ψ, ite_eq_right (by simp at hj; omega : ¬ i < j)], zero_add, quot,
       ← tsum_mul_left]
     refine tsum_congr fun j => ?_
-    simp only [ψ, if_pos (by omega : i < j + (i + 1)),
+    simp only [ψ, ite_eq_left (by omega : i < j + (i + 1)),
       show j + (i + 1) - 1 - i = j by omega, show i + 1 + j = j + (i + 1) by omega]
     ring
   have hleft : psum b x - psum b α = (x - α) * ∑' j, ∑' i, ψ j i := by

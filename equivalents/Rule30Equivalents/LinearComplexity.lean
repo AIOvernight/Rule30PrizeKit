@@ -74,17 +74,17 @@ theorem measure_generates (n d : ℕ) (a : Fin d → ZMod 2) :
     (fun t => t + d)
     (fun t v => by
       have hne : ∀ i : Fin d, t + (i : ℕ) ≠ t + d := fun i => by have := i.isLt; omega
-      simp only [Function.update_apply, hne, if_false, if_true, bit_not]
+      simp only [Function.update_apply, hne, ite_false, ite_true, bit_not]
       exact decide_add_one_eq _ _)
     (fun t v t' ht' => by
       have h1 : t' + d ≠ t + d := by omega
       have h2 : ∀ i : Fin d, t' + (i : ℕ) ≠ t + d := fun i => by have := i.isLt; omega
-      simp only [Function.update_apply, h1, h2, if_false])
+      simp only [Function.update_apply, h1, h2, ite_false])
     (fun _ => true) (n - d)
   rw [← h]
   congr 1
   ext v
-  simp only [Set.mem_setOf_eq, Generates, decide_eq_true_eq]
+  simp only [Set.mem_ofPred_eq, Generates, decide_eq_true_eq]
   exact forall_congr' fun t => ⟨fun h ht => h (by omega), fun h ht => h (by omega)⟩
 
 theorem two_pow_mul_inv_pow (a : ℕ) : (2 : ENNReal) ^ a * 2⁻¹ ^ a = 1 := by
@@ -190,11 +190,11 @@ theorem measure_rows_vanish {r : ℕ} (u : Fin r → ZMod 2) (hu : u ≠ 0) (ℓ
           u t * bit (v (t + j)) + if t = s then 1 else 0 := fun t => by
         by_cases hts : t = s
         · subst hts
-          rw [Function.update_self, bit_not, hus, if_pos rfl]
+          rw [Function.update_self, bit_not, hus, ite_eq_left rfl]
           ring
         · have hne : (t : ℕ) + j ≠ s + j := fun h => hts (Fin.ext (by omega))
-          rw [Function.update_of_ne hne, if_neg hts, add_zero]
-      simp only [hsplit, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+          rw [Function.update_of_ne hne, ite_eq_right hts, add_zero]
+      simp only [hsplit, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
       exact decide_add_one_eq _ _)
     (fun j v j' hj' => by
       have hterm : ∀ t : Fin r,
@@ -210,7 +210,7 @@ theorem measure_rows_vanish {r : ℕ} (u : Fin r → ZMod 2) (hu : u ≠ 0) (ℓ
   rw [← h]
   congr 1
   ext v
-  simp only [Set.mem_setOf_eq, decide_eq_true_eq]
+  simp only [Set.mem_ofPred_eq, decide_eq_true_eq]
 
 /-- **Long registers are rare**: `Lₙ > ℓ` with probability at most `2^(n-ℓ) 2^-ℓ`. -/
 theorem measure_lt_linComplexity (n ℓ : ℕ) :
@@ -221,7 +221,7 @@ theorem measure_lt_linComplexity (n ℓ : ℕ) :
         {v | ∀ j < ℓ, ∑ t, u t * bit (v (t + j)) = 0} := by
     intro v hv
     by_contra hnot
-    simp only [Set.mem_iUnion, Finset.mem_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq,
+    simp only [Set.mem_iUnion, Finset.mem_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq,
       not_exists] at hnot
     refine absurd (linComplexity_le_of_rows fun u hu => ?_) (not_le.2 hv)
     by_contra hu0
@@ -247,14 +247,14 @@ theorem measure_lower_tail (n k : ℕ) :
   rcases Nat.lt_or_ge n (2 * k) with h | h
   · have hemp : {v | 2 * linComplexity v n + 2 * k ≤ n} = ∅ :=
       Set.eq_empty_of_forall_notMem fun v hv => by
-        simp only [Set.mem_setOf_eq] at hv
+        simp only [Set.mem_ofPred_eq] at hv
         omega
     rw [hemp, measure_empty]
     exact zero_le
   set m := (n - 2 * k) / 2 with hm
   calc coins ℕ {v | 2 * linComplexity v n + 2 * k ≤ n}
       ≤ coins ℕ {v | linComplexity v n ≤ m} := measure_mono fun v hv => by
-        simp only [Set.mem_setOf_eq] at hv ⊢
+        simp only [Set.mem_ofPred_eq] at hv ⊢
         omega
     _ ≤ 2 ^ (m + 1) * 2⁻¹ ^ (n - m) := measure_linComplexity_le n m
     _ = 2 * 2⁻¹ ^ (2 * k) * ((2 ^ m * 2⁻¹ ^ m) * 2⁻¹ ^ (n - 2 * m - 2 * k)) := by
@@ -273,7 +273,7 @@ theorem measure_upper_tail (n k : ℕ) :
   rcases Nat.lt_or_ge (n + 1) (2 * k) with h | h
   · have hemp : {v | n + 2 * k < 2 * linComplexity v n} = ∅ :=
       Set.eq_empty_of_forall_notMem fun v hv => by
-        simp only [Set.mem_setOf_eq] at hv
+        simp only [Set.mem_ofPred_eq] at hv
         have := linComplexity_le_self v n
         omega
     rw [hemp, measure_empty]
@@ -284,7 +284,7 @@ theorem measure_upper_tail (n k : ℕ) :
   obtain ⟨f, hf, hfk⟩ : ∃ f, n - e = e + f ∧ 2 * k ≤ f + 1 := ⟨n - 2 * e, by omega, by omega⟩
   calc coins ℕ {v | n + 2 * k < 2 * linComplexity v n}
       ≤ coins ℕ {v | n - e < linComplexity v n} := measure_mono fun v hv => by
-        simp only [Set.mem_setOf_eq] at hv ⊢
+        simp only [Set.mem_ofPred_eq] at hv ⊢
         omega
     _ ≤ 2 ^ (n - (n - e)) * 2⁻¹ ^ (n - e) := measure_lt_linComplexity n (n - e)
     _ = 2⁻¹ ^ f := by

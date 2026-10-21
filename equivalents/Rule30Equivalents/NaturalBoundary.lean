@@ -47,7 +47,7 @@ theorem mul_genFun_eq {b : ℕ → Bool} {T P : ℕ} (hTP : ∀ t, T ≤ t → b
   have hs := summable_coef b hz
   set g : ℕ → ℂ := fun t => (if P ≤ t then coef b (t - P) else 0) * z ^ t
   have hg : ∀ t, g (t + P) = z ^ P * (coef b t * z ^ t) := fun t => by
-    simp only [g, if_pos (Nat.le_add_left P t), Nat.add_sub_cancel, pow_add]
+    simp only [g, ite_eq_left (Nat.le_add_left P t), Nat.add_sub_cancel, pow_add]
     ring
   have hgs : Summable g := by
     refine (summable_nat_add_iff P).1 ?_
@@ -65,7 +65,7 @@ theorem mul_genFun_eq {b : ℕ → Bool} {T P : ℕ} (hTP : ∀ t, T ≤ t → b
     ring
   · have ht' : T + P ≤ t := by simpa using ht
     obtain ⟨s, rfl⟩ : ∃ s, t = s + P := ⟨t - P, by omega⟩
-    simp only [g, if_pos (Nat.le_add_left P s), Nat.add_sub_cancel, coef, hTP s (by omega)]
+    simp only [g, ite_eq_left (Nat.le_add_left P s), Nat.add_sub_cancel, coef, hTP s (by omega)]
     ring
 
 /-- **An eventually periodic sequence has a generating function that continues analytically

@@ -44,7 +44,7 @@ theorem mod_eq {x : (k : ℕ) → Fin (k + 1).factorial} (hx : x ∈ Zhat) {j k 
     rw [← ih, ← hx k, Nat.mod_mod_of_dvd _ (Nat.factorial_dvd_factorial (by omega))]
 
 theorem isClosed : IsClosed Zhat := by
-  rw [Zhat, Set.setOf_forall]
+  rw [Zhat, Set.ofPred_forall]
   refine isClosed_iInter fun k => isClosed_eq
     (f := fun x : (k : ℕ) → Fin (k + 1).factorial => (x (k + 1) : ℕ) % (k + 1).factorial)
     (g := fun x => (x k : ℕ)) ?_ ?_

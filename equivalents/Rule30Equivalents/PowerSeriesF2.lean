@@ -106,12 +106,12 @@ theorem linearRecurrence_from_zero_of_eventuallyPeriodic {b : ℕ → Bool}
   obtain ⟨T, p, hp, hper⟩ := h
   refine ⟨T + p, fun i => if (i : ℕ) = T then 1 else 0, fun t => ?_⟩
   rw [Finset.sum_eq_single (⟨T, by omega⟩ : Fin (T + p))]
-  · simp only [if_true, one_mul]
+  · simp only [ite_true, one_mul]
     unfold bit
     rw [show t + (T + p) = t + T + p by omega, hper (t + T) (by omega)]
   · intro j _ hj
     have hjT : (j : ℕ) ≠ T := fun h => hj (Fin.ext h)
-    simp only [hjT, if_false, zero_mul]
+    simp only [hjT, ite_false, zero_mul]
   · intro h
     exact absurd (Finset.mem_univ _) h
 

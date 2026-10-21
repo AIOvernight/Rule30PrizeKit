@@ -199,7 +199,7 @@ theorem eventuallyPeriodic_prepend_iff (w b : ℕ → Bool) (k : ℕ) :
   refine (eventuallyPeriodic_shift_iff _ k).symm.trans
     (eventuallyPeriodic_congr_of_eventually_eq (N := 0) fun t _ => ?_)
   show (if t + k < k then w (t + k) else b (t + k - k)) = b t
-  rw [if_neg (by omega), Nat.add_sub_cancel]
+  rw [ite_eq_right (by omega), Nat.add_sub_cancel]
 
 /-- **Problem 1 after an index shift**: for every `k`, Problem 1 holds iff the shifted center
 column `t ↦ c (t + k)` is not eventually periodic. -/
@@ -325,7 +325,7 @@ theorem xorDeriv_blackCount_parity (n : ℕ) :
   rw [blackCount_succ]
   cases h : Rule30Prize.center n
   · simp
-  · simp only [if_true]
+  · simp only [ite_true]
     by_cases hk : Rule30Prize.blackCount n % 2 = 1
     · rw [decide_eq_true hk, decide_eq_false (by omega)]; rfl
     · rw [decide_eq_false hk, decide_eq_true (by omega)]; rfl
@@ -813,18 +813,18 @@ def stripePattern (n t : ℕ) (p : ℤ) : Bool :=
 /-- Left of the diagonal the stripe pattern is the single-seed pattern. -/
 theorem stripePattern_left {n t : ℕ} {p : ℤ} (h : p < (t : ℤ)) :
     stripePattern n t p = cell t p := by
-  unfold stripePattern; rw [if_pos h]
+  unfold stripePattern; rw [ite_eq_left h]
 
 /-- On `[t, t + n)` the stripe pattern is black exactly at even positions. -/
 theorem stripePattern_band {n t : ℕ} {p : ℤ} (h1 : (t : ℤ) ≤ p) (h2 : p < (t : ℤ) + n) :
     stripePattern n t p = decide (p % 2 = 0) := by
-  unfold stripePattern; rw [if_neg (show ¬ p < (t : ℤ) by omega), if_pos h2]
+  unfold stripePattern; rw [ite_eq_right (show ¬ p < (t : ℤ) by omega), ite_eq_left h2]
 
 /-- From `t + n` on, the stripe pattern is black only at `t + n`. -/
 theorem stripePattern_edge {n t : ℕ} {p : ℤ} (h : (t : ℤ) + n ≤ p) :
     stripePattern n t p = decide (p = (t : ℤ) + n) := by
   unfold stripePattern
-  rw [if_neg (show ¬ p < (t : ℤ) by omega), if_neg (show ¬ p < (t : ℤ) + n by omega)]
+  rw [ite_eq_right (show ¬ p < (t : ℤ) by omega), ite_eq_right (show ¬ p < (t : ℤ) + n by omega)]
 
 /-- **The `or` latch.** Inside the stripe, or at its right end, a cell or its right neighbor is
 black. -/

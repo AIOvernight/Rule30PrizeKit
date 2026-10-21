@@ -171,10 +171,10 @@ theorem tendsto_cesaroMean_succ {a : ℕ → ℝ} {B L : ℝ} (hB : ∀ n, |a n|
     have : ∑ m ∈ range (n + 1), w n m = 1 := by
       rw [show ∑ m ∈ range (n + 1), w n m =
           ∑ m ∈ range (n + 1), ((m + k).choose k : ℝ) / (n + k + 1).choose (k + 1) from
-        sum_congr rfl fun m hm => if_pos (Nat.lt_succ_iff.1 (mem_range.1 hm)), ← sum_div,
+        sum_congr rfl fun m hm => ite_eq_left (Nat.lt_succ_iff.1 (mem_range.1 hm)), ← sum_div,
         sum_choose k n, div_self (hpos n).ne']
     rw [← this]
-    exact hasSum_sum_of_ne_finset_zero fun m hm => if_neg (by
+    exact hasSum_sum_of_ne_finset_zero fun m hm => ite_eq_right (by
       rw [mem_range] at hm
       omega)
   have hhead : ∀ N, Tendsto (fun n => ∑ m ∈ range N, w n m) atTop (𝓝 0) := by
@@ -195,14 +195,14 @@ theorem tendsto_cesaroMean_succ {a : ℕ → ℝ} {B L : ℝ} (hB : ∀ n, |a n|
     filter_upwards [eventually_ge_atTop N] with n hn
     rw [sum_div]
     refine sum_congr rfl fun m hm => ?_
-    simp only [w, if_pos (show m ≤ n by have := mem_range.1 hm; omega)]
+    simp only [w, ite_eq_left (show m ≤ n by have := mem_range.1 hm; omega)]
   have hmean : ∀ n, cesaroMean (k + 1) a n = ∑' m, w n m * cesaroMean k a m := by
     intro n
     rw [tsum_eq_sum (s := range (n + 1)) fun m hm => by
-      simp only [w, if_neg (show ¬ m ≤ n by rw [mem_range] at hm; omega), zero_mul]]
+      simp only [w, ite_eq_right (show ¬ m ≤ n by rw [mem_range] at hm; omega), zero_mul]]
     rw [cesaroMean, iterSum_succ, psum, sum_div, show n + (k + 1) = n + k + 1 by ring]
     refine sum_congr rfl fun m hm => ?_
-    simp only [w, if_pos (Nat.lt_succ_iff.1 (mem_range.1 hm)), cesaroMean]
+    simp only [w, ite_eq_left (Nat.lt_succ_iff.1 (mem_range.1 hm)), cesaroMean]
     have := choose_pos m k
     field_simp
   refine (tendsto_weighted (w := w) (Eventually.of_forall hw0) (Eventually.of_forall hsum)

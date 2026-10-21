@@ -54,10 +54,10 @@ theorem card_firstLast_ne (τ : ℕ) (hτ : 0 < τ) :
       (Finset.univ.filter fun w : Fin (τ + 1) → Bool => ¬ w 0 ≠ w (Fin.last τ)).card := by
     refine Finset.card_nbij' flip flip (fun w hw => ?_) (fun w hw => ?_) (fun w _ => hinv w)
       (fun w _ => hinv w)
-    · simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hw ⊢
+    · simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hw ⊢
       rw [hflip0, hflipl]
       cases h0 : w 0 <;> cases hl : w (Fin.last τ) <;> simp_all
-    · simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hw ⊢
+    · simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hw ⊢
       rw [hflip0, hflipl]
       cases h0 : w 0 <;> cases hl : w (Fin.last τ) <;> simp_all
   have htotal := Finset.card_filter_add_card_filter_not
@@ -144,7 +144,7 @@ theorem far_from_periodic_of_isNormal {b : ℕ → Bool} (hb : IsNormal b) {y : 
     have h2 : ((Finset.range n).filter (fun t => b (t + P) ≠ y (t + P))).card ≤ E (n + P) := by
       refine Finset.card_le_card_of_injOn (· + P) (fun t ht => ?_)
         (fun _ _ _ _ h => Nat.add_right_cancel h)
-      simp only [Finset.coe_filter, Finset.mem_range, Set.mem_setOf_eq] at ht ⊢
+      simp only [Finset.coe_filter, Finset.mem_range, Set.mem_ofPred_eq] at ht ⊢
       exact ⟨by omega, ht.2⟩
     have h3 : E (n + P) ≤ E n + P := by
       have : (Finset.range (n + P)).filter (fun t => b t ≠ y t) ⊆

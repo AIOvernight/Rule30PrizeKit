@@ -146,7 +146,7 @@ theorem finite_returns {lo : ℤ} (hlo : x lo = true) (hzero : ∀ p, p < lo →
   have hset : {t | LimitPoints.half (evol x) t = LimitPoints.half (evol x) 0} =
       {t : ℕ | ∀ p : ℤ, 0 ≤ p → evol x t p = x p} := by
     ext t
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     constructor
     · intro h p hp
       have : evol x t (p.toNat : ℤ) = evol x 0 (p.toNat : ℤ) := congrFun h p.toNat

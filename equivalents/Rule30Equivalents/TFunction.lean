@@ -136,14 +136,14 @@ def row (a : Nat) (p : Int) : Bool := if p ≤ 0 then a.testBit (-p).toNat else 
 theorem row_white (a : Nat) : ∀ p, (0 : Int) < p → row a p = false := by
   intro p hp
   unfold row
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
 
 /-- **Row `t` of the evolution of `row a`, read leftwards from position `t`, is `Φ^t(a)`.** -/
 theorem testBit_orbit (a : Nat) : ∀ t j, (orbit a t).testBit j = evol (row a) t ((t : Int) - j)
   | 0, j => by
     show a.testBit j = row a (((0 : Nat) : Int) - (j : Int))
     unfold row
-    rw [if_pos (by omega)]
+    rw [ite_eq_left (by omega)]
     congr 1; omega
   | t + 1, j => by
     have hw := evol_eq_false_of_gt (row_white a)

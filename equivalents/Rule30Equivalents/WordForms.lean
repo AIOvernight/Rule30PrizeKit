@@ -70,7 +70,7 @@ theorem exists_card_prefixFactors (b : ℕ → Bool) (n : ℕ) :
   rw [card_prefixFactors, ← Set.ncard_coe_finset]
   refine Set.ncard_le_ncard (fun w hw => ?_) (Finset.finite_toSet _)
   have hw' : ∃ i, (fun j : Fin n => b (i + j)) = w := hw
-  have e : idx w = Classical.choose hw' := dif_pos hw'
+  have e : idx w = Classical.choose hw' := dite_eq_left hw'
   have hle : idx w ≤ Finset.univ.sup idx := Finset.le_sup (Finset.mem_univ w)
   rw [Finset.coe_image]
   exact ⟨Classical.choose hw', Finset.mem_coe.2 (Finset.mem_range.2 (by omega)),

@@ -117,7 +117,7 @@ theorem card_filter_card_eq (m t : ℕ) :
   refine Finset.card_nbij' (fun u => Finset.univ.filter fun j => u j = true)
     (fun s j => decide (j ∈ s)) ?_ ?_ ?_ ?_
   · intro u hu
-    simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_setOf_eq] at hu
+    simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hu
     simp [Finset.mem_powersetCard, hu]
   · intro s hs
     simp only [Finset.mem_coe, Finset.mem_powersetCard] at hs

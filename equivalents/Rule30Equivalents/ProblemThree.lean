@@ -100,7 +100,7 @@ theorem run_kernelTM {f : ℕ → Bool} (hf : IsAutomatic 2 f) (n : ℕ) {t : �
     have htape : (initW (kernelTM f hf).toMachine id
         (binWord (kernelTM f hf).toMachine (some false) n)).tape (t : ℤ) = some (n.testBit t) := by
       simp only [initW, binWord, List.length_map, List.length_range, id]
-      erw [dif_pos (by simp <;> omega)]
+      erw [dite_eq_left (by simp; omega)]
       simp only [List.getElem_map, List.getElem_range, Int.toNat_natCast]
       cases n.testBit t <;> rfl
     refine Cfg.ext' ?_ ?_ ?_
@@ -132,7 +132,7 @@ theorem decidesBinInTime_kernelTM {f : ℕ → Bool} (hf : IsAutomatic 2 f) :
   have htape : (initW (kernelTM f hf).toMachine id
       (binWord (kernelTM f hf).toMachine (some false) n)).tape (n.size : ℤ) = none := by
     simp only [initW, binWord, List.length_map, List.length_range]
-    erw [dif_neg (by simp <;> omega)]
+    erw [dite_eq_right (by simp)]
     rfl
   dsimp only
   rw [htape]

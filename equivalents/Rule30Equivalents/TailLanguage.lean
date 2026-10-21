@@ -146,7 +146,7 @@ theorem exists_mem_tailSubshift {b : ℕ → Bool} {n : ℕ} {w : Fin n → Bool
     show b (((i k : ℤ) + m).toNat + j) =
       if 0 ≤ (i k : ℤ) + (m + ((j : ℕ) : ℤ)) then b ((i k : ℤ) + (m + ((j : ℕ) : ℤ))).toNat
       else false
-    rw [if_pos (by omega)]
+    rw [ite_eq_left (by omega)]
     congr 1
     omega
   · obtain ⟨k, hkw⟩ := (key 0 n).exists
@@ -156,7 +156,7 @@ theorem exists_mem_tailSubshift {b : ℕ → Bool} {n : ℕ} {w : Fin n → Bool
     rw [← h1, ← h2]
     show (if 0 ≤ (i k : ℤ) + ((j : ℕ) : ℤ) then b ((i k : ℤ) + ((j : ℕ) : ℤ)).toNat else false) =
       b (i k + j)
-    rw [if_pos (by omega)]
+    rw [ite_eq_left (by omega)]
     congr 1
 
 /-- A sequence `ℤ → Bool` with period `P` repeats after every multiple of `P`. -/
@@ -208,7 +208,7 @@ theorem infinite_tailSubshift_iff (b : ℕ → Bool) :
         f w ∈ tailSubshift b ∧ ∀ j : Fin K, f w ((j : ℕ) : ℤ) = w j := by
       intro w h
       have := Classical.choose_spec (exists_mem_tailSubshift h)
-      simp only [f, dif_pos h]
+      simp only [f, dite_eq_left h]
       exact this
     have hinj : Set.InjOn f (tailFactors b K) := by
       intro w hw w' hw' hww'

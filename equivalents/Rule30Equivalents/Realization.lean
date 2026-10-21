@@ -107,7 +107,7 @@ theorem cantorFunction_eq (b : ℕ) (hb : 2 ≤ b) :
   unfold Cardinal.cantorFunctionAux
   rcases Bool.eq_false_or_eq_true (c t) with h | h
   · rw [h]
-    simp only [cond_true, if_true, one_div, inv_pow]
+    simp only [Bool.cond_true, ite_true, one_div, inv_pow]
     rw [pow_succ]
     field_simp
   · rw [h]; simp

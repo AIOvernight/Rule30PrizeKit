@@ -98,7 +98,7 @@ theorem measureReal_abs_sub_lt_le (y : ℝ) {ℓ : ℝ} (hℓ : 0 < ℓ) (hℓ1 
   have hsub : {v | |baseValue 2 v - y| < ℓ} ⊆
       ⋃ j ∈ Finset.Icc a (a + 1), {v : ℕ → Bool | lead 2 v k = j} := by
     intro v hv
-    simp only [Set.mem_setOf_eq, abs_lt] at hv
+    simp only [Set.mem_ofPred_eq, abs_lt] at hv
     obtain ⟨hv1, hv2⟩ := hv
     have hpm := pow_mul_baseValue (le_refl 2) v k
     simp only [Nat.cast_ofNat] at hpm
@@ -113,7 +113,7 @@ theorem measureReal_abs_sub_lt_le (y : ℝ) {ℓ : ℝ} (hℓ : 0 < ℓ) (hℓ1 
       nlinarith
     have hJ1 : c - 3 / 2 < ((lead 2 v k : ℕ) : ℝ) := by linarith
     have hJ2 : ((lead 2 v k : ℕ) : ℝ) < c + 1 / 2 := by linarith
-    simp only [Set.mem_iUnion, Set.mem_setOf_eq, Finset.mem_Icc, exists_prop]
+    simp only [Set.mem_iUnion, Set.mem_ofPred_eq, Finset.mem_Icc, exists_prop]
     refine ⟨lead 2 v k, ⟨Nat.ceil_le.2 hJ1.le, ?_⟩, rfl⟩
     have h4 : ((lead 2 v k : ℕ) : ℝ) < a + 2 := by
       have := Nat.le_ceil (c - 3 / 2)
@@ -201,7 +201,7 @@ theorem ae_not_frequently_approx {p : ℝ} (hp : 2 < p) (C : ℕ) :
       have hmn : m ≤ n := by
         have : m < (n : ℤ) + 1 := by exact_mod_cast h2'
         omega
-      simp only [Set.mem_iUnion, Set.mem_setOf_eq, Finset.mem_range, exists_prop]
+      simp only [Set.mem_iUnion, Set.mem_ofPred_eq, Finset.mem_range, exists_prop]
       refine ⟨m.toNat, by omega, ?_⟩
       have : ((m.toNat : ℕ) : ℝ) = (m : ℝ) := by exact_mod_cast Int.toNat_of_nonneg hm0
       rw [this, abs_lt]

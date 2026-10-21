@@ -47,7 +47,7 @@ variable {α : Type*} {S A : Set ℕ}
 lemma term_realize_eq_add_dotProduct [Fintype α] (S : Set ℕ) (t : presburgerS[[A]].Term α) :
     letI := structS S
     ∃ (k : ℕ) (u : α → ℕ), ∀ (v : α → ℕ), t.realize v = k + u ⬝ᵥ v := by
-  letI := structS S
+  let := structS S
   classical
   induction t with simp only [Term.realize]
   | var i =>
@@ -87,7 +87,7 @@ lemma isSemilinearSet_setOf_add_dotProduct_mem [Fintype α] (hS : IsSemilinearSe
   have hS' : IsSemilinearSet {x : ℕ | k + x ∈ S} := by
     rw [Nat.isSemilinearSet_iff_ultimately_periodic] at hS ⊢
     obtain ⟨m, p, hp, h⟩ := hS
-    exact ⟨m, p, hp, fun x hx => by rw [mem_setOf, mem_setOf, ← add_assoc]; exact h _ (by omega)⟩
+    exact ⟨m, p, hp, fun x hx => by rw [mem_ofPred, mem_ofPred, ← add_assoc]; exact h _ (by omega)⟩
   let f : (α → ℕ) →+ ℕ :=
     { toFun := fun v => u ⬝ᵥ v, map_zero' := dotProduct_zero u, map_add' := dotProduct_add u }
   exact hS'.preimage f
@@ -98,13 +98,13 @@ lemma isSemilinearSet_boundedFormula_realize (hS : IsSemilinearSet S) {n}
     (φ : presburgerS[[A]].BoundedFormula α n) :
     letI := structS S
     IsSemilinearSet {v : α ⊕ Fin n → ℕ | φ.Realize (v ∘ Sum.inl) (v ∘ Sum.inr)} := by
-  letI := structS S
-  haveI := Fintype.ofFinite α
+  let := structS S
+  have := Fintype.ofFinite α
   induction φ with simp only [BoundedFormula.Realize]
   | equal t₁ t₂ =>
     rcases term_realize_eq_add_dotProduct S t₁ with ⟨k₁, u₁, ht₁⟩
     rcases term_realize_eq_add_dotProduct S t₂ with ⟨k₂, u₂, ht₂⟩
-    convert! Nat.isSemilinearSet_setOf_mulVec_eq ![k₁] ![k₂] (.of ![u₁]) (.of ![u₂])
+    convert! Nat.isSemilinearSet_setOfPred_mulVec_eq ![k₁] ![k₂] (.of ![u₁]) (.of ![u₂])
     simp [ht₁, ht₂]
   | rel R ts =>
     cases R with
@@ -121,14 +121,14 @@ lemma isSemilinearSet_boundedFormula_realize (hS : IsSemilinearSet S) {n}
   | falsum => exact .empty
   | imp _ _ ih₁ ih₂ =>
     convert! (ih₂.compl.inter ih₁).compl using 1
-    simp [setOf_inter_eq_sep, imp_iff_not_or, compl_setOf]
+    simp [ofPred_inter_eq_sep, imp_iff_not_or, compl_ofPred]
   | @all n φ ih =>
     let e := (Equiv.sumAssoc α (Fin n) (Fin 1)).trans (Equiv.sumCongr (.refl α) finSumFinEquiv)
     rw [← isSemilinearSet_image_iff (LinearEquiv.funCongrLeft ℕ ℕ e)] at ih
     convert! ih.compl.proj.compl using 1
-    simp_rw [compl_setOf, not_exists, Fin.forall_fin_succ_pi, Fin.forall_fin_zero_pi,
+    simp_rw [compl_ofPred, not_exists, Fin.forall_fin_succ_pi, Fin.forall_fin_zero_pi,
       mem_compl_iff, mem_image, not_not, ← LinearEquiv.eq_symm_apply, LinearEquiv.funCongrLeft_symm,
-      exists_eq_right, mem_setOf, LinearEquiv.funCongrLeft_apply, LinearMap.funLeft,
+      exists_eq_right, mem_ofPred, LinearEquiv.funCongrLeft_apply, LinearMap.funLeft,
       LinearMap.coe_mk, AddHom.coe_mk]
     congr! 4
     ext i
@@ -137,12 +137,12 @@ lemma isSemilinearSet_boundedFormula_realize (hS : IsSemilinearSet S) {n}
 /-- **Definable in `(ℕ, +, S)` with `S` semilinear ⟹ semilinear.** -/
 theorem isSemilinearSet_of_definable (hS : IsSemilinearSet S) {s : Set (α → ℕ)}
     (h : letI := structS S; A.Definable presburgerS s) : IsSemilinearSet s := by
-  letI := structS S
+  let := structS S
   obtain ⟨φ, rfl⟩ := h
   let e := Equiv.sumEmpty α (Fin 0)
   convert! (isSemilinearSet_boundedFormula_realize hS φ).image (LinearMap.funLeft ℕ ℕ e.symm)
   ext x
-  simp only [mem_setOf_eq, mem_image]
+  simp only [mem_ofPred_eq, mem_image]
   rw [(e.arrowCongr (.refl ℕ)).exists_congr_left]
   simp [Formula.Realize, Unique.eq_default, Function.comp_def, LinearMap.funLeft, e]
 
@@ -151,7 +151,7 @@ theorem isSemilinearSet_of_eventuallyPeriodic {b : ℕ → Bool} (hb : Eventuall
     IsSemilinearSet {t | b t = true} := by
   obtain ⟨T, P, hP, hper⟩ := hb
   rw [Nat.isSemilinearSet_iff_ultimately_periodic]
-  exact ⟨T, P, hP, fun x hx => by rw [mem_setOf, mem_setOf, hper x hx]⟩
+  exact ⟨T, P, hP, fun x hx => by rw [mem_ofPred, mem_ofPred, hper x hx]⟩
 
 /-- **Multiplication is not definable from an eventually periodic set.** -/
 theorem mul_not_definable_of_eventuallyPeriodic {b : ℕ → Bool} (hb : EventuallyPeriodic b) :
@@ -182,12 +182,12 @@ section Layer
 variable {S : Set ℕ} {β γ : Type}
 
 theorem sfun_var (i : β) : SFun S fun v : β → ℕ => v i := by
-  letI := structS S
+  let := structS S
   exact presburgerS.definableFun_var i
 
 theorem sfun_add {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
     SFun S fun v => f v + g v := by
-  letI := structS S
+  let := structS S
   have hmap : (∅ : Set ℕ).DefinableMap presburgerS fun v => ![f v, g v] := by
     simp [DefinableMap, Fin.forall_fin_two, hf, hg]
   exact DefinableFun.comp hmap
@@ -196,14 +196,14 @@ theorem sfun_add {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
 
 theorem sfun_const : ∀ n : ℕ, SFun S fun _ : β → ℕ => n
   | 0 => by
-    letI := structS S
+    let := structS S
     have hmap : (∅ : Set ℕ).DefinableMap presburgerS fun _ : β → ℕ => (![] : Fin 0 → ℕ) :=
       fun i => i.elim0
     exact DefinableFun.comp hmap
       (DefinableFun.fun_symbol (L := presburgerS) (M := ℕ)
         (presburgerFunc.zero : presburgerS.Functions 0))
   | n + 1 => by
-    letI := structS S
+    let := structS S
     have hmap : (∅ : Set ℕ).DefinableMap presburgerS fun _ : β → ℕ => (![] : Fin 0 → ℕ) :=
       fun i => i.elim0
     exact sfun_add (sfun_const n) (DefinableFun.comp hmap
@@ -212,12 +212,12 @@ theorem sfun_const : ∀ n : ℕ, SFun S fun _ : β → ℕ => n
 
 theorem sdef_eq {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
     SDef S {v | f v = g v} := by
-  letI := structS S
-  exact hf.setOf_eq hg
+  let := structS S
+  exact hf.ofPred_eq hg
 
 theorem sdef_le [Finite β] {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
     SDef S {v | f v ≤ g v} := by
-  letI := structS S
+  let := structS S
   have hf' : SFun S fun w : β ⊕ Unit → ℕ => f (w ∘ Sum.inl) :=
     DefinableFun.comp (fun i => sfun_var (Sum.inl i)) hf
   have hg' : SFun S fun w : β ⊕ Unit → ℕ => g (w ∘ Sum.inl) :=
@@ -226,7 +226,7 @@ theorem sdef_le [Finite β] {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : S
     sdef_eq (sfun_add hf' (sfun_var _)) hg'
   convert h.exists_of_finite using 1
   ext v
-  simp only [Set.mem_setOf_eq, Sum.elim_comp_inl, Sum.elim_inr]
+  simp only [Set.mem_ofPred_eq, Sum.elim_comp_inl, Sum.elim_inr]
   constructor
   · intro hle
     exact ⟨fun _ => g v - f v, Nat.add_sub_of_le hle⟩
@@ -238,14 +238,14 @@ theorem sdef_lt [Finite β] {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : S
   exact sdef_le (sfun_add hf (sfun_const 1)) hg
 
 theorem sdef_mem_var (i : β) : SDef S {v : β → ℕ | v i ∈ S} := by
-  letI := structS S
+  let := structS S
   refine ⟨Relations.formula₁ (Sum.inl RelS.mem) (Term.var i), ?_⟩
   ext v
-  simp only [Set.mem_setOf_eq, Formula.realize_rel₁, Term.realize_var]
+  simp only [Set.mem_ofPred_eq]
   rfl
 
 theorem sdef_mem {f : (β → ℕ) → ℕ} (hf : SFun S f) : SDef S {v | f v ∈ S} := by
-  letI := structS S
+  let := structS S
   have hmap : (∅ : Set ℕ).DefinableMap presburgerS fun v => ![f v] := by
     simp [DefinableMap, hf]
   exact (sdef_mem_var (0 : Fin 1)).preimage_map hmap
@@ -274,7 +274,7 @@ def SqWin (S : Set ℕ) (x y z : ℕ) : Prop :=
 def SqPred (S : Set ℕ) (y z : ℕ) : Prop := (y = 0 ∧ z = 0) ∨ (1 ≤ y ∧ ∃ x, SqWin S x y z)
 
 theorem sdef_consec : SDef S {v : Fin 3 → ℕ | Consec S (v 0) (v 1) (v 2)} := by
-  letI := structS S
+  let := structS S
   have hall : SDef S {v : Fin 3 → ℕ | ∀ r, v 1 < r → r < v 2 → v 0 + r ∉ S} := by
     have hA : SDef S {w : Fin 3 ⊕ Unit → ℕ | w (Sum.inl 1) < w (Sum.inr ())} :=
       sdef_lt (sfun_var _) (sfun_var _)
@@ -284,7 +284,7 @@ theorem sdef_consec : SDef S {v : Fin 3 → ℕ | Consec S (v 0) (v 1) (v 2)} :=
       sdef_mem (sfun_add (sfun_var _) (sfun_var _))
     convert (hA.compl.union (hB.compl.union hC.compl)).forall_of_finite using 1
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_compl_iff, Sum.elim_inl, Sum.elim_inr]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_compl_iff, Sum.elim_inl, Sum.elim_inr]
     constructor
     · intro h u
       by_contra hc
@@ -303,11 +303,11 @@ theorem sdef_consec : SDef S {v : Fin 3 → ℕ | Consec S (v 0) (v 1) (v 2)} :=
 /-- `Consec` at three definable coordinates. -/
 theorem sdef_consec_comp {β : Type} [Finite β] (i j k : β) :
     SDef S {w : β → ℕ | Consec S (w i) (w j) (w k)} := by
-  letI := structS S
+  let := structS S
   exact sdef_consec.preimage_comp ![i, j, k]
 
 theorem sdef_sqWin : SDef S {v : Fin 3 → ℕ | SqWin S (v 0) (v 1) (v 2)} := by
-  letI := structS S
+  let := structS S
   have hgap : SDef S {v : Fin 3 → ℕ | ∀ p q r, r ≤ v 2 → Consec S (v 0) p q →
       Consec S (v 0) q r → r + p = q + q + 2} := by
     have hA : SDef S {w : Fin 3 ⊕ Fin 3 → ℕ | w (Sum.inr 2) ≤ w (Sum.inl 2)} :=
@@ -320,7 +320,7 @@ theorem sdef_sqWin : SDef S {v : Fin 3 → ℕ | SqWin S (v 0) (v 1) (v 2)} := b
         (sfun_add (sfun_add (sfun_var _) (sfun_var _)) (sfun_const 2))
     convert (hA.compl.union (hB.compl.union (hC.compl.union hD))).forall_of_finite using 1
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_compl_iff, Sum.elim_inl, Sum.elim_inr]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_compl_iff, Sum.elim_inl, Sum.elim_inr]
     constructor
     · intro h u
       by_contra hc
@@ -340,7 +340,7 @@ theorem sdef_sqWin : SDef S {v : Fin 3 → ℕ | SqWin S (v 0) (v 1) (v 2)} := b
         (sfun_add (sfun_var _) (sfun_const 1))
     convert (hB.inter hE).exists_of_finite using 1
     ext v
-    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Sum.elim_inl, Sum.elim_inr]
+    simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, Sum.elim_inl, Sum.elim_inr]
     exact ⟨fun ⟨p, hp⟩ => ⟨fun _ => p, hp⟩, fun ⟨u, hu⟩ => ⟨u (), hu⟩⟩
   have h0 : SDef S {v : Fin 3 → ℕ | v 0 ∈ S} := sdef_mem_var 0
   have h1 : SDef S {v : Fin 3 → ℕ | v 0 + 1 ∈ S} := sdef_mem (sfun_add (sfun_var _) (sfun_const 1))
@@ -348,7 +348,7 @@ theorem sdef_sqWin : SDef S {v : Fin 3 → ℕ | SqWin S (v 0) (v 1) (v 2)} := b
   exact h0.inter (h1.inter (h2.inter (hgap.inter hlast)))
 
 theorem sdef_sqPred : SDef S {v : Fin 2 → ℕ | SqPred S (v 0) (v 1)} := by
-  letI := structS S
+  let := structS S
   have hz0 : SDef S {v : Fin 2 → ℕ | v 0 = 0} := sdef_eq (sfun_var _) (sfun_const 0)
   have hz1 : SDef S {v : Fin 2 → ℕ | v 1 = 0} := sdef_eq (sfun_var _) (sfun_const 0)
   have hpos : SDef S {v : Fin 2 → ℕ | 1 ≤ v 0} := sdef_le (sfun_const 1) (sfun_var _)
@@ -357,7 +357,7 @@ theorem sdef_sqPred : SDef S {v : Fin 2 → ℕ | SqPred S (v 0) (v 1)} := by
   have hex : SDef S {v : Fin 2 → ℕ | ∃ x, SqWin S x (v 0) (v 1)} := by
     convert hwin.exists_of_finite using 1
     ext v
-    simp only [Set.mem_setOf_eq, Sum.elim_inl, Sum.elim_inr]
+    simp only [Set.mem_ofPred_eq, Sum.elim_inl, Sum.elim_inr]
     exact ⟨fun ⟨x, hx⟩ => ⟨fun _ => x, hx⟩, fun ⟨u, hu⟩ => ⟨u (), hu⟩⟩
   exact (hz0.inter hz1).union (hpos.inter hex)
 
@@ -472,7 +472,7 @@ theorem sqPred_iff (hS : Disjunctive S) (y z : ℕ) : SqPred S y z ↔ z = y * y
 /-- `SqPred` at two definable functions. -/
 theorem sdef_sqPred_comp {β : Type} {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
     SDef S {v | SqPred S (f v) (g v)} := by
-  letI := structS S
+  let := structS S
   have hmap : (∅ : Set ℕ).DefinableMap presburgerS fun v => ![f v, g v] := by
     simp [DefinableMap, Fin.forall_fin_two, hf, hg]
   exact sdef_sqPred.preimage_map hmap
@@ -481,7 +481,7 @@ theorem sdef_sqPred_comp {β : Type} {f g : (β → ℕ) → ℕ} (hf : SFun S f
 `(a + b)² = a² + b² + 2c`, and `SqPred` defines squaring. -/
 theorem mul_definable_of_disjunctive (hS : Disjunctive S) :
     SDef S {v : Fin 3 → ℕ | v 0 = v 1 * v 2} := by
-  letI := structS S
+  let := structS S
   have h1 : SDef S {w : Fin 3 ⊕ Fin 3 → ℕ |
       SqPred S (w (Sum.inl 1) + w (Sum.inl 2)) (w (Sum.inr 0))} :=
     sdef_sqPred_comp (sfun_add (sfun_var _) (sfun_var _)) (sfun_var _)
@@ -495,7 +495,7 @@ theorem mul_definable_of_disjunctive (hS : Disjunctive S) :
       (sfun_add (sfun_add (sfun_add (sfun_var _) (sfun_var _)) (sfun_var _)) (sfun_var _))
   convert (h1.inter (h2.inter (h3.inter h4))).exists_of_finite using 1
   ext v
-  simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Sum.elim_inl, Sum.elim_inr, sqPred_iff hS]
+  simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, Sum.elim_inl, Sum.elim_inr, sqPred_iff hS]
   constructor
   · intro h
     refine ⟨![(v 1 + v 2) * (v 1 + v 2), v 1 * v 1, v 2 * v 2], rfl, rfl, rfl, ?_⟩
@@ -516,6 +516,6 @@ theorem mul_definable_of_center_disjunctive
     SDef {t | c t = true} {v : Fin 3 → ℕ | v 0 = v 1 * v 2} :=
   mul_definable_of_disjunctive fun n w => by
     obtain ⟨i, hi⟩ := h n w
-    exact ⟨i, fun j => by rw [Set.mem_setOf_eq, hi j]⟩
+    exact ⟨i, fun j => by rw [Set.mem_ofPred_eq, hi j]⟩
 
 end Rule30Equivalents.PresburgerExpansion

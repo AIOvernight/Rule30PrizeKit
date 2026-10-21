@@ -5,7 +5,7 @@ import Mathlib.Data.Set.Finite.Range
 import Mathlib.Order.Interval.Finset.Basic
 import Mathlib.Data.Fintype.Pigeonhole
 import Mathlib.Data.Fintype.Powerset
-import Mathlib.Data.Finite.Prod
+import Mathlib.Basic.Finite.Prod
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Order.Interval.Finset.Nat
 import Mathlib.Data.Set.Countable
@@ -204,7 +204,7 @@ def lassoDFA (n : ℕ) : DFA Bool (Fin (T + P + 1)) where
 theorem lassoDFA_step_pos (n m : ℕ) (a : Bool) :
     (lassoDFA b T P hP n).step (posState T P hP m) a =
       if a = b (pos T P m) then posState T P hP (m + 1) else Fin.last _ := by
-  simp only [lassoDFA, posState, dif_pos (pos_lt T P hP m)]
+  simp only [lassoDFA, posState, dite_eq_left (pos_lt T P hP m)]
   rfl
 
 theorem lassoDFA_step_last (n : ℕ) (a : Bool) :
@@ -219,24 +219,25 @@ theorem lassoDFA_eval (hper : ∀ t, T ≤ t → b (t + P) = b t) (n : ℕ) (y :
   | append_singleton z a ih =>
     rw [DFA.eval_append_singleton, ih, List.length_append, List.length_singleton, prefixOf_succ]
     by_cases hz : z = prefixOf b z.length
-    · rw [if_pos hz, lassoDFA_step_pos, b_pos b T P hP hper]
+    · rw [ite_eq_left hz, lassoDFA_step_pos, b_pos b T P hP hper]
       by_cases ha : a = b z.length
-      · rw [if_pos ha, if_pos (by rw [← hz, ha])]
-      · rw [if_neg ha, if_neg (fun h => ha (by
+      · rw [ite_eq_left ha, ite_eq_left (by rw [← hz, ha])]
+      · rw [ite_eq_right ha, ite_eq_right (fun h => ha (by
           have := List.append_inj' h rfl; simpa using this.2))]
-    · rw [if_neg hz, if_neg (show ¬ (z ++ [a] = prefixOf b z.length ++ [b z.length]) from
+    · rw [ite_eq_right hz,
+        ite_eq_right (show ¬ (z ++ [a] = prefixOf b z.length ++ [b z.length]) from
         fun h => hz (List.append_inj' h rfl).1), lassoDFA_step_last]
 
 theorem lassoDFA_uniquelyAccepts (hper : ∀ t, T ≤ t → b (t + P) = b t) (n : ℕ) :
     UniquelyAccepts (lassoDFA b T P hP n) (prefixOf b n) := by
   have hlen : (prefixOf b n).length = n := by simp [prefixOf]
   refine ⟨?_, fun y hy hacc => ?_⟩
-  · rw [DFA.mem_accepts, lassoDFA_eval b T P hP hper, hlen, if_pos rfl]
+  · rw [DFA.mem_accepts, lassoDFA_eval b T P hP hper, hlen, ite_eq_left rfl]
     rfl
   · rw [hlen] at hy
     rw [DFA.mem_accepts, lassoDFA_eval b T P hP hper, hy] at hacc
     by_contra hne
-    rw [if_neg hne] at hacc
+    rw [ite_eq_right hne] at hacc
     have hlt := pos_lt T P hP n
     simp only [lassoDFA, posState, Set.mem_singleton_iff, Fin.ext_iff, Fin.val_last] at hacc
     omega
@@ -298,7 +299,7 @@ theorem eventuallyPeriodic_of_frequently_autComplexityLE {b : ℕ → Bool} {K :
     Set.infinite_of_forall_exists_gt fun a => by
       obtain ⟨n, hn, hA⟩ := Filter.frequently_atTop.1 h (a + 1)
       exact ⟨n, hA, by omega⟩
-  haveI := hN.to_subtype
+  have := hN.to_subtype
   obtain ⟨D, hD⟩ := Finite.exists_infinite_fiber
     (fun n : {n | AutComplexityLE (prefixOf b n) K} => Classical.choose n.2)
   have hDinf : ((Subtype.val) '' ((fun n : {n | AutComplexityLE (prefixOf b n) K} =>

@@ -90,7 +90,7 @@ open MeasureTheory Filter Topology Ruliology.CellularAutomata Rule30Realization 
 
 theorem measurableSet_window (t : ℕ) (I : Finset ℤ) (w : ℤ → Bool) :
     MeasurableSet {x : ℤ → Bool | ∀ i ∈ I, evol x t i = w i} := by
-  simp only [Set.setOf_forall]
+  simp only [Set.ofPred_forall]
   exact MeasurableSet.iInter fun i => MeasurableSet.iInter fun _ =>
     measurable_evol t i (measurableSet_singleton (w i))
 
@@ -131,7 +131,7 @@ theorem measure_inter_cells {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m :
     -- flipping the coin at the foot of `cell a` preserves `E`
     have hinv : ∀ x, Function.update x (foot (cell a)) (!x (foot (cell a))) ∈ E ↔ x ∈ E := by
       intro x
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq,
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_ofPred_eq,
         hAm x _ (hS a (Finset.mem_insert_self a s))]
       refine and_congr_right fun _ => forall₂_congr fun k hk => ?_
       have := hlt k hk
@@ -142,7 +142,7 @@ theorem measure_inter_cells {A : Set (ℤ → Bool)} (hA : MeasurableSet A) {m :
     have hset : A ∩ {x : ℤ → Bool | ∀ k ∈ insert a s, evol x (cell k).1 (cell k).2 = w k} =
         E ∩ {x | evol x (cell a).1 (cell a).2 = w a} := by
       ext x
-      simp only [hEdef, Set.mem_inter_iff, Set.mem_setOf_eq, Finset.mem_insert,
+      simp only [hEdef, Set.mem_inter_iff, Set.mem_ofPred_eq, Finset.mem_insert,
         forall_eq_or_imp]
       tauto
     rw [hset, eq_mul_inv_of_two_mul h,
@@ -192,16 +192,16 @@ theorem preimage_restrict_singleton (t : ℕ) (I : Finset ℤ) (v : I → Bool) 
     (fun x : ℤ → Bool => I.restrict (evol x t)) ⁻¹' {v} =
       {x | ∀ i ∈ I, evol x t i = extend v i} := by
   ext x
-  simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_setOf_eq]
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_ofPred_eq]
   constructor
   · rintro h i hi
-    simp only [extend, dif_pos hi]
+    simp only [extend, dite_eq_left hi]
     rw [← h]
     rfl
   · intro h
     funext i
     have := h i.1 i.2
-    simp only [extend, dif_pos i.2] at this
+    simp only [extend, dite_eq_left i.2] at this
     exact this
 
 /-- **Rule 30 preserves the fair-coin measure** (Hedlund's theorem for rule 30): every iterate
@@ -228,10 +228,10 @@ theorem measure_window_inter_window (t : ℕ) (J I : Finset ℤ) (u w : ℤ → 
       2⁻¹ ^ J.card * 2⁻¹ ^ I.card := by
   have hA : MeasurableSet {x : ℤ → Bool | ∀ j ∈ J, x j = u j} := measurableSet_window 0 J u
   have h := measure_inter_window hA (m := m) (fun x p hp => by
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     refine forall₂_congr fun j hj => ?_
     rw [Function.update_of_ne (by have := hJ j hj; omega)]) t w I hI
-  rw [Set.setOf_and, h, show {x : ℤ → Bool | ∀ j ∈ J, x j = u j} =
+  rw [Set.ofPred_and, h, show {x : ℤ → Bool | ∀ j ∈ J, x j = u j} =
     {x | ∀ j ∈ J, evol x 0 j = u j} from rfl, measure_window]
 
 /-- **Rule 30 is topologically mixing**: for nonempty open sets `U` and `V`, from some time on,
@@ -268,7 +268,7 @@ theorem measure_prefix_cells {cell : ℕ → ℕ × ℤ}
   rw [← Finset.card_range (n + 1), ← measure_cells cell w _ hcell.injOn]
   congr 1
   ext x
-  simp only [Set.mem_setOf_eq, Finset.mem_range, Nat.lt_succ_iff]
+  simp only [Set.mem_ofPred_eq, Finset.mem_range, Nat.lt_succ_iff]
 
 /-- **A sequence of cells with distinct feet is a fair-coin sequence**: if the cells `cell k` have
 pairwise distinct feet, `x ↦ (F^{t_k}(x)_{i_k})_k` carries `coins ℤ` to `coins ℕ`. -/
@@ -354,7 +354,7 @@ theorem measure_diag_eq (t : ℕ) (a : ℤ) :
   have hset : {x : ℤ → Bool | evol x (t + 1) (a + 1) = evol x t a} =
       {x | ∀ i ∈ ({a + 1, a + 2} : Finset ℤ), evol x t i = (fun _ => false) i} := by
     ext x
-    simp only [Set.mem_setOf_eq, Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp,
+    simp only [Set.mem_ofPred_eq, Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp,
       forall_eq]
     rw [AlgebraicDegree.evol_succ, show a + 1 - 1 = a by ring, show a + 1 + 1 = a + 2 by ring]
     cases evol x t a <;> cases evol x t (a + 1) <;> cases evol x t (a + 2) <;> decide
@@ -386,7 +386,7 @@ theorem exists_ge_of_disjunctive {v : ℕ → Bool} (hv : Disjunctive v) {n : �
   obtain ⟨i, hi⟩ := hv (N + n) fun j => if h : N ≤ j.1 then w ⟨j.1 - N, by omega⟩ else false
   refine ⟨i + N, Nat.le_add_left N i, fun j => ?_⟩
   have := hi ⟨N + j.1, by omega⟩
-  simp only [Nat.le_add_right, dif_pos, Nat.add_sub_cancel_left] at this
+  simp only [Nat.le_add_right, dite_eq_left, Nat.add_sub_cancel_left] at this
   rw [show i + N + j.1 = i + (N + j.1) by ring]
   exact this
 
@@ -431,7 +431,7 @@ theorem residual_frequently_window :
     refine residual_of_dense_open ?_ ?_
     · have hev : ∀ (q : ℤ) (b : Bool), IsOpen {y : ℤ → Bool | y q = b} := fun q b =>
         (isOpen_discrete ({b} : Set Bool)).preimage (continuous_apply (A := fun _ : ℤ => Bool) q)
-      simp only [Set.setOf_exists, Set.setOf_and]
+      simp only [Set.ofPred_exists, Set.ofPred_and]
       exact isOpen_iUnion fun q => isOpen_const.inter
         ((hev q false).inter ((hev (q + 1) true).inter (hev (q + 2) false)))
     · rw [dense_iff_inter_open]
@@ -441,9 +441,9 @@ theorem residual_frequently_window :
       set q : ℤ := n + N + 1
       refine ⟨fun p => if p = q then false else if p = q + 1 then true else if p = q + 2 then false
         else v p, hn fun p _ hp => ?_, q, by omega, by simp, by simp, by simp⟩
-      simp only [show p ≠ q by omega, show p ≠ q + 1 by omega, show p ≠ q + 2 by omega, if_false]
+      simp only [show p ≠ q by omega, show p ≠ q + 1 by omega, show p ≠ q + 2 by omega, ite_false]
   refine Filter.mem_of_superset (countable_iInter_mem.2 hU) fun y hy n => ?_
-  simp only [Set.mem_iInter, Set.mem_setOf_eq] at hy
+  simp only [Set.mem_iInter, Set.mem_ofPred_eq] at hy
   obtain ⟨q, hq, h⟩ := hy n.toNat
   exact ⟨q, by omega, h⟩
 
@@ -923,7 +923,7 @@ theorem ae_mem_visits (I : Finset ℤ) (v : I → Bool) (T : ℕ) :
     ∀ᵐ x ∂(coins ℤ), x ∈ visits I v T := by
   have hsub : (fun x : ℤ → Bool => evol x 1) ⁻¹' visits I v T ⊆ visits I v T := by
     intro x hx
-    simp only [visits, Set.mem_preimage, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hx ⊢
+    simp only [visits, Set.mem_preimage, Set.mem_iUnion, Set.mem_Ici, Set.mem_ofPred_eq] at hx ⊢
     obtain ⟨t, ht, h⟩ := hx
     refine ⟨1 + t, by omega, fun i hi => ?_⟩
     rw [← Rule30ZeroBoundaryBarriers.evol_restart x 1 t i]
@@ -950,11 +950,11 @@ theorem ae_frequently_mem :
   rintro U hU ⟨y, hy⟩ T
   obtain ⟨n, hn⟩ := exists_window_subset (hU.mem_nhds hy)
   have hxv := hx n ((Finset.Icc (-(n : ℤ)) n).restrict y) T
-  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hxv
+  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_ofPred_eq] at hxv
   obtain ⟨t, ht, hw⟩ := hxv
   refine ⟨t, ht, hn fun p hp1 hp2 => ?_⟩
   have := hw p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
-  simp only [extend, dif_pos (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
+  simp only [extend, dite_eq_left (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
   exact this
 
 /-- **Generic orbits return to every open set**: for a comeager set of configurations `x`, every
@@ -980,11 +980,11 @@ theorem residual_frequently_mem :
   obtain ⟨n, hn⟩ := exists_window_subset (hU.mem_nhds hy)
   have hxv := Set.mem_iInter.1 (Set.mem_iInter.1 (Set.mem_iInter.1 hx n)
     ((Finset.Icc (-(n : ℤ)) n).restrict y)) T
-  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_setOf_eq] at hxv
+  simp only [visits, Set.mem_iUnion, Set.mem_Ici, Set.mem_ofPred_eq] at hxv
   obtain ⟨t, ht, hw⟩ := hxv
   refine ⟨t, ht, hn fun p hp1 hp2 => ?_⟩
   have := hw p (Finset.mem_Icc.2 ⟨hp1, hp2⟩)
-  simp only [extend, dif_pos (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
+  simp only [extend, dite_eq_left (Finset.mem_Icc.2 ⟨hp1, hp2⟩)] at this
   exact this
 
 /-! ### Perturbations -/
@@ -1053,9 +1053,9 @@ theorem log_two_le_coverEntropy_shift :
         (Set.mem_univ _)
       refine Finset.mem_image.2 ⟨y, hy, funext fun k => ?_⟩
       simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
-        Prod.map_apply, ShiftOrbit.shift_iterate, V, Set.mem_setOf_eq, add_zero] at hxy
+        Prod.map_apply, ShiftOrbit.shift_iterate, V, Set.mem_ofPred_eq, add_zero] at hxy
       have hk := hxy k k.2
-      simp only [dif_pos k.2] at hk
+      simp only [dite_eq_left k.2] at hk
       exact hk.symm
     calc 2 ^ n = (Finset.univ : Finset (Fin n → Bool)).card := by simp
       _ = (s.image fun y => fun k : Fin n => y k).card := by rw [hsurj]
@@ -1199,7 +1199,7 @@ theorem coverMincard_le (N n : ℕ) :
     refine ⟨rep (pairWord N L x),
       Finset.mem_coe.2 (Finset.mem_image_of_mem _ (mem_pairWords.2 hw)), ?_⟩
     have hrep : pairWord N L (rep (pairWord N L x)) = pairWord N L x := by
-      simp only [rep, dif_pos hw]
+      simp only [rep, dite_eq_left hw]
       exact hw.choose_spec
     have hcol : ∀ s ≤ n + 2 * N, evol x s N = evol (rep (pairWord N L x)) s N ∧
         evol x s (N + 1) = evol (rep (pairWord N L x)) s (N + 1) := fun s hs => by
@@ -1207,7 +1207,7 @@ theorem coverMincard_le (N n : ℕ) :
       simp only [pairWord, Prod.mk.injEq] at this
       exact ⟨this.1.symm, this.2.symm⟩
     simp only [dynEntourage, Set.mem_iInter, Set.mem_preimage, Prod.map_iterate,
-      Prod.map_apply, windowRel, Set.mem_setOf_eq]
+      Prod.map_apply, windowRel, Set.mem_ofPred_eq]
     intro k hk i hi1 hi2
     rw [iterate_evol_one, iterate_evol_one]
     -- the column `i` lies `N - i ≤ 2N` cells left of the column `N`

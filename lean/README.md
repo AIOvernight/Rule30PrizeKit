@@ -7,7 +7,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 - **The statements:** `Ruliology/CellularAutomata/Rule30Jen.lean` defines `rule`, `cell` and `EventuallyPeriodic`. `Ruliology/CellularAutomata/Rule30Prize.lean` defines `center`, `Problem1` and `Problem2`. The kit's [README](../README.md) quotes them.
 - **The catalog:** 54 modules. `Ruliology.lean` imports the 40 `Rule30*` modules; their import closure adds the 13 data modules in `Rule30Certificates/` and `BusyBeaverLifetimes`. Each module's docstring records its claim, method and sources.
 - **Axioms:** every theorem uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
-- **Provenance:** the 54 catalog modules come from the Ruliology catalog of 2026-10-15, byte for byte except one docstring sentence in `Rule30ZeroBoundaryWidth52`. `SHA256SUMS` lists their hashes: `shasum -a 256 -c SHA256SUMS`.
+- **Provenance:** the 54 catalog modules come from the Ruliology catalog of 2026-10-15, byte for byte except one docstring sentence in `Rule30ZeroBoundaryWidth52`. `SHA256SUMS` lists their hashes as copied, which the kit's first commit, `c2dab06`, matches (`shasum -a 256 -c SHA256SUMS` in a checkout of it). Since then their comments have dropped catalog numbering and provenance, and eight modules changed for Lean 4.35.0; `git log lean/` shows each change.
 - **Added in the kit:** modules proved after the snapshot, or proved during the attempt but left out of the catalog. [Added in the kit](#added-in-the-kit) lists them.
 
 ## Status by period

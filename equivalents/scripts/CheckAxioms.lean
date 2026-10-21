@@ -113,6 +113,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.ProblemTwo.problem2_of_isNormal
 #print axioms Rule30Equivalents.ProblemTwo.problem1_of_density_on_progressions
 #print axioms Rule30Equivalents.ProfiniteIntegers.problem1_iff_no_continuous_extension
+#print axioms Rule30Equivalents.RandomNaturalBoundary.problem1_of_circleIsNaturalBoundary
 #print axioms Rule30Equivalents.Realization.problem1_iff_realization
 #print axioms Rule30Equivalents.Realization.problem1_iff_column_iff_both
 #print axioms Rule30Equivalents.Realization.problem1_iff_irrational_ofDigits

@@ -174,7 +174,7 @@ files. The rows follow the order of Section 3.
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register`, `WordsAutomata.problem1_iff_maxOrderComplexity_tendsto`, `WordsAutomata.problem1_iff_no_feedback_from_zero` |
-| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn` |
+| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn`, `RandomNaturalBoundary.ae_circleIsNaturalBoundary_trace` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
@@ -1224,7 +1224,16 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   `problem1_iff_no_meromorphicOn`, Problem 1 ⟺ f agrees on the unit disk with no function
   meromorphic on a disk of radius R > 1; at each point x of a closed disk of radius ρ ∈ (1, R),
   some (z − x)ⁿ·g is analytic on a ball around x, finitely many balls cover the closed disk, and
-  Q = ∏ (X − x)ⁿ clears the poles (`hasMeromorphicExtension_of_meromorphicOn`).
+  Q = ∏ (X − x)ⁿ clears the poles (`hasMeromorphicExtension_of_meromorphicOn`). For almost every
+  configuration the center column has the unit circle as natural boundary
+  ([RandomNaturalBoundary](Rule30Equivalents/RandomNaturalBoundary.lean),
+  `ae_circleIsNaturalBoundary_trace`; Steinhaus, Paley–Zygmund): along the radius to
+  w = e^(iπ(2p+1)/(N+1)) the real part of 2f(tw) − 1/(1 − tw) is a weighted sum
+  Σ tᵏ Re(wᵏ)(±1) of independent signs, with variance at least 1/(1 − t^(2N+2)) and fourth moment
+  at most three times the squared variance, so by the Paley–Zygmund inequality it exceeds any
+  bound near t = 1 with probability at least 1/6, and almost surely by Kolmogorov's zero-one law.
+  These directions are dense, and a continuation across the circle at one of them would make the
+  sum converge.
 
   ```lean
   noncomputable def genFun (z : ℂ) : ℂ := ∑' t, (if Rule30Prize.center t then (1 : ℂ) else 0) * z ^ t
@@ -1236,7 +1245,8 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
 
 - *Mathlib.* `AnalyticOnNhd`, `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` and
   `FormalMultilinearSeries.radius`. Missing: natural boundaries, Szegő's theorem and Pólya–Carlson.
-- *Sources.* [Sze22]; [Car21]; [Pol16]; [BC17] (its Theorem 1.1 states Szegő's theorem in this form).
+- *Sources.* [Sze22]; [Car21]; [Pol16]; [BC17] (its Theorem 1.1 states Szegő's theorem in this form);
+  for random coefficients [Ste30]; [PZ32]; [Kah85].
   One survey cited Carlson's different 1921 paper, *Über ganzwertige Funktionen*; the correct one
   is [Car21].
 
@@ -2331,7 +2341,11 @@ countably many, `ae_not_zero_set_countable_trace`), Prize Problem 3 in both read
 computes the column at all: a machine computes at most one sequence, and machines are countably
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration
-(`TypicalConditions.ae_prizeProblems_trace`). The circuit relative of Problem 3 holds too: for all
+(`TypicalConditions.ae_prizeProblems_trace`). The generating function has the unit circle as
+natural boundary, the sufficient condition of [41]
+([RandomNaturalBoundary](Rule30Equivalents/RandomNaturalBoundary.lean),
+`ae_circleIsNaturalBoundary_trace`, by the Paley–Zygmund inequality and Kolmogorov's zero-one law).
+The circuit relative of Problem 3 holds too: for all
 large k no circuit with at most 2ᵏ/(8k) binary gates computes t ↦ c(t), t < 2ᵏ, from the binary
 digits of t, since there are at most (16(k + s)²)^s circuits with s gates and each computes the
 random function with probability 2^(−2ᵏ) ([Circuits](Rule30Equivalents/Circuits.lean),
@@ -3112,6 +3126,11 @@ Algebra, power series and coding theory
   Preuss. Akad. Wiss. (1922) 88–91.
 - [Car21] F. Carlson, Über Potenzreihen mit ganzzahligen Koeffizienten, Math. Z. 9 (1921) 1–13.
 - [Pol16] G. Pólya, Über Potenzreihen mit ganzzahligen Koeffizienten, Math. Ann. 77 (1916) 497–513.
+- [Ste30] H. Steinhaus, Über die Wahrscheinlichkeit dafür, daß der Konvergenzkreis einer Potenzreihe
+  ihre natürliche Grenze ist, Math. Z. 31 (1930) 408–416.
+- [PZ32] R. E. A. C. Paley, A. Zygmund, On some series of functions (3), Proc. Cambridge Philos.
+  Soc. 28 (1932) 190–205.
+- [Kah85] J.-P. Kahane, Some Random Series of Functions, 2nd ed., Cambridge Univ. Press (1985).
 - [JB89] C. J. A. Jansen, D. E. Boekee, The shortest feedback shift register that can generate a
   given sequence, CRYPTO '89, LNCS 435 (1990) 90–99.
 - [Li24] C. Li, A survey on complexity measures of pseudo-random sequences, arXiv:2405.08479 (2024).

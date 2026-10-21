@@ -2,6 +2,7 @@ import Rule30Equivalents.Mixing
 import Rule30Equivalents.IteratedLogarithm
 import Rule30Equivalents.ErdosRenyi
 import Rule30Equivalents.ReturnTimes
+import Rule30Equivalents.RandomNaturalBoundary
 
 /-!
 # Laws along every line of the spacetime diagram
@@ -19,7 +20,9 @@ of fair-coin sequences holds along all of these countably many lines at once
 * `ae_returnTime_lines`: the first `n` cells recur after `2^(n + o(n))` steps (`ReturnTimes`);
 * `ae_linComplexity_lines`: the linear complexity of the first `n` cells is `n/2 + o(n)`
   (`LinearComplexity`);
-* `ae_maxWindow_lines`: for each `1/2 < α < 1`, the Erdős–Rényi law (`ErdosRenyi`).
+* `ae_maxWindow_lines`: for each `1/2 < α < 1`, the Erdős–Rényi law (`ErdosRenyi`);
+* `ae_circleIsNaturalBoundary_lines`: the generating function of the cells has the unit circle as
+  a natural boundary (`RandomNaturalBoundary`).
 
 The center column is the line `p = 0`, `q = 1`. Lines of velocity `1` are not fair coins
 (`Mixing.measure_diag_eq`).
@@ -72,5 +75,12 @@ theorem ae_maxWindow_lines {α : ℝ} (hα : 1 / 2 < α) (hα1 : α < 1) :
           ⌊Real.log n / (Real.log 2 - Real.binEntropy α)⌋₊ /
         ⌊Real.log n / (Real.log 2 - Real.binEntropy α)⌋₊) atTop (𝓝 α) :=
   Mixing.ae_lines_of_ae (ErdosRenyi.ae_tendsto_maxWindow hα hα1)
+
+/-- **A natural boundary along every line**: the generating function of the cells along the line
+has the unit circle as a natural boundary. -/
+theorem ae_circleIsNaturalBoundary_lines :
+    ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
+      RandomNaturalBoundary.CircleIsNaturalBoundary fun k => evol x (q * k + t₀) (p * k + x₀) :=
+  Mixing.ae_lines_of_ae RandomNaturalBoundary.ae_circleIsNaturalBoundary
 
 end Rule30Equivalents.Lines

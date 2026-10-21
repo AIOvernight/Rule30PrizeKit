@@ -23,6 +23,8 @@ sh Rule30PrizeKit/setup.sh
 2. It builds `Rule30PrizeKit` and the template `Rule30Submission`.
 3. It runs the checker on the template, which passes.
 
+It does not build the whole catalog. To import another catalog module, build it first, with `lake build Ruliology.CellularAutomata.<Module>`, or build everything with `bash build_all.sh`, one module at a time: the certificate modules need about 3 GB each.
+
 LeanLink needs version 1.0.14 or later. Since 1.0.13 it loads from the kit with `LeanImportString[src, "ProjectDir" -> kit]`, following Lake path dependencies such as `lean/`, and 1.0.14 adds `"KernelCheck"`, the kernel replay described below.
 
 ## The statements

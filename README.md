@@ -2,7 +2,7 @@
 
 This is the reference Lean environment for submissions to the [Wolfram Rule 30 Prizes](https://rule30prize.org/). The verifier checks every submission against exactly this Lake project:
 
-- Lean 4.30.0 and Mathlib `c5ea00351c`;
+- Lean 4.35.0 and Mathlib `56a005855e`, its `v4.35.0` tag;
 - the official statements `Problem1` and `Problem2`, in [`lean/`](lean), with the catalog of proved partial results;
 - the 161 `problem1_iff_*` equivalences and 44 `problem1_of_*` sufficient conditions, and for Prize Problem 2 the 14 `problem2_iff_*` forms and the sufficient conditions `problem2_of_isNormal` and `problem2_of_unpredictable_half`, in [`equivalents/`](equivalents), with [`CATALOG.md`](equivalents/CATALOG.md), the catalog of 54 equivalent forms.
 
@@ -25,7 +25,7 @@ sh Rule30PrizeKit/setup.sh
 
 It does not build the whole catalog. To import another catalog module, build it first, with `lake build Ruliology.CellularAutomata.<Module>`, or build everything with `bash build_all.sh`, one module at a time: the certificate modules need about 3 GB each.
 
-LeanLink needs version 1.0.14 or later. Since 1.0.13 it loads from the kit with `LeanImportString[src, "ProjectDir" -> kit]`, following Lake path dependencies such as `lean/`, and 1.0.14 adds `"KernelCheck"`, the kernel replay described below.
+LeanLink needs version 1.2.0 or later, the first built for Lean 4.35.0. It loads from the kit with `LeanImportString[src, "ProjectDir" -> kit]`, following Lake path dependencies such as `lean/`, and its `"KernelCheck"` is the kernel replay described below.
 
 ## The statements
 
@@ -77,7 +77,7 @@ lake env lean --run Check.lean Rule30Submission --claim partial --headline Rule3
 2. **Statement.** The module imports the official statements, so `Problem1` and `Problem2` are the kit's: a module cannot declare its own under the official names. The headline has exactly the official type. For a partial result, it only has to exist and be a theorem.
 3. **Axioms.** The headline uses only `propext`, `Classical.choice` and `Quot.sound`.
 
-**Why replay matters.** In Lean 4.30, `#print axioms` and LeanLink's `"Axioms"` read the axiom lists stored in the compiled module. A file can add a theorem without type checking it (`set_option debug.skipKernelTC true`), and an axiom check then reports nothing wrong. [`tests/T05SkipKernel.lean`](tests/T05SkipKernel.lean) does this. LeanLink shows its type as `Problem1` with no axioms and the term `True.intro`. Only the replay rejects it: `Check.lean`'s, or LeanLink's `"KernelCheck"`.
+**Why replay matters.** `#print axioms` and LeanLink's `"Axioms"` read the axiom lists stored in the compiled module. A file can add a theorem without type checking it (`set_option debug.skipKernelTC true`), and an axiom check then reports nothing wrong. [`tests/T05SkipKernel.lean`](tests/T05SkipKernel.lean) does this. LeanLink shows its type as `Problem1` with no axioms and the term `True.intro`. Only the replay rejects it: `Check.lean`'s, or LeanLink's `"KernelCheck"`.
 
 `sh tests/run.sh` runs ten checker runs over seven test files: one template that passes, then `sorry`, a new axiom, `native_decide`, the forged theorem, a wrong type and a `Problem1` of the module's own, which all fail.
 

@@ -374,8 +374,8 @@ theorem runW_dfaTM (w : List β) {t : ℕ} (ht : t ≤ w.length) :
     rw [(isRun_runW (M := (dfaTM D).toMachine) some w) t, ih (by omega), step_eq rfl]
     have htape : (initW (dfaTM D).toMachine some w).tape (t : ℤ) = some (w[t]'(by omega)) := by
       simp only [initW]
-      rw [dif_pos (by omega)]
-      simp
+      erw [dif_pos (by simp; omega)]
+      simp only [Int.toNat_natCast]; rfl
     refine Cfg.ext' ?_ ?_ ?_
     · dsimp only
       rw [htape]
@@ -398,7 +398,7 @@ theorem decidesLang_dfaTM : DecidesLang (dfaTM D).toMachine some D.accepts fun n
     step_eq rfl]
   have htape : (initW (dfaTM D).toMachine some w).tape (w.length : ℤ) = none := by
     simp only [initW]
-    rw [dif_neg (by omega)]
+    erw [dif_neg (by simp <;> omega)]
     rfl
   dsimp only
   rw [htape]

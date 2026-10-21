@@ -333,7 +333,7 @@ theorem measurable_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → σ) (g :
       readState_congr (b' := fun i => if h : i < n + 1 then trace x i else false)
         fun i hi => by simp [show i < n + 1 by omega]]
   rw [h]
-  exact (measurable_of_finite _).comp (measurable_pi_lambda _ fun i =>
+  exact (measurable_of_finite _).comp (Measurable.of_eval fun i =>
     RandomConfigurations.measurable_evol (i : ℕ) 0)
 
 /-- The errors of a predictor on the trace are adapted: flipping the coin at `-n` flips the trace
@@ -357,7 +357,7 @@ theorem measurePreserving_errors {σ : Type} (s₀ : σ) (δ : σ → Bool → �
     MeasureTheory.MeasurePreserving (fun x : ℤ → Bool => errors s₀ δ g (trace x))
       (RandomConfigurations.coins ℤ) (RandomConfigurations.coins ℕ) :=
   RandomConfigurations.measurePreserving_of_measure_prefix
-    (measurable_pi_lambda _ (measurable_errors s₀ δ g))
+    (Measurable.of_eval (measurable_errors s₀ δ g))
     (RandomConfigurations.measure_prefix_of_adapted (measurable_errors s₀ δ g)
       (adapted_errors s₀ δ g))
 

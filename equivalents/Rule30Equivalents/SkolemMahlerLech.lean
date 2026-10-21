@@ -325,7 +325,7 @@ theorem epSet_zeros_of_coeff_ne_zero {d : ℕ} (a : Fin (d + 1) → ℚ) (ha0 : 
   have hstate : ∀ n (i : Fin (d + 1)), (((A ^ n *ᵥ v) i : ℤ_[p]) : ℚ_[p]) = (u (n + i) : ℚ_[p]) := by
     intro n
     induction n with
-    | zero => intro i; simp [v, toZp]
+    | zero => intro i; rw [pow_zero, Matrix.one_mulVec]; simp [v, toZp]
     | succ n ih =>
       intro i
       rw [pow_succ', ← Matrix.mulVec_mulVec]
@@ -335,7 +335,8 @@ theorem epSet_zeros_of_coeff_ne_zero {d : ℕ} (a : Fin (d + 1) → ℚ) (ha0 : 
         rw [show n + ((i : ℕ) + 1) = n + 1 + i by omega]
       · obtain rfl : i = Fin.last d := Fin.ext (by simp; omega)
         rw [companion_mulVec_last, PadicInt.coe_sum]
-        simp only [PadicInt.coe_mul, ih, c, toZp, Fin.val_last]
+        simp only [PadicInt.coe_mul, ih, Fin.val_last]
+        simp only [c, toZp]
         rw [show n + 1 + d = n + (d + 1) by ring, hu n]
         push_cast
         rfl

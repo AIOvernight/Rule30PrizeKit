@@ -120,7 +120,7 @@ Each module first proves a general theorem about every sequence `b : ℕ → Boo
 
 ## Building
 
-This is a Lake project on Lean 4.30.0. It pins Mathlib at commit `c5ea00351c` and depends on the core-Lean snapshot in [`../lean`](../lean) for `Rule30Prize.Problem1`.
+This is a Lake project on Lean 4.35.0. It pins Mathlib at commit `56a005855e`, its `v4.35.0` tag, and depends on the core-Lean snapshot in [`../lean`](../lean) for `Rule30Prize.Problem1`.
 
 From the kit root, which shares one Mathlib with this folder:
 

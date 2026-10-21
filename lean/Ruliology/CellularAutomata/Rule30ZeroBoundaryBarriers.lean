@@ -821,7 +821,7 @@ theorem left_edge {x : Int → Bool} {lo : Int} (h1 : x lo = true) (h0 : ∀ p, 
     ∀ t : Nat, evol x t (lo - t) = true ∧ ∀ p, p < lo - t → evol x t p = false := by
   intro t
   induction t with
-  | zero => exact ⟨by simpa using h1, fun p hp => h0 p (by omega)⟩
+  | zero => exact ⟨by simpa [evol] using h1, fun p hp => h0 p (by omega)⟩
   | succ t ih =>
     refine ⟨?_, fun p hp => ?_⟩
     · rw [evol_succ, ih.2 _ (by omega), ih.2 _ (by omega), show lo - ↑(t + 1) + 1 = lo - ↑t by omega, ih.1]
@@ -833,7 +833,7 @@ theorem right_edge {x : Int → Bool} {hi : Int} (h1 : x hi = true) (h0 : ∀ p,
     ∀ t : Nat, evol x t (hi + t) = true ∧ ∀ p, hi + t < p → evol x t p = false := by
   intro t
   induction t with
-  | zero => exact ⟨by simpa using h1, fun p hp => h0 p (by omega)⟩
+  | zero => exact ⟨by simpa [evol] using h1, fun p hp => h0 p (by omega)⟩
   | succ t ih =>
     refine ⟨?_, fun p hp => ?_⟩
     · rw [evol_succ, show hi + ↑(t + 1) - 1 = hi + t by omega, ih.1, ih.2 _ (by omega),

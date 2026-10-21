@@ -59,17 +59,17 @@ lemma term_realize_eq_add_dotProduct [Fintype α] (S : Set ℕ) (t : presburgerS
       cases f with
       | zero =>
         refine ⟨0, 0, fun v => ?_⟩
-        rw [withConstants_funMap_sumInl]
+        erw [withConstants_funMap_sumInl]
         simp
         rfl
       | one =>
         refine ⟨1, 0, fun v => ?_⟩
-        rw [withConstants_funMap_sumInl]
+        erw [withConstants_funMap_sumInl]
         simp
         rfl
       | add =>
         refine ⟨k 0 + k 1, u 0 + u 1, fun v => ?_⟩
-        rw [withConstants_funMap_sumInl]
+        erw [withConstants_funMap_sumInl]
         show (ts 0).realize v + (ts 1).realize v = _
         rw [ih 0, ih 1, add_dotProduct]
         ring
@@ -235,7 +235,7 @@ theorem sdef_le [Finite β] {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : S
 
 theorem sdef_lt [Finite β] {f g : (β → ℕ) → ℕ} (hf : SFun S f) (hg : SFun S g) :
     SDef S {v | f v < g v} := by
-  convert sdef_le (sfun_add hf (sfun_const 1)) hg using 1
+  exact sdef_le (sfun_add hf (sfun_const 1)) hg
 
 theorem sdef_mem_var (i : β) : SDef S {v : β → ℕ | v i ∈ S} := by
   letI := structS S
@@ -298,7 +298,7 @@ theorem sdef_consec : SDef S {v : Fin 3 → ℕ | Consec S (v 0) (v 1) (v 2)} :=
   have h0 : SDef S {v : Fin 3 → ℕ | v 0 + v 1 ∈ S} := sdef_mem (sfun_add (sfun_var _) (sfun_var _))
   have h1 : SDef S {v : Fin 3 → ℕ | v 0 + v 2 ∈ S} := sdef_mem (sfun_add (sfun_var _) (sfun_var _))
   have h2 : SDef S {v : Fin 3 → ℕ | v 1 < v 2} := sdef_lt (sfun_var _) (sfun_var _)
-  convert h0.inter (h1.inter (h2.inter hall)) using 1
+  exact h0.inter (h1.inter (h2.inter hall))
 
 /-- `Consec` at three definable coordinates. -/
 theorem sdef_consec_comp {β : Type} [Finite β] (i j k : β) :
@@ -345,7 +345,7 @@ theorem sdef_sqWin : SDef S {v : Fin 3 → ℕ | SqWin S (v 0) (v 1) (v 2)} := b
   have h0 : SDef S {v : Fin 3 → ℕ | v 0 ∈ S} := sdef_mem_var 0
   have h1 : SDef S {v : Fin 3 → ℕ | v 0 + 1 ∈ S} := sdef_mem (sfun_add (sfun_var _) (sfun_const 1))
   have h2 : SDef S {v : Fin 3 → ℕ | v 0 + v 2 ∈ S} := sdef_mem (sfun_add (sfun_var _) (sfun_var _))
-  convert h0.inter (h1.inter (h2.inter (hgap.inter hlast))) using 1
+  exact h0.inter (h1.inter (h2.inter (hgap.inter hlast)))
 
 theorem sdef_sqPred : SDef S {v : Fin 2 → ℕ | SqPred S (v 0) (v 1)} := by
   letI := structS S
@@ -359,7 +359,7 @@ theorem sdef_sqPred : SDef S {v : Fin 2 → ℕ | SqPred S (v 0) (v 1)} := by
     ext v
     simp only [Set.mem_setOf_eq, Sum.elim_inl, Sum.elim_inr]
     exact ⟨fun ⟨x, hx⟩ => ⟨fun _ => x, hx⟩, fun ⟨u, hu⟩ => ⟨u (), hu⟩⟩
-  convert (hz0.inter hz1).union (hpos.inter hex) using 1
+  exact (hz0.inter hz1).union (hpos.inter hex)
 
 /-- Above a window element `q < z` with `z` in the window there is a next element `r ≤ z`. -/
 theorem exists_consec {x q z : ℕ} (hq : x + q ∈ S) (hz : x + z ∈ S) (hqz : q < z) :

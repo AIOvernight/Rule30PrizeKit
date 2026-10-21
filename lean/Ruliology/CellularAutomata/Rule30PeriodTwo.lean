@@ -100,7 +100,7 @@ theorem col1_rowAt : ∀ (cs : List Bool) (t n : Nat),
       (List.range cs.length).map (fun i => cell (t + i) 1)
   | [], t, n, _ => rfl
   | c :: cs, t, n, h => by
-    have h0 : cell t 0 = c := by simpa using h 0 (by simp)
+    have h0 : cell t 0 = c := h 0 (by simp)
     have hs : stepRow c (rowAt t 1 ((n + cs.length + 1) + 1)) =
         rowAt (t + 1) 1 (n + cs.length + 1) := by
       have := stepRow_rowAt t (n + cs.length + 1) 1

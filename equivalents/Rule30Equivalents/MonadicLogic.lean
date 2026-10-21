@@ -220,7 +220,11 @@ inductive AtomKind
   | sing
   | sub
   | less
-  deriving DecidableEq, Fintype
+  deriving DecidableEq
+
+instance : Fintype AtomKind where
+  elems := {.empty, .sing, .sub, .less}
+  complete x := by cases x <;> simp
 
 /-- Atomic formulas over the variables below `m`. -/
 abbrev Atom (m : ℕ) := AtomKind × Fin m × Fin m
@@ -663,8 +667,7 @@ theorem holds_periodicFormula {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P)
     -- the sets of the counting automaton itself
     obtain ⟨s, hs, hfs, hn⟩ := h (fun j => if j < N + P then {t | (cnt N P hP t : ℕ) = j} else ∅)
       (fun j hj => if_neg hj)
-      ⟨by dsimp only; rw [if_pos (by omega)]; rfl, fun y s hs hy => by
-        dsimp only at hy ⊢
+      ⟨by rw [if_pos (by omega)]; rfl, fun y s hs hy => by
         rw [if_pos hs] at hy
         rw [if_pos (wrap_lt hP s)]
         show (cnt N P hP (y + 1) : ℕ) = wrap N P s

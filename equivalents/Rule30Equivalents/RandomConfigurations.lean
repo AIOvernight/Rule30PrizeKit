@@ -7,6 +7,7 @@ import Mathlib.Probability.Distributions.Uniform
 import Mathlib.Probability.CentralLimitTheorem
 import Mathlib.Probability.Moments.SubGaussian
 import Mathlib.Probability.ConditionalProbability
+import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Random configurations
@@ -68,16 +69,13 @@ open MeasureTheory ProbabilityTheory Filter Topology Ruliology.CellularAutomata 
   Genericity
 
 /-- The fair coin on `Bool`. -/
-noncomputable def coin : Measure Bool := (PMF.uniformOfFintype Bool).toMeasure
+noncomputable def coin : Measure Bool := Measure.uniformOfFinset Finset.univ
 
-instance : IsProbabilityMeasure coin := by
-  unfold coin
-  infer_instance
+instance : IsProbabilityMeasure coin :=
+  ⟨by simp [coin, Measure.uniformOfFinset, ENNReal.inv_two_add_inv_two]⟩
 
 theorem coin_singleton (b : Bool) : coin {b} = 2⁻¹ := by
-  rw [coin, PMF.toMeasure_apply_singleton _ b (measurableSet_singleton b),
-    PMF.uniformOfFintype_apply]
-  simp
+  simp [coin]
 
 /-- Independent fair coins indexed by `ι`. -/
 noncomputable abbrev coins (ι : Type*) : Measure (ι → Bool) :=
@@ -113,7 +111,7 @@ theorem coins_singleton (v : ℕ → Bool) : coins ℕ {v} = 0 := by
     (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)).comp (tendsto_add_atTop_nat 1)
   exact le_antisymm (ge_of_tendsto' hlim hle) zero_le
 
-instance : NoAtoms (coins ℕ) := ⟨coins_singleton⟩
+instance : NullSingletonClass (coins ℕ) := ⟨coins_singleton⟩
 
 theorem measurable_evol (t : ℕ) (p : ℤ) : Measurable fun x : ℤ → Bool => evol x t p :=
   (continuous_evol t p).measurable
@@ -133,7 +131,7 @@ theorem flip_eq {ι : Type*} [DecidableEq ι] (j : ι) :
 theorem measurable_flip {ι : Type*} [DecidableEq ι] (j : ι) :
     Measurable fun x : ι → Bool => Function.update x j (!x j) := by
   rw [flip_eq]
-  exact measurable_pi_lambda _ fun i => Measurable.of_discrete.comp (measurable_pi_apply i)
+  exact Measurable.of_eval fun i => Measurable.of_discrete.comp (measurable_pi_apply i)
 
 /-- Flipping one coin preserves the fair-coin measure. -/
 theorem map_flip {ι : Type*} [DecidableEq ι] (j : ι) :
@@ -355,7 +353,6 @@ theorem measurePreserving_of_measure_prefix {ρ : Measure (ℤ → Bool)} [IsPro
     (hpre : ∀ (w : ℕ → Bool) (n : ℕ), ρ {x | ∀ t ≤ n, g x t = w t} = 2⁻¹ ^ (n + 1)) :
     MeasurePreserving g ρ (coins ℕ) := by
   refine ⟨hg, ?_⟩
-  have : IsProbabilityMeasure (ρ.map g) := Measure.isProbabilityMeasure_map hg.aemeasurable
   refine ext_of_generate_finite _ generateFrom_measurableCylinders.symm
     isPiSystem_measurableCylinders (fun s hs => ?_) (by rw [measure_univ, measure_univ])
   rw [measurableCylinders_nat] at hs
@@ -686,8 +683,8 @@ theorem ae_isNormal : ∀ᵐ v ∂(coins ℕ), StrongerStatements.IsNormal v := 
       with v hv
     have := tendsto_average_of_residues hn
       (a := fun i => if ∀ j : Fin n, v (i + j) = w j then (1 : ℝ) else 0)
-      (fun i => by dsimp only; split_ifs <;> norm_num)
-      (fun i => by dsimp only; split_ifs <;> norm_num)
+      (fun i => by split_ifs <;> norm_num)
+      (fun i => by split_ifs <;> norm_num)
       fun r hr => hv ⟨r, hr⟩
     refine this.congr fun N => ?_
     rw [Finset.sum_boole]
@@ -918,7 +915,7 @@ theorem ae_eventually_abs_count_trace_lt :
 def glue (R x : ℤ → Bool) (p : ℤ) : Bool := if p ≤ 0 then x p else R p
 
 theorem measurable_glue (R : ℤ → Bool) : Measurable (glue R) :=
-  measurable_pi_lambda _ fun p => by
+  Measurable.of_eval fun p => by
     by_cases hp : p ≤ 0
     · simp only [glue, if_pos hp]
       exact measurable_pi_apply p

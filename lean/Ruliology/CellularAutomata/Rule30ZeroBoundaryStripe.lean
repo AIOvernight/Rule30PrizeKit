@@ -501,6 +501,7 @@ def reachesStripe (n : Nat) : Nat → Nat → Bool
   | 0, v => v == enc stripe n
   | f + 1, v => v == enc stripe n || reachesStripe n f (bstep n v)
 
+set_option maxRecDepth 100000 in
 /-- Local front check: with the stripe from cell `13` on, cells `11, 12` become `1, 0` within
 `9` steps, for each of the `2 ^ 12` contents of cells `1..12`. -/
 theorem front_check : Rule30StripCertificates.allBelow (fun v => v % 2 == 1 || frontWithin 12 9 v) (2 ^ 13) = true := by
@@ -772,6 +773,7 @@ theorem stripe2_confined (L : Nat → Bool) (K : Nat) (hK : K % 2 = 0) (hK2 : 2 
         unfold stripe2; rw [show (k' + 2) % 2 = 1 by omega]; rfl
       rw [hs, hs2]; rfl
 
+set_option maxRecDepth 100000 in
 /-- Local front check for the even phase: stripe from cell `14` on, cells `12, 13` become `1, 0`
 within `9` steps, for each of the `2 ^ 13` contents of cells `1..13`. -/
 theorem front_check2 : Rule30StripCertificates.allBelow (fun v => v % 2 == 1 || frontWithin 13 9 v) (2 ^ 14) = true := by
@@ -781,6 +783,7 @@ def reachesStripe2 (n : Nat) : Nat → Nat → Bool
   | 0, v => v >>> 2 == enc stripe2 n >>> 2
   | f + 1, v => v >>> 2 == enc stripe2 n >>> 2 || reachesStripe2 n f (bstep n v)
 
+set_option maxRecDepth 100000 in
 /-- Small strips, even phase: stripe from cell `12` on; every content of cells `1..11` reaches the
 stripe on cells `2..11` within `40` steps. -/
 theorem small_check2 : Rule30StripCertificates.allBelow (fun v => v % 2 == 1 || reachesStripe2 11 40 v) (2 ^ 12) = true := by

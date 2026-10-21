@@ -1,4 +1,5 @@
 import Rule30Equivalents.WordsAutomata
+import Mathlib.Tactic.Ring
 
 /-!
 # The tail language: no flat step, no Rauzy cycle

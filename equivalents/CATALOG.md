@@ -47,8 +47,8 @@ def center (t : Nat) : Bool := cell t 0
 def Problem1 : Prop := ¬ EventuallyPeriodic center
 ```
 
-The Mathlib-based library in this folder (namespace `Rule30Equivalents`, Mathlib `c5ea00351c`,
-Lean 4.30) imports these definitions. [Rule30Equivalents/Basic.lean](Rule30Equivalents/Basic.lean)
+The Mathlib-based library in this folder (namespace `Rule30Equivalents`, Mathlib `56a005855e`,
+Lean 4.35.0) imports these definitions. [Rule30Equivalents/Basic.lean](Rule30Equivalents/Basic.lean)
 adds two abbreviations:
 
 ```lean
@@ -2245,7 +2245,7 @@ def Hypertranscendental : Prop :=
   ∀ (n : ℕ) (P : MvPolynomial (Fin (n + 2)) ℚ), P ≠ 0 →
     MvPolynomial.aeval (fun i : Fin (n + 2) =>
       if (i : ℕ) = 0 then (PowerSeries.X : PowerSeries ℚ)
-      else (⇑(PowerSeries.derivative ℚ))^[(i : ℕ) - 1] C) P ≠ 0
+      else (⇑(PowerSeries.derivative (R := ℚ)))^[(i : ℕ) - 1] C) P ≠ 0
 def NotZeroSetCharTwo : Prop :=
   ∀ (E : LinearRecurrence (RatFunc (ZMod 2))) (u : ℕ → RatFunc (ZMod 2)), E.IsSolution u →
     {t | u t = 0} ≠ {t | Rule30Prize.center t = true}

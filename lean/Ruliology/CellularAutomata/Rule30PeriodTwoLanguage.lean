@@ -140,7 +140,7 @@ theorem no_pattern (C : Cert) (bad : Nat) (hw : C.w = [false, true]) (T T' : Nat
       (simMask C bad S ys).testBit (encList (rowR (u + 2 * ys.length) C.b)) = true := by
     intro ys
     induction ys with
-    | nil => intro S u _ _ hS _; simpa using hS
+    | nil => intro S u _ _ hS _; exact hS
     | cons y ys ih =>
       intro S u hu hpu hS hys
       obtain ⟨e1, e2, b1, b2, _⟩ := hstep u hu hpu

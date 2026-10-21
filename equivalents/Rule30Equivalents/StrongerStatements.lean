@@ -77,7 +77,8 @@ theorem problem1_of_every_line
       ¬ EventuallyPeriodic fun t => Rule30Jen.cell (q * t + t₀) (p * t + x₀)) :
     Rule30Prize.Problem1 := by
   have := h 0 1 0 0 one_pos (by simp)
-  simpa using this
+  simp only [one_mul, add_zero, zero_mul] at this
+  exact this
 
 /-- **Unbounded runs.** -/
 theorem problem1_of_unbounded_runs (b : Bool) (h : ∀ n, ∃ t, ∀ i < n, c (t + i) = b) :
@@ -232,7 +233,7 @@ nonzero polynomial `P` in `n + 2` variables. -/
 def IsDifferentiallyAlgebraic (F : PowerSeries ℚ) : Prop :=
   ∃ (n : ℕ) (P : MvPolynomial (Fin (n + 2)) ℚ), P ≠ 0 ∧
     MvPolynomial.aeval (Fin.cons PowerSeries.X fun i : Fin (n + 1) =>
-      (⇑(PowerSeries.derivative ℚ))^[i] F) P = 0
+      (⇑(PowerSeries.derivative (R := ℚ)))^[i] F) P = 0
 
 /-- **Hypertranscendence**: if `∑ c(t) zᵗ` satisfies no algebraic differential equation over `ℚ`,
 Problem 1 holds. An eventually periodic `c` gives `Q(z) C(z) − P(z) = 0`, an equation of order
@@ -467,7 +468,8 @@ there are countably many equations. -/
 theorem countable_setOf_isMahler {k : ℕ} (hk : 2 ≤ k) (hk0 : k ≠ 0) :
     {b : ℕ → Bool | IsMahler k hk0 (LinearRelations.series ℚ b)}.Countable := by
   classical
-  haveI : Countable (AddMonoidAlgebra ℚ ℕ) := inferInstanceAs (Countable (ℕ →₀ ℚ))
+  haveI : Countable (AddMonoidAlgebra ℚ ℕ) :=
+    (AddMonoidAlgebra.coeffEquiv (R := ℚ) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
   let Sol : (Σ d : ℕ, Fin (d + 1) → Polynomial ℚ) → Set (ℕ → Bool) := fun e =>
     {b | (∃ i, e.2 i ≠ 0) ∧ ∑ i, (e.2 i : PowerSeries ℚ) *

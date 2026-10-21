@@ -367,11 +367,9 @@ theorem eventuallyPeriodic_of_frequently_autComplexityLE {b : ℕ → Bool} {K :
       rw [hAdef, hBdef, show (s - t₁) + (t₁ - t₀) = (t₁ - t₀) + (s - t₁) by omega, seg_add,
         show t₀ + (t₁ - t₀) = t₁ by omega]
     have htake := congrArg (fun l => l.take (s - t₁)) hBA
-    simp only at htake
     rw [List.take_left' (length_seg b t₁ (s - t₁)), hAB, seg_add,
       List.take_left' (length_seg b t₀ (s - t₁))] at htake
     have hget := congrArg (fun l => l.getD j false) htake
-    simp only at hget
     rw [getD_seg b t₁ _ hj, getD_seg b t₀ _ hj] at hget
     exact hget.symm
   refine ⟨t₀, t₁ - t₀, by omega, fun t ht => ?_⟩

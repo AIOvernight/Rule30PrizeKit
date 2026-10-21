@@ -265,7 +265,6 @@ theorem eventuallyPeriodic_of_isAutomatic {a b : ℕ} (ha : 2 ≤ a) (hb : 2 ≤
   set ξ := Finset.univ.sup (fun s => (P s).1 + (P s).2) + 1
   have hξ : ∀ s, (P s).1 < ξ ∧ (P s).2 < ξ := fun s => by
     have := Finset.le_sup (f := fun s => (P s).1 + (P s).2) (Finset.mem_univ s)
-    dsimp only at this
     constructor <;> omega
   obtain ⟨m, n, hm, hn, hclose⟩ := exists_close_powers ha hb (M := 6 * ξ) (by omega)
   push_cast at hclose

@@ -183,7 +183,7 @@ theorem measure_window (t : ℕ) (I : Finset ℤ) (w : ℤ → Bool) :
   rwa [Set.univ_inter, measure_univ, one_mul] at h
 
 theorem measurable_evol_all (t : ℕ) : Measurable fun x : ℤ → Bool => evol x t :=
-  measurable_pi_lambda _ fun p => measurable_evol t p
+  Measurable.of_eval fun p => measurable_evol t p
 
 /-- A pattern on the window `I`, extended by white cells. -/
 def extend {I : Finset ℤ} (v : I → Bool) (i : ℤ) : Bool := if h : i ∈ I then v ⟨i, h⟩ else false
@@ -276,7 +276,7 @@ theorem measurePreserving_cells {cell : ℕ → ℕ × ℤ}
     (hcell : Function.Injective fun k => foot (cell k)) :
     MeasurePreserving (fun (x : ℤ → Bool) k => evol x (cell k).1 (cell k).2) (coins ℤ)
       (coins ℕ) :=
-  measurePreserving_of_measure_prefix (measurable_pi_lambda _ fun _ => measurable_evol _ _)
+  measurePreserving_of_measure_prefix (Measurable.of_eval fun _ => measurable_evol _ _)
     (measure_prefix_cells hcell)
 
 /-- **The cells along a path that never moves right are independent fair coins**: for
@@ -499,7 +499,6 @@ theorem measure_inter_preimage_cylinder {A : Set (ℤ → Bool)} (hA : Measurabl
   have hg : Measurable fun x : ℤ → Bool => I.restrict (evol x t) :=
     (Finset.measurable_restrict I).comp (measurable_evol_all t)
   have h := congrArg (fun ν : Measure (I → Bool) => ν S) (map_restrict_window hA hAm t I hI)
-  simp only at h
   rw [Measure.map_apply hg hS, Measure.restrict_apply (hg hS), Measure.smul_apply,
     smul_eq_mul] at h
   rw [Set.inter_comm, Measure.infinitePi_cylinder _ hS]
@@ -617,7 +616,7 @@ theorem tendsto_measure_inter_preimage {A B : Set (ℤ → Bool)} (hA : Measurab
 /-- **Rule 30 is ergodic** for the fair-coin measure: an invariant measurable set has measure
 `μ(s) = μ(s)²`, so `0` or `1`. -/
 theorem ergodic_evol_one : Ergodic (fun x : ℤ → Bool => evol x 1) (coins ℤ) := by
-  refine ⟨measurePreserving_evol 1, ⟨fun s hs hinv => ?_⟩⟩
+  refine Ergodic.of_preimage_eq (measurePreserving_evol 1) fun s hs hinv => ?_
   have hinvt : ∀ t, (fun x : ℤ → Bool => evol x t) ⁻¹' s = s := by
     intro t
     induction t with
@@ -638,7 +637,7 @@ theorem ergodic_evol_one : Ergodic (fun x : ℤ → Bool => evol x 1) (coins ℤ
     rcases mul_eq_zero.1 this with h0 | h1
     · exact Or.inl h0
     · exact Or.inr (by linarith)
-  rw [Filter.eventuallyConst_set]
+  rw [Filter.eventuallyEmptyOrUniv_iff]
   rcases h01 with h0 | h1
   · right
     exact measure_eq_zero_iff_ae_notMem.1 ((measureReal_eq_zero_iff (measure_ne_top _ _)).1 h0)
@@ -717,7 +716,7 @@ theorem abs_prod_sub_prod_le {x y : ℕ → ℝ} (hx : ∀ j, 0 ≤ x j ∧ x j 
     set P := ∏ j ∈ Finset.range n, x j
     set Q := ∏ j ∈ Finset.range n, y j
     have h0 : 0 ≤ P := Finset.prod_nonneg fun j _ => (hx j).1
-    have h1 : P ≤ 1 := Finset.prod_le_one (fun j _ => (hx j).1) fun j _ => (hx j).2
+    have h1 : P ≤ 1 := Finset.prod_le_one₀ (fun j _ => (hx j).1) fun j _ => (hx j).2
     rw [show P * x n - Q * y n = P * (x n - y n) + (P - Q) * y n by ring]
     calc |P * (x n - y n) + (P - Q) * y n| ≤ |P * (x n - y n)| + |(P - Q) * y n| :=
           abs_add_le _ _
@@ -814,12 +813,14 @@ theorem exists_tendsto_birkhoffAverage_const (g : Lp ℝ 2 (coins ℤ)) :
     ∃ c : ℝ, Tendsto (fun N => birkhoffAverage ℝ koopman _root_.id N g) atTop
       (𝓝 (Lp.const 2 (coins ℤ) c)) := by
   have h := koopman.tendsto_birkhoffAverage_orthogonalProjection norm_koopman_le g
-  set P : Lp ℝ 2 (coins ℤ) := ((LinearMap.eqLocus koopman 1).orthogonalProjection g :
-    Lp ℝ 2 (coins ℤ)) with hPdef
+  set P : Lp ℝ 2 (coins ℤ) :=
+    ((koopman.eqLocus (1 : Lp ℝ 2 (coins ℤ) →L[ℝ] Lp ℝ 2 (coins ℤ))).orthogonalProjectionOnto g :
+      Lp ℝ 2 (coins ℤ)) with hPdef
   have hP : koopman P = P := by
-    have := ((LinearMap.eqLocus koopman 1).orthogonalProjection g).2
+    have := ((koopman.eqLocus
+      (1 : Lp ℝ 2 (coins ℤ) →L[ℝ] Lp ℝ 2 (coins ℤ))).orthogonalProjectionOnto g).2
     rw [LinearMap.mem_eqLocus] at this
-    simpa using this
+    exact this
   -- as an a.e.-class, `P ∘ F = P`, so `P` is constant
   have hP' : P.1.compMeasurePreserving (fun x : ℤ → Bool => evol x 1) ergodic_evol_one.1 =
       P.1 := congrArg Subtype.val hP

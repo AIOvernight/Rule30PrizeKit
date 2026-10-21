@@ -315,7 +315,7 @@ theorem bdef_le {α : Type} [Finite α] {f g : (α → ℕ) → ℕ} (hf : BFun 
 
 theorem bdef_lt {α : Type} [Finite α] {f g : (α → ℕ) → ℕ} (hf : BFun k f) (hg : BFun k g) :
     BDef k {v | f v < g v} := by
-  convert bdef_le (bfun_add hf (bfun_const 1)) hg using 1
+  exact bdef_le (bfun_add hf (bfun_const 1)) hg
 
 /-- "`g v` is a power of `k`" is definable. -/
 theorem bdef_pow (hk : 2 ≤ k) {α : Type} [Finite α] {g : (α → ℕ) → ℕ} (hg : BFun k g) :

@@ -270,7 +270,7 @@ theorem coin_map_not : coin.map (fun b => !b) = coin := by
 /-- Exchanging black and white preserves the fair-coin measure. -/
 theorem measurePreserving_not :
     MeasurePreserving (fun (v : ℕ → Bool) k => !v k) (coins ℕ) (coins ℕ) := by
-  refine ⟨measurable_pi_lambda _ fun k =>
+  refine ⟨Measurable.of_eval fun k =>
     (Measurable.of_discrete (f := fun b : Bool => !b)).comp (measurable_pi_apply k), ?_⟩
   have h := Measure.infinitePi_map_pi (μ := fun _ : ℕ => coin) (f := fun _ (b : Bool) => !b)
     fun _ => Measurable.of_discrete
@@ -352,7 +352,7 @@ def flipIco (m n : ℕ) (v : ℕ → Bool) : ℕ → Bool := fun k => if k ∈ F
 /-- Flipping a block of coins preserves the fair-coin measure. -/
 theorem measurePreserving_flipIco (m n : ℕ) :
     MeasurePreserving (flipIco m n) (coins ℕ) (coins ℕ) := by
-  refine ⟨measurable_pi_lambda _ fun k => ?_, ?_⟩
+  refine ⟨Measurable.of_eval fun k => ?_, ?_⟩
   · by_cases hk : k ∈ Finset.Ico m n
     · simp only [flipIco, hk, if_true]
       exact (Measurable.of_discrete (f := fun b : Bool => !b)).comp (measurable_pi_apply k)

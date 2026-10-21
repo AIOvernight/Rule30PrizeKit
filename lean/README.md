@@ -1,6 +1,6 @@
 # Rule 30: the statements and the catalog of partial results
 
-This Lake project (package `rule30prize`, library `Ruliology`) holds the official Lean statements of the Rule 30 Prize problems and a catalog of proved partial results about rule 30, all in the namespace `Ruliology.CellularAutomata`. It is plain Lean 4.30.0, without Mathlib.
+This Lake project (package `rule30prize`, library `Ruliology`) holds the official Lean statements of the Rule 30 Prize problems and a catalog of proved partial results about rule 30, all in the namespace `Ruliology.CellularAutomata`. It is plain Lean 4.35.0, without Mathlib.
 
 **Problem 1 is open.** Everything here is a partial result.
 
@@ -28,7 +28,7 @@ Barriers are also proved:
 
 ## Building
 
-You need [elan](https://github.com/leanprover/elan); it installs Lean 4.30.0 from `lean-toolchain`.
+You need [elan](https://github.com/leanprover/elan); it installs Lean 4.35.0 from `lean-toolchain`.
 
 `lake build` builds everything, but a cold build runs modules in parallel. The four `Rule30Certificates/ZeroBoundaryWidth52Chunks*` modules take about 20 s and 3 GB each, so a cold parallel build can need about 12.5 GB.
 

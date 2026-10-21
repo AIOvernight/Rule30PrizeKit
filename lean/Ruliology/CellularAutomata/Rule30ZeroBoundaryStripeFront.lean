@@ -118,7 +118,7 @@ theorem seg_sound (K S q Wb pb : Nat) : ∀ fuel r W fp,
       refine ⟨by rw [orb_succ']; exact hrest.1, fun j hj hq => ?_⟩
       cases j with
       | zero =>
-        have hb : Nat.beq (Nat.mod r 2) q = true := by rw [Nat.beq_eq]; simpa using hq
+        have hb : Nat.beq (Nat.mod r 2) q = true := by rw [Nat.beq_eq]; exact hq
         rw [hb] at h1
         exact h1
       | succ j =>

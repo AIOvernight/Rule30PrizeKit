@@ -8,7 +8,7 @@ defaultTargets = ["Rule30PrizeKit"]
 name = "rule30prize"
 path = "lean"
 
-# The 96 `problem1_iff_*` equivalences. Brings Mathlib, pinned at c5ea00351c.
+# The 96 `problem1_iff_*` equivalences. Brings Mathlib, pinned at its v4.35.0 tag.
 [[require]]
 name = "rule30equivalents"
 path = "equivalents"

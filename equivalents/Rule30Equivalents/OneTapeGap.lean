@@ -1067,7 +1067,7 @@ theorem run_periodicTM {f : ℕ → Bool} {N P : ℕ} (hP : 0 < P) {n t : ℕ} (
       simp only [init]; rw [if_pos (by omega)]; rfl
     dsimp only
     rw [htape]
-    simp only [Cfg.mk.injEq]
+    refine (Cfg.mk.injEq ..).mpr ?_
     refine ⟨rfl, by push_cast; rfl, ?_⟩
     exact Function.update_eq_self_iff.2 htape.symm
 

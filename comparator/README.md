@@ -6,7 +6,7 @@ may be adversarial. The automated verifier's replay (`../Check.lean`) loads the 
 directly. Comparator instead exports the proof from the sandbox and checks it outside.
 
 Comparator needs Linux with [landrun](https://github.com/Zouuup/landrun) and a `lean4export` built
-for Lean 4.30.0. Use a fresh checkout in which no submission has been built.
+for Lean 4.35.0. Use a fresh checkout in which no submission has been built.
 
 ```sh
 cp /path/to/submission/Rule30Submission.lean .   # into the kit

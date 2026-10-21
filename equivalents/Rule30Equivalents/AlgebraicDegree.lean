@@ -5,6 +5,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Data.Int.Interval
+import Mathlib.Tactic.Ring
 
 /-!
 # The algebraic degree of rule 30's `t`-step map

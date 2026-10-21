@@ -71,7 +71,7 @@ theorem measure_run (β : Bool) (i m : ℕ) :
     coins ℕ {v | ∀ j < m, v (i + j) = β} = 2⁻¹ ^ m :=
   measure_triangular (ι := ℕ) (fun j v => v (i + j)) (fun _ => measurable_pi_apply _)
     (fun j => i + j) (fun j v => by simp)
-    (fun j v j' hj' => by dsimp only; rw [Function.update_of_ne (by omega)]) (fun _ => β) m
+    (fun j v j' hj' => by rw [Function.update_of_ne (by omega)]) (fun _ => β) m
 
 /-- **A long run is rare**: a run of length `m` among the first `n` cells has probability at most
 `(n + 1) 2^-m`. -/

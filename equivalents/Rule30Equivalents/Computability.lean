@@ -179,8 +179,9 @@ theorem partrec_firstDefect : Partrec firstDefect := by
 
 theorem firstDefect_dom (TP : ℕ × ℕ) :
     (firstDefect TP).Dom ↔ ∃ t, defect TP.1 TP.2 t = true := by
-  simp only [firstDefect, Nat.rfind_dom, Part.mem_some_iff, Part.some_dom, implies_true, and_true]
-  exact ⟨fun ⟨t, h⟩ => ⟨t, h.symm⟩, fun ⟨t, h⟩ => ⟨t, h.symm⟩⟩
+  simp only [firstDefect, Nat.rfind_dom]
+  exact ⟨fun ⟨t, h, _⟩ => ⟨t, (Part.mem_some_iff.1 h).symm⟩,
+    fun ⟨t, h⟩ => ⟨t, Part.mem_some_iff.2 h.symm, fun _ _ => trivial⟩⟩
 
 /-- **Problem 1 as the totality of a partial recursive function**: the search for a defect halts on
 every input. -/
@@ -284,7 +285,7 @@ theorem countable_computable : {v : ℕ → Bool | Computable v}.Countable := by
     have h : Nat.Partrec (g v) := by
       have h' : Partrec (v : ℕ →. Bool) := hv
       unfold Partrec at h'
-      convert h' using 1
+      refine (congrArg Nat.Partrec ?_).mpr h'
       funext n
       simp [g]
     exact Nat.Partrec.Code.exists_code.1 h

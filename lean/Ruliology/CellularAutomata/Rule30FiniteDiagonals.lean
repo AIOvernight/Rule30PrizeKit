@@ -198,7 +198,6 @@ theorem Ld_periodic : ∀ j, ∃ T, ∀ t, T ≤ t → Ld x lo j (t + 2 ^ j) = L
         (fun t _ => Ld_step j t)
         (fun t ht => by
           funext b
-          simp only
           rw [ha2 t (by omega), hb t (by omega)])
         t (by omega)
       rw [show 2 ^ (j + 1 + 1) = 2 * 2 ^ (j + 1) by rw [Nat.pow_succ]; omega]

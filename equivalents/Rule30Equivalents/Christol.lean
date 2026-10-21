@@ -89,22 +89,22 @@ theorem cartier_pow_mul {r : ℕ} (hr : r < p) (h g : PowerSeries (ZMod p)) :
   symm
   refine Finset.sum_bij (fun y _ => (p * y.1, p * y.2 + r)) ?_ ?_ ?_ ?_
   · intro y hy
-    rw [Finset.mem_antidiagonal] at hy
-    simp only [Finset.mem_filter, Finset.mem_antidiagonal]
+    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hy
+    simp only [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal]
     exact ⟨by rw [← hy]; ring, dvd_mul_right _ _⟩
   · intro y₁ _ y₂ _ he
     simp only [Prod.mk.injEq] at he
     exact Prod.ext (Nat.eq_of_mul_eq_mul_left hp0 he.1)
       (Nat.eq_of_mul_eq_mul_left hp0 (by omega))
   · intro x hx
-    simp only [Finset.mem_filter, Finset.mem_antidiagonal] at hx
+    simp only [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at hx
     obtain ⟨hsum, k, hk⟩ := hx
     have hkn : k ≤ n := by
       by_contra hkn
       have : p * (n + 1) ≤ p * k := Nat.mul_le_mul_left p (by omega)
       rw [Nat.mul_succ] at this
       omega
-    refine ⟨(k, n - k), by simp only [Finset.mem_antidiagonal]; omega, ?_⟩
+    refine ⟨(k, n - k), by simp only [Finset.HasAntidiagonal.mem_antidiagonal]; omega, ?_⟩
     have h2 : x.2 = p * (n - k) + r := by
       rw [Nat.mul_sub]
       have : p * k ≤ p * n := Nat.mul_le_mul_left p hkn
@@ -142,7 +142,7 @@ theorem BddDeg.mul {N M : ℕ} {g h : PowerSeries (ZMod p)} (hg : BddDeg N g) (h
   intro n hn
   rw [PowerSeries.coeff_mul]
   refine Finset.sum_eq_zero fun x hx => ?_
-  rw [Finset.mem_antidiagonal] at hx
+  rw [Finset.HasAntidiagonal.mem_antidiagonal] at hx
   by_cases h1 : N < x.1
   · rw [hg _ h1, zero_mul]
   · rw [hh _ (by omega), mul_zero]

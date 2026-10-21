@@ -38,7 +38,7 @@ open scoped LaurentSeries RatFunc
 
 variable {K : Type*} [Field K]
 
-local notation "δ" => PowerSeries.derivative K
+local notation "δ" => PowerSeries.derivative (R := K)
 
 /-! ### Differentiating `P(F)` -/
 

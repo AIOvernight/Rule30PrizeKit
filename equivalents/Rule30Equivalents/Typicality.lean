@@ -317,10 +317,11 @@ theorem finite_roots_series {g : Polynomial (Polynomial (ZMod 2))} (hg : g ≠ 0
 /-- **Almost every generating function over `𝔽₂` is a root of no nonzero `g(X, Y)`**. -/
 theorem ae_not_root_series : ∀ᵐ v ∂(coins ℕ), ∀ g : Polynomial (Polynomial (ZMod 2)), g ≠ 0 →
     g.eval₂ Polynomial.coeToPowerSeries.ringHom (LinearRelations.series (ZMod 2) v) ≠ 0 := by
-  haveI : Countable (AddMonoidAlgebra (ZMod 2) ℕ) := inferInstanceAs (Countable (ℕ →₀ ZMod 2))
+  haveI : Countable (AddMonoidAlgebra (ZMod 2) ℕ) :=
+    (AddMonoidAlgebra.coeffEquiv (R := ZMod 2) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial (ZMod 2)) := Polynomial.toFinsupp_injective.countable
   haveI : Countable (AddMonoidAlgebra (Polynomial (ZMod 2)) ℕ) :=
-    inferInstanceAs (Countable (ℕ →₀ Polynomial (ZMod 2)))
+    (AddMonoidAlgebra.coeffEquiv (R := Polynomial (ZMod 2)) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial (Polynomial (ZMod 2))) :=
     Polynomial.toFinsupp_injective.countable
   refine ae_all_iff.2 fun g => ?_

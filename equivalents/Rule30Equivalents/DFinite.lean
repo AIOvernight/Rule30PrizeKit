@@ -1,6 +1,7 @@
 import Rule30Equivalents.Holonomic
 import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.RingTheory.Polynomial.Pochhammer
+import Mathlib.Data.Rat.Floor
 
 /-!
 # Problem 1 ⟺ the generating series of the center column is not D-finite
@@ -37,14 +38,14 @@ open Ruliology.CellularAutomata Polynomial LinearRelations
 
 /-- The `i`-th derivative of a power series over `ℚ`. -/
 noncomputable def D (i : ℕ) (f : PowerSeries ℚ) : PowerSeries ℚ :=
-  (⇑(PowerSeries.derivative ℚ))^[i] f
+  (⇑(PowerSeries.derivative (R := ℚ)))^[i] f
 
 /-- **Coefficients of the `i`-th derivative**: `[X^n] F^{(i)} = F_{n+i} · (n + 1)⋯(n + i)`. -/
 theorem coeff_D (f : PowerSeries ℚ) : ∀ (i n : ℕ),
     PowerSeries.coeff n (D i f) = PowerSeries.coeff (n + i) f * ((n + 1).ascFactorial i : ℚ)
   | 0, n => by simp [D]
   | i + 1, n => by
-    show PowerSeries.coeff n (D i (PowerSeries.derivative ℚ f)) = _
+    show PowerSeries.coeff n (D i (PowerSeries.derivative (R := ℚ) f)) = _
     rw [coeff_D _ i n, PowerSeries.coeff_derivative, Nat.ascFactorial_succ,
       show n + i + 1 = n + (i + 1) by omega]
     push_cast
@@ -65,7 +66,6 @@ theorem coeff_coe_mul_add {q : ℚ[X]} {K : ℕ} (hK : q.natDegree ≤ K) (φ : 
   rw [hz, add_zero, ← Finset.sum_range_reflect]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [Finset.mem_range] at hm
-  dsimp only
   rw [Polynomial.coeff_coe, show K + 1 - 1 - m = K - m by omega,
     show t + K - (K - m) = t + m by omega]
 
@@ -90,7 +90,7 @@ theorem dFinite_of_eventuallyPeriodic {b : ℕ → Bool} (h : EventuallyPeriodic
     refine ⟨0, fun _ => 1, ⟨0, one_ne_zero⟩, ?_⟩
     simp [D, hF]
   · refine ⟨1, ![-(derivative P * Q - P * derivative Q), P * Q], ⟨1, by simp [hP, hQ]⟩, ?_⟩
-    have hd := congrArg (PowerSeries.derivative ℚ) hQF
+    have hd := congrArg (PowerSeries.derivative (R := ℚ)) hQF
     rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, PowerSeries.derivative_coe,
       PowerSeries.derivative_coe] at hd
     rw [Fin.sum_univ_succ, Fin.sum_univ_succ, Fin.sum_univ_zero]
@@ -207,7 +207,7 @@ theorem eventuallyPeriodic_iff_dFinite (b : ℕ → Bool) : EventuallyPeriodic b
 linear differential equation with polynomial coefficients, not all zero, holds for it. -/
 theorem problem1_iff_not_dFinite : Rule30Prize.Problem1 ↔
     ¬ ∃ (r : ℕ) (q : Fin (r + 1) → ℚ[X]), (∃ i, q i ≠ 0) ∧
-      ∑ i : Fin (r + 1), (q i : PowerSeries ℚ) * (⇑(PowerSeries.derivative ℚ))^[i]
+      ∑ i : Fin (r + 1), (q i : PowerSeries ℚ) * (⇑(PowerSeries.derivative (R := ℚ)))^[i]
         (PowerSeries.mk fun t => if Rule30Prize.center t then 1 else 0) = 0 :=
   problem1_iff_not_eventuallyPeriodic.trans (not_congr (eventuallyPeriodic_iff_dFinite c))
 

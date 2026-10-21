@@ -61,11 +61,11 @@ theorem exists_measurePreserving_inverse :
   have hSE : S ⊆ E := fun x hx => by
     by_contra h
     exact hx (subset_toMeasurable _ _ h)
-  have hemb : MeasurableEmbedding (S.restrict fun x : ℤ → Bool => evol x 1) :=
+  have hemb : MeasurableEmbedding (S.domRestrict fun x : ℤ → Bool => evol x 1) :=
     continuous_evol_one.continuousOn.measurableEmbedding hS (hinj.mono hSE)
   -- invert rule 30 on `F(S)`, and do nothing elsewhere
   let G : (ℤ → Bool) → (ℤ → Bool) :=
-    Function.extend (S.restrict fun x : ℤ → Bool => evol x 1) Subtype.val id
+    Function.extend (S.domRestrict fun x : ℤ → Bool => evol x 1) Subtype.val id
   have hGF : ∀ x ∈ S, G (evol x 1) = x := fun x hx =>
     hemb.injective.extend_apply Subtype.val id ⟨x, hx⟩
   have hG : Measurable G := hemb.measurable_extend measurable_subtype_coe measurable_id
@@ -76,7 +76,7 @@ theorem exists_measurePreserving_inverse :
   -- `F(S)` has full measure, since `F` preserves the measure
   have hFS : MeasurableSet ((fun x : ℤ → Bool => evol x 1) '' S) := by
     have := hemb.measurableSet_range
-    rwa [Set.range_restrict] at this
+    rwa [Set.range_domRestrict] at this
   have hpre : coins ℤ ((fun x : ℤ → Bool => evol x 1) ⁻¹' ((fun x : ℤ → Bool => evol x 1) '' S))ᶜ
       = 0 := measure_mono_null (Set.compl_subset_compl.2 (Set.subset_preimage_image _ S)) hSc
   have hfull : coins ℤ ((fun x : ℤ → Bool => evol x 1) '' S)ᶜ = 0 := by
@@ -149,7 +149,7 @@ theorem twoSidedTrace_eq {x : ℤ → Bool} (hx : ∀ n : ℕ, evol (inv^[n + 1]
       show m - (t + m).toNat = (-t).toNat by omega]
 
 theorem measurable_twoSidedTrace : Measurable twoSidedTrace := by
-  refine measurable_pi_lambda _ fun t => ?_
+  refine Measurable.of_eval fun t => ?_
   unfold twoSidedTrace
   split_ifs
   · exact measurable_evol t.toNat 0

@@ -128,8 +128,10 @@ abbrev ChgAt (t : ℕ) : Prop := Rule30Prize.center t ≠ Rule30Prize.center (t 
 noncomputable def chg (k : ℕ) : ℕ := Nat.nth ChgAt k
 
 theorem infinite_chg : (setOf ChgAt).Infinite := by
-  convert WordForms.infinite_changes using 2 with t
+  convert WordForms.infinite_changes using 1
+  ext t
   simp [TransformsSeeds.xorDeriv]
+  rfl
 
 /-- `R_k = r₁ + ⋯ + r_k`, where the `k`-th run (from `0`) starts. -/
 noncomputable def runStart (k : ℕ) : ℕ := ∑ j ∈ Finset.range k, runLen j

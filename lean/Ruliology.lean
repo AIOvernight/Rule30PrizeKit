@@ -63,6 +63,6 @@ SHA-256 hashes.
 It then imports the modules added in the kit since; `README.md` lists them under "Added in the
 kit".
 
-Core Lean 4.30.0, no dependencies. `README.md` maps the modules, names the headline theorems and
+Core Lean 4.35.0, no dependencies. `README.md` maps the modules, names the headline theorems and
 says how to build.
 -/

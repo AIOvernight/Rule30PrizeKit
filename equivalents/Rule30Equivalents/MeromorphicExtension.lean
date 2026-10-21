@@ -104,7 +104,7 @@ theorem eval_mul_genFun (Q : ℂ[X]) (b : ℕ → Bool) {z : ℂ} (hz : ‖z‖ 
   refine tsum_congr fun n => ?_
   rw [PowerSeries.coeff_mul, Finset.sum_mul]
   refine Finset.sum_congr rfl fun kl hkl => ?_
-  rw [Finset.mem_antidiagonal] at hkl
+  rw [Finset.HasAntidiagonal.mem_antidiagonal] at hkl
   rw [Polynomial.coeff_coe, coeff_series, ← hkl, pow_add]
   simp only [coef, toK]
   ring

@@ -225,7 +225,6 @@ theorem eventuallyPeriodic_of_accepts_iff {b : ℕ → Bool} (B : Buchi Bool)
   refine ⟨m, L, hL, fun t ht => ?_⟩
   have e1 := congrFun hacc' (t + L)
   have e2 := congrFun hacc' t
-  simp only at e1 e2
   rw [← e1, ← e2, hφ_ge _ (by omega), hφ_ge _ ht, show t + L - m = (t - m) + L by omega,
     Nat.add_mod_right]
 

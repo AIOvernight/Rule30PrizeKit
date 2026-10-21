@@ -313,7 +313,7 @@ theorem mem_cfgs {K : ℕ} {w : M.toMachine.Q} (hh : -(K : ℤ) ≤ w.2.2 ∧ w.
   classical
   obtain ⟨q, wt, wh⟩ := w
   unfold cfgs
-  rw [Finset.mem_image]
+  refine Finset.mem_image.2 ?_
   refine ⟨(q, fun j => wt ((j : ℤ) - K), ⟨(wh + K).toNat, by simp only at hh; omega⟩),
     Finset.mem_univ _, ?_⟩
   simp only at hh hw
@@ -595,8 +595,8 @@ theorem runW_dfaOTM (w : List α) {t : ℕ} (ht : t ≤ w.length) :
     rw [(isRun_runW (M := (dfaOTM D).toMachine) some w) t, ih (by omega), step_eq rfl]
     have htape : (initW (dfaOTM D).toMachine some w).tape (t : ℤ) = some (w[t]'(by omega)) := by
       simp only [initW]
-      rw [dif_pos (by omega)]
-      simp
+      erw [dif_pos (by omega)]
+      simp only [Int.toNat_natCast]; rfl
     refine Cfg.ext' ?_ ?_ ?_
     · dsimp only
       rw [htape]
@@ -620,7 +620,7 @@ theorem runW_dfaOTM_succ (w : List α) :
     step_eq rfl]
   have htape : (initW (dfaOTM D).toMachine some w).tape (w.length : ℤ) = none := by
     simp only [initW]
-    rw [dif_neg (by omega)]
+    erw [dif_neg (by omega)]
     rfl
   dsimp only
   rw [htape]

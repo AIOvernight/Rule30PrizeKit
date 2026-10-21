@@ -4,8 +4,8 @@ import Rule30Equivalents
 /-!
 # Rule 30 Prize kit, version 1
 
-The reference Lean environment for submissions to the Rule 30 Prize: Lean 4.30.0 and
-Mathlib `c5ea00351c`, pinned by `lean-toolchain` and `lake-manifest.json`.
+The reference Lean environment for submissions to the Rule 30 Prize: Lean 4.35.0 and
+Mathlib `56a005855e` (its `v4.35.0` tag), pinned by `lean-toolchain` and `lake-manifest.json`.
 
 * **The statements.** `Ruliology.CellularAutomata.Rule30Prize.Problem1` and `Problem2`, in
   `lean/Ruliology/CellularAutomata/Rule30Prize.lean`, with the rule-30 pattern `cell` from

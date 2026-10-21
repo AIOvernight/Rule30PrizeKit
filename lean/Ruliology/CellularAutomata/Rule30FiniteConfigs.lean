@@ -57,7 +57,7 @@ theorem evol_eq_false_of_lt : ∀ (t : Nat) (p : Int), p < lo - t → evol x t p
 
 /-- The leftmost black cell moves one step to the left at every step. -/
 theorem evol_left_edge : ∀ t : Nat, evol x t (lo - t) = true
-  | 0 => by simpa using hlo
+  | 0 => by simpa [evol] using hlo
   | t + 1 => by
     show rule (evol x t (lo - ((t + 1 : Nat) : Int) - 1)) (evol x t (lo - ((t + 1 : Nat) : Int)))
       (evol x t (lo - ((t + 1 : Nat) : Int) + 1)) = true

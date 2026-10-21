@@ -146,7 +146,6 @@ theorem problem1_iff_no_continuous_extension : Rule30Prize.Problem1 ↔
     refine ⟨T, P, hP, fun t ht => ?_⟩
     obtain ⟨s, rfl⟩ : ∃ s, t = T + s := ⟨t - T, by omega⟩
     have := hper s
-    simp only at this
     rwa [add_assoc]
 
 end Rule30Equivalents.ProfiniteIntegers

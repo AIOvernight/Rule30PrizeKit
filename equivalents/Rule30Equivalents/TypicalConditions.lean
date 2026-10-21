@@ -101,7 +101,8 @@ theorem ae_transcendental_series_trace : ∀ᵐ x ∂(coins ℤ), ∀ (p : ℕ) 
 
 /-- `K(X)` is countable for a countable field `K`: `x = num x / denom x`. -/
 instance {K : Type*} [Field K] [Countable K] : Countable (RatFunc K) := by
-  haveI : Countable (AddMonoidAlgebra K ℕ) := inferInstanceAs (Countable (ℕ →₀ K))
+  haveI : Countable (AddMonoidAlgebra K ℕ) :=
+    (AddMonoidAlgebra.coeffEquiv (R := K) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial K) := Polynomial.toFinsupp_injective.countable
   refine Function.Injective.countable (f := fun x : RatFunc K => (x.num, x.denom)) fun x y h => ?_
   simp only [Prod.mk.injEq] at h
@@ -114,7 +115,7 @@ theorem ae_transcendental_rat : ∀ᵐ v ∂(coins ℕ), Transcendental (RatFunc
     ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) := by
   classical
   haveI : Countable (AddMonoidAlgebra (RatFunc ℚ) ℕ) :=
-    inferInstanceAs (Countable (ℕ →₀ RatFunc ℚ))
+    (AddMonoidAlgebra.coeffEquiv (R := RatFunc ℚ) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial (RatFunc ℚ)) := Polynomial.toFinsupp_injective.countable
   have hinj : Function.Injective fun v : ℕ → Bool =>
       ((LinearRelations.series ℚ v : PowerSeries ℚ) : ℚ⸨X⸩) :=
@@ -176,7 +177,7 @@ theorem measure_autComplexityLE_le (K n : ℕ) :
             simpa [List.getElem?_map, List.getElem?_range hj] using this
         _ = 2⁻¹ ^ n := measure_triangular (ι := ℕ) (fun j v => v (0 + j))
             (fun _ => measurable_pi_apply _) (fun j => 0 + j) (fun j v => by simp)
-            (fun j v j' hj' => by dsimp only; rw [Function.update_of_ne (by omega)]) w n
+            (fun j v j' hj' => by rw [Function.update_of_ne (by omega)]) w n
     · rw [Set.not_nonempty_iff_eq_empty.1 hne, measure_empty]
       exact zero_le
   calc coins ℕ {v | Automatic.AutComplexityLE ((List.range n).map v) K}
@@ -217,7 +218,9 @@ theorem ae_density_progressions_trace : ∀ᵐ x ∂(coins ℤ), ∀ P r : ℕ, 
     exact_mod_cast mul_right_cancel₀ (by exact_mod_cast hP.ne' : (P : ℤ) ≠ 0) h'
   filter_upwards [(Mixing.measurePreserving_cells hinj).quasiMeasurePreserving.ae ae_isNormal]
     with x hx _
-  simpa [Fin.forall_fin_one, one_div] using hx 1 fun _ => true
+  have h := hx 1 fun _ => true
+  simp at h
+  convert h using 6 <;> simp [trace]
 
 /-- The density of black cells of a normal sequence is `1/2`. -/
 theorem tendsto_ones_div {b : ℕ → Bool} (hb : StrongerStatements.IsNormal b) :
@@ -495,7 +498,8 @@ theorem ae_not_zero_set_ratFunc_trace (p : ℕ) [Fact p.Prime] :
 /-- `ℚ(β)` is countable: its elements are quotients of polynomials in `β`. -/
 theorem countable_adjoin (β : ℝ) :
     ((IntermediateField.adjoin ℚ ({β} : Set ℝ) : IntermediateField ℚ ℝ) : Set ℝ).Countable := by
-  haveI : Countable (AddMonoidAlgebra ℚ ℕ) := inferInstanceAs (Countable (ℕ →₀ ℚ))
+  haveI : Countable (AddMonoidAlgebra ℚ ℕ) :=
+    (AddMonoidAlgebra.coeffEquiv (R := ℚ) (M := ℕ)).injective.countable
   haveI : Countable (Polynomial ℚ) := Polynomial.toFinsupp_injective.countable
   refine (Set.countable_range fun q : Polynomial ℚ × Polynomial ℚ =>
     Polynomial.aeval β q.1 / Polynomial.aeval β q.2).mono fun y hy => ?_
@@ -563,7 +567,8 @@ theorem runW_relabel (w : List M.Γ) (t : ℕ) :
     refine Cfg.ext' rfl rfl ?_
     funext i
     simp only [initW, relabelCfg, relabel, List.length_map, id]
-    split_ifs <;> simp
+    rw [apply_dite eΓ]
+    exact dite_congr (by simp) (fun h => by simp) (fun h => rfl)
   | succ t ih =>
     rw [isRun_runW (M := relabel M eQ eΓ) id (w.map eΓ : List (relabel M eQ eΓ).Γ) t, ih,
       isRun_runW (M := M) id w t, step_relabelCfg]
@@ -571,11 +576,9 @@ theorem runW_relabel (w : List M.Γ) (t : ℕ) :
 theorem binWord_relabel (zero : M.Γ) (n : ℕ) :
     binWord (relabel M eQ eΓ) (eΓ zero) n =
       ((binWord M zero n).map eΓ : List (relabel M eQ eΓ).Γ) := by
-  simp only [binWord, List.map_map]
-  congr 1
-  funext i
-  simp only [Function.comp_apply, relabel]
-  split_ifs <;> rfl
+  simp only [binWord]
+  refine Eq.trans ?_ List.map_map.symm
+  exact List.map_congr_left fun i _ => (apply_ite eΓ _ _ _).symm
 
 theorem decidesBinInTime_relabel {zero : M.Γ} {f : ℕ → Bool} {T : ℕ → ℕ}
     (h : DecidesBinInTime M zero f T) : DecidesBinInTime (relabel M eQ eΓ) (eΓ zero) f T := by

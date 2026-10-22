@@ -2862,7 +2862,12 @@ with Turing machines reading n. Notes:
     rare at Cramér's rate: for 1/2 ≤ a < 1, (1/n) log P(N(n) ≥ an) → H(a) − log 2, H the binary
     entropy ([LargeDeviations](Rule30Equivalents/LargeDeviations.lean),
     `tendsto_log_measureReal_trace`; Chernoff's bound from above, the mode of the binomial
-    distribution from below). The densest windows follow the Erdős–Rényi law: for 1/2 < α < 1 the
+    distribution from below). Locally the count is Gaussian, by the theorem of de Moivre and Laplace:
+if (kₙ − n/2)/√n → x, then √n P(N(n) = kₙ) → √(2/π) e^(−2x²)
+([LocalLimit](Rule30Equivalents/LocalLimit.lean), `tendsto_sqrt_mul_measureReal_trace`, from
+Stirling's formula), so the first 2n cells are exactly half black with probability
+(1 + o(1))/√(πn) (`tendsto_sqrt_mul_measureReal_balanced_trace`). The densest windows follow the
+Erdős–Rényi law: for 1/2 < α < 1 the
     windows of length L(n) = ⌊log n/(log 2 − H(α))⌋ inside the first n cells are at most a fraction
     α + o(1) black, and some of them reach it ([ErdosRenyi](Rule30Equivalents/ErdosRenyi.lean),
     `ae_tendsto_maxWindow_trace`; the longest runs are the case α = 1). The configurations with an

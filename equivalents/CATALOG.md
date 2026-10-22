@@ -174,7 +174,7 @@ files. The rows follow the order of Section 3.
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register`, `WordsAutomata.problem1_iff_maxOrderComplexity_tendsto`, `WordsAutomata.problem1_iff_no_feedback_from_zero` |
-| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn`, `RandomNaturalBoundary.ae_circleIsNaturalBoundary_trace` |
+| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn`, `RandomNaturalBoundary.ae_circleIsNaturalBoundary_trace`, `ApproximateRecurrence.problem1_iff_no_approx_recurrence` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
@@ -1233,7 +1233,18 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   at most three times the squared variance, so by the Paley–Zygmund inequality it exceeds any
   bound near t = 1 with probability at least 1/6, and almost surely by Kolmogorov's zero-one law.
   These directions are dense, and a continuation across the circle at one of them would make the
-  sum converge.
+  sum converge. The last step of Szegő's proof is proved too
+  ([ApproximateRecurrence](Rule30Equivalents/ApproximateRecurrence.lean),
+  `problem1_iff_no_approx_recurrence`): over ℂ (or any normed field), Problem 1 ⟺ for every monic
+  Q = Xᵠ + γ_{q−1}X^{q−1} + ⋯ + γ₀, ‖c(n + q) + Σ γⱼ c(n + j)‖ ≥ 1/2 for infinitely many n.
+  What is missing is the analytic step: a continuation of f across an arc gives, for each ε > 0,
+  such a Q with error below ε for all n. In Dienes's proof (followed by Borwein–Erdélyi–Littmann),
+  Cauchy's formula over a contour that leaves the unit disk across the arc writes the error as an
+  integral of the tails Σₘ c(n + m)zᵐ against Q(1/z), with the tails bounded uniformly on the
+  contour. (The cruder bound C/abs(abs(z) − 1) also suffices if Q is multiplied by a factor
+  vanishing where the contour crosses the circle.) The gap is a monic polynomial of modulus below 1
+  on the reflected contour, which bounds the unit disk minus a notch: the logarithmic capacity of
+  such a notched disk is below 1, and Mathlib has no capacity theory.
 
   ```lean
   noncomputable def genFun (z : ℂ) : ℂ := ∑' t, (if Rule30Prize.center t then (1 : ℂ) else 0) * z ^ t

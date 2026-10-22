@@ -71,6 +71,7 @@ import Rule30Equivalents.ErdosRenyi
 import Rule30Equivalents.Lines
 import Rule30Equivalents.RandomNaturalBoundary
 import Rule30Equivalents.LocalLimit
+import Rule30Equivalents.ApproximateRecurrence
 import Rule30Equivalents.Typicality
 import Rule30Equivalents.FiniteRings
 import Rule30Equivalents.Lagrange

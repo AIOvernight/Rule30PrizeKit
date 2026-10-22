@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30StripCertificates
-import Ruliology.CellularAutomata.Rule30Diagonals
+module
+
+public import Ruliology.CellularAutomata.Rule30StripCertificates
+public import Ruliology.CellularAutomata.Rule30Diagonals
 
 /-!
 # Rule 30, least period 4: the ether and the wall traps of the right half
@@ -31,6 +33,8 @@ ether column keeps its periodic values forever (`trap_invariant`).
   `least_period_four_of_absorption`: absorption into the family for every finite right half
   excludes `w^∞` as a tail of the center column, for every transient.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Ether
@@ -420,7 +424,7 @@ def config (j0 φ k : Nat) (ws : List Bool) (p : Nat) : Bool :=
 theorem config_finite (j0 φ k : Nat) (ws : List Bool) (p : Nat) (hp : k + 13 < p) :
     config j0 φ k ws p = false := by
   unfold config
-  rw [if_neg (by omega), if_neg (by omega)]
+  rw [ite_eq_right (by omega), ite_eq_right (by omega)]
 
 /-- Columns `1..b` of the ether at phase `φ`, when column `0` is the ether column `j0`. -/
 def etherRow (j0 φ b : Nat) : List Bool := seg (fun i => ether (j0 + (i + 1)) φ) b
@@ -437,7 +441,7 @@ theorem config_pure_ether (w : List Bool) (j0 s k b : Nat) (hal : aligned w j0 s
   have hE : ∀ p, 1 ≤ p → p ≤ k → drv (wordAt w) (config j0 s k ws) 0 p = ether (j0 + p) (0 + s) := by
     intro p hp1 hpk
     rw [drv_init _ _ p hp1, Nat.zero_add]
-    unfold config; rw [if_pos ⟨hp1, hpk⟩]
+    unfold config; rw [ite_eq_left ⟨hp1, hpk⟩]
   have hW : ((0 + s) % 4, rowOf (drv (wordAt w) (config j0 s k ws)) 0 k 13) ∈ wallStates := by
     have e : rowOf (drv (wordAt w) (config j0 s k ws)) 0 k 13 = ws := by
       unfold rowOf
@@ -447,7 +451,7 @@ theorem config_pure_ether (w : List Bool) (j0 s k b : Nat) (hal : aligned w j0 s
       intro i hi
       rw [drv_init _ _ _ (by omega)]
       unfold config
-      rw [if_neg (by omega), if_pos ⟨by omega, by omega⟩]
+      rw [ite_eq_right (by omega), ite_eq_left ⟨by omega, by omega⟩]
       congr 1
       omega
     rw [e, Nat.zero_add]; exact hws

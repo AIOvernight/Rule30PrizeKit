@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Ruliology.CellularAutomata.Rule30Window
+module
+
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Ruliology.CellularAutomata.Rule30Window
 
 /-!
 # Rule 30: the periods of the right diagonals
@@ -53,6 +55,8 @@ and `2^{(2j+1)/3}`; numerically `e_j ≈ 0.43 j`.
 
 The diagonals and their recurrence are in `Rule30Diagonals`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30RightPeriods

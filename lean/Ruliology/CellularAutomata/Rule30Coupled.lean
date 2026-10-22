@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
+module
+
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
 
 /-!
 # Every period, coupled: FinConf for one column as a family of coupled questions
@@ -25,6 +27,8 @@ statements `Q001`, `C3`, `C3w` and `C3s001` keep the left half; Absorption and `
 right half.
 -/
 
+@[expose] public section
+
 namespace Ruliology.CellularAutomata
 namespace Rule30Coupled
 
@@ -40,8 +44,8 @@ theorem left_eq_L (y : Int → Bool) :
   | 0, p, hp => by
     show y p = (if p < 0 then y p else evol y 0 0)
     by_cases h : p < 0
-    · rw [if_pos h]
-    · rw [if_neg h, show p = 0 by omega]; rfl
+    · rw [ite_eq_left h]
+    · rw [ite_eq_right h, show p = 0 by omega]; rfl
   | t + 1, p, hp => by
     by_cases h : p < 0
     · rw [L_succ h, ← left_eq_L y t (p - 1) (by omega), ← left_eq_L y t p (by omega),
@@ -91,35 +95,35 @@ theorem evol_glue {ω : Nat → Bool} {s : Int → Bool} {x : Nat → Bool} (h :
     show glue s (ω 0) x p = _
     unfold glue
     by_cases hp : p < 0
-    · rw [if_pos hp, if_pos hp, L_zero hp]
-    · rw [if_neg hp, if_neg hp]
+    · rw [ite_eq_left hp, ite_eq_left hp, L_zero hp]
+    · rw [ite_eq_right hp, ite_eq_right hp]
       by_cases h0 : p = 0
-      · rw [if_pos h0, show p.toNat = 0 by omega, drv_col0]
-      · rw [if_neg h0, drv_init _ _ _ (by omega)]
+      · rw [ite_eq_left h0, show p.toNat = 0 by omega, drv_col0]
+      · rw [ite_eq_right h0, drv_init _ _ _ (by omega)]
   | t + 1, p => by
     show rule (evol (glue s (ω 0) x) t (p - 1)) (evol (glue s (ω 0) x) t p)
         (evol (glue s (ω 0) x) t (p + 1)) = _
     rw [evol_glue h t (p - 1), evol_glue h t p, evol_glue h t (p + 1)]
     rcases (show p ≤ -2 ∨ p = -1 ∨ p = 0 ∨ 1 ≤ p by omega) with hp | hp | hp | hp
-    · rw [if_pos (show p - 1 < 0 by omega), if_pos (show p < 0 by omega),
-        if_pos (show p + 1 < 0 by omega), if_pos (show p < 0 by omega), L_succ (by omega)]
+    · rw [ite_eq_left (show p - 1 < 0 by omega), ite_eq_left (show p < 0 by omega),
+        ite_eq_left (show p + 1 < 0 by omega), ite_eq_left (show p < 0 by omega), L_succ (by omega)]
     · subst hp
-      rw [if_pos (by omega), if_pos (by omega), if_neg (by omega), if_pos (by omega),
+      rw [ite_eq_left (by omega), ite_eq_left (by omega), ite_eq_right (by omega), ite_eq_left (by omega),
         L_succ (by omega), show ((-1 : Int) + 1).toNat = 0 by rfl, drv_col0,
         show (-1 : Int) + 1 = 0 by rfl, L_col0]
     · subst hp
-      rw [if_pos (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
+      rw [ite_eq_left (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
         show ((0 : Int)).toNat = 0 by rfl, show ((0 : Int) + 1).toNat = 1 by rfl, drv_col0,
         drv_col0, show (0 : Int) - 1 = -1 by rfl, ← h t]
-    · rw [if_neg (show ¬ p - 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
-        if_neg (show ¬ p + 1 < 0 by omega), if_neg (show ¬ p < 0 by omega)]
+    · rw [ite_eq_right (show ¬ p - 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
+        ite_eq_right (show ¬ p + 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega)]
       obtain ⟨k, hk⟩ : ∃ k : Nat, p.toNat = k + 1 := ⟨p.toNat - 1, by omega⟩
       rw [show (p - 1).toNat = k by omega, hk, show (p + 1).toNat = k + 2 by omega]
       rfl
 
 theorem center_glue {ω : Nat → Bool} {s : Int → Bool} {x : Nat → Bool} (h : Coupled ω s x)
     (t : Nat) : evol (glue s (ω 0) x) t 0 = ω t := by
-  rw [evol_glue h t 0, if_neg (by omega), show (0 : Int).toNat = 0 from rfl, drv_col0]
+  rw [evol_glue h t 0, ite_eq_right (by omega), show (0 : Int).toNat = 0 from rfl, drv_col0]
 
 /-! ### The coupled questions -/
 
@@ -143,8 +147,8 @@ theorem CQ_iff_no_finite_config (ω : Nat → Bool) :
     refine h ⟨glue s (ω 0) x, ⟨W₁ + W₂, fun p hp => ?_⟩, center_glue hc⟩
     unfold glue
     by_cases hn : p < 0
-    · rw [if_pos hn]; exact hW₁ p (by omega)
-    · rw [if_neg hn, if_neg (by omega)]; exact hW₂ _ (by omega)
+    · rw [ite_eq_left hn]; exact hW₁ p (by omega)
+    · rw [ite_eq_right hn, ite_eq_right (by omega)]; exact hW₂ _ (by omega)
 
 /-- For the alternating column the coupled question is `CQ01`. -/
 theorem CQ_altCol_iff_CQ01 : CQ Rule30PeriodTwoCoupled.altCol ↔ Rule30PeriodTwoCoupled.CQ01 :=

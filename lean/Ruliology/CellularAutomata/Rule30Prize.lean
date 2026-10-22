@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Jen
+module
+
+public import Ruliology.CellularAutomata.Rule30Jen
 
 /-!
 # The Rule 30 Prize problems: statements, and the constant case of Problem 1
@@ -25,6 +27,8 @@ All three are open.
   eventually periodic, which Jen's theorem (`Rule30Jen.not_adjacent`) rules out.
 * `center_not_eventually_constant`: the center column in particular.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Prize

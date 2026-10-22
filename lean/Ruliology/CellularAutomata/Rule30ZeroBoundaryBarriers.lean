@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
-import Ruliology.CellularAutomata.Rule30Realization
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
+public import Ruliology.CellularAutomata.Rule30Realization
 
 /-!
 # Rule 30, period 2: barriers for invariant and ranking-function proofs
@@ -30,6 +32,8 @@ center alternates for about `7 N` steps. `no_joint_local_ranking`: no function o
 rightmost black positions, center window, left-edge window, right-edge window) into `Nat` strictly
 decreases at every step where the center column flips, over all finite configurations.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryBarriers
@@ -421,8 +425,8 @@ theorem maxAcc_neg (A : DFA) (q : Nat) (w : List Bool) (h : maxAcc A q w < 0) :
     rw [maxAcc_cons] at h ⊢
     have := maxAcc_ge A (A.δ q b) w
     by_cases hr : 0 ≤ maxAcc A (A.δ q b) w
-    · simp only [hr, if_true] at h; omega
-    · simp only [hr, if_false] at h ⊢
+    · simp only [hr, ite_true] at h; omega
+    · simp only [hr, ite_false] at h ⊢
       cases hq : A.F q <;> simp_all
 
 theorem maxAcc_append (A : DFA) : ∀ (q : Nat) (u v : List Bool),
@@ -432,7 +436,7 @@ theorem maxAcc_append (A : DFA) : ∀ (q : Nat) (u v : List Bool),
     simp only [List.nil_append, dfaRun, List.length_nil]
     by_cases h : 0 ≤ maxAcc A q v
     · simp [h]
-    · simp only [h, if_false]
+    · simp only [h, ite_false]
       have := maxAcc_neg A q v (by omega)
       rw [this.2, maxAcc_nil, this.1]; rfl
   | q, b :: u, v => by
@@ -440,10 +444,10 @@ theorem maxAcc_append (A : DFA) : ∀ (q : Nat) (u v : List Bool),
     rw [maxAcc_cons, maxAcc_append A (A.δ q b) u v, maxAcc_cons]
     by_cases h : 0 ≤ maxAcc A (dfaRun A (A.δ q b) u) v
     · have : 0 ≤ (u.length : Int) + maxAcc A (dfaRun A (A.δ q b) u) v := by omega
-      simp only [h, if_true, this]
+      simp only [h, ite_true, this]
       push_cast
       omega
-    · simp only [h, if_false]
+    · simp only [h, ite_false]
 
 /-- If the state after reading `u` accepts, the longest accepted prefix of `u ++ v` has length at
 least `|u|`. -/
@@ -460,13 +464,13 @@ theorem maxAcc_ge_of_acc (A : DFA) (q : Nat) (u v : List Bool) (h : A.F (dfaRun 
       rw [maxAcc_cons]
       simp only [List.length_cons]
       have h0 : 0 ≤ maxAcc A (A.δ q b) u := by omega
-      simp only [h0, if_true]
+      simp only [h0, ite_true]
       push_cast
       omega
   rw [maxAcc_append]
   by_cases h' : 0 ≤ maxAcc A (dfaRun A q u) v
-  · simp only [h', if_true]; omega
-  · simp only [h', if_false]; exact key q u h
+  · simp only [h', ite_true]; omega
+  · simp only [h', ite_false]; exact key q u h
 
 /-- The word `(01)^k`. -/
 def altWord : Nat → List Bool
@@ -709,7 +713,7 @@ theorem no_edge_dfa_ranking (A : DFA) (N : Nat) (hN : 0 < N) (hδ : ∀ q b, A.�
         push_cast at this ⊢
         omega
     have h0 : 0 ≤ maxAcc A q (altWord k) := by omega
-    simp only [h0, if_true, hZlen] at hup
+    simp only [h0, ite_true, hZlen] at hup
     have : (j : Int) * 3 ≤ 2 * B + 1 := by
       push_cast at hup
       omega
@@ -739,7 +743,7 @@ theorem no_edge_dfa_ranking (A : DFA) (N : Nat) (hN : 0 < N) (hδ : ∀ q b, A.�
       exact hdead i
     have hsmall : maxAcc A q (altWord k) ≤ 2 * i1 := by
       rw [hsp, maxAcc_append, dfaRun_altWord, hdead']
-      simp only [show ¬ ((0 : Int) ≤ -1) by omega, if_false]
+      simp only [show ¬ ((0 : Int) ≤ -1) by omega, ite_false]
       have := maxAcc_le A q (altWord i1)
       rw [altWord_length] at this
       push_cast at this ⊢
@@ -748,10 +752,10 @@ theorem no_edge_dfa_ranking (A : DFA) (N : Nat) (hN : 0 < N) (hδ : ∀ q b, A.�
     rw [hZlen] at hZ
     have hi1B : i1 ≤ B := by omega
     by_cases h0 : 0 ≤ maxAcc A q (altWord k)
-    · simp only [h0, if_true, hZlen] at hlow
+    · simp only [h0, ite_true, hZlen] at hlow
       push_cast at hlow
       omega
-    · simp only [h0, if_false] at hlow
+    · simp only [h0, ite_false] at hlow
       push_cast at hlow
       omega
 
@@ -920,8 +924,8 @@ theorem c7cut_left_shift (N m : Nat) (p : Int) (hp : p ≤ 7 * (N : Int) + 6) :
       p + 7 * (-(m : Int)) ≤ 7 * ((N + m : Nat) : Int) + 6) ↔
       (-(7 * (N : Int) + 1) ≤ p ∧ p ≤ 7 * (N : Int) + 6) := by push_cast; omega
   by_cases h : -(7 * (N : Int) + 1) ≤ p ∧ p ≤ 7 * (N : Int) + 6
-  · rw [if_pos h, if_pos (e1.2 h)]
-  · rw [if_neg h, if_neg (fun h' => h (e1.1 h'))]
+  · rw [ite_eq_left h, ite_eq_left (e1.2 h)]
+  · rw [ite_eq_right h, ite_eq_right (fun h' => h (e1.1 h'))]
 
 theorem c7cut_right_shift (N m : Nat) (p : Int) (hp : -(7 * (N : Int) + 1) ≤ p) :
     c7cut (N + m) (p + 7 * (m : Int)) = c7cut N p := by
@@ -930,8 +934,8 @@ theorem c7cut_right_shift (N m : Nat) (p : Int) (hp : -(7 * (N : Int) + 1) ≤ p
       p + 7 * (m : Int) ≤ 7 * ((N + m : Nat) : Int) + 6) ↔
       (-(7 * (N : Int) + 1) ≤ p ∧ p ≤ 7 * (N : Int) + 6) := by push_cast; omega
   by_cases h : -(7 * (N : Int) + 1) ≤ p ∧ p ≤ 7 * (N : Int) + 6
-  · rw [if_pos h, if_pos (e1.2 h)]
-  · rw [if_neg h, if_neg (fun h' => h (e1.1 h'))]
+  · rw [ite_eq_left h, ite_eq_left (e1.2 h)]
+  · rw [ite_eq_right h, ite_eq_right (fun h' => h (e1.1 h'))]
 
 /-- Center window, left-edge window and right-edge window. -/
 def centerWin (w : Nat) (x : Int → Bool) : List Bool :=

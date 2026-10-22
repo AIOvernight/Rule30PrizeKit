@@ -1,9 +1,11 @@
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap0
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap1
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap2
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap3
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap4
-import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap5
+module
+
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap0
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap1
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap2
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap3
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap4
+public import Ruliology.CellularAutomata.Rule30Certificates.EtherTrap5
 
 /-!
 # The pure-ether strip lies in no trap of width `≤ 20`
@@ -19,6 +21,8 @@ node (`pure_ether_not_in_trap_*`). The theorems live in the namespace `Rule30Eth
 This concerns the strip relaxation, where column `b + 1` is arbitrary. It says nothing about
 whether the true right half reaches the pure ether, and absorption remains open.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherTrap

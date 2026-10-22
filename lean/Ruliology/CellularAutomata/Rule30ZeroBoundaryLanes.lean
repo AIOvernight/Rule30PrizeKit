@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
 
 /-!
 # `Q01` for all starts of bounded width: a bit-sliced certificate checker
@@ -25,6 +27,8 @@ even level `k`.
 
 `Rule30ZeroBoundaryWidth52` runs the checker at width `52`: all `256` chunks pass with `97` levels.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryLanes
@@ -476,9 +480,9 @@ theorem q01_of_checks (W K n : Nat) (hn : n ≤ W / 2)
     rw [show (2 * s + 1) / 2 = s by omega]
     unfold yFree
     by_cases hs : s < n
-    · rw [if_pos hs, pats_getD n s hs, pat_spec n s p hs hp, testBit_pack]
+    · rw [ite_eq_left hs, pats_getD n s hs, pat_spec n s p hs hp, testBit_pack]
       simp [hs]
-    · rw [if_neg hs, testBit_pack]
+    · rw [ite_eq_right hs, testBit_pack]
       have hsn : s - n < W / 2 - n := by omega
       have hyy : y (2 * (n + (s - n)) + 1) = y (2 * s + 1) := by
         rw [show n + (s - n) = s by omega]

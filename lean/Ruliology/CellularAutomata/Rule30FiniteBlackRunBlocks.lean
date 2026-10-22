@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30BlackRunBlocks
-import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
+module
+
+public import Ruliology.CellularAutomata.Rule30BlackRunBlocks
+public import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
 
 /-!
 # Theorem B′ for every configuration with a leftmost black cell
@@ -23,6 +25,8 @@ configuration with a leftmost black cell and every column `i`, as Theorems B and
 
 Source: as for `Rule30BlackRunBlocks`. The port follows `Rule30FiniteBlackRuns`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteBlackRunBlocks

@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Jen
+module
+
+public import Ruliology.CellularAutomata.Rule30Jen
 
 /-!
 # Rule 30 from a single white cell, and rule 135
@@ -23,6 +25,8 @@ the same single-seed center columns as rules 30 and 135; this is not formalized 
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for the
 reduction to columns `0` and `-1`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30WhiteSeed

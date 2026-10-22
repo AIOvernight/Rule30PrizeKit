@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
+module
+
+public import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
 
 /-!
 # Period 2: the language of the bad class of the right strip
@@ -14,6 +16,8 @@ eventually, column `1` at the white times never spells `pat`.
 
 `Rule30PeriodTwoWidth5` and `Rule30PeriodTwoWidth6` apply it at the strip widths `5` and `6`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodTwoLanguage
@@ -163,7 +167,7 @@ theorem no_pattern (C : Cert) (bad : Nat) (hw : C.w = [false, true]) (T T' : Nat
     have := key ys _ t ht hph hS0 (fun i hi => by
       have := hm (i + 1) (by simp; omega)
       simpa using this)
-    simp only [occurs, bne_iff_ne, ne_eq, Bool.not_eq_true, decide_eq_false_iff_not, Decidable.not_not] at hocc
+    simp only [occurs] at hocc
     rw [show (simMask C bad (startMask C bad y (allLists C.b)) ys) = 0 by
       revert hocc; cases (simMask C bad (startMask C bad y (allLists C.b)) ys) == 0 <;> simp] at this
     simp at this

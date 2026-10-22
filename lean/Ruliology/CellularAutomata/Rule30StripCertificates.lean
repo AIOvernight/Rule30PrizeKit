@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30MaskedJen
+module
+
+public import Ruliology.CellularAutomata.Rule30MaskedJen
 
 /-!
 # Rule 30: strip certificates exclude periodic words of the center column
@@ -49,6 +51,8 @@ The certificates were found by computer search and are checked here by the kerne
 *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, whose argument the
 bitmask certificates generalize.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30StripCertificates
@@ -136,16 +140,16 @@ theorem testBit_stripStep (K : Nat) (a z : Bool) (r : Nat) (hr : r < 2 ^ K) (k :
     by_cases h1 : 0 + 1 = K
     · have hb : r.testBit (0 + 1) = false := by
         rw [h1]; exact Nat.testBit_lt_two_pow hr
-      simp only [if_pos h1, hb]
+      simp only [ite_eq_left h1, hb]
       simp [← h1]
-    · simp only [if_neg h1]
+    · simp only [ite_eq_right h1]
       simp [show ¬ (0 ≥ K - 1) by omega]
   · by_cases h1 : k + 1 = K
     · have hb : r.testBit (k + 1) = false := by
         rw [h1]; exact Nat.testBit_lt_two_pow hr
-      simp only [if_neg h0, if_pos h1, hb]
+      simp only [ite_eq_right h0, ite_eq_left h1, hb]
       simp [show k ≥ 1 by omega, show k ≥ K - 1 by omega, show k - (K - 1) = 0 by omega, h0]
-    · simp only [if_neg h0, if_neg h1]
+    · simp only [ite_eq_right h0, ite_eq_right h1]
       simp [show k ≥ 1 by omega, show ¬ (k ≥ K - 1) by omega, h0]
 
 theorem enc_step {K t : Nat} {j : Int} {r : Nat} (h : Enc K t j r) :
@@ -208,7 +212,7 @@ theorem mem_imageAux {K : Nat} {a : Bool} {S r : Nat} (hS : S.testBit r = true) 
     · rw [mem_imageAux hS z n hrn]; rfl
     · have : r = n := by omega
       subst this
-      rw [if_pos hS, Nat.testBit_or, testBit_one_shiftLeft, testBit_one_shiftLeft]
+      rw [ite_eq_left hS, Nat.testBit_or, testBit_one_shiftLeft, testBit_one_shiftLeft]
       cases z <;> simp
 
 theorem imageAux_mono {K : Nat} {a : Bool} {S S' : Nat}
@@ -220,9 +224,9 @@ theorem imageAux_mono {K : Nat} {a : Bool} {S S' : Nat}
     rcases Bool.or_eq_true_iff.mp h with h | h
     · rw [imageAux_mono hSS n y h]; rfl
     · by_cases hn : S.testBit n = true
-      · rw [if_pos hn] at h
-        rw [if_pos (hSS n hn), h]; simp
-      · rw [if_neg hn, Nat.zero_testBit] at h; exact absurd h (by decide)
+      · rw [ite_eq_left hn] at h
+        rw [ite_eq_left (hSS n hn), h]; simp
+      · rw [ite_eq_right hn, Nat.zero_testBit] at h; exact absurd h (by decide)
 
 /-- Apply a driver word to a set of strip states. -/
 def applyWord (K : Nat) : List Bool → Nat → Nat
@@ -594,9 +598,9 @@ theorem Cert.iterG_formula (C : Cert) (r : Nat) (hm : 0 < C.m r) (hP : 0 < C.P) 
       (p + ((if C.wAt φ then 0 else 1) + C.whites ((φ + 1) % C.P) n)) % C.m r
     unfold Cert.nextPos
     cases C.wAt φ
-    · simp only [Bool.false_eq_true, if_false]
+    · simp only [Bool.false_eq_true, ite_false]
       rw [Nat.mod_add_mod, Nat.add_assoc]
-    · simp only [if_true, Nat.zero_add]
+    · simp only [ite_true, Nat.zero_add]
 
 theorem Cert.iterG_mul (C : Cert) (r : Nat) (hm : 0 < C.m r) (hP : 0 < C.P) (φ : Nat)
     (hφ : φ < C.P) : ∀ k p, p < C.m r →

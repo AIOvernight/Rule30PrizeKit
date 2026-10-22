@@ -1,6 +1,8 @@
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles0
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles1
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles2
+module
+
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles0
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles1
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryStripeCycles2
 
 /-!
 # The stripe-prefix family `S[1..m] · v · 0^∞`, `|v| ≤ 3`: death within `31` steps of arrival
@@ -18,6 +20,8 @@ in the namespace `Rule30ZeroBoundaryStripeFront`.
 
 Only tails `|v| ≤ 3` are kernel-checked; the bound `31` after arrival is attained (computation).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryStripeFront
@@ -96,12 +100,12 @@ theorem rowV_eq (m : Nat) (v : List Bool) (hv : v.length ≤ 3) :
   unfold rowV row3 vget
   by_cases hk : k ≤ m
   · simp [hk]
-  · simp only [hk, if_false]
+  · simp only [hk, ite_false]
     rcases (show k - m - 1 = 0 ∨ k - m - 1 = 1 ∨ k - m - 1 = 2 ∨ 3 ≤ k - m - 1 by omega) with h | h | h | h
     · simp [h]
     · simp [h]
     · simp [h]
-    · rw [if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+    · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega)]
       rw [List.getD_eq_getElem?_getD, List.getElem?_eq_none (by omega)]
       rfl
 

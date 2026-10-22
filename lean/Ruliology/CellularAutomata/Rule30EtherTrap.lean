@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Ether
+module
+
+public import Ruliology.CellularAutomata.Rule30Ether
 
 /-!
 # No fixed-width trap of the right strip contains the pure ether
@@ -23,6 +25,8 @@ Jen (`Rule30MaskedJen`): if the true right half enters a trap, the center column
 * `node_succ`, `node_traj`: the driven right half (`Rule30Ether.node`) is a path of the
   relaxation along column `b + 1`, so the trap notion here is the one masked Jen uses.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherTrap
@@ -160,7 +164,7 @@ theorem word_lemma (w : List Bool) (T : Nat × List Bool → Prop) (hT : Closed 
     intro i j hj
     have e1 : ¬ (P.length + i * L + j < P.length) ↔ True := by simp; omega
     simp only [u]
-    rw [if_neg (by omega), show P.length + i * L + j - P.length = j + L * i by
+    rw [ite_eq_right (by omega), show P.length + i * L + j - P.length = j + L * i by
       rw [Nat.mul_comm]; omega, Nat.add_mul_div_left _ _ hL0, Nat.add_mul_mod_self_left,
       Nat.div_eq_of_lt hj, Nat.mod_eq_of_lt hj, Nat.zero_add]
   have hblk : ∀ i, traj w y (blk i) L = y := by
@@ -269,7 +273,7 @@ theorem getD_append_right' (l1 l2 : List Bool) (i : Nat) (h : l1.length ≤ i) :
   rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD, List.getElem?_append_right h]
 
 theorem getD_take' (l : List Bool) (b i : Nat) (h : i < b) : (l.take b).getD i false = l.getD i false := by
-  rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD, List.getElem?_take, if_pos h]
+  rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD, List.getElem?_take, ite_eq_left h]
 
 theorem take_seg : ∀ (b n : Nat) (f : Nat → Bool), b ≤ n → (seg f n).take b = seg f b
   | 0, _, _, _ => by simp [seg]

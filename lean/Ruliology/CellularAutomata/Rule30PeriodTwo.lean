@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30BlackRuns
-import Ruliology.CellularAutomata.Rule30DrivenLeft
+module
+
+public import Ruliology.CellularAutomata.Rule30BlackRuns
+public import Ruliology.CellularAutomata.Rule30DrivenLeft
 
 /-!
 # Rule 30: what an eventual period 2 of the center column would force
@@ -40,6 +42,8 @@ from a finite row whose leftmost black cell is at `-T`.
 project found that for every start of support width `W ≤ 39`, column `-1` turns white at some
 even step, within roughly `1.25 W` to `2 W` steps.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodTwo

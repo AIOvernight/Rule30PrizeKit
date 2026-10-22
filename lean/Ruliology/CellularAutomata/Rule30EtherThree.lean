@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Ether
+module
+
+public import Ruliology.CellularAutomata.Rule30Ether
 
 /-!
 # Rule 30, least period 3: the 12 × 3 ether and the ether-and-wall framework
@@ -29,6 +31,8 @@ The period-3 study spans the modules `Rule30EtherThree`, `Rule30EtherThreeNoWall
 `Rule30EtherThreeTrap`, `Rule30EtherThreeReach`, `Rule30EtherThreeLeft` and
 `Rule30EtherThreeSkeleton`, all in the namespace `Rule30EtherThree`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree

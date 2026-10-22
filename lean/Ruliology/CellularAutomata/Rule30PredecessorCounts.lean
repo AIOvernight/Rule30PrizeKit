@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Predecessors
+module
+
+public import Ruliology.CellularAutomata.Rule30Predecessors
 
 /-!
 # Rule 30 on a cyclic register: how many configurations have 0, 1, 2 or 3 predecessors
@@ -17,6 +19,8 @@ Let `numWithPreds k N` be the number of registers of length `N` with exactly `k`
 
 `hasPreds_iff` connects `predCount` with the predecessor count `HasPreds` of the main file.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30
@@ -127,7 +131,7 @@ theorem sum_predCount (N : Nat) (hN : 1 ≤ N) : ((regs N).map predCount).sum = 
     have hs : step x ∈ regs N := mem_regs.2 (by rw [length_step]; exact mem_regs.1 hx)
     rw [List.countP_eq_length_filter]
     have := (nodup_regs N).count (a := step x)
-    rw [if_pos hs, List.count_eq_length_filter] at this
+    rw [ite_eq_left hs, List.count_eq_length_filter] at this
     rw [← this]
     congr 1
     apply List.filter_congr
@@ -210,7 +214,7 @@ theorem numWithPreds_three (N : Nat) (hN : 1 ≤ N) :
   · rename_i h
     simp only [h, decide_true, Bool.and_true]
     have := (nodup_regs N).count (a := List.replicate N true)
-    rw [if_pos (mem_regs.2 (by simp))] at this
+    rw [ite_eq_left (mem_regs.2 (by simp))] at this
     rw [← this, List.count]
   · rename_i h
     simp [h]

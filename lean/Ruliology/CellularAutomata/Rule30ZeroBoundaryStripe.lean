@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
-import Ruliology.CellularAutomata.Rule30StripCertificates
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
+public import Ruliology.CellularAutomata.Rule30StripCertificates
 
 /-!
 # Rule 30, zero-boundary left half: epochs, stripe stability and stripe absorption
@@ -39,6 +41,8 @@ deviations from the stripe.
 * `Theta_eventually_stripe_iff`: **the constrained start `Theta f` is eventually the stripe iff the
   free bits `f` are eventually `1`.**
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryStripe

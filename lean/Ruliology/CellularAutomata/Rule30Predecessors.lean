@@ -1,3 +1,5 @@
+module
+
 /-!
 # Rule 30 on a cyclic register: a corrected Feynman theorem
 
@@ -27,6 +29,8 @@ determines `(x_{i-1}, x_i)` through the *transfer map* `T y_i`.
   point. Products of `M 0` and `M 2` lie in a 10-element set `K` whose members have `0` or `2`.
   These finite facts are checked by `decide`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30
@@ -632,7 +636,7 @@ theorem predCount_eq_three_iff (y : List Bool) (hy : y ≠ []) :
     · intro h; split at h
       · exact ⟨hr, by assumption⟩
       · omega
-    · rintro ⟨-, h⟩; rw [if_pos h]
+    · rintro ⟨-, h⟩; rw [ite_eq_left h]
 
 /-- **The corrected Feynman theorem** for rule 30 on a cyclic register of `N ≥ 1` cells.
 `predCount y` counts the predecessors of `y` (`hasPreds`). It is `0`, `1`, `2` or `3`; it is `1`

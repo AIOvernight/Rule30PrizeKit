@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Jen
+module
+
+public import Ruliology.CellularAutomata.Rule30Jen
 
 /-!
 # Every diagonal of rule 30 is periodic
@@ -28,6 +30,8 @@ about the center column. Wolfram notes the left-side periods grow very slowly an
 ones exponentially; Rowland (*Local Nested Structure in Rule 30*, Complex Systems 16 (2006))
 proves the left-side period doubling.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Diagonals

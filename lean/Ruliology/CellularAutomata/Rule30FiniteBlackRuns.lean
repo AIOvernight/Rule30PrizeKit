@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30BlackRuns
-import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
+module
+
+public import Ruliology.CellularAutomata.Rule30BlackRuns
+public import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
 
 /-!
 # Long black runs, for every configuration with a leftmost black cell
@@ -38,6 +40,8 @@ say nothing that singles out the seed.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
 exclusions are those of `Rule30BlackRuns`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteBlackRuns

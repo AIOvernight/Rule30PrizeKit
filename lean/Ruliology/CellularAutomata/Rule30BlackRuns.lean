@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Ruliology.CellularAutomata.Rule30MaskedJen
+module
+
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Ruliology.CellularAutomata.Rule30MaskedJen
 
 /-!
 # Rule 30: long black runs shield the right half
@@ -39,6 +41,8 @@ Theorem B′, the block-specific sharpening of Theorem B, is in `Rule30BlackRunB
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, whose
 adjacent-column argument these results extend.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30BlackRuns

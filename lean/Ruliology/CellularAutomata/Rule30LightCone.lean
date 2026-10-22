@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
 
 /-!
 # Rule 30: light cones and the block tree
@@ -20,6 +22,8 @@ Tree evaluation needs about `(h + v) log v` bits for height `h` and node size `v
 and `v = b`, so `b ≈ √n` gives the center cell at time `n` in about `√n · log n` bits of memory. Neither algorithm is formalized here. Nothing in this module is specific to rule 30
 beyond its radius `1`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30LightCone
@@ -58,18 +62,18 @@ theorem assemble_blocks (b : Nat) (y : Int → Bool) (j : Int) (q : Int) (h1 : -
     (h2 : q ≤ 2 * b - 1) :
     assemble b (block b y (j - 1)) (block b y j) (block b y (j + 1)) q = y (q + j * b) := by
   unfold assemble
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   by_cases hq0 : q < 0
-  · rw [if_pos hq0, getD_block b y _ (by omega)]
+  · rw [ite_eq_left hq0, getD_block b y _ (by omega)]
     congr 1
     rw [Int.toNat_of_nonneg (by omega), Int.sub_mul]
     omega
-  · rw [if_neg hq0]
+  · rw [ite_eq_right hq0]
     by_cases hqb : q < b
-    · rw [if_pos hqb, getD_block b y _ (by omega), Int.toNat_of_nonneg (by omega)]
+    · rw [ite_eq_left hqb, getD_block b y _ (by omega), Int.toNat_of_nonneg (by omega)]
       congr 1
       omega
-    · rw [if_neg hqb, if_pos (by omega), getD_block b y _ (by omega)]
+    · rw [ite_eq_right hqb, ite_eq_left (by omega), getD_block b y _ (by omega)]
       congr 1
       rw [Int.toNat_of_nonneg (by omega), Int.add_mul]
       omega

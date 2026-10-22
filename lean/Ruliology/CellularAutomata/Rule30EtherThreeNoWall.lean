@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30EtherThree
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherThree
 
 /-!
 # Rule 30, least period 3: no wall of width at most 12
@@ -17,6 +19,8 @@ violates the U-property.
 The exhaustive search behind the certificates (and a C search, not kernel-checked) also finds no
 wall for widths `13..23`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree
@@ -64,11 +68,11 @@ theorem testBit_stripStep_mod {b b' : Nat} (hbb : b' ≤ b) (x z : Bool) (r : Na
       · rw [m1 (i - 1) (by omega)]
     · rw [m1 i hi]
     · by_cases h1 : i + 1 = b'
-      · rw [if_pos h1]
+      · rw [ite_eq_left h1]
         by_cases hbe : b' = b
-        · rw [if_pos (by omega), if_pos hbe]
-        · rw [if_neg (by omega), if_neg hbe, h1]
-      · rw [if_neg h1, if_neg (by omega), m1 (i + 1) (by omega)]
+        · rw [ite_eq_left (by omega), ite_eq_left hbe]
+        · rw [ite_eq_right (by omega), ite_eq_right hbe, h1]
+      · rw [ite_eq_right h1, ite_eq_right (by omega), m1 (i + 1) (by omega)]
   · rw [decide_eq_false hi, Bool.false_and]
     exact (Nat.testBit_lt_two_pow (Nat.lt_of_lt_of_le (stripStep_lt b' x _ _)
       (Nat.pow_le_pow_right (by decide) (by omega)))).symm
@@ -130,11 +134,11 @@ theorem nw_sound {a b : Nat} {d z : Nat → Nat} (hc : nwCheck a b d z = true)
       have hok := nwNodeOK_of_check hc φ r hφ hr
       unfold nwNodeOK at hok
       by_cases h0 : nwDist d φ r = 0
-      · rw [if_pos h0] at hok
+      · rw [ite_eq_left h0] at hok
         unfold nwViol at hok
         simp only [Bool.and_eq_true, Bool.not_eq_true', bne_iff_ne, ne_eq] at hok
         exact hok.2 (hW.2.1 φ r hWr hok.1)
-      · rw [if_neg h0] at hok
+      · rw [ite_eq_right h0] at hok
         have hlt := of_decide_eq_true hok
         exact ih ((φ + 1) % 3) (nwSucc a b φ r (nwMove z φ r)) (by omega) (Nat.mod_lt _ (by decide))
           (hW.2.2 φ r (nwMove z φ r) hWr)

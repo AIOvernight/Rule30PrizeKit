@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryLanes
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryLanes
 
 /-!
 # `Q01` at width `52`: the chunk checks `192` to `255`
@@ -11,6 +13,8 @@ Data for `Rule30ZeroBoundaryWidth52`: the kernel checks `check 52 97 18 c = true
 
 The `16` chunks are regrouped here, four to a module.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata.Rule30ZeroBoundaryWidth52
 

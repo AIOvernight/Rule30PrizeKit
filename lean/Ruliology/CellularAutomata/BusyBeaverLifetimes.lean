@@ -1,3 +1,5 @@
+module
+
 /-!
 # Busy-beaver lifetimes of cellular automata
 
@@ -33,6 +35,8 @@ the cells at offsets `-r, …, r`.
 - The general frame lemmas (`TwoColor.lifetime_of_lives` and `ThreeColor.lifetime_of_lives`) are
   proved once for every rule.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace BusyBeaverLifetimes
@@ -218,7 +222,7 @@ theorem cell_eq_zero_of_lt {n : Nat} (hn : rule n 0 0 0 = 0) :
     ∀ (t : Nat) (p : Int), p < -(t : Int) → cell n t p = 0
   | 0, p, h => by
     show (if p = 0 then 1 else 0) = 0
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
   | t + 1, p, h => by
     show rule n (cell n t (p - 1)) (cell n t p) (cell n t (p + 1)) = 0
     rw [cell_eq_zero_of_lt hn t (p - 1) (by omega), cell_eq_zero_of_lt hn t p (by omega),
@@ -281,7 +285,7 @@ theorem rep_init (n : Nat) : Rep n 0 2 0 := by
   show (if ((j : Int) - (0 : Nat) - 1) = 0 then 1 else 0) = _
   by_cases hj : j = 1
   · subst hj; decide
-  · rw [if_neg (by omega), decide_eq_false (by omega)]
+  · rw [ite_eq_right (by omega), decide_eq_false (by omega)]
     rfl
 
 /-- `lives F k A B`: the planes are nonzero now and for the next `k - 1` steps, and both `0`

@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.BusyBeaverLifetimes
+module
+
+public import Ruliology.CellularAutomata.BusyBeaverLifetimes
 
 /-!
 # Rule 30: only 24 of the 32 possible 3×2 blocks occur
@@ -19,6 +21,8 @@ determined by the top row, so 32 blocks are possible a priori (`consistent_count
 * `occurs_single_cell`: all 24 allowed blocks occur in the classic evolution from a single black
   cell, by step 21.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Blocks

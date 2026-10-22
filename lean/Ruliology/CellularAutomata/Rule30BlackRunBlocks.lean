@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30BlackRuns
+module
+
+public import Ruliology.CellularAutomata.Rule30BlackRuns
 
 /-!
 # Rule 30: a long black run followed by a specific block (Theorem B′)
@@ -21,6 +23,8 @@ Then column `1` is eventually periodic, which Jen's theorem forbids.
 
 The blocks and their `j0` were found by a SAT search and are checked here by the kernel.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30BlackRunBlocks

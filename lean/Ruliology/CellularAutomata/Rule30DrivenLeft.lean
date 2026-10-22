@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30MaskedJen
+module
+
+public import Ruliology.CellularAutomata.Rule30MaskedJen
 
 /-!
 # Rule 30: the left half driven by a boundary column
@@ -37,6 +39,8 @@ cell is at `-m`, `m ≥ 1`, and everything further left is white.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
 argument here is Jen's, run inside the half-line.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30DrivenLeft
@@ -349,10 +353,10 @@ theorem exists_prefix (b : Nat → Bool) : ∀ j : Nat, ∃ s : Int → Bool,
     have hagree : ∀ p : Int, -((j : Nat) : Int) ≤ p → p < 0 → s' p = s p := by
       intro p hp1 _
       simp only [s']
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
     refine ⟨s', fun p hp => ?_, fun k hk => ?_⟩
     · simp only [s']
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
       exact hsupp p (by omega)
     · by_cases hkj : k < j
       · rw [← hpre k hkj]
@@ -388,10 +392,10 @@ theorem barrier_exists (b : Nat → Bool) {n : Nat} (hn : 0 < n) : ∃ s : Int �
   let s' : Int → Bool := fun p => if p = -((n : Nat) : Int) then true else s p
   refine ⟨s', fun p hp => ?_, by simp [s'], fun k hk => ?_⟩
   · simp only [s']
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
     exact hsupp p (by omega)
   · rw [← hpre k (by omega)]
-    exact light_cone (k := k) (fun p hp1 hp2 => by simp only [s']; rw [if_neg (by omega)])
+    exact light_cone (k := k) (fun p hp1 hp2 => by simp only [s']; rw [ite_eq_right (by omega)])
       k (Nat.le_refl k) (-1) (by omega) (by omega)
 
 /-- **Barrier (uniqueness).** Two starts with leftmost black cell at `-n` (white beyond) whose

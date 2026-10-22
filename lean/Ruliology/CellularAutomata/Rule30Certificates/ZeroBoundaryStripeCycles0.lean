@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront
 
 /-!
 # The stripe-prefix family: front-window cycles (six cycles of length `4096` or `16384`)
@@ -9,6 +11,8 @@ segments are checked by `seg` with `decide +kernel` and joined by `seg_sound` an
 `cyc_0_1`, `cyc_1_0`, `cyc_6_1` (length `4096`) and `cyc_2_1`, `cyc_3_0`, `cyc_7_0` (length
 `16384`), one `seg` check each.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront.StripeCycles0
 

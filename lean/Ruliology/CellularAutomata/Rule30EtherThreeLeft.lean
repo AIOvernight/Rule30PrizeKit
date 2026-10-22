@@ -1,6 +1,8 @@
-import Ruliology.CellularAutomata.Rule30EtherThree
-import Ruliology.CellularAutomata.Rule30DrivenLeft
-import Ruliology.CellularAutomata.Rule30PeriodTwo
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherThree
+public import Ruliology.CellularAutomata.Rule30DrivenLeft
+public import Ruliology.CellularAutomata.Rule30PeriodTwo
 
 /-!
 # Rule 30, least period 3: reductions to the left half
@@ -28,6 +30,8 @@ Both statements are open. Evidence (a C search, not kernel-checked):
 every start of width `W ≤ 37` violates `Q001`'s constraint by time `94`, and every start of width
 `W ≤ 70` violates the `011` constraint by time `99` (all three phases).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree
@@ -189,9 +193,9 @@ theorem not_eventually_011_of_C3w (hC : C3w w011) :
   rw [fits3_011]
   have : (t - T) % 3 = 0 ∨ (t - T) % 3 = 1 ∨ (t - T) % 3 = 2 := by omega
   rcases this with h | h | h
-  · rw [if_neg (by omega), if_neg (by omega)]
-  · rw [if_pos h, s1 h]; rfl
-  · rw [if_neg (by omega), if_pos h, s2 h]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega)]
+  · rw [ite_eq_left h, s1 h]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_left h, s2 h]; rfl
 
 /-! ### Finiteness is essential for `C3w w011`: the ether -/
 

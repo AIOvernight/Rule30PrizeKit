@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30PeriodTwoLanguage
+module
+
+public import Ruliology.CellularAutomata.Rule30PeriodTwoLanguage
 
 /-!
 # Period 2, right half: constraints at strip width `5` (kernel-checked)
@@ -17,6 +19,8 @@ that no path inside the bad class reads the listed column-`1` words at consecuti
 Width `5` is the smallest strip width whose bad class forbids more than `11` and `00000`
 (computation). The constraints are conditional on an eventual period `2`; they do not exclude it.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodTwoWidth5

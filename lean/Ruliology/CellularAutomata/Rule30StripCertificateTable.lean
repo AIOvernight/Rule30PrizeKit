@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30StripCertificates
+module
+
+public import Ruliology.CellularAutomata.Rule30StripCertificates
 
 /-!
 # Rule 30: thirty periodic words excluded by bitmask strip certificates
@@ -33,6 +35,8 @@ Some of these also follow from general theorems: `0 1^k` with `k ≥ 9` from
 
 The table was found by a search and is checked here by the kernel.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30StripCertificateTable

@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
+module
+
+public import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
 
 /-!
 # Rule 30 from any finite configuration: Jen's theorem, period 1 and period 2
@@ -34,6 +36,8 @@ center alternates from time `0`, which is what `CQ01` excludes
 Sources: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242;
 J. Kopra (TCS 2023) for left-finite configurations; Condrey (arXiv 2609.09431, 2026) for period 1.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteConfigs

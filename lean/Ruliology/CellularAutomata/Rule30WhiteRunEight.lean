@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30BlackRuns
+module
+
+public import Ruliology.CellularAutomata.Rule30BlackRuns
 
 /-!
 # Rule 30: the words `0^r 1 1` with `r ≥ 8`
@@ -21,6 +23,8 @@ cell at depth `r + 3`, holds at every period start, column `1` reads `0^(r+1) 1`
 eventually reads `1^(r+1) 0` or `0 1^r 0` in every period. In each case column `1` is eventually
 periodic, and so is column `0`, against Jen's theorem (`Rule30Jen.not_adjacent`).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30WhiteRunEight

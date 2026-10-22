@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30PeriodTwoCoupled
+module
+
+public import Ruliology.CellularAutomata.Rule30PeriodTwoCoupled
 
 /-!
 # Rule 30, period 2: the coupled question in finite configurations and sideways
@@ -51,6 +53,8 @@ barrier B1 (`Rule30ZeroBoundaryBarriers.no_finite_abstract_ranking`).
 The exact-death identity was first observed numerically, for `R = ∅` and widths up to `300`.
 -/
 
+@[expose] public section
+
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodTwoSideways
 
@@ -67,10 +71,10 @@ theorem altCol_odd (s : Nat) : altCol (2 * s + 1) = false := by
   unfold altCol; rw [show (2 * s + 1) % 2 = 1 by omega]; rfl
 
 theorem alt_even (f : Nat → Bool) (s : Nat) : alt f (2 * s) = true := by
-  unfold alt; rw [if_pos (by omega)]
+  unfold alt; rw [ite_eq_left (by omega)]
 
 theorem alt_odd (f : Nat → Bool) (s : Nat) : alt f (2 * s + 1) = f s := by
-  unfold alt; rw [if_neg (by omega), show (2 * s + 1) / 2 = s by omega]
+  unfold alt; rw [ite_eq_right (by omega), show (2 * s + 1) / 2 = s by omega]
 
 theorem evol_congr {x : Int → Bool} {t : Nat} {p q : Int} (h : p = q) : evol x t p = evol x t q :=
   h ▸ rfl
@@ -164,13 +168,13 @@ def gluedRun (L R : Nat → Bool) (t : Nat) (p : Int) : Bool :=
   if p < 0 then zrow L t (-p).toNat else drv altCol R t p.toNat
 
 theorem gluedRun_m1 (L R : Nat → Bool) (t : Nat) : gluedRun L R t (-1) = zrow L t 1 := by
-  unfold gluedRun; rw [if_pos (by omega)]; rfl
+  unfold gluedRun; rw [ite_eq_left (by omega)]; rfl
 
 theorem gluedRun_zero (L R : Nat → Bool) (t : Nat) : gluedRun L R t 0 = altCol t := by
-  unfold gluedRun; rw [if_neg (by omega)]; exact drv_col0 _ _ t
+  unfold gluedRun; rw [ite_eq_right (by omega)]; exact drv_col0 _ _ t
 
 theorem gluedRun_one (L R : Nat → Bool) (t : Nat) : gluedRun L R t 1 = drv altCol R t 1 := by
-  unfold gluedRun; rw [if_neg (by omega)]; rfl
+  unfold gluedRun; rw [ite_eq_right (by omega)]; rfl
 
 /-- The gluing is the true evolution as long as the coupled constraint holds. -/
 theorem evol_glue_upto (L R : Nat → Bool) (n : Nat)
@@ -181,13 +185,13 @@ theorem evol_glue_upto (L R : Nat → Bool) (n : Nat)
     show glue L R p = gluedRun L R 0 p
     unfold glue gluedRun
     by_cases h : p < 0
-    · rw [if_pos h, if_pos h]
+    · rw [ite_eq_left h, ite_eq_left h]
       obtain ⟨k, hk⟩ : ∃ k : Nat, (-p).toNat = k + 1 := ⟨(-p).toNat - 1, by omega⟩
       rw [hk]; rfl
-    · rw [if_neg h, if_neg h]
+    · rw [ite_eq_right h, ite_eq_right h]
       by_cases h0 : p = 0
-      · rw [if_pos h0, show p.toNat = 0 by omega, drv_col0]; rfl
-      · rw [if_neg h0, drv_init _ _ _ (by omega)]
+      · rw [ite_eq_left h0, show p.toNat = 0 by omega, drv_col0]; rfl
+      · rw [ite_eq_right h0, drv_init _ _ _ (by omega)]
   | t + 1, p, ht => by
     show rule (evol (glue L R) t (p - 1)) (evol (glue L R) t p) (evol (glue L R) t (p + 1)) =
       gluedRun L R (t + 1) p
@@ -196,15 +200,15 @@ theorem evol_glue_upto (L R : Nat → Bool) (n : Nat)
     rcases (show p ≤ -2 ∨ p = -1 ∨ p = 0 ∨ p = 1 ∨ 2 ≤ p by omega) with h | h | h | h | h
     · -- deep in the left half
       unfold gluedRun
-      rw [if_pos (show p - 1 < 0 by omega), if_pos (show p < 0 by omega),
-        if_pos (show p + 1 < 0 by omega), if_pos (show p < 0 by omega)]
+      rw [ite_eq_left (show p - 1 < 0 by omega), ite_eq_left (show p < 0 by omega),
+        ite_eq_left (show p + 1 < 0 by omega), ite_eq_left (show p < 0 by omega)]
       obtain ⟨k, hk⟩ : ∃ k : Nat, (-p).toNat = k + 2 := ⟨(-p).toNat - 2, by omega⟩
       rw [show (-(p - 1)).toNat = k + 3 by omega, hk, show (-(p + 1)).toNat = k + 1 by omega]
       rfl
     · -- column -1: the wall is white, and the center is black only where column -1 is
       unfold gluedRun
-      rw [if_pos (show p - 1 < 0 by omega), if_pos (show p < 0 by omega),
-        if_neg (show ¬ p + 1 < 0 by omega), if_pos (show p < 0 by omega),
+      rw [ite_eq_left (show p - 1 < 0 by omega), ite_eq_left (show p < 0 by omega),
+        ite_eq_right (show ¬ p + 1 < 0 by omega), ite_eq_left (show p < 0 by omega),
         show (-(p - 1)).toNat = 2 by omega, show (-p).toNat = 1 by omega,
         show (p + 1).toNat = 0 by omega, drv_col0, zrow_succ L t 0, zrow_wall]
       show xor (zrow L t 2) (zrow L t 1 || altCol t) = xor (zrow L t 2) (zrow L t 1 || false)
@@ -213,8 +217,8 @@ theorem evol_glue_upto (L R : Nat → Bool) (n : Nat)
       · rw [altCol_odd]
     · -- the center
       unfold gluedRun
-      rw [if_pos (show p - 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
-        if_neg (show ¬ p + 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
+      rw [ite_eq_left (show p - 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
+        ite_eq_right (show ¬ p + 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
         show (-(p - 1)).toNat = 1 by omega, show p.toNat = 0 by omega,
         show (p + 1).toNat = 1 by omega, drv_col0, drv_col0]
       show xor (zrow L t 1) (altCol t || drv altCol R t 1) = altCol (t + 1)
@@ -224,15 +228,15 @@ theorem evol_glue_upto (L R : Nat → Bool) (n : Nat)
         cases drv altCol R (2 * s + 1) 1 <;> rfl
     · -- column 1
       unfold gluedRun
-      rw [if_neg (show ¬ p - 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
-        if_neg (show ¬ p + 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
+      rw [ite_eq_right (show ¬ p - 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
+        ite_eq_right (show ¬ p + 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
         show (p - 1).toNat = 0 by omega, show p.toNat = 0 + 1 by omega,
         show (p + 1).toNat = 2 by omega]
       rfl
     · -- deep in the right half
       unfold gluedRun
-      rw [if_neg (show ¬ p - 1 < 0 by omega), if_neg (show ¬ p < 0 by omega),
-        if_neg (show ¬ p + 1 < 0 by omega), if_neg (show ¬ p < 0 by omega)]
+      rw [ite_eq_right (show ¬ p - 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega),
+        ite_eq_right (show ¬ p + 1 < 0 by omega), ite_eq_right (show ¬ p < 0 by omega)]
       obtain ⟨k, hk⟩ : ∃ k : Nat, p.toNat = k + 1 := ⟨p.toNat - 1, by omega⟩
       rw [show (p - 1).toNat = k by omega, hk, show (p + 1).toNat = k + 2 by omega]
       rfl
@@ -248,8 +252,8 @@ theorem glue_fin {L R : Nat → Bool} (hL : FinSupp L) (hR : FinSupp R) : FinCon
   refine ⟨max WL WR, fun p hp => ?_⟩
   unfold glue
   by_cases hn : p < 0
-  · rw [if_pos hn]; exact hWL _ (by omega)
-  · rw [if_neg hn, if_neg (by omega)]; exact hWR _ (by omega)
+  · rw [ite_eq_left hn]; exact hWL _ (by omega)
+  · rw [ite_eq_right hn, ite_eq_right (by omega)]; exact hWR _ (by omega)
 
 /-! ### Finite configurations -/
 
@@ -481,7 +485,7 @@ theorem CQ01Empty_iff : CQ01Empty ↔
     exact hW _ (by omega)
   · rintro h hP
     refine h ⟨glue (Psi empty) empty, glue_fin hP ⟨0, fun _ _ => rfl⟩, fun p hp => ?_, fun t => ?_⟩
-    · unfold glue; rw [if_neg (by omega), if_neg (by omega)]; rfl
+    · unfold glue; rw [ite_eq_right (by omega), ite_eq_right (by omega)]; rfl
     · rw [evol_glue _ _ (Psi_inX empty) (Psi_free empty) t 0, gluedRun_zero]
 
 /-! ### Barrier: alternation from finite configurations is unbounded -/

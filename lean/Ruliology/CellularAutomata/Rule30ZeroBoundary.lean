@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30PeriodTwo
+module
+
+public import Ruliology.CellularAutomata.Rule30PeriodTwo
 
 /-!
 # Rule 30: the zero-boundary left half (ZBL) and the period-2 question `Q01`
@@ -50,6 +52,8 @@ system, the **zero-boundary left half** (ZBL), in one encoding: `zrow L t k` is 
 bits `cell (T + 2 k + 1) (-1)` contain neither `00` (`Rule30PeriodTwo.golden`) nor `11111`
 (`col1_black_among_five`, a kernel check over the light cone of columns `1..11`).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundary
@@ -342,7 +346,7 @@ theorem complete_near_wall (z c : Nat → Bool) :
       have hdiff : L' (d + 1) ≠ L (d + 1) := by simp [L']
       have hflip := pivot hagree hdiff
       refine ⟨L', fun k hk => ?_, fun t ht => ?_⟩
-      · simp only [L', show k ≠ d + 1 by omega, if_false]; exact hLz k (by omega)
+      · simp only [L', show k ≠ d + 1 by omega, ite_false]; exact hLz k (by omega)
       · by_cases htd : t = d
         · subst htd
           revert hflip hok
@@ -637,10 +641,10 @@ theorem Theta_col (f : Nat → Bool) (t : Nat) : zrow (Theta f) t 1 = alt f t :=
   (realization (alt f)).1 t
 
 theorem Theta_inX (f : Nat → Bool) : InX (Theta f) := by
-  intro s; rw [Theta_col]; unfold alt; rw [if_pos (by omega)]
+  intro s; rw [Theta_col]; unfold alt; rw [ite_eq_left (by omega)]
 
 theorem Theta_free (f : Nat → Bool) (s : Nat) : zrow (Theta f) (2 * s + 1) 1 = f s := by
-  rw [Theta_col]; unfold alt; rw [if_neg (by omega), show (2 * s + 1) / 2 = s by omega]
+  rw [Theta_col]; unfold alt; rw [ite_eq_right (by omega), show (2 * s + 1) / 2 = s by omega]
 
 theorem Theta_wall (f : Nat → Bool) : Theta f 0 = false := rfl
 
@@ -653,10 +657,10 @@ theorem Theta_unique {L f : Nat → Bool} (hX : InX L) (hf : ∀ s, zrow L (2 * 
   refine (realization (alt f)).2 L fun t => ?_
   unfold alt
   by_cases ht : t % 2 = 0
-  · rw [if_pos ht]
+  · rw [ite_eq_left ht]
     have := hX (t / 2)
     rwa [show 2 * (t / 2) = t by omega] at this
-  · rw [if_neg ht, ← hf (t / 2), show 2 * (t / 2) + 1 = t by omega]
+  · rw [ite_eq_right ht, ← hf (t / 2), show 2 * (t / 2) + 1 = t by omega]
 
 /-- **The constrained starts are exactly the image of `Theta`.** -/
 theorem inX_iff (L : Nat → Bool) : InX L ↔ ∃ f, zrow L 0 = Theta f := by
@@ -680,8 +684,8 @@ theorem Theta_dep (f g : Nat → Bool) (k : Nat) (h : ∀ s, 2 * s + 2 ≤ k →
   intro j hj
   unfold alt
   by_cases hj2 : (0 + j) % 2 = 0
-  · rw [if_pos hj2, if_pos hj2]
-  · rw [if_neg hj2, if_neg hj2]; exact h _ (by omega)
+  · rw [ite_eq_left hj2, ite_eq_left hj2]
+  · rw [ite_eq_right hj2, ite_eq_right hj2]; exact h _ (by omega)
 
 /-- **Continuity of the inverse.** The free bit `f s` is determined by `Theta f` at depths
 `≤ 2 s + 2`. -/
@@ -704,10 +708,10 @@ theorem tri_even (f g : Nat → Bool) (j : Nat) (h : ∀ s, s < j → f s = g s)
     intro i hi
     unfold alt
     by_cases hi2 : (0 + i) % 2 = 0
-    · rw [if_pos hi2, if_pos hi2]
-    · rw [if_neg hi2, if_neg hi2]; exact h _ (by omega))]
+    · rw [ite_eq_left hi2, ite_eq_left hi2]
+    · rw [ite_eq_right hi2, ite_eq_right hi2]; exact h _ (by omega))]
   unfold alt
-  rw [if_neg (by omega), if_neg (by omega), show (0 + (2 * j + 1)) / 2 = j by omega]
+  rw [ite_eq_right (by omega), ite_eq_right (by omega), show (0 + (2 * j + 1)) / 2 = j by omega]
 
 /-- **Two-step conjugacy.** Two ZBL steps of `Theta f` give `Theta` of the shifted free bits: the
 constrained two-step dynamics is the full one-sided shift. -/
@@ -785,7 +789,7 @@ def toRow (l : List Bool) (k : Nat) : Bool := if k = 0 then false else (l[k - 1]
 theorem toRow_fin (l : List Bool) : ∀ k, l.length < k → toRow l k = false := by
   intro k hk
   unfold toRow
-  rw [if_neg (by omega), List.getElem?_eq_none (by omega)]
+  rw [ite_eq_right (by omega), List.getElem?_eq_none (by omega)]
   rfl
 
 /-- Every row supported at depths `1, …, W` is `toRow l` for a list of length `W`. -/
@@ -793,7 +797,7 @@ theorem row_is_list (L : Nat → Bool) (W : Nat) (hL : ∀ k, W < k → L k = fa
     ∃ l : List Bool, l.length = W ∧ ∀ k, 1 ≤ k → toRow l k = L k := by
   refine ⟨(List.range W).map (fun i => L (i + 1)), by simp, fun k hk => ?_⟩
   unfold toRow
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   by_cases hkW : k ≤ W
   · rw [List.getElem?_map, List.getElem?_range (by omega)]
     show L (k - 1 + 1) = L k
@@ -904,8 +908,8 @@ theorem good_ext (W n : Nat) (g : Nat → Bool) (hg : Good W n g) :
     intro i hi
     unfold extAt
     by_cases hin : i = n
-    · rw [if_pos hin, hin]
-    · rw [if_neg hin]; exact hfg i (by omega)
+    · rw [ite_eq_left hin, hin]
+    · rw [ite_eq_right hin]; exact hfg i (by omega)
   cases hfn : f n with
   | false =>
     rw [hfn] at hpre
@@ -922,8 +926,8 @@ theorem good_choice (W n : Nat) (g : Nat → Bool) (hg : Good W n g) :
     Good W (n + 1) (extAt g n (choiceBit W n g)) := by
   unfold choiceBit
   by_cases hc : Good W (n + 1) (extAt g n false)
-  · rw [if_pos hc]; exact hc
-  · rw [if_neg hc]; exact (good_ext W n g hg).resolve_left hc
+  · rw [ite_eq_left hc]; exact hc
+  · rw [ite_eq_right hc]; exact (good_ext W n g hg).resolve_left hc
 
 noncomputable def branch (W : Nat) : Nat → (Nat → Bool)
   | 0 => fun _ => false
@@ -948,7 +952,7 @@ theorem branch_stable (W i : Nat) : ∀ m, i < m → branch W m i = branch W (i 
     · subst him; rfl
     · show extAt (branch W m) m (choiceBit W m (branch W m)) i = _
       unfold extAt
-      rw [if_neg him]
+      rw [ite_eq_right him]
       exact ih (by omega)
 
 noncomputable def limitF (W : Nat) : Nat → Bool := fun i => branch W (i + 1) i
@@ -986,12 +990,12 @@ theorem toRow_snoc_le (l : List Bool) (b : Bool) (i : Nat) (hi : i ≤ l.length)
     toRow (l ++ [b]) i = toRow l i := by
   unfold toRow
   by_cases h0 : i = 0
-  · rw [if_pos h0, if_pos h0]
-  · rw [if_neg h0, if_neg h0, List.getElem?_append_left (by omega)]
+  · rw [ite_eq_left h0, ite_eq_left h0]
+  · rw [ite_eq_right h0, ite_eq_right h0, List.getElem?_append_left (by omega)]
 
 theorem toRow_snoc_last (l : List Bool) (b : Bool) : toRow (l ++ [b]) (l.length + 1) = b := by
   unfold toRow
-  rw [if_neg (by omega), show l.length + 1 - 1 = l.length by omega,
+  rw [ite_eq_right (by omega), show l.length + 1 - 1 = l.length by omega,
     List.getElem?_append_right (by omega)]
   simp
 
@@ -1037,7 +1041,7 @@ theorem cnt_eq (n : Nat) : ∀ l : List Bool,
     have hlen1 : (l ++ [true]).length = l.length + 1 := by simp
     rw [hlen0, hlen1]
     by_cases hl : ok l
-    · rw [if_pos hl]
+    · rw [ite_eq_left hl]
       by_cases hm : l.length % 2 = 0
       · have e0 := ok_snoc l false
         have e1 := ok_snoc l true
@@ -1049,7 +1053,7 @@ theorem cnt_eq (n : Nat) : ∀ l : List Bool,
             have := (e1.mp h).2 hm
             rw [hp, hb] at this
             exact absurd this (by decide)
-          rw [if_pos h0, if_neg h1, Nat.add_zero]
+          rw [ite_eq_left h0, ite_eq_right h1, Nat.add_zero]
           congr 1; omega
         · have h0 : ¬ ok (l ++ [false]) := by
             intro h; exact hb ((e0.mp h).2 hm)
@@ -1058,23 +1062,23 @@ theorem cnt_eq (n : Nat) : ∀ l : List Bool,
           have h1 : ok (l ++ [true]) := by
             refine e1.mpr ⟨hl, fun _ => ?_⟩
             rw [hp, hb']; rfl
-          rw [if_neg h0, if_pos h1, Nat.zero_add]
+          rw [ite_eq_right h0, ite_eq_left h1, Nat.zero_add]
           congr 1; omega
       · have h0 : ok (l ++ [false]) := (ok_snoc l false).mpr ⟨hl, fun h => absurd h hm⟩
         have h1 : ok (l ++ [true]) := (ok_snoc l true).mpr ⟨hl, fun h => absurd h hm⟩
-        rw [if_pos h0, if_pos h1, ← Nat.two_mul, ← Nat.pow_succ']
+        rw [ite_eq_left h0, ite_eq_left h1, ← Nat.two_mul, ← Nat.pow_succ']
         congr 1; omega
-    · rw [if_neg hl]
+    · rw [ite_eq_right hl]
       have h0 : ¬ ok (l ++ [false]) := fun h => hl (ok_of_snoc l false h)
       have h1 : ¬ ok (l ++ [true]) := fun h => hl (ok_of_snoc l true h)
-      rw [if_neg h0, if_neg h1]
+      rw [ite_eq_right h0, ite_eq_right h1]
 
 /-- **Exactly `2 ^ ⌊W / 2⌋` starts of width `≤ W`** (lists of length `W`) satisfy the constraint
 at every even step `t ≤ W - 1`. -/
 theorem count_constrained (W : Nat) : cnt W [] = 2 ^ (W / 2) := by
   rw [cnt_eq]
   have h : ok [] := fun t ht => absurd ht (Nat.not_lt_zero _)
-  rw [if_pos h]
+  rw [ite_eq_left h]
   show 2 ^ ((0 + W) / 2 - 0 / 2) = 2 ^ (W / 2)
   congr 1; omega
 
@@ -1084,7 +1088,7 @@ theorem toRow_inj (l l' : List Bool) (hlen : l.length = l'.length) (h : ∀ k, 1
   intro i
   have := h (i + 1) (by omega)
   unfold toRow at this
-  rw [if_neg (by omega), if_neg (by omega), show i + 1 - 1 = i by omega] at this
+  rw [ite_eq_right (by omega), ite_eq_right (by omega), show i + 1 - 1 = i by omega] at this
   by_cases hi : i < l.length
   · rw [List.getElem?_eq_getElem hi, List.getElem?_eq_getElem (by omega)] at this ⊢
     simp at this
@@ -1209,10 +1213,10 @@ theorem Q01_iff_staged : Q01 ↔ Rule30PeriodTwo.Q01 := by
     have hsL : ∀ k : Nat, 1 ≤ k → s (-(k : Int)) = L k := by
       intro k hk
       show (if -(k : Int) < 0 then L (-(-(k : Int))).toNat else false) = L k
-      rw [if_pos (by omega), show (-(-(k : Int))).toNat = k by omega]
+      rw [ite_eq_left (by omega), show (-(-(k : Int))).toNat = k by omega]
     refine hS m s (by omega) (fun p hp => ?_) ?_ fun k => ?_
     · show (if p < 0 then L (-p).toNat else false) = false
-      rw [if_pos (by omega)]; exact hfin _ (by omega)
+      rw [ite_eq_left (by omega)]; exact hfin _ (by omega)
     · rw [hsL m hm]; exact hedge
     · rw [show (-1 : Int) = -((1 : Nat) : Int) by rfl, L_eq_zrow s (2 * k) 1 (Nat.le_refl 1),
         zrow_congr (L' := L) hsL]

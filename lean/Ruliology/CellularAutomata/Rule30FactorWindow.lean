@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Window
+module
+
+public import Ruliology.CellularAutomata.Rule30Window
 
 /-!
 # Rule 30: an eventual period needs `T + P ≥ 16359`
@@ -17,6 +19,8 @@ factor start positions sorted by factor value (`permAt`, packed 14 bits per entr
 checks that the list covers `0, …, 16358` (`cover_ok`) and that the factor values strictly
 increase along it (`sorted_ok`).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FactorWindow

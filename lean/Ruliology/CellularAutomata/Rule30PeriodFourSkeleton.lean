@@ -1,6 +1,8 @@
-import Ruliology.CellularAutomata.Rule30StripCertificates
-import Ruliology.CellularAutomata.Rule30DrivenLeft
-import Ruliology.CellularAutomata.Rule30Ether
+module
+
+public import Ruliology.CellularAutomata.Rule30StripCertificates
+public import Ruliology.CellularAutomata.Rule30DrivenLeft
+public import Ruliology.CellularAutomata.Rule30Ether
 
 /-!
 # Rule 30, least period 4: forced skeletons of the right half, and a left-half reduction
@@ -37,6 +39,8 @@ transient. The statements `C3 w` are open.
 The left-half reduction uses `Rule30MaskedJen.effective_step` through
 `Rule30DrivenLeft.cell_eq_L_effective`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodFourSkeleton
@@ -564,10 +568,10 @@ theorem not_eventually_0001_of_C3 (hC : C3 w0001) :
   rw [fits_0001]
   have : (t - T) % 4 = 0 ∨ (t - T) % 4 = 1 ∨ (t - T) % 4 = 2 ∨ (t - T) % 4 = 3 := by omega
   rcases this with h | h | h | h
-  · rw [if_pos h, (s0 h).2.2]; rfl
-  · rw [if_neg (by omega), if_neg (by omega), if_neg (by omega)]
-  · rw [if_neg (by omega), if_pos h, (s2 h).2]; rfl
-  · rw [if_neg (by omega), if_neg (by omega), if_pos h, (s3 h).2.2]; rfl
+  · rw [ite_eq_left h, (s0 h).2.2]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega)]
+  · rw [ite_eq_right (by omega), ite_eq_left h, (s2 h).2]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h, (s3 h).2.2]; rfl
 
 /-- **`C3` excludes `0011`.** -/
 theorem not_eventually_0011_of_C3 (hC : C3 w0011) :
@@ -580,10 +584,10 @@ theorem not_eventually_0011_of_C3 (hC : C3 w0011) :
   rw [fits_0011 w0011 (Or.inl rfl)]
   have : (t - T) % 4 = 0 ∨ (t - T) % 4 = 1 ∨ (t - T) % 4 = 2 ∨ (t - T) % 4 = 3 := by omega
   rcases this with h | h | h | h
-  · rw [if_neg (by omega), if_neg (by omega), if_neg (by omega)]
-  · rw [if_pos h, (s1 h).2]; rfl
-  · rw [if_neg (by omega), if_pos h, (s2 h).2]; rfl
-  · rw [if_neg (by omega), if_neg (by omega), if_pos h, (s3 h).2]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega)]
+  · rw [ite_eq_left h, (s1 h).2]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_left h, (s2 h).2]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h, (s3 h).2]; rfl
 
 /-- **`C3` excludes `0111`.** -/
 theorem not_eventually_0111_of_C3 (hC : C3 w0111) :
@@ -594,10 +598,10 @@ theorem not_eventually_0111_of_C3 (hC : C3 w0111) :
   rw [fits_0011 w0111 (Or.inr rfl)]
   have : (t - T) % 4 = 0 ∨ (t - T) % 4 = 1 ∨ (t - T) % 4 = 2 ∨ (t - T) % 4 = 3 := by omega
   rcases this with h | h | h | h
-  · rw [if_neg (by omega), if_neg (by omega), if_neg (by omega)]
-  · rw [if_pos h, s1 h]; rfl
-  · rw [if_neg (by omega), if_pos h, s2 h]; rfl
-  · rw [if_neg (by omega), if_neg (by omega), if_pos h, s3 h]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega)]
+  · rw [ite_eq_left h, s1 h]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_left h, s2 h]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h, s3 h]; rfl
 
 /-- **Least period 4 from `C3`.** If `C3` holds for `0001`, `0011` and `0111`, the center column is
 not eventually equal to any of these words, with any transient. -/

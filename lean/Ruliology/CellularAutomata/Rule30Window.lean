@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Prize
+module
+
+public import Ruliology.CellularAutomata.Rule30Prize
 
 /-!
 # A kernel-checked window for Problem 1
@@ -15,6 +17,8 @@ records bit `K` of each row, and `centerLoop_spec` proves what it records.
 This is a finite check, far smaller than the published billion-bit computations; its point is
 that every step, including the simulation, is checked by Lean's kernel.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Window
@@ -77,8 +81,8 @@ theorem centerLoop_spec (K : Nat) : ∀ n t acc, (∀ i, t ≤ i → acc.testBit
     intro t acc hacc i
     simp only [centerLoop, Nat.add_zero]
     by_cases h : i < t
-    · rw [if_pos h]
-    · rw [if_neg h, if_neg h, hacc i (by omega)]
+    · rw [ite_eq_left h]
+    · rw [ite_eq_right h, ite_eq_right h, hacc i (by omega)]
   | succ n ih =>
     intro t acc hacc i
     have hbit : ∀ j, (if (row K t).testBit K then acc ||| (1 <<< t) else acc).testBit j =
@@ -94,12 +98,12 @@ theorem centerLoop_spec (K : Nat) : ∀ n t acc, (∀ i, t ≤ i → acc.testBit
         rfl),
       hbit i]
     by_cases h1 : i < t
-    · rw [if_pos (show i < t + 1 by omega), if_pos h1, decide_eq_false (show ¬ t = i by omega),
+    · rw [ite_eq_left (show i < t + 1 by omega), ite_eq_left h1, decide_eq_false (show ¬ t = i by omega),
         Bool.false_and, Bool.or_false]
     · by_cases h2 : i = t
-      · rw [if_pos (show i < t + 1 by omega), if_neg h1, if_pos (show i < t + (n + 1) by omega),
+      · rw [ite_eq_left (show i < t + 1 by omega), ite_eq_right h1, ite_eq_left (show i < t + (n + 1) by omega),
           hacc i (by omega), decide_eq_true h2.symm, Bool.true_and, Bool.false_or, h2]
-      · rw [if_neg (show ¬ i < t + 1 by omega), if_neg h1, show t + 1 + n = t + (n + 1) by omega]
+      · rw [ite_eq_right (show ¬ i < t + 1 by omega), ite_eq_right h1, show t + 1 + n = t + (n + 1) by omega]
 
 /-! ### The window -/
 
@@ -115,7 +119,7 @@ theorem centerLoop_eq : centerLoop windowN windowN 0 (2 ^ windowN) 0 = centerBit
 theorem center_eq_bit (t : Nat) (ht : t < windowN) : center t = centerBits.testBit t := by
   have h := centerLoop_spec windowN windowN 0 0 (by simp) t
   rw [show row windowN 0 = 2 ^ windowN from rfl, centerLoop_eq] at h
-  rw [h, if_neg (by omega), if_pos (by omega), row_testBit windowN t (by omega) windowN]
+  rw [h, ite_eq_right (by omega), ite_eq_left (by omega), row_testBit windowN t (by omega) windowN]
   simp [center]
 
 /-- The witness search: every period `P ≤ N/4` is broken within 32 steps after `N/2`. -/

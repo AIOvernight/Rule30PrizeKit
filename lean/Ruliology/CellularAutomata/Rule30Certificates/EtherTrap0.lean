@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30EtherTrap
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherTrap
 
 /-!
 # Pure ether, word `0001`: certificates for the alignment `j₀ = 5`
@@ -8,6 +10,8 @@ Data for `Rule30EtherTrapWidth20`: kernel-checked certificates for `0001` (data:
 width `20`, a path to a node with two closed walks of equal length whose white-phase outputs
 differ (`certOK`, `decide +kernel`): `cert_0001_5_0` – `cert_0001_5_3` (phases `0` – `3`).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata.Rule30EtherTrap
 

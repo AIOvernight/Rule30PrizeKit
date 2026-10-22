@@ -1,53 +1,55 @@
-import Ruliology.CellularAutomata.Rule30Predecessors
-import Ruliology.CellularAutomata.Rule30PredecessorCounts
-import Ruliology.CellularAutomata.Rule30Blocks
-import Ruliology.CellularAutomata.Rule30Jen
-import Ruliology.CellularAutomata.Rule30Prize
-import Ruliology.CellularAutomata.Rule30Window
-import Ruliology.CellularAutomata.Rule30MaskedJen
-import Ruliology.CellularAutomata.Rule30BlackRuns
-import Ruliology.CellularAutomata.Rule30BlackRunBlocks
-import Ruliology.CellularAutomata.Rule30StripCertificates
-import Ruliology.CellularAutomata.Rule30StripCertificateTable
-import Ruliology.CellularAutomata.Rule30DrivenLeft
-import Ruliology.CellularAutomata.Rule30RightPeriods
-import Ruliology.CellularAutomata.Rule30WhiteSeed
-import Ruliology.CellularAutomata.Rule30Realization
-import Ruliology.CellularAutomata.Rule30FactorWindow
-import Ruliology.CellularAutomata.Rule30PeriodTwo
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripe
-import Ruliology.CellularAutomata.Rule30ZeroBoundarySmall
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
-import Ruliology.CellularAutomata.Rule30Ether
-import Ruliology.CellularAutomata.Rule30PeriodTwoCoupled
-import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryLanes
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryWidth52
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFamily
-import Ruliology.CellularAutomata.Rule30EtherTrap
-import Ruliology.CellularAutomata.Rule30EtherTrapWidth20
-import Ruliology.CellularAutomata.Rule30PeriodTwoLanguage
-import Ruliology.CellularAutomata.Rule30PeriodTwoWidth5
-import Ruliology.CellularAutomata.Rule30PeriodTwoWidth6
-import Ruliology.CellularAutomata.Rule30EtherThree
-import Ruliology.CellularAutomata.Rule30EtherThreeNoWall
-import Ruliology.CellularAutomata.Rule30EtherThreeTrap
-import Ruliology.CellularAutomata.Rule30EtherThreeReach
-import Ruliology.CellularAutomata.Rule30EtherThreeLeft
-import Ruliology.CellularAutomata.Rule30EtherThreeSkeleton
-import Ruliology.CellularAutomata.Rule30WhiteRunEight
-import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
-import Ruliology.CellularAutomata.Rule30LightCone
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
-import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
-import Ruliology.CellularAutomata.Rule30Coupled
-import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
-import Ruliology.CellularAutomata.Rule30FiniteBlackRunBlocks
-import Ruliology.CellularAutomata.Rule30FiniteDiagonals
-import Ruliology.CellularAutomata.Rule30FiniteWhiteRuns
+module
+
+public import Ruliology.CellularAutomata.Rule30Predecessors
+public import Ruliology.CellularAutomata.Rule30PredecessorCounts
+public import Ruliology.CellularAutomata.Rule30Blocks
+public import Ruliology.CellularAutomata.Rule30Jen
+public import Ruliology.CellularAutomata.Rule30Prize
+public import Ruliology.CellularAutomata.Rule30Window
+public import Ruliology.CellularAutomata.Rule30MaskedJen
+public import Ruliology.CellularAutomata.Rule30BlackRuns
+public import Ruliology.CellularAutomata.Rule30BlackRunBlocks
+public import Ruliology.CellularAutomata.Rule30StripCertificates
+public import Ruliology.CellularAutomata.Rule30StripCertificateTable
+public import Ruliology.CellularAutomata.Rule30DrivenLeft
+public import Ruliology.CellularAutomata.Rule30RightPeriods
+public import Ruliology.CellularAutomata.Rule30WhiteSeed
+public import Ruliology.CellularAutomata.Rule30Realization
+public import Ruliology.CellularAutomata.Rule30FactorWindow
+public import Ruliology.CellularAutomata.Rule30PeriodTwo
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripe
+public import Ruliology.CellularAutomata.Rule30ZeroBoundarySmall
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+public import Ruliology.CellularAutomata.Rule30Ether
+public import Ruliology.CellularAutomata.Rule30PeriodTwoCoupled
+public import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryLanes
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryWidth52
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFront
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFamily
+public import Ruliology.CellularAutomata.Rule30EtherTrap
+public import Ruliology.CellularAutomata.Rule30EtherTrapWidth20
+public import Ruliology.CellularAutomata.Rule30PeriodTwoLanguage
+public import Ruliology.CellularAutomata.Rule30PeriodTwoWidth5
+public import Ruliology.CellularAutomata.Rule30PeriodTwoWidth6
+public import Ruliology.CellularAutomata.Rule30EtherThree
+public import Ruliology.CellularAutomata.Rule30EtherThreeNoWall
+public import Ruliology.CellularAutomata.Rule30EtherThreeTrap
+public import Ruliology.CellularAutomata.Rule30EtherThreeReach
+public import Ruliology.CellularAutomata.Rule30EtherThreeLeft
+public import Ruliology.CellularAutomata.Rule30EtherThreeSkeleton
+public import Ruliology.CellularAutomata.Rule30WhiteRunEight
+public import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
+public import Ruliology.CellularAutomata.Rule30LightCone
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
+public import Ruliology.CellularAutomata.Rule30FiniteMaskedJen
+public import Ruliology.CellularAutomata.Rule30Coupled
+public import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
+public import Ruliology.CellularAutomata.Rule30FiniteBlackRunBlocks
+public import Ruliology.CellularAutomata.Rule30FiniteDiagonals
+public import Ruliology.CellularAutomata.Rule30FiniteWhiteRuns
 
 /-!
 # Rule 30 Prize: Lean snapshot
@@ -66,3 +68,5 @@ kit".
 Core Lean 4.35.0, no dependencies. `README.md` maps the modules, names the headline theorems and
 says how to build.
 -/
+
+@[expose] public section

@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Prize
+module
+
+public import Ruliology.CellularAutomata.Rule30Prize
 
 /-!
 # Rule 30: masked, effective-boundary and window forms of Jen's theorem
@@ -37,6 +39,8 @@ when column `i` is white. This module states the sharper forms that follow.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for the
 adjacent-column argument; the masked, effective-boundary and window forms refine it.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30MaskedJen

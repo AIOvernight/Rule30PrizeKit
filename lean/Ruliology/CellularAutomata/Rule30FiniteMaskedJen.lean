@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
+module
+
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
 
 /-!
 # Masked and window forms of Jen's theorem for every finite configuration
@@ -22,6 +24,8 @@ a leftmost black cell `lo`. Column `i` of the evolution is `t ↦ evol x t i`.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
 masked and window forms are those of `Rule30MaskedJen`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteMaskedJen

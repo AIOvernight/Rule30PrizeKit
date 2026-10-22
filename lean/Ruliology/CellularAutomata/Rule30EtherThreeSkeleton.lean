@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30EtherThreeLeft
-import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherThreeLeft
+public import Ruliology.CellularAutomata.Rule30PeriodFourSkeleton
 
 /-!
 # Rule 30, least period 3: forced skeletons of the right half
@@ -24,6 +26,8 @@ Consequence for the left half (`Rule30EtherThreeLeft`):
 Evidence for `C3s001` (C, not kernel-checked): every start of width `W ≤ 70` (all three phases)
 violates the constraint `(0, *, 1)` by time `103`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree
@@ -165,9 +169,9 @@ theorem not_eventually_001_of_C3s (hC : C3s001) :
   have hk3 : (T + k - T) % 3 = k % 3 := by rw [show T + k - T = k by omega]
   have : k % 3 = 0 ∨ k % 3 = 1 ∨ k % 3 = 2 := by omega
   rcases this with h | h | h
-  · rw [if_pos h, s0 (by omega)]; rfl
-  · rw [if_neg (by omega), if_neg (by omega)]
-  · rw [if_neg (by omega), if_pos h, s2 (by omega)]; rfl
+  · rw [ite_eq_left h, s0 (by omega)]; rfl
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega)]
+  · rw [ite_eq_right (by omega), ite_eq_left h, s2 (by omega)]; rfl
 
 end Rule30EtherThree
 end Ruliology.CellularAutomata

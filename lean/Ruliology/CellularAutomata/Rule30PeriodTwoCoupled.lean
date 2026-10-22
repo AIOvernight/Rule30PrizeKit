@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
-import Ruliology.CellularAutomata.Rule30Ether
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+public import Ruliology.CellularAutomata.Rule30Ether
 
 /-!
 # Rule 30, period 2: the coupled question `CQ01` and the ether as an infinite witness
@@ -27,6 +29,8 @@ by the alternating column (`Rule30Ether.drv`).
 So the ether satisfies every condition of `CQ01` except finite support: as for `Q01` (whose
 infinite witness is the stripe, `Rule30ZeroBoundary.zrow_stripe`), finite support is essential.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30PeriodTwoCoupled

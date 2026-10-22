@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30EtherThree
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherThree
 
 /-!
 # Rule 30, least period 3: a period-21 trap for `001`
@@ -19,6 +21,8 @@ the center column `1` is a fixed function `u` of the label.
   holds for `001` is open; in the period-3 study all `18,258` tested right halves entered `t001`,
   with delays up to about `2 · 10^5` steps (computation, not a proof).
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree

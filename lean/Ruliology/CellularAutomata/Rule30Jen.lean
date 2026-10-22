@@ -1,3 +1,5 @@
+module
+
 /-!
 # Rule 30: no two columns are both eventually periodic (Jen 1986)
 
@@ -24,6 +26,8 @@ E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219â€
   strip eventually periodic (`between_periodic`). So column `j + 1` is eventually periodic, and
   the adjacent case applies.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Jen

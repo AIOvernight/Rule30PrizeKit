@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30EtherThreeTrap
+module
+
+public import Ruliology.CellularAutomata.Rule30EtherThreeTrap
 
 /-!
 # Rule 30, least period 3: the `001` trap is reached
@@ -11,6 +13,8 @@ the conclusion of `AbsorptionT t001` for this one start (`absorbed_empty`).
   (bit `i` = column `i + 1`); `rowN_eq_drv` identifies it with `Rule30Ether.drv`.
 * `t001_reached`: kernel computation of `1270` steps, then a lookup in the trap.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30EtherThree
@@ -41,8 +45,8 @@ theorem testBit_stepN (c : Bool) (r i : Nat) :
   have hF' : ∀ j, F.testBit j = if j = 0 then c else r.testBit (j - 1) := by
     intro j; rw [← hF]; exact testBit_full c r j
   rw [Nat.testBit_xor, Nat.testBit_or, Nat.testBit_shiftRight, Nat.testBit_shiftRight,
-    hF' i, hF' (1 + i), hF' (2 + i), if_neg (show ¬ (1 + i = 0) by omega),
-    if_neg (show ¬ (2 + i = 0) by omega),
+    hF' i, hF' (1 + i), hF' (2 + i), ite_eq_right (show ¬ (1 + i = 0) by omega),
+    ite_eq_right (show ¬ (2 + i = 0) by omega),
     show 1 + i - 1 = i by omega, show 2 + i - 1 = i + 1 by omega]
   rfl
 
@@ -58,8 +62,8 @@ theorem rowN_eq_drv (c : Nat → Bool) (x0 : Nat) :
     rw [testBit_stepN, ih i, ih (i + 1)]
     congr 1
     by_cases hi : i = 0
-    · subst hi; rw [if_pos rfl, drv_col0]
-    · rw [if_neg hi, ih (i - 1), show i - 1 + 1 = i by omega]
+    · subst hi; rw [ite_eq_left rfl, drv_col0]
+    · rw [ite_eq_right hi, ih (i - 1), show i - 1 + 1 = i by omega]
 
 theorem rowN_empty_eq :
     t001.st 597 = rowN (fun t => wordAt3 w001 (t + 0)) 0 1270 % 2 ^ 47 := by decide +kernel

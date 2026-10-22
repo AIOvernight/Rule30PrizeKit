@@ -1,5 +1,7 @@
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
+module
+
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
 
 /-!
 # The diagonals of every configuration with an edge
@@ -33,6 +35,8 @@ Sources: the single-seed statements are `Rule30Diagonals`; E. M. Coven, M. Pivat
 *Prevalence of odometers in cellular automata*, Proc. Amer. Math. Soc. 135 (2007) 815–821, for
 the odometer.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteDiagonals

@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundary
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundary
 
 /-!
 # Rule 30, zero-boundary left half: `Q01` for all starts of width at most `16`
@@ -14,6 +16,8 @@ step is a bit operation on the packed row (`step_toFun`).
 These are kernel-checked instances of `Q01` at small sizes. Exhaustive searches outside Lean go
 further, but are not kernel-checked; `Q01` itself is open.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundarySmall
@@ -69,7 +73,7 @@ theorem exists_pack (W : Nat) : ∀ x : Nat → Bool, (∀ k, W < k → x k = fa
       intro k hk
       by_cases h : k = W + 1
       · simp [x', h]
-      · simp only [x', h, if_false]; exact hx k (by omega)
+      · simp only [x', h, ite_false]; exact hx k (by omega)
     obtain ⟨r', hr', hr'x⟩ := ih x' hx'
     have hrx : ∀ k, 1 ≤ k → k ≠ W + 1 → toFun r' k = x k := by
       intro k hk1 hk; rw [hr'x k hk1]; simp [x', hk]
@@ -85,7 +89,7 @@ theorem exists_pack (W : Nat) : ∀ x : Nat → Bool, (∀ k, W < k → x k = fa
       · subst hk; rw [hb]
         simp [toFun, Nat.testBit_two_pow_add_eq, testBit_ge_of_lt hr' (Nat.le_refl W)]
       · rw [← hrx k hk1 hk]
-        simp only [toFun, show k ≠ 0 by omega, if_false]
+        simp only [toFun, show k ≠ 0 by omega, ite_false]
         by_cases hlt : k - 1 < W
         · exact Nat.testBit_two_pow_add_gt hlt r'
         · have h1 : (2 ^ W + r').testBit (k - 1) = false := by

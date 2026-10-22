@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Jen
+module
+
+public import Ruliology.CellularAutomata.Rule30Jen
 
 /-!
 # Rule 30: every column is realizable, and Jen's hypotheses do not decide Problem 1
@@ -30,6 +32,8 @@ Two barriers for proofs of Problem 1.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242, for
 Jen's argument.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30Realization
@@ -83,38 +87,38 @@ theorem evol_conf (R : Int → Bool) (c : Nat → Bool) : ∀ t p,
   | 0, p => by
     simp only [evol, conf]
     by_cases h : 1 ≤ p
-    · rw [if_pos h, if_pos h]; rfl
-    · rw [if_neg h, if_neg h]
+    · rw [ite_eq_left h, ite_eq_left h]; rfl
+    · rw [ite_eq_right h, ite_eq_right h]
   | t + 1, p => by
     have ih := evol_conf R c t
     show rule (evol (conf R c) t (p - 1)) (evol (conf R c) t p) (evol (conf R c) t (p + 1)) = _
     rw [ih (p - 1), ih p, ih (p + 1)]
     by_cases h1 : 1 ≤ p
     · have e1 : (if 1 ≤ p then rh R c (t + 1) p else lc R c (-p).toNat (t + 1)) = rh R c (t + 1) p :=
-        if_pos h1
-      have e2 : (if 1 ≤ p then rh R c t p else lc R c (-p).toNat t) = rh R c t p := if_pos h1
+        ite_eq_left h1
+      have e2 : (if 1 ≤ p then rh R c t p else lc R c (-p).toNat t) = rh R c t p := ite_eq_left h1
       have e3 : (if 1 ≤ p + 1 then rh R c t (p + 1) else lc R c (-(p + 1)).toNat t) = rh R c t (p + 1) :=
-        if_pos (by omega)
+        ite_eq_left (by omega)
       rw [e1, e2, e3]
       show _ = rule (if p = 1 then c t else rh R c t (p - 1)) (rh R c t p) (rh R c t (p + 1))
       by_cases h2 : p = 1
       · subst h2
-        rw [if_neg (by decide), if_pos rfl]
+        rw [ite_eq_right (by decide), ite_eq_left rfl]
         rfl
-      · rw [if_pos (show 1 ≤ p - 1 by omega), if_neg h2]
+      · rw [ite_eq_left (show 1 ≤ p - 1 by omega), ite_eq_right h2]
     · have e1 : (if 1 ≤ p then rh R c (t + 1) p else lc R c (-p).toNat (t + 1)) = lc R c (-p).toNat (t + 1) :=
-        if_neg h1
-      have e2 : (if 1 ≤ p then rh R c t p else lc R c (-p).toNat t) = lc R c (-p).toNat t := if_neg h1
+        ite_eq_right h1
+      have e2 : (if 1 ≤ p then rh R c t p else lc R c (-p).toNat t) = lc R c (-p).toNat t := ite_eq_right h1
       have e4 : (if 1 ≤ p - 1 then rh R c t (p - 1) else lc R c (-(p - 1)).toNat t) =
-          lc R c (-(p - 1)).toNat t := if_neg (by omega)
+          lc R c (-(p - 1)).toNat t := ite_eq_right (by omega)
       rw [e1, e2, e4]
       by_cases h0 : p = 0
       · subst h0
-        rw [if_pos (by decide)]
+        rw [ite_eq_left (by decide)]
         exact center_step R c t
       · -- p ≤ -1: write -p = m + 1
         obtain ⟨m, hm⟩ : ∃ m : Nat, (-p).toNat = m + 1 := ⟨(-p).toNat - 1, by omega⟩
-        rw [if_neg (show ¬ 1 ≤ p + 1 by omega), hm,
+        rw [ite_eq_right (show ¬ 1 ≤ p + 1 by omega), hm,
           show (-(p - 1)).toNat = m + 2 by omega, show (-(p + 1)).toNat = m by omega]
         exact lc_step R c m t
 
@@ -123,7 +127,7 @@ theorem evol_conf (R : Int → Bool) (c : Nat → Bool) : ∀ t p,
 theorem realize (R : Int → Bool) (c : Nat → Bool) :
     (∀ p, 1 ≤ p → conf R c p = R p) ∧ ∀ t, evol (conf R c) t 0 = c t := by
   refine ⟨fun p hp => by simp [conf, hp], fun t => ?_⟩
-  rw [evol_conf R c t 0, if_neg (by decide)]
+  rw [evol_conf R c t 0, ite_eq_right (by decide)]
   rfl
 
 /-! ### Uniqueness: the left half is determined by the right half and column `0` -/
@@ -240,14 +244,14 @@ theorem seed_perturbation (n : Nat) :
   refine ⟨conf seed c', fun p hp => ?_, fun t ht => ?_, fun t ht => ?_⟩
   · by_cases h1 : 1 ≤ p
     · exact hreal.1 p h1
-    · have e : conf seed c' p = lc seed c' (-p).toNat 0 := if_neg h1
-      have e' : conf seed cs p = lc seed cs (-p).toNat 0 := if_neg h1
+    · have e : conf seed c' p = lc seed c' (-p).toNat 0 := ite_eq_right h1
+      have e' : conf seed cs p = lc seed cs (-p).toNat 0 := ite_eq_right h1
       rw [e, show seed p = conf seed cs p from congrFun hseed p, e']
       exact lc_congr seed (-p).toNat 0 (fun s hs => by
         show (if s ≤ n then cell s 0 else false) = cell s 0
-        rw [if_pos (by omega)])
-  · rw [hreal.2 t]; show (if t ≤ n then cell t 0 else false) = _; rw [if_pos ht]
-  · rw [hreal.2 t]; show (if t ≤ n then cell t 0 else false) = _; rw [if_neg (by omega)]
+        rw [ite_eq_left (by omega)])
+  · rw [hreal.2 t]; show (if t ≤ n then cell t 0 else false) = _; rw [ite_eq_left ht]
+  · rw [hreal.2 t]; show (if t ≤ n then cell t 0 else false) = _; rw [ite_eq_right (by omega)]
 
 
 /-! ### Left-permutive rules from a single seed -/

@@ -1,7 +1,9 @@
-import Ruliology.CellularAutomata.Rule30WhiteRunEight
-import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
-import Ruliology.CellularAutomata.Rule30FiniteDiagonals
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+module
+
+public import Ruliology.CellularAutomata.Rule30WhiteRunEight
+public import Ruliology.CellularAutomata.Rule30FiniteBlackRuns
+public import Ruliology.CellularAutomata.Rule30FiniteDiagonals
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
 
 /-!
 # The words `0^r 1 1`, `r ≥ 8`, for every finite configuration
@@ -28,6 +30,8 @@ cell moves one cell right per step.
 Source: E. Jen, *Global properties of cellular automata*, J. Stat. Phys. 43 (1986) 219–242; the
 exclusion is that of `Rule30WhiteRunEight`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30FiniteWhiteRuns

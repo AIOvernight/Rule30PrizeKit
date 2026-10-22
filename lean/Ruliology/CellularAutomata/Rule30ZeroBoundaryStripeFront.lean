@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30ZeroBoundarySmall
+module
+
+public import Ruliology.CellularAutomata.Rule30ZeroBoundarySmall
 
 /-!
 # The front window of a stripe prefix
@@ -23,6 +25,8 @@ time `d - 1` at once (`front_sound`).
   data; `Rule30ZeroBoundaryStripeFamily` finishes it with the cycles of
   `Rule30Certificates.ZeroBoundaryStripeCycles0` – `ZeroBoundaryStripeCycles2`.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryStripeFront
@@ -272,14 +276,14 @@ theorem win_step (x : Nat → Bool) (d K t : Nat) (hag : ∀ k, 1 ≤ k → k < 
       fun j hj => by rw [testBit_pk]; simp [hj]
     rw [e]
     rcases (show i = 0 ∨ i = 1 ∨ 2 ≤ i by omega) with rfl | rfl | h2
-    · rw [hW 0 hi, if_pos rfl, if_pos rfl]
+    · rw [hW 0 hi, ite_eq_left rfl, ite_eq_left rfl]
       simp only [Nat.add_zero]
       rw [hsb (d - t - 1) (by omega), hsb (d - t - 2) (by omega),
         stripe_pred (d - t) (by omega), stripe_pred2 (d - t) (by omega)]
-    · rw [hW 1 hi, if_neg (by omega), if_neg (by omega), if_pos rfl, hW 0 (by omega),
+    · rw [hW 1 hi, ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left rfl, hW 0 (by omega),
         show d - t - 1 + 1 = d - t + 0 by omega, show d - t - 2 + 1 = d - t - 1 by omega,
         hsb (d - t - 1) (by omega), stripe_pred (d - t) (by omega)]
-    · rw [hW i hi, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+    · rw [hW i hi, ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
         hW (i - 1) (by omega), hW (i - 2) (by omega),
         show d - t - 1 + i = d - t + (i - 1) by omega, show d - t - 2 + i = d - t + (i - 2) by omega]
   · simp [hi]
@@ -329,11 +333,11 @@ theorem front_sound (x : Nat → Bool) (d K S lam : Nat) (hd : 1 ≤ d)
     omega
   · -- light cone: the row at time `d - 1` agrees with the window at depths `1, …, K`
     rw [zrow_shift, zrow_light_cone (L' := toFun (win x d K (d - 1))) s 1 (fun i h1 h2 => by
-      simp only [toFun, show i ≠ 0 by omega, if_false]
+      simp only [toFun, show i ≠ 0 by omega, ite_false]
       unfold win
       rw [testBit_pk, show d - (d - 1) + (i - 1) = i by omega]
       simp [show i - 1 < K by omega]), run_toFun]
-    simp only [toFun, if_false, Nat.sub_self, show (1 : Nat) ≠ 0 by omega]
+    simp only [toFun, ite_false, Nat.sub_self, show (1 : Nat) ≠ 0 by omega]
     rw [Nat.testBit_zero]
     simp [hprun]
 
@@ -371,8 +375,8 @@ theorem family_of_class (m q δ lam : Nat) (b0 b1 b2 : Bool) (hq : m % 2 = q) (h
     intro k hk1 hk2
     unfold row3
     by_cases hkm : k ≤ m
-    · rw [if_pos hkm]
-    · rw [if_neg hkm]
+    · rw [ite_eq_left hkm]
+    · rw [ite_eq_right hkm]
       obtain ⟨j, rfl⟩ : ∃ j, k = m + j := ⟨k - m, by omega⟩
       rw [stripe_add_mod m q j hq, show m + j - m - 1 = j - 1 by omega]
       rcases hall j (by omega) with h | h
@@ -380,11 +384,11 @@ theorem family_of_class (m q δ lam : Nat) (b0 b1 b2 : Bool) (hq : m % 2 = q) (h
       · exact h
   refine ⟨hag, ?_, ?_⟩
   · unfold row3
-    rw [if_neg (by omega), show m + δ - m - 1 = δ - 1 by omega, stripe_add_mod m q δ hq]
+    rw [ite_eq_right (by omega), show m + δ - m - 1 = δ - 1 by omega, stripe_add_mod m q δ hq]
     exact hne
   · have hw : pk (fun i => row3 m b0 b1 b2 (m + δ + i)) 32 = pk (fun i => vget b0 b1 b2 (δ - 1 + i)) 32 :=
       pk_congr _ _ _ fun i _ => by
-        unfold row3; rw [if_neg (by omega), show m + δ + i - m - 1 = δ - 1 + i by omega]
+        unfold row3; rw [ite_eq_right (by omega), show m + δ + i - m - 1 = δ - 1 + i by omega]
     have hp : (m + δ) % 2 = (q + δ) % 2 := by omega
     rw [← hw, ← hp] at hcyc
     obtain ⟨s, hs, he, hz⟩ := front_sound (row3 m b0 b1 b2) (m + δ) 32 31 lam (by omega) hag

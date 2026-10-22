@@ -1,7 +1,9 @@
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks0
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks1
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks2
-import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks3
+module
+
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks0
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks1
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks2
+public import Ruliology.CellularAutomata.Rule30Certificates.ZeroBoundaryWidth52Chunks3
 
 /-!
 # `Q01` for every start of width at most `52` (kernel-checked)
@@ -21,6 +23,8 @@ soundness is `Rule30ZeroBoundaryLanes.q01_of_chunks`.
 files, about `345` s of kernel time). It is not part of this kit because of
 its build cost.
 -/
+
+@[expose] public section
 
 namespace Ruliology.CellularAutomata
 namespace Rule30ZeroBoundaryWidth52

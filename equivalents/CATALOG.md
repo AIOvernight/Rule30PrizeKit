@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃); c is not both 2- and 3-regular | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic`, `RegularSequences.problem1_iff_not_regularSeq_two_three` |
-| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Stated; sufficient direction for integer bases and uniform case proved (library) | `problem1_iff_not_substitutive`; `Substitutive.problem1_of_not_substitutive`, `Substitutive.problem1_of_not_substitutive_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic`, `PerronFrobenius.tendsto_pow_div` |
+| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Stated; sufficient direction for integer bases and uniform case proved (library) | `problem1_iff_not_substitutive`; `Substitutive.problem1_of_not_substitutive`, `Substitutive.problem1_of_not_substitutive_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic`, `PerronFrobenius.tendsto_pow_div`, `LinearRecurrence.isLinearlyRecurrent_of_isPrimitive` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
 **Summary.** Of the 54 equivalent forms, 52 are proved in the library: 6 in batch 1, 21 in
@@ -2166,9 +2166,19 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
     integer k need not generate a k-automatic sequence. Numerically the k-kernel does not stabilize
     for a → aab, b → bc, c → c (k = 2), nor for the primitive a → ac, b → bbc, c → aabb (k = 3,
     other eigenvalues ±√2).
-  - What is missing is Durand's theorem itself: return words and derived sequences, the linear
-    recurrence of primitive substitutive sequences, Durand's 1998 theorem for primitive
-    substitutions and his reduction of the general case [Dur11].
+  - Primitive substitutive sequences are linearly recurrent, proved in
+    [LinearRecurrence](Rule30Equivalents/LinearRecurrence.lean)
+    (`isLinearlyRecurrent_of_isPrimitive`, also for codings): every word u occurs in every interval
+    of L·abs(u) positions. Some σᵏ(b) contains every letter, so the blocks σⁿ(b) of each level have
+    comparable lengths, and a word shorter than every block of level n lies in two adjacent blocks,
+    hence in every block of level n + m. With it the Durand–Host–Skau bound
+    (`length_lt_of_occursAt`): if such a sequence is not eventually periodic, two occurrences
+    p < p + d of u have abs(u) < L d, by Morse–Hedlund.
+  - What is missing is Durand's theorem itself. His proof [Dur11] uses the theorem of Durand and
+    Rigo that the words occurring infinitely often in a sequence that is both α- and β-substitutive
+    occur with bounded gaps, his 2002 theorem for "good" substitutions (growing, with a primitive
+    sub-substitution of the same dominant eigenvalue), and a counting argument on concatenations of
+    return words for the others.
 - *Known.* No data exist for non-integer Perron bases; the kernel bounds of [42] cover only the
   integer case.
 - *Sources.* [Dur11]; [Cob69].

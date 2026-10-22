@@ -80,6 +80,7 @@ public import Rule30Equivalents.SzegoContour
 public import Rule30Equivalents.Szego
 public import Rule30Equivalents.PerronFrobenius
 public import Rule30Equivalents.Substitutive
+public import Rule30Equivalents.LinearRecurrence
 public import Rule30Equivalents.Typicality
 public import Rule30Equivalents.FiniteRings
 public import Rule30Equivalents.Lagrange

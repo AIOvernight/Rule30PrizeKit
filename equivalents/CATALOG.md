@@ -174,7 +174,7 @@ files. The rows follow the order of Section 3.
 | 31 | p-recursive | algebra | no polynomial-coefficient recurrence holds; Σ c(t)Xᵗ is not D-finite | Proved (library), both forms | `Holonomic.problem1_iff_not_pRecursive`, `DFinite.problem1_iff_not_dFinite` |
 | 38 | fatou | algebra | Σ c(t)zᵗ is transcendental over ℚ(z) | Proved (library) | `AlgebraicDFinite.problem1_iff_transcendental`, `AlgebraicDFinite.exists_dfinite_of_isAlgebraic` |
 | 28 | nlfsr | coding theory | no nonlinear feedback shift register generates c; maximum-order complexity is unbounded | Proved (library) | `WordsAutomata.problem1_iff_no_feedback_shift_register`, `WordsAutomata.problem1_iff_maxOrderComplexity_tendsto`, `WordsAutomata.problem1_iff_no_feedback_from_zero` |
-| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Stated; sufficient direction and disk form proved (library) | `problem1_iff_natural_boundary`; `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn`, `RandomNaturalBoundary.ae_circleIsNaturalBoundary_trace`, `ApproximateRecurrence.problem1_iff_no_approx_recurrence` |
+| 41 | natural-boundary | complex analysis | Σ c(t)zᵗ has the unit circle as natural boundary | Proved (library), through Szegő's theorem | `Szego.problem1_iff_natural_boundary`, `Szego.eventuallyPeriodic_iff_continuation`, `SzegoContour.exists_approx_recurrence`, `SzegoPolynomial.exists_notch_poly`, `NaturalBoundary.problem1_of_natural_boundary`, `MeromorphicExtension.problem1_iff_no_meromorphic_extension`, `MeromorphicExtension.problem1_iff_no_meromorphicOn`, `RandomNaturalBoundary.ae_circleIsNaturalBoundary_trace`, `ApproximateRecurrence.problem1_iff_no_approx_recurrence` |
 | 3 | shift-orbit | symbolic dynamics | the shifts of c are pairwise distinct; c is not a preperiodic point of the shift | Proved (library) | `ShiftOrbit.problem1_iff_infinite_shifts`, `ShiftOrbit.problem1_iff_injective_shifts`, `ShiftOrbit.problem1_iff_not_preperiodic` |
 | 4 | morse-hedlund | words | c has at least n + 1 distinct factors of each length n | Proved (library) | `ShiftOrbit.problem1_iff_ncard_factors` and three more |
 | 13 | orbit-closure | topological dynamics | the orbit closure of c in {0,1}^ℕ is infinite | Proved (library) | `WordsAutomata.problem1_iff_orbit_closure_infinite` |
@@ -202,8 +202,8 @@ files. The rows follow the order of Section 3.
 | 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (integer bases) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
-**Summary.** Of the 54 equivalent forms, 51 are proved in the library: 6 in batch 1, 21 in
-batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
+**Summary.** Of the 54 equivalent forms, 52 are proved in the library: 6 in batch 1, 21 in
+batch 2, and 25 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerRows.lean), [9] and
 [18] in [LogicAutomata](Rule30Equivalents/LogicAutomata.lean), [22] in
 [Realization](Rule30Equivalents/Realization.lean), [24], [29], [47] and [51] in
 [WordForms](Rule30Equivalents/WordForms.lean), [50] (Engel and Sylvester) in
@@ -219,7 +219,8 @@ batch 2, and 24 later: [25] and [26] in [IntegerRows](Rule30Equivalents/IntegerR
 [ContextFree](Rule30Equivalents/ContextFree.lean), [38] in
 [AlgebraicDFinite](Rule30Equivalents/AlgebraicDFinite.lean), [45] in
 [SkolemMahlerLech](Rule30Equivalents/SkolemMahlerLech.lean), [42] in
-[Cobham](Rule30Equivalents/Cobham.lean), and [43] in [OneTapeGap](Rule30Equivalents/OneTapeGap.lean)
+[Cobham](Rule30Equivalents/Cobham.lean), [41] in [Szego](Rule30Equivalents/Szego.lean), and [43] in
+[OneTapeGap](Rule30Equivalents/OneTapeGap.lean)
 (time) and [OfflineGap](Rule30Equivalents/OfflineGap.lean) (space). One more, [7], is proved in the core catalog and
 also has a library proof. All three parts of [14] are proved, the Diophantine graph included
 ([DiophantineGraph](Rule30Equivalents/DiophantineGraph.lean)). The MSO form of [36] is proved by the composition method,
@@ -240,10 +241,11 @@ theorem: a one-tape machine that runs in time o(n log n) on unary input has boun
 sequences, so it decides an eventually periodic language
 ([OneTapeGap](Rule30Equivalents/OneTapeGap.lean)); its space form through the theorem of Stearns,
 Hartmanis and Lewis, with the same splicing on the input tape of an offline machine
-([OfflineGap](Rule30Equivalents/OfflineGap.lean)). 1 form is stated,
-[41], and its direction "the form implies Problem 1" is proved, as is its disk form (no
-meromorphic extension to a disk of radius > 1). 1 form is a sketch, [46]; its
-uniform case (integer bases, uniform substitutions) is proved.
+([OfflineGap](Rule30Equivalents/OfflineGap.lean)). [41] is proved through Szegő's theorem for
+0/1 sequences: Cauchy's theorem on an annular sector writes a recurrence combination of the
+coefficients as a contour integral, and an explicit monic polynomial, small on a notched disk,
+takes the place of logarithmic capacity ([Szego](Rule30Equivalents/Szego.lean)). 1 form is a
+sketch, [46]; its uniform case (integer bases, uniform substitutions) is proved.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -1218,53 +1220,69 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   coefficients and radius 1 is either rational or has the unit circle as natural boundary.
   Conversely, an EP sequence gives P(z)/(1 − z^P), which is meromorphic with poles only at roots of
   unity. Then apply [17] over ℂ.
-- *Difficulty.* Hard: it needs Szegő's theorem or Pólya–Carlson.
-- *Lean.* Stated. The sufficient direction is proved in
-  [NaturalBoundary](Rule30Equivalents/NaturalBoundary.lean): `problem1_of_natural_boundary`. If c has
-  period P from time T, then on the unit disk (1 − z^P)·f(z) is a polynomial (`mul_genFun_eq`), so f
-  continues as a rational function across the circle at z₀ = e^(iπ/P), where 1 − z₀^P = 2
-  (`exists_continuation`). The disk form, the easy case of Szegő's theorem, is proved in
-  [MeromorphicExtension](Rule30Equivalents/MeromorphicExtension.lean):
-  `problem1_iff_no_meromorphic_extension`, Problem 1 ⟺ for no R > 1 and no polynomial Q ≠ 0 does
-  Q·f extend holomorphically to abs(z) < R. The coefficients β(n) of Q·C take finitely many
-  values (one per window of c), Cauchy's estimate on a circle of radius ρ ∈ (1, R) gives
-  β(n) = O(ρ⁻ⁿ), so β is eventually 0 and C is rational ([17]). With Mathlib's `MeromorphicOn`:
-  `problem1_iff_no_meromorphicOn`, Problem 1 ⟺ f agrees on the unit disk with no function
-  meromorphic on a disk of radius R > 1; at each point x of a closed disk of radius ρ ∈ (1, R),
-  some (z − x)ⁿ·g is analytic on a ball around x, finitely many balls cover the closed disk, and
-  Q = ∏ (X − x)ⁿ clears the poles (`hasMeromorphicExtension_of_meromorphicOn`). For almost every
-  configuration the center column has the unit circle as natural boundary
-  ([RandomNaturalBoundary](Rule30Equivalents/RandomNaturalBoundary.lean),
-  `ae_circleIsNaturalBoundary_trace`; Steinhaus, Paley–Zygmund): along the radius to
-  w = e^(iπ(2p+1)/(N+1)) the real part of 2f(tw) − 1/(1 − tw) is a weighted sum
-  Σ tᵏ Re(wᵏ)(±1) of independent signs, with variance at least 1/(1 − t^(2N+2)) and fourth moment
-  at most three times the squared variance, so by the Paley–Zygmund inequality it exceeds any
-  bound near t = 1 with probability at least 1/6, and almost surely by Kolmogorov's zero-one law.
-  These directions are dense, and a continuation across the circle at one of them would make the
-  sum converge. The last step of Szegő's proof is proved too
-  ([ApproximateRecurrence](Rule30Equivalents/ApproximateRecurrence.lean),
-  `problem1_iff_no_approx_recurrence`): over ℂ (or any normed field), Problem 1 ⟺ for every monic
-  Q = Xᵠ + γ_{q−1}X^{q−1} + ⋯ + γ₀, ‖c(n + q) + Σ γⱼ c(n + j)‖ ≥ 1/2 for infinitely many n.
-  What is missing is the analytic step: a continuation of f across an arc gives, for each ε > 0,
-  such a Q with error below ε for all n. In Dienes's proof (followed by Borwein–Erdélyi–Littmann),
-  Cauchy's formula over a contour that leaves the unit disk across the arc writes the error as an
-  integral of the tails Σₘ c(n + m)zᵐ against Q(1/z), with the tails bounded uniformly on the
-  contour. (The cruder bound C/abs(abs(z) − 1) also suffices if Q is multiplied by a factor
-  vanishing where the contour crosses the circle.) The gap is a monic polynomial of modulus below 1
-  on the reflected contour, which bounds the unit disk minus a notch: the logarithmic capacity of
-  such a notched disk is below 1, and Mathlib has no capacity theory.
+- *Difficulty.* Hard: it needs Szegő's theorem or Pólya–Carlson, which Mathlib lacks (Szegő's
+  theorem for 0/1 coefficients is proved here).
+- *Lean.* Proved in the library ([Szego](Rule30Equivalents/Szego.lean)), through Szegő's theorem
+  for 0/1 sequences, `Szego.eventuallyPeriodic_iff_continuation`.
 
   ```lean
-  noncomputable def genFun (z : ℂ) : ℂ := ∑' t, (if Rule30Prize.center t then (1 : ℂ) else 0) * z ^ t
   theorem problem1_iff_natural_boundary : Rule30Prize.Problem1 ↔
       ∀ z₀ : ℂ, ‖z₀‖ = 1 → ∀ r : ℝ, 0 < r → ¬ ∃ g : ℂ → ℂ,
         AnalyticOnNhd ℂ g (Metric.ball z₀ r) ∧
-          ∀ z ∈ Metric.ball z₀ r, ‖z‖ < 1 → g z = genFun z
+          ∀ z ∈ Metric.ball z₀ r, ‖z‖ < 1 → g z = NaturalBoundary.genFun c z
   ```
 
-- *Mathlib.* `AnalyticOnNhd`, `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` and
-  `FormalMultilinearSeries.radius`. Missing: natural boundaries, Szegő's theorem and Pólya–Carlson.
-- *Sources.* [Sze22]; [Car21]; [Pol16]; [BC17] (its Theorem 1.1 states Szegő's theorem in this form);
+  - The sufficient direction ([NaturalBoundary](Rule30Equivalents/NaturalBoundary.lean),
+    `problem1_of_natural_boundary`): if c has period P from time T, then on the unit disk
+    (1 − z^P)·f(z) is a polynomial (`mul_genFun_eq`), so f continues as a rational function across
+    the circle at z₀ = e^(iπ/P), where 1 − z₀^P = 2 (`exists_continuation`).
+  - The coefficient identity ([SzegoContour](Rule30Equivalents/SzegoContour.lean)): rotate the arc
+    to 1, so that a(n) = c(n)z₀ⁿ. For a monic W = Σ wⱼXʲ, Σⱼ wⱼ a(n + j) is (2πi)⁻¹ times the
+    integral of the tail Tₙ(z) = Σₘ a(n + m)zᵐ against W(1/z)/z over a circle of radius ρ < 1
+    (`circleIntegral_tail_mul`).
+  - The contour: Cauchy's theorem on an annular sector, a rectangle in logarithmic coordinates
+    (`sector_integral_eq`), moves the arc abs(arg z) ≤ τ out to a radius R > 1. There the tails
+    continue as (g(z) − Σ_{j<n} aⱼzʲ)/zⁿ, at most abs(g(z)) + 1/(abs(z) − 1) (`norm_contTail_le`).
+  - The polynomial: W(w) = W₀(w)(w − e^(iτ))(w − e^(−iτ)). The last two factors cancel the growth of
+    the tails where the contour crosses the circle (`norm_contTail_mul_le`). W₀ is monic and at most
+    2qᴰ, q < 1, on the reflected contour: the circle of radius 1/R and the part of the annulus
+    1/R ≤ abs(w) ≤ 1/ρ where Re w ≤ abs(w) cos τ
+    ([SzegoPolynomial](Rule30Equivalents/SzegoPolynomial.lean), `exists_notch_poly`). The classical
+    proof gets W₀ from the logarithmic capacity of the notched disk, which is below 1. Mathlib has
+    no capacity theory, so W₀ is explicit: wᴷᴰ · wᴰ T_D(ℓ(w)) up to a constant, with T_D the
+    Chebyshev polynomial and ℓ(w) = (w² + (1 − κ)w + 1)/((1 + κ)w), κ = cos(τ/2), which maps the arc
+    cos θ ≤ κ of the unit circle onto [−1, 1]. On the circle of radius 1/R the factor wᴷᴰ wins, and
+    near the notch abs(ℓ(w) − 1) + abs(ℓ(w) + 1) ≤ 2 + O((abs(w) − 1)²).
+  - The recurrence: so abs(Σⱼ wⱼ a(n + j)) ≤ C·qᴰ < 1/2 for every n
+    (`SzegoContour.exists_approx_recurrence`), Q(X) = W(z₀X)/z₀ᵈ is a monic recurrence that c
+    satisfies within 1/2, and c is eventually periodic
+    ([ApproximateRecurrence](Rule30Equivalents/ApproximateRecurrence.lean),
+    `eventuallyPeriodic_iff_approx_recurrence`): the candidates 0 and 1 for c(n + d) are 1 apart, so
+    the window determines the next cell.
+  - The disk form, the easy case of Szegő's theorem, is proved in
+    [MeromorphicExtension](Rule30Equivalents/MeromorphicExtension.lean):
+    `problem1_iff_no_meromorphic_extension`, Problem 1 ⟺ for no R > 1 and no polynomial Q ≠ 0 does
+    Q·f extend holomorphically to abs(z) < R. The coefficients β(n) of Q·C take finitely many values
+    (one per window of c), Cauchy's estimate on a circle of radius ρ ∈ (1, R) gives β(n) = O(ρ⁻ⁿ),
+    so β is eventually 0 and C is rational ([17]). With Mathlib's `MeromorphicOn`:
+    `problem1_iff_no_meromorphicOn`, Problem 1 ⟺ f agrees on the unit disk with no function
+    meromorphic on a disk of radius R > 1; at each point x of a closed disk of radius ρ ∈ (1, R),
+    some (z − x)ⁿ·g is analytic on a ball around x, finitely many balls cover the closed disk, and
+    Q = ∏ (X − x)ⁿ clears the poles (`hasMeromorphicExtension_of_meromorphicOn`).
+  - For almost every configuration the center column has the unit circle as natural boundary
+    ([RandomNaturalBoundary](Rule30Equivalents/RandomNaturalBoundary.lean),
+    `ae_circleIsNaturalBoundary_trace`; Steinhaus, Paley–Zygmund): along the radius to
+    w = e^(iπ(2p+1)/(N+1)) the real part of 2f(tw) − 1/(1 − tw) is a weighted sum Σ tᵏ Re(wᵏ)(±1) of
+    independent signs, with variance at least 1/(1 − t^(2N+2)) and fourth moment at most three times
+    the squared variance, so by the Paley–Zygmund inequality it exceeds any bound near t = 1 with
+    probability at least 1/6, and almost surely by Kolmogorov's zero-one law. These directions are
+    dense, and a continuation across the circle at one of them would make the sum converge.
+- *Mathlib.* `AnalyticOnNhd`, `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`,
+  `FormalMultilinearSeries.radius`, `Complex.integral_boundary_rect_eq_zero_of_differentiableOn`
+  and `Polynomial.Chebyshev.T`. Missing: natural boundaries, logarithmic capacity, Szegő's theorem
+  and Pólya–Carlson.
+- *Sources.* [Sze22]; [Die57] (ch. X); [BEL08] (section 3); [Car21]; [Pol16]; [BC17] (its
+  Theorem 1.1 states Szegő's theorem in this form);
   for random coefficients [Ste30]; [PZ32]; [Kah85].
   One survey cited Carlson's different 1921 paper, *Über ganzwertige Funktionen*; the correct one
   is [Car21].
@@ -2361,7 +2379,7 @@ computes the column at all: a machine computes at most one sequence, and machine
 many up to relabeling, `countable_setOf_decidesBin`), and x_β ∉ ℚ(β) for every real β > 2
 (`ae_value_not_mem_adjoin_trace`). So all three Prize problems hold for almost every configuration
 (`TypicalConditions.ae_prizeProblems_trace`). The generating function has the unit circle as
-natural boundary, the sufficient condition of [41]
+natural boundary, the condition of [41]
 ([RandomNaturalBoundary](Rule30Equivalents/RandomNaturalBoundary.lean),
 `ae_circleIsNaturalBoundary_trace`, by the Paley–Zygmund inequality and Kolmogorov's zero-one law).
 The circuit relative of Problem 3 holds too: for all
@@ -3026,9 +3044,11 @@ is 2 log₂ n (1 + o(1)) ([MaxOrderComplexity](Rule30Equivalents/MaxOrderComplex
       directions), automatic and k-regular sequences, Büchi automata and the MSO composition method,
       the context-free pumping lemma, the time and space gap theorems (Hennie–Trakhtenbrot and
       Stearns–Hartmanis–Lewis), meromorphic continuation of finite-valued power series (the disk
-      form of Fatou–Szegő), the Hardy–Littlewood–Karamata and Hardy Tauberian theorems, Borel's
-      normal number theorem for fair coins, and, for rule 30, Hedlund's measure preservation,
-      mixing and ergodicity. Szegő's and Pólya–Carlson's theorems are still missing.
+      form of Fatou–Szegő), Szegő's theorem for 0/1 coefficients (a continuation across any arc
+      of the unit circle makes the sequence eventually periodic), the Hardy–Littlewood–Karamata
+      and Hardy Tauberian theorems, Borel's normal number theorem for fair coins, and, for rule 30,
+      Hedlund's measure preservation, mixing and ergodicity. Pólya–Carlson's theorem is still
+      missing.
 
 ---
 
@@ -3150,6 +3170,9 @@ Algebra, power series and coding theory
 - [Fat06] P. Fatou, Séries trigonométriques et séries de Taylor, Acta Math. 30 (1906) 335–400.
 - [Sze22] G. Szegő, Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten, Sitzungsber.
   Preuss. Akad. Wiss. (1922) 88–91.
+- [Die57] P. Dienes, The Taylor Series, Dover (1957), reprint of the Oxford edition (1931).
+- [BEL08] P. Borwein, T. Erdélyi, F. Littmann, Polynomials with coefficients from a finite set,
+  Trans. Amer. Math. Soc. 360 (2008) 5145–5154.
 - [Car21] F. Carlson, Über Potenzreihen mit ganzzahligen Koeffizienten, Math. Z. 9 (1921) 1–13.
 - [Pol16] G. Pólya, Über Potenzreihen mit ganzzahligen Koeffizienten, Math. Ann. 77 (1916) 497–513.
 - [Ste30] H. Steinhaus, Über die Wahrscheinlichkeit dafür, daß der Konvergenzkreis einer Potenzreihe

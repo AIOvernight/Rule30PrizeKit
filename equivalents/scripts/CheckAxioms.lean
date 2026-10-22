@@ -164,6 +164,7 @@ Regenerate with `python3 equivalents/scripts/gen_check_axioms.py`. -/
 #print axioms Rule30Equivalents.Symmetry.problem2_iff_rule86
 #print axioms Rule30Equivalents.Symmetry.problem2_iff_rule135
 #print axioms Rule30Equivalents.Symmetry.problem2_iff_rule149
+#print axioms Rule30Equivalents.Szego.problem1_iff_natural_boundary
 #print axioms Rule30Equivalents.TFunction.problem1_iff_orbit
 #print axioms Rule30Equivalents.TailLanguage.problem1_iff_tail_strictMono
 #print axioms Rule30Equivalents.TailLanguage.problem1_iff_tailSubshift_infinite

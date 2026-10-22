@@ -8,7 +8,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 - **The catalog:** 54 modules. `Ruliology.lean` imports the 40 `Rule30*` modules; their import closure adds the 13 data modules in `Rule30Certificates/` and `BusyBeaverLifetimes`. Each module's docstring records its claim, method and sources.
 - **Axioms:** every theorem uses only `propext`, `Classical.choice` and `Quot.sound`. None uses `sorry` or `native_decide`.
 - **Provenance:** the 54 catalog modules come from the Ruliology catalog of 2026-10-15, byte for byte except one docstring sentence in `Rule30ZeroBoundaryWidth52`. `SHA256SUMS` lists their hashes as copied, which the kit's first commit, `c2dab06`, matches (`shasum -a 256 -c SHA256SUMS` in a checkout of it). Since then their comments have dropped catalog numbering and provenance, eight modules changed for Lean 4.35.0, and every file became a module of Lean's module system (`module`, `public import`, `@[expose] public section`, so all definitions stay unfoldable for importers) with deprecated names replaced; `git log lean/` shows each change.
-- **Added in the kit:** modules proved after the snapshot, or proved during the attempt but left out of the catalog. [Added in the kit](#added-in-the-kit) lists them.
+- **Added in the kit:** modules proved after the snapshot, proved during the attempt but left out of the catalog, or contributed by participants in the prize. [Added in the kit](#added-in-the-kit) lists them, with credits.
 
 ## Status by period
 
@@ -43,8 +43,9 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30ZeroBoundaryStripe Rule30ZeroBoundarySmall Rule30ZeroBoundaryBarriers Rule30Ether \
     Rule30PeriodTwoCoupled Rule30PeriodFourSkeleton Rule30ZeroBoundaryLanes \
     Rule30Certificates.ZeroBoundaryWidth52Chunks{0,1,2,3} Rule30ZeroBoundaryWidth52 \
-    Rule30ZeroBoundaryStripeFront Rule30Certificates.ZeroBoundaryStripeCycles{0,1,2} \
-    Rule30ZeroBoundaryStripeFamily Rule30EtherTrap Rule30Certificates.EtherTrap{0,1,2,3,4,5} \
+    Rule30ZeroBoundaryStripeFront Rule30Certificates.ZeroBoundaryStripeCycles{0,1,2,3} \
+    Rule30ZeroBoundaryStripeFamily Rule30ZeroBoundaryStripeFour Rule30EtherTrap \
+    Rule30Certificates.EtherTrap{0,1,2,3,4,5} \
     Rule30EtherTrapWidth20 Rule30PeriodTwoLanguage Rule30PeriodTwoWidth5 Rule30PeriodTwoWidth6 \
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
     Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways \
@@ -94,6 +95,7 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | `Rule30FiniteWhiteRuns` | 2026-10-17 | The exclusion of `Rule30WhiteRunEight` for every column of every nonzero finite configuration: no column is eventually `0^r 1 1` repeated, `r ≥ 8`, whatever the transient. The lemmas of `Rule30BlackRuns` (the first black cell right of the column moves left during a white run, and the period-start classes) hold for column `0` of any evolution; the seed's right edge becomes any black cell right of the column, which every nonzero finite configuration has from some time on; translation gives every column. | `no_white_run_11_col0`, `no_white_run_11_finite`, `evol_right_edge`, `exists_rightmost` |
 | `Rule30Coupled` | 2026-10-17 | Every period, as coupled questions. In any configuration the two halves evolve as the halves driven by the center column, and the center is updated from its two driven neighbours; conversely, two driven halves glued to a column satisfying that update give a configuration with that center. `CQ ω` (**open** for every nonconstant periodic `ω`): no finite left half and finite right half are coupled to `ω`; it holds iff no finite configuration has center column `ω`. FinConf for one column is exactly the family `CQ ω` over all periodic `ω` with a black cell, and the family implies Problem 1. For the alternating column, `CQ` is `CQ01`. | `left_eq_L`, `right_eq_drv`, `evol_glue`, `CQ_iff_no_finite_config`, `CQ_altCol_iff_CQ01`, `finConf_center_iff`, `problem1_of_CQ` |
 | `Rule30LightCone` | 2026-10-17 | The locality behind space-efficient evaluation. A cell at time `t` depends only on the initial cells within distance `t`. With space blocks and time steps of width `b`, each block is a fixed function of the three blocks around it one time step earlier, so the center cell at time `m b` is the root of a fan-in-3 tree of `b`-bit blocks with height `m`. This is the shape that Williams's square-root-space simulation passes to Cook–Mertz tree evaluation, about `√n · log n` bits for the center cell at time `n`; neither algorithm is formalized. | `evol_window`, `block_step`, `center_eq_root` |
+| `Rule30ZeroBoundaryStripeFour` | 2026-10-23 | Stripe prefixes with four tail cells. For every `m` and every tail `v` of four cells, the start `S[1..m] · v · 0^∞` first deviates from the stripe at some depth `d ≤ m + 6`, and depth `1` turns white at an even time `≤ d - 1 + 31`. Every class `(m mod 2, v)` is covered except `v = 13` with `m` odd. This carries `Rule30ZeroBoundaryStripeFamily` from tails of length at most 3 to length 4, by the same route: one kernel-checked periodic front-window orbit per class, from `Rule30Certificates/ZeroBoundaryStripeCycles0`–`3` (namespace `Rule30ZeroBoundaryStripeFront.StripeCycles3` for the new data module). Contributed by Ying Yin with Codex (GPT-6) as Rule 30 Prize submission `R30-20261020-81df0e`, and ported to core Lean. | `stripe_four_tail`, `family4_of_class` |
 
 ## Which modules predate the attempt
 
@@ -112,7 +114,7 @@ All modules live in `Ruliology/CellularAutomata/`. Theorems live in the namespac
 - `Rule30Predecessors` and `Rule30PredecessorCounts` use `…Rule30`.
 - The six `Rule30EtherThree*` modules share `…Rule30EtherThree`.
 - `Rule30EtherTrapWidth20` uses `…Rule30EtherTrap`.
-- `Rule30ZeroBoundaryStripeFamily` uses `…Rule30ZeroBoundaryStripeFront`.
+- `Rule30ZeroBoundaryStripeFamily` and `Rule30ZeroBoundaryStripeFour` use `…Rule30ZeroBoundaryStripeFront`.
 - The data modules in `Rule30Certificates/` use namespaces inside the module they serve, for example `…Rule30ZeroBoundaryWidth52.C0`.
 
 "Open" marks a statement defined as a `Prop` but not proved.

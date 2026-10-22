@@ -45,7 +45,7 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30Certificates.EtherTrap3 Rule30Certificates.EtherTrap4 Rule30Certificates.EtherTrap5 \
     Rule30EtherTrapWidth20 Rule30PeriodTwoLanguage Rule30PeriodTwoWidth5 Rule30PeriodTwoWidth6 \
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
-    Rule30EtherThreeLeft Rule30EtherThreeSkeleton; do
+    Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30Certificates.WhiteEndChecks Rule30WhiteEnd; do
   build "$m" "Ruliology.CellularAutomata.$m"
 done
 build Ruliology Ruliology

@@ -20,7 +20,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 | Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52. | `Rule30PeriodTwo`, `Rule30PeriodTwoCoupled`, `Rule30PeriodTwoSideways`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30PeriodTwoWidth5/6` |
 | Least period 3 | Reduced. 001 needs one of AbsorptionT t001, Q001 or C3s001. 011 needs C3w(011). All four are **open**. | `Rule30EtherThree*` |
 | Least period 4 | Reduced to Absorption, the ether-and-wall trap, which is **open**. The pure ether lies in no trap of width ≤ 20. | `Rule30Ether`, `Rule30PeriodFourSkeleton`, `Rule30EtherTrapWidth20` |
-| Longer periods | **Open.** Some words are excluded, for example by long black runs and 30 certified words. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight` |
+| Longer periods | **Open.** Some words are excluded, for example by long black runs, 30 certified words and every `1 0^q` with `q ≥ 10`. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight`, `Rule30WhiteEnd` |
 
 Barriers are also proved:
 - Rules 90, 150 and 210 share every structural fact the argument uses, yet their center columns are eventually constant (`Rule30Realization`).
@@ -49,13 +49,14 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30EtherTrapWidth20 Rule30PeriodTwoLanguage Rule30PeriodTwoWidth5 Rule30PeriodTwoWidth6 \
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
     Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways \
-    Rule30LightCone Rule30FiniteConfigs Rule30FiniteMaskedJen Rule30Coupled Rule30FiniteBlackRuns Rule30FiniteBlackRunBlocks Rule30FiniteDiagonals Rule30FiniteWhiteRuns; do
+    Rule30LightCone Rule30FiniteConfigs Rule30FiniteMaskedJen Rule30Coupled Rule30FiniteBlackRuns Rule30FiniteBlackRunBlocks Rule30FiniteDiagonals Rule30FiniteWhiteRuns \
+    Rule30Certificates.WhiteEndChecks Rule30WhiteEnd; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
 ```
 
-On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB. Every module not listed below built in under 7 s and 1.2 GB.
+On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four modules added on 2026-10-23 take about 45 s more. Every module not listed below built in under 7 s and 1.2 GB.
 
 | Module | Time | Peak memory |
 |---|---|---|
@@ -64,6 +65,7 @@ On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB. Every modu
 | `Rule30BlackRunBlocks` | 20 s | 2.3 GB |
 | `Rule30ZeroBoundarySmall` | 19 s | 3.2 GB |
 | `Rule30ZeroBoundaryStripe` | 18 s | 1.8 GB |
+| `Rule30Certificates/WhiteEndChecks` | 34 s | 0.8 GB |
 | `Rule30EtherThreeNoWall` | 9 s | 1.1 GB |
 | `Rule30BlackRuns` | 9 s | 2.2 GB |
 
@@ -96,6 +98,7 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | `Rule30Coupled` | 2026-10-17 | Every period, as coupled questions. In any configuration the two halves evolve as the halves driven by the center column, and the center is updated from its two driven neighbours; conversely, two driven halves glued to a column satisfying that update give a configuration with that center. `CQ ω` (**open** for every nonconstant periodic `ω`): no finite left half and finite right half are coupled to `ω`; it holds iff no finite configuration has center column `ω`. FinConf for one column is exactly the family `CQ ω` over all periodic `ω` with a black cell, and the family implies Problem 1. For the alternating column, `CQ` is `CQ01`. | `left_eq_L`, `right_eq_drv`, `evol_glue`, `CQ_iff_no_finite_config`, `CQ_altCol_iff_CQ01`, `finConf_center_iff`, `problem1_of_CQ` |
 | `Rule30LightCone` | 2026-10-17 | The locality behind space-efficient evaluation. A cell at time `t` depends only on the initial cells within distance `t`. With space blocks and time steps of width `b`, each block is a fixed function of the three blocks around it one time step earlier, so the center cell at time `m b` is the root of a fan-in-3 tree of `b`-bit blocks with height `m`. This is the shape that Williams's square-root-space simulation passes to Cook–Mertz tree evaluation, about `√n · log n` bits for the center cell at time `n`; neither algorithm is formalized. | `evol_window`, `block_step`, `center_eq_root` |
 | `Rule30ZeroBoundaryStripeFour` | 2026-10-23 | Stripe prefixes with four tail cells. For every `m` and every tail `v` of four cells, the start `S[1..m] · v · 0^∞` first deviates from the stripe at some depth `d ≤ m + 6`, and depth `1` turns white at an even time `≤ d - 1 + 31`. Every class `(m mod 2, v)` is covered except `v = 13` with `m` odd. This carries `Rule30ZeroBoundaryStripeFamily` from tails of length at most 3 to length 4, by the same route: one kernel-checked periodic front-window orbit per class, from `Rule30Certificates/ZeroBoundaryStripeCycles0`–`3` (namespace `Rule30ZeroBoundaryStripeFront.StripeCycles3` for the new data module). Contributed by Ying Yin with Codex (GPT-6) as Rule 30 Prize submission `R30-20261020-81df0e`, and ported to core Lean. | `stripe_four_tail`, `family4_of_class` |
+| `Rule30WhiteEnd` | 2026-10-23 | The white end. For every `q ≥ 10`, no column of rule 30 is eventually the repeating word `1 0^q`, whatever the transient: for the single seed, `EventuallyWord (true :: List.replicate q false)` is false, and the same holds for every column of every configuration with a leftmost black cell, every finite nonzero one included. `Rule30StripCertificateTable` excludes only `q = 10, 11, 12`. A one-sided strip relaxation (eight cells right of the column, an arbitrary cell beyond) determines column `c + 1` after three periods; kernel checks cover `q = 10 … 25`, and the relaxation's white step satisfies `W^26 = W^22` on the sets that occur, which covers every `q ≥ 26`. Two adjacent columns periodic for ever then contradict Jen's theorem with a clock. The checks are in `Rule30Certificates/WhiteEndChecks`, where `control_q9` shows that the check fails at `q = 9`. Contributed by Gareth Herbert with Claude and GPT as Rule 30 Prize submission `R30-20261022-c27323`, and ported to core Lean. | `not_eventuallyWord_white_end`, `white_end_seed`, `white_end`, `white_end_finite` |
 
 ## Which modules predate the attempt
 

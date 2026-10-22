@@ -1,16 +1,18 @@
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.WordsAutomata
-import Rule30Equivalents.BinaryIrrational
-import Rule30Equivalents.LinearRelations
-import Rule30Equivalents.PowerSeriesF2
-import Rule30Equivalents.Automatic
-import Mathlib.RingTheory.PowerSeries.Derivative
-import Mathlib.Algebra.MvPolynomial.Basic
-import Mathlib.RingTheory.PowerSeries.Expand
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.NumberTheory.DiophantineApproximation.Basic
-import Mathlib.Algebra.AlgebraicCard
-import Mathlib.Data.Finsupp.Encodable
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.WordsAutomata
+public import Rule30Equivalents.BinaryIrrational
+public import Rule30Equivalents.LinearRelations
+public import Rule30Equivalents.PowerSeriesF2
+public import Rule30Equivalents.Automatic
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.RingTheory.PowerSeries.Expand
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.NumberTheory.DiophantineApproximation.Basic
+public import Mathlib.Algebra.AlgebraicCard
+public import Mathlib.Data.Finsupp.Encodable
 
 /-!
 # Stronger statements that imply Problem 1
@@ -57,6 +59,8 @@ theorem uses the weaker consequence that some set is infinite, so it covers the 
   recurrent eventually periodic sequence is purely periodic (`IsRecurrent.purelyPeriodic`), so for
   a recurrent `c` Problem 1 is the case `T = 0` (`problem1_iff_not_purelyPeriodic_of_recurrent`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.StrongerStatements
 

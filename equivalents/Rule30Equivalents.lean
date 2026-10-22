@@ -1,97 +1,101 @@
-import Rule30Equivalents.Basic
-import Rule30Equivalents.BinaryIrrational
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.NumberTheory
-import Rule30Equivalents.TwoAdic
-import Rule30Equivalents.PowerSeriesF2
-import Rule30Equivalents.LinearRelations
-import Rule30Equivalents.WordsAutomata
-import Rule30Equivalents.Symmetry
-import Rule30Equivalents.TransformsSeeds
-import Rule30Equivalents.IntegerRows
-import Rule30Equivalents.LogicAutomata
-import Rule30Equivalents.Realization
-import Rule30Equivalents.Lyndon
-import Rule30Equivalents.GoldenPowers
-import Rule30Equivalents.ContextFree
-import Rule30Equivalents.AlgebraicDFinite
-import Rule30Equivalents.Strassmann
-import Rule30Equivalents.SkolemMahlerLech
-import Rule30Equivalents.DiophantineGraph
-import Rule30Equivalents.NaturalBoundary
-import Rule30Equivalents.Cobham
-import Rule30Equivalents.Christol
-import Rule30Equivalents.OneTapeGap
-import Rule30Equivalents.OfflineGap
-import Rule30Equivalents.MonadicLogic
-import Rule30Equivalents.BuchiArithmetic
-import Rule30Equivalents.LimitPoints
-import Rule30Equivalents.OrderDefinable
-import Rule30Equivalents.ProblemThree
-import Rule30Equivalents.StrongerStatements
-import Rule30Equivalents.AlgebraicDegree
-import Rule30Equivalents.RightHalfReturns
-import Rule30Equivalents.Tauberian
-import Rule30Equivalents.ProblemTwo
-import Rule30Equivalents.BuchiConverse
-import Rule30Equivalents.Odometer
-import Rule30Equivalents.CenterFormulas
-import Rule30Equivalents.OneTapeRegular
-import Rule30Equivalents.UniformMorphic
-import Rule30Equivalents.MeromorphicExtension
-import Rule30Equivalents.TwoAdicPeriods
-import Rule30Equivalents.RegularSequences
-import Rule30Equivalents.ProfiniteIntegers
-import Rule30Equivalents.PresburgerExpansion
-import Rule30Equivalents.Genericity
-import Rule30Equivalents.Preimages
-import Rule30Equivalents.RandomConfigurations
-import Rule30Equivalents.Mixing
-import Rule30Equivalents.HolderMeans
-import Rule30Equivalents.BlackTimes
-import Rule30Equivalents.CesaroMeans
-import Rule30Equivalents.EmpiricalMeasures
-import Rule30Equivalents.OrbitFrequencies
-import Rule30Equivalents.QueryComplexity
-import Rule30Equivalents.BoundedRemainder
-import Rule30Equivalents.Fluctuations
-import Rule30Equivalents.Computability
-import Rule30Equivalents.Invertibility
-import Rule30Equivalents.PeriodicPoints
-import Rule30Equivalents.Autocorrelation
-import Rule30Equivalents.LinearComplexity
-import Rule30Equivalents.LongestRuns
-import Rule30Equivalents.ReturnTimes
-import Rule30Equivalents.TypicalConditions
-import Rule30Equivalents.IteratedLogarithm
-import Rule30Equivalents.IrrationalityExponent
-import Rule30Equivalents.Circuits
-import Rule30Equivalents.LargeDeviations
-import Rule30Equivalents.ErdosRenyi
-import Rule30Equivalents.Lines
-import Rule30Equivalents.RandomNaturalBoundary
-import Rule30Equivalents.LocalLimit
-import Rule30Equivalents.ApproximateRecurrence
-import Rule30Equivalents.MaxOrderComplexity
-import Rule30Equivalents.Typicality
-import Rule30Equivalents.FiniteRings
-import Rule30Equivalents.Lagrange
-import Rule30Equivalents.Minkowski
-import Rule30Equivalents.WordForms
-import Rule30Equivalents.Expansions
-import Rule30Equivalents.Holonomic
-import Rule30Equivalents.OmegaRegular
-import Rule30Equivalents.PisotNumbers
-import Rule30Equivalents.PisotBase
-import Rule30Equivalents.Automatic
-import Rule30Equivalents.Transcendence
-import Rule30Equivalents.LempelZiv
-import Rule30Equivalents.CoupledHalves
-import Rule30Equivalents.TailLanguage
-import Rule30Equivalents.TFunction
-import Rule30Equivalents.TFunctionCycles
-import Rule30Equivalents.DFinite
-import Rule30Equivalents.AutomatonGroup
-import Rule30Equivalents.FrozenBoundary
-import Rule30Equivalents.FrozenBoundaryPeriodTwo
-import Rule30Equivalents.FrozenBoundaryCore
+module
+
+public import Rule30Equivalents.Basic
+public import Rule30Equivalents.BinaryIrrational
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.NumberTheory
+public import Rule30Equivalents.TwoAdic
+public import Rule30Equivalents.PowerSeriesF2
+public import Rule30Equivalents.LinearRelations
+public import Rule30Equivalents.WordsAutomata
+public import Rule30Equivalents.Symmetry
+public import Rule30Equivalents.TransformsSeeds
+public import Rule30Equivalents.IntegerRows
+public import Rule30Equivalents.LogicAutomata
+public import Rule30Equivalents.Realization
+public import Rule30Equivalents.Lyndon
+public import Rule30Equivalents.GoldenPowers
+public import Rule30Equivalents.ContextFree
+public import Rule30Equivalents.AlgebraicDFinite
+public import Rule30Equivalents.Strassmann
+public import Rule30Equivalents.SkolemMahlerLech
+public import Rule30Equivalents.DiophantineGraph
+public import Rule30Equivalents.NaturalBoundary
+public import Rule30Equivalents.Cobham
+public import Rule30Equivalents.Christol
+public import Rule30Equivalents.OneTapeGap
+public import Rule30Equivalents.OfflineGap
+public import Rule30Equivalents.MonadicLogic
+public import Rule30Equivalents.BuchiArithmetic
+public import Rule30Equivalents.LimitPoints
+public import Rule30Equivalents.OrderDefinable
+public import Rule30Equivalents.ProblemThree
+public import Rule30Equivalents.StrongerStatements
+public import Rule30Equivalents.AlgebraicDegree
+public import Rule30Equivalents.RightHalfReturns
+public import Rule30Equivalents.Tauberian
+public import Rule30Equivalents.ProblemTwo
+public import Rule30Equivalents.BuchiConverse
+public import Rule30Equivalents.Odometer
+public import Rule30Equivalents.CenterFormulas
+public import Rule30Equivalents.OneTapeRegular
+public import Rule30Equivalents.UniformMorphic
+public import Rule30Equivalents.MeromorphicExtension
+public import Rule30Equivalents.TwoAdicPeriods
+public import Rule30Equivalents.RegularSequences
+public import Rule30Equivalents.ProfiniteIntegers
+public import Rule30Equivalents.PresburgerExpansion
+public import Rule30Equivalents.Genericity
+public import Rule30Equivalents.Preimages
+public import Rule30Equivalents.RandomConfigurations
+public import Rule30Equivalents.Mixing
+public import Rule30Equivalents.HolderMeans
+public import Rule30Equivalents.BlackTimes
+public import Rule30Equivalents.CesaroMeans
+public import Rule30Equivalents.EmpiricalMeasures
+public import Rule30Equivalents.OrbitFrequencies
+public import Rule30Equivalents.QueryComplexity
+public import Rule30Equivalents.BoundedRemainder
+public import Rule30Equivalents.Fluctuations
+public import Rule30Equivalents.Computability
+public import Rule30Equivalents.Invertibility
+public import Rule30Equivalents.PeriodicPoints
+public import Rule30Equivalents.Autocorrelation
+public import Rule30Equivalents.LinearComplexity
+public import Rule30Equivalents.LongestRuns
+public import Rule30Equivalents.ReturnTimes
+public import Rule30Equivalents.TypicalConditions
+public import Rule30Equivalents.IteratedLogarithm
+public import Rule30Equivalents.IrrationalityExponent
+public import Rule30Equivalents.Circuits
+public import Rule30Equivalents.LargeDeviations
+public import Rule30Equivalents.ErdosRenyi
+public import Rule30Equivalents.Lines
+public import Rule30Equivalents.RandomNaturalBoundary
+public import Rule30Equivalents.LocalLimit
+public import Rule30Equivalents.ApproximateRecurrence
+public import Rule30Equivalents.MaxOrderComplexity
+public import Rule30Equivalents.Typicality
+public import Rule30Equivalents.FiniteRings
+public import Rule30Equivalents.Lagrange
+public import Rule30Equivalents.Minkowski
+public import Rule30Equivalents.WordForms
+public import Rule30Equivalents.Expansions
+public import Rule30Equivalents.Holonomic
+public import Rule30Equivalents.OmegaRegular
+public import Rule30Equivalents.PisotNumbers
+public import Rule30Equivalents.PisotBase
+public import Rule30Equivalents.Automatic
+public import Rule30Equivalents.Transcendence
+public import Rule30Equivalents.LempelZiv
+public import Rule30Equivalents.CoupledHalves
+public import Rule30Equivalents.TailLanguage
+public import Rule30Equivalents.TFunction
+public import Rule30Equivalents.TFunctionCycles
+public import Rule30Equivalents.DFinite
+public import Rule30Equivalents.AutomatonGroup
+public import Rule30Equivalents.FrozenBoundary
+public import Rule30Equivalents.FrozenBoundaryPeriodTwo
+public import Rule30Equivalents.FrozenBoundaryCore
+
+@[expose] public section

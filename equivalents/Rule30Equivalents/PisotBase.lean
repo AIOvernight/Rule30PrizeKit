@@ -1,6 +1,17 @@
-import Rule30Equivalents.PisotNumbers
-import Mathlib.NumberTheory.Real.Irrational
-import Mathlib.Tactic.ComputeDegree
+module
+
+public import Rule30Equivalents.PisotNumbers
+public import Mathlib.NumberTheory.Real.Irrational
+public import Mathlib.Tactic.ComputeDegree
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 in the Pisot base `1 + √2`
@@ -17,6 +28,8 @@ This is the case `β = 1 + √2` of `PisotNumbers.eventuallyPeriodic_iff_mem_adj
 root of `X² - 2X - 1`, whose other root `1 - √2` has absolute value `√2 - 1 < 1` (`isPisot_β`), and
 `ℚ(1 + √2)` is the field `ℚ(√2)` of the numbers `a + b √2` (`mem_adjoin_iff`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.PisotBase
 

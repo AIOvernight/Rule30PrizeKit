@@ -1,8 +1,10 @@
-import Rule30Equivalents.Basic
-import Mathlib.Data.Set.Card
-import Mathlib.Basic.Finite.Prod
-import Mathlib.Dynamics.PeriodicPts.Defs
-import Mathlib.Order.Preorder.Finite
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.Data.Set.Card
+public import Mathlib.Basic.Finite.Prod
+public import Mathlib.Dynamics.PeriodicPts.Defs
+public import Mathlib.Order.Preorder.Finite
 
 /-!
 # Problem 1 as a statement about shifts and factor complexity
@@ -56,6 +58,8 @@ the number of distinct factors of length `n`.
 * The finite-orbit form is the elementary fact that a point of the shift is preperiodic iff its
   forward orbit is finite (pigeonhole).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents
 namespace ShiftOrbit

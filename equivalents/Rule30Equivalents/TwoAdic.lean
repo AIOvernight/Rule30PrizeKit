@@ -1,10 +1,12 @@
-import Rule30Equivalents.Basic
-import Mathlib.NumberTheory.Padics.PadicIntegers
-import Mathlib.Analysis.Normed.Group.InfiniteSum
-import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.Algebra.Ring.Int.Parity
-import Mathlib.Data.Int.Interval
-import Mathlib.RingTheory.Multiplicity
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.Analysis.Normed.Group.InfiniteSum
+public import Mathlib.Analysis.SpecificLimits.Basic
+public import Mathlib.Algebra.Ring.Int.Parity
+public import Mathlib.Data.Int.Interval
+public import Mathlib.RingTheory.Multiplicity
 
 /-!
 # Problem 1 as the irrationality of a 2-adic number
@@ -106,6 +108,8 @@ lowest digit first (`partialSum p x n`; for the center column, `S p n`). A fract
   2-adic complexity of a finite sequence), §10 (the rational approximation algorithm, the 2-adic
   analogue of Berlekamp–Massey).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TwoAdic
 

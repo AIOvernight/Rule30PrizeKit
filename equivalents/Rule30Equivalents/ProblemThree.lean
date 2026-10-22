@@ -1,7 +1,9 @@
-import Rule30Equivalents.OneTapeGap
-import Rule30Equivalents.Automatic
-import Mathlib.Data.Nat.Size
-import Mathlib.Analysis.Complex.ExponentialBounds
+module
+
+public import Rule30Equivalents.OneTapeGap
+public import Rule30Equivalents.Automatic
+public import Mathlib.Data.Nat.Size
+public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Prize Problem 3 implies Problem 1
@@ -20,6 +22,8 @@ verbal reading, implies that `c` is not `2`-automatic (`not_isAutomatic_of_probl
 Problem 1 (`problem1_of_problem3Verbal`). This is the chain "Problem 3 ⟹ no polylog-time digit
 extraction ⟹ c is not automatic ⟹ Problem 1".
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ProblemThree
 

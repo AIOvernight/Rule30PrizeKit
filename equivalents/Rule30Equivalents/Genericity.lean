@@ -1,7 +1,18 @@
-import Rule30Equivalents.AlgebraicDegree
-import Rule30Equivalents.Symmetry
-import Rule30Equivalents.LimitPoints
-import Mathlib.Topology.Baire.BaireMeasurable
+module
+
+public import Rule30Equivalents.AlgebraicDegree
+public import Rule30Equivalents.Symmetry
+public import Rule30Equivalents.LimitPoints
+public import Mathlib.Topology.Baire.BaireMeasurable
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Generic configurations
@@ -35,6 +46,8 @@ omega-limit set itself is infinite (`infinite_omegaLimit_seed`, from Kopra's lim
 right halves of the rows), so Problem 1 is about its trace, not its size. The same holds for every
 configuration with a leftmost black cell (`infinite_omegaLimit`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Genericity
 

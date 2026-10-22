@@ -1,6 +1,17 @@
-import Rule30Equivalents.Fluctuations
-import Rule30Equivalents.LongestRuns
-import Mathlib.Probability.BorelCantelli
+module
+
+public import Rule30Equivalents.Fluctuations
+public import Rule30Equivalents.LongestRuns
+public import Mathlib.Probability.BorelCantelli
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The law of the iterated logarithm for the center column
@@ -34,6 +45,8 @@ Borel–Cantelli lemma (`ae_frequently_window_mem`) the walk gains nearly `√(2
 `n = 2bᵏ⁺¹`, across infinitely many of them. For a large ratio `b` the walk before the window,
 above `-2√(2 n log log n / b)` by the cruder envelope, cannot cancel the gain.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.IteratedLogarithm
 

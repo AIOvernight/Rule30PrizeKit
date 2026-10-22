@@ -1,4 +1,15 @@
-import Rule30Equivalents.RandomConfigurations
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The longest run of a random sequence
@@ -22,6 +33,8 @@ against `log₂ 10⁷ ≈ 23.3`.)
   `ae_tendsto_longestRun`: `longestRun v β n / ⌊log₂ n⌋ → 1`, and
   `ae_tendsto_longestRun_trace`: the same for the center column of almost every configuration.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LongestRuns
 

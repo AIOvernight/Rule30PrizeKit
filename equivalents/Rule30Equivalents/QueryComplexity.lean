@@ -1,4 +1,15 @@
-import Rule30Equivalents.AlgebraicDegree
+module
+
+public import Rule30Equivalents.AlgebraicDegree
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Query complexity of rule 30's `t`-step map
@@ -21,6 +32,8 @@ This is a linear lower bound for computing `Φ_t` from an arbitrary initial row.
 directly about Prize Problem 3, where the initial row is the single black cell and the only input
 is `t`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.QueryComplexity
 

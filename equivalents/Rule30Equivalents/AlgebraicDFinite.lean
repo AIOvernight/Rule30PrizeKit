@@ -1,5 +1,7 @@
-import Rule30Equivalents.DFinite
-import Rule30Equivalents.Transcendence
+module
+
+public import Rule30Equivalents.DFinite
+public import Rule30Equivalents.Transcendence
 
 /-!
 # Problem 1 ⟺ the generating function is transcendental over `ℚ(X)`
@@ -30,6 +32,8 @@ Sources: L. Comtet, *Calcul pratique des coefficients de Taylor d'une fonction a
 Enseign. Math. 10 (1964) 267–270; R. P. Stanley, *Differentiably finite power series*, European J.
 Combin. 1 (1980) 175–188, Theorem 2.1.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.AlgebraicDFinite
 

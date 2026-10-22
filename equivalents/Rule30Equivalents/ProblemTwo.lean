@@ -1,8 +1,10 @@
-import Rule30Equivalents.Basic
-import Rule30Equivalents.Tauberian
-import Rule30Equivalents.BinaryIrrational
-import Rule30Equivalents.StrongerStatements
-import Rule30Equivalents.Symmetry
+module
+
+public import Rule30Equivalents.Basic
+public import Rule30Equivalents.Tauberian
+public import Rule30Equivalents.BinaryIrrational
+public import Rule30Equivalents.StrongerStatements
+public import Rule30Equivalents.Symmetry
 
 /-!
 # Prize Problem 2: density 1/2
@@ -25,6 +27,8 @@ every bit sequence) and
 `problem1_of_density_on_progressions`: density `1/2` along every arithmetic progression rules out
 an eventually constant residue class, hence gives Problem 1 (the anti-Toeplitz statement).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ProblemTwo
 

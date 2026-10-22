@@ -1,4 +1,6 @@
-import Ruliology.CellularAutomata.Rule30Prize
+module
+
+public import Ruliology.CellularAutomata.Rule30Prize
 
 /-!
 # Shared definitions for the equivalent forms of Rule 30 Problem 1
@@ -12,6 +14,8 @@ started from a single black cell, is not eventually periodic:
 Each file in this library proves `Problem1 ↔ X` for one reformulation `X`, usually by proving a
 general statement about every `b : ℕ → Bool` and then specializing it to the center column `c`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents
 

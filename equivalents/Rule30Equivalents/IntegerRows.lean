@@ -1,5 +1,7 @@
-import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30Diagonals
+module
+
+public import Rule30Equivalents.Basic
+public import Ruliology.CellularAutomata.Rule30Diagonals
 
 /-!
 # Rule 30 as an integer sequence
@@ -28,6 +30,8 @@ bits `j`, `j - 1` and `j - 2` of the argument, with bit `j` entering through `xo
 Sources: S. Wolfram, *A New Kind of Science* (2002), the integer form of rule 30; OEIS A110240 and
 A051023.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.IntegerRows
 

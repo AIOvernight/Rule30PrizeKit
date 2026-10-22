@@ -1,7 +1,18 @@
-import Rule30Equivalents.RandomConfigurations
-import Mathlib.LinearAlgebra.Matrix.Rank
-import Mathlib.Analysis.PSeries
-import Mathlib.Analysis.SpecialFunctions.Log.Base
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Mathlib.LinearAlgebra.Matrix.Rank
+public import Mathlib.Analysis.PSeries
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The linear complexity profile of a random sequence
@@ -28,6 +39,8 @@ lemma.
   `ae_tendsto_linComplexity_trace`: for almost every configuration the center column satisfies
   the hypothesis of `StrongerStatements.problem1_of_linComplexity_tendsto`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LinearComplexity
 

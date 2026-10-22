@@ -1,5 +1,16 @@
-import Rule30Equivalents.TFunctionCycles
-import Rule30Equivalents.TransformsSeeds
+module
+
+public import Rule30Equivalents.TFunctionCycles
+public import Rule30Equivalents.TransformsSeeds
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Rule 30's automaton group 2369: the states and the light cone
@@ -52,6 +63,8 @@ and `Φ` has infinite order. So group 2369 is an ascending HNN extension of a lo
 finitely presented. The argument is the one P. V. Silva and B. Steinberg use for reset automata
 (Int. J. Algebra Comput. 15 (2005)); the automaton here is 2-definite rather than reset.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.AutomatonGroup
 

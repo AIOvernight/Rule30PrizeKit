@@ -1,6 +1,17 @@
-import Rule30Equivalents.Lagrange
-import Rule30Equivalents.WordForms
-import Rule30Equivalents.BinaryIrrational
+module
+
+public import Rule30Equivalents.Lagrange
+public import Rule30Equivalents.WordForms
+public import Rule30Equivalents.BinaryIrrational
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 through Minkowski's question-mark function
@@ -24,6 +35,8 @@ Sources: H. Minkowski, *Zur Geometrie der Zahlen* (1904); A. Denjoy, *Sur une fo
 Minkowski*, J. Math. Pures Appl. 17 (1938) 105–151; R. Salem, *On some singular monotonic
 functions which are strictly increasing*, Trans. AMS 53 (1943) 427–439.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Minkowski
 

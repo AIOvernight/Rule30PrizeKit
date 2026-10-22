@@ -1,5 +1,16 @@
-import Rule30Equivalents.LargeDeviations
-import Mathlib.Analysis.SpecialFunctions.Stirling
+module
+
+public import Rule30Equivalents.LargeDeviations
+public import Mathlib.Analysis.SpecialFunctions.Stirling
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The local limit theorem for the center column
@@ -24,6 +35,8 @@ Sources: A. de Moivre, *The Doctrine of Chances*, 2nd ed. (1738); P.-S. Laplace,
 analytique des probabilités* (1812); W. Feller, *An Introduction to Probability Theory and Its
 Applications*, vol. 1, 3rd ed., Wiley (1968), chapter VII.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LocalLimit
 

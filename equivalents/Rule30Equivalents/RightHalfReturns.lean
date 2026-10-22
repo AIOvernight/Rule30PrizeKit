@@ -1,6 +1,8 @@
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.LimitPoints
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.LimitPoints
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
 
 /-!
 # The right half returns to its start only finitely often
@@ -23,6 +25,8 @@ this is `LimitPoints.half_cell_eq_zero_iff`.
   there repeat with the period of a return. Two adjacent periodic columns contradict Jen's theorem
   for configurations with a leftmost black cell (`Rule30FiniteConfigs.not_adjacent`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.RightHalfReturns
 

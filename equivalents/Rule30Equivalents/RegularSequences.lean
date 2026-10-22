@@ -1,6 +1,8 @@
-import Rule30Equivalents.Cobham
-import Rule30Equivalents.LinearRelations
-import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+module
+
+public import Rule30Equivalents.Cobham
+public import Rule30Equivalents.LinearRelations
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 /-!
 # k-regular sequences
@@ -25,6 +27,8 @@ Source: J.-P. Allouche and J. Shallit, *The ring of k-regular sequences*, Theore
 (1992) 163–197, where `k`-regular sequences are defined over a ring, and a `k`-regular sequence
 with finitely many values is shown to be `k`-automatic.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.RegularSequences
 

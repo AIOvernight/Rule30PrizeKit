@@ -1,6 +1,8 @@
-import Mathlib.NumberTheory.Real.GoldenRatio
-import Mathlib.Data.Nat.Find
-import Mathlib.Tactic.Linarith
+module
+
+public import Mathlib.NumberTheory.Real.GoldenRatio
+public import Mathlib.Data.Nat.Find
+public import Mathlib.Tactic.Linarith
 
 /-!
 # The Mignosi–Restivo–Salemi theorem: prefixes ending in `φ²`-repetitions
@@ -26,6 +28,8 @@ the Fibonacci word has, for each `ε > 0`, every long prefix ending in a `(φ² 
 Source: F. Mignosi, A. Restivo, S. Salemi, *Periodicity and the golden ratio*, Theoret. Comput.
 Sci. 204 (1998) 153–167 (Lemmas 1–4, Theorems 1 and 2). The conjecture is J. Shallit's.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.GoldenPowers
 

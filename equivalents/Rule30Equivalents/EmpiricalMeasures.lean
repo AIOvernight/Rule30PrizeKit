@@ -1,6 +1,17 @@
-import Rule30Equivalents.Mixing
-import Mathlib.MeasureTheory.Measure.Prokhorov
-import Mathlib.MeasureTheory.Measure.Portmanteau
+module
+
+public import Rule30Equivalents.Mixing
+public import Mathlib.MeasureTheory.Measure.Prokhorov
+public import Mathlib.MeasureTheory.Measure.Portmanteau
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 2 through empirical measures
@@ -27,6 +38,8 @@ the compact space of probability measures (Mathlib's Prokhorov theorem). Its mas
   (Mathlib's `IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem`). With Borel's theorem,
   the trace of almost every configuration is generic (`ae_tendsto_empirical_trace`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.EmpiricalMeasures
 

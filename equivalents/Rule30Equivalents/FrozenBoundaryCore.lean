@@ -1,4 +1,15 @@
-import Rule30Equivalents.FrozenBoundary
+module
+
+public import Rule30Equivalents.FrozenBoundary
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The frozen-boundary conjecture is FinConf plus a two-step core
@@ -45,6 +56,8 @@ reduce at greater depth. That has not been proved.
 Numerically, every residue of these three steps matches a finite seed at depth at most 2, and the
 shift identities explain why.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.FrozenBoundaryCore
 

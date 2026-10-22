@@ -1,5 +1,7 @@
-import Rule30Equivalents.Cobham
-import Rule30Equivalents.LogicAutomata
+module
+
+public import Rule30Equivalents.Cobham
+public import Rule30Equivalents.LogicAutomata
 
 /-!
 # Büchi arithmetic
@@ -24,6 +26,8 @@ relations:
   `isAutomatic_of_definable`.
 * Conversely, eventually periodic sets are Presburger-definable, hence definable in the expansion.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.BuchiArithmetic
 

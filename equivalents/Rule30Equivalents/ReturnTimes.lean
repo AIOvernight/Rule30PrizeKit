@@ -1,5 +1,16 @@
-import Rule30Equivalents.LongestRuns
-import Rule30Equivalents.LinearComplexity
+module
+
+public import Rule30Equivalents.LongestRuns
+public import Rule30Equivalents.LinearComplexity
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Return times of a random sequence
@@ -22,6 +33,8 @@ and Weiss, for fair coins.
   (`ae_tendsto_logb_returnTime`). The same holds for the center column of almost every
   configuration (`ae_tendsto_logb_returnTime_trace`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ReturnTimes
 

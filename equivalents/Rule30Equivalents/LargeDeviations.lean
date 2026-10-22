@@ -1,5 +1,16 @@
-import Rule30Equivalents.LongestRuns
-import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
+module
+
+public import Rule30Equivalents.LongestRuns
+public import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Large deviations of the density of the center column
@@ -19,9 +30,18 @@ probability at most `e^(-n I(a))`, for every `n`. For the lower bound, with `k =
 probability at least `e^(-n I(p))/(n + 1)` (`log_measureReal_ge`), and `I` is continuous.
 -/
 
+@[expose] public section
+
 namespace Rule30Equivalents.LargeDeviations
 
 open MeasureTheory Filter Topology Genericity RandomConfigurations
+
+/-- The binary entropy, written out. -/
+theorem binEntropy_eq (p : ℝ) :
+    Real.binEntropy p = p * Real.log p⁻¹ + (1 - p) * Real.log (1 - p)⁻¹ := by
+  rw [Real.binEntropy_eq_negMulLog_add_negMulLog_one_sub, Real.log_inv, Real.log_inv]
+  simp only [Real.negMulLog_def]
+  ring
 
 /-- The first `n` coins of a fair-coin sequence form a fair word. -/
 theorem map_prefix (n : ℕ) : (coins ℕ).map (fun v (j : Fin n) => v j) = coins (Fin n) :=
@@ -74,7 +94,7 @@ theorem measureReal_le_exp (n : ℕ) {a : ℝ} (ha : 1 / 2 ≤ a) (ha1 : a < 1) 
     have h2 : (2 : ℝ)⁻¹ = Real.exp (-Real.log 2) := by rw [Real.exp_neg, Real.exp_log two_pos]
     rw [h1, h2, ← Real.exp_add, ← Real.exp_add]
     congr 1
-    rw [htdef, Real.log_div ha0.ne' h1a.ne', Real.binEntropy, Real.log_inv, Real.log_inv]
+    rw [htdef, Real.log_div ha0.ne' h1a.ne', binEntropy_eq, Real.log_inv, Real.log_inv]
     ring
   have hS : ({w | a * n ≤ ∑ j, black (w j)} : Set (Fin n → Bool)) =
       ↑(Finset.univ.filter fun w : Fin n → Bool => a * n ≤ ∑ j, black (w j)) := by
@@ -242,7 +262,7 @@ theorem log_measureReal_ge {n : ℕ} (hn : 0 < n) {a : ℝ} (ha1 : a ≤ 1) :
     Real.log_pow] at hmode
   have hH : (n : ℝ) * Real.binEntropy p =
       -((k : ℝ) * Real.log p + ((n - k : ℕ) : ℝ) * Real.log (1 - p)) := by
-    rw [Real.binEntropy, Real.log_inv, Real.log_inv, Nat.cast_sub hk, ← hnp]
+    rw [binEntropy_eq, Real.log_inv, Real.log_inv, Nat.cast_sub hk, ← hnp]
     ring
   have e : (n : ℝ) * (Real.binEntropy p - Real.log 2) =
       (n : ℝ) * Real.binEntropy p - n * Real.log 2 := mul_sub _ _ _

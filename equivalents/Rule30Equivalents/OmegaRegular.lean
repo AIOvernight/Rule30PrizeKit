@@ -1,8 +1,19 @@
-import Rule30Equivalents.Basic
-import Mathlib.Data.Fintype.Option
-import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Order.Preorder.Finite
-import Mathlib.Data.Fintype.Pigeonhole
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.Data.Fintype.Option
+public import Mathlib.Data.Set.Finite.Basic
+public import Mathlib.Order.Preorder.Finite
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 ⟺ the center column is not ω-regular
@@ -28,6 +39,8 @@ By Büchi's theorem the ω-regular sets are the sets definable in monadic second
 Sources: J. R. Büchi, *On a decision method in restricted second order arithmetic* (1962);
 W. Thomas, *Automata on infinite objects*, Handbook of Theoretical Computer Science B (1990).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OmegaRegular
 

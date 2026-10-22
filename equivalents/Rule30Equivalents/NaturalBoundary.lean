@@ -1,7 +1,9 @@
-import Rule30Equivalents.Basic
-import Mathlib.Analysis.Complex.CauchyIntegral
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import Mathlib.Analysis.SpecificLimits.Normed
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Analysis.SpecificLimits.Normed
 
 /-!
 # Natural boundary: the sufficient direction
@@ -20,6 +22,8 @@ Sources: G. Szegő, *Über Potenzreihen mit endlich vielen verschiedenen Koeffiz
 Preuss. Akad. Wiss. (1922) 88–91; F. Carlson, *Über Potenzreihen mit ganzzahligen Koeffizienten*,
 Math. Z. 9 (1921) 1–13.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.NaturalBoundary
 

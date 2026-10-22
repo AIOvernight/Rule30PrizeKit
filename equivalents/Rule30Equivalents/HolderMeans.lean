@@ -1,5 +1,16 @@
-import Rule30Equivalents.ProblemTwo
-import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+module
+
+public import Rule30Equivalents.ProblemTwo
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Iterated Cesàro means and Hardy's Tauberian theorem
@@ -19,6 +30,8 @@ mean, Hölder's mean of order `k`.
 * `halfDensity_iff_holder`, `problem2_iff_holder`: **Problem 2 holds iff the Hölder means of order
   `k` of the center column tend to `1/2`**, for every `k ≥ 1`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.HolderMeans
 

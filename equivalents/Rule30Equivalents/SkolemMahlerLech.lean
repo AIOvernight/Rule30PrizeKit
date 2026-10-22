@@ -1,9 +1,11 @@
-import Rule30Equivalents.Strassmann
-import Rule30Equivalents.LinearRelations
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.RingTheory.Polynomial.Pochhammer
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.Analysis.SpecificLimits.Basic
+module
+
+public import Rule30Equivalents.Strassmann
+public import Rule30Equivalents.LinearRelations
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.Polynomial.Pochhammer
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # The Skolem–Mahler–Lech theorem, and Problem 1 as a zero set over `ℚ`
@@ -35,6 +37,8 @@ Mat. Kongr. (1934) 163–188; K. Mahler, *Eine arithmetische Eigenschaft der Tay
 rationaler Funktionen*, Proc. Akad. Wet. Amsterdam 38 (1935) 50–60; C. Lech, *A note on recurring
 series*, Ark. Mat. 2 (1953) 417–421; the exposition of T. Tao, *Structure and Randomness*, §1.9.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.SkolemMahlerLech
 
@@ -217,7 +221,7 @@ theorem exists_pow_eq_one_add {d : ℕ} (A : Matrix (Fin d) (Fin d) ℤ_[p])
   have := hB i j
   rw [Matrix.sub_apply] at this
   rw [Matrix.add_apply, Matrix.smul_apply, Matrix.of_apply, smul_eq_mul, ← this]
-  ring
+  ring_nf
 
 /-- `((1 + p B)ⁿ w)ᵢ = ∑ₖ (n choose k) pᵏ (Bᵏ w)ᵢ`. -/
 theorem mulVec_pow_eq_sum {d : ℕ} (B : Matrix (Fin d) (Fin d) ℤ_[p]) (w : Fin d → ℤ_[p])

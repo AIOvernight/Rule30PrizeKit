@@ -1,5 +1,9 @@
-import Mathlib.Computability.ContextFreeGrammar
-import Rule30Equivalents.LogicAutomata
+module
+
+public import Mathlib.Computability.ContextFreeGrammar
+public import Rule30Equivalents.LogicAutomata
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
 
 /-!
 # Problem 1 and context-free languages
@@ -36,6 +40,8 @@ grammars*, Z. Phonetik Sprachwiss. Kommunikationsforsch. 14 (1961) 143–172; S.
 *Two families of languages related to ALGOL*, J. ACM 9 (1962) 350–371; R. V. Book, *On languages
 with a certain prefix property*, Math. Systems Theory 10 (1977) 229–237.
 -/
+
+@[expose] public section
 
 universe u
 

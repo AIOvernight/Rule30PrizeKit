@@ -1,10 +1,21 @@
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.TransformsSeeds
-import Rule30Equivalents.Symmetry
-import Rule30Equivalents.Lyndon
-import Rule30Equivalents.GoldenPowers
-import Mathlib.Data.Nat.Nth
-import Mathlib.NumberTheory.Real.GoldenRatio
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.TransformsSeeds
+public import Rule30Equivalents.Symmetry
+public import Rule30Equivalents.Lyndon
+public import Rule30Equivalents.GoldenPowers
+public import Mathlib.Data.Nat.Nth
+public import Mathlib.NumberTheory.Real.GoldenRatio
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 for words: certificates, gaps, run lengths, repetitions and borders
@@ -34,6 +45,8 @@ One sufficient condition:
   unbounded, Problem 1 holds (`lzComplexity_le_of_eventuallyPeriodic`). The equivalence is proved in
   `LempelZiv`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.WordForms
 

@@ -1,11 +1,13 @@
-import Rule30Equivalents.Basic
-import Rule30Equivalents.WordsAutomata
-import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
-import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Data.Int.Interval
-import Mathlib.Tactic.Ring
+module
+
+public import Rule30Equivalents.Basic
+public import Rule30Equivalents.WordsAutomata
+public import Ruliology.CellularAutomata.Rule30ZeroBoundaryBarriers
+public import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.Data.Int.Interval
+public import Mathlib.Tactic.Ring
 
 /-!
 # The algebraic degree of rule 30's `t`-step map
@@ -43,6 +45,8 @@ the Möbius transform `coef Φ_t S = ∑_{U ⊆ S} Φ_t(1_U)`.
 The degree does not decide Problem 1: there are rules of maximal degree whose single-seed center
 columns are eventually periodic.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.AlgebraicDegree
 

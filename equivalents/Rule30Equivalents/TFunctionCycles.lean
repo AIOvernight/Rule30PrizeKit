@@ -1,5 +1,16 @@
-import Rule30Equivalents.TFunction
-import Mathlib.Logic.Function.Iterate
+module
+
+public import Rule30Equivalents.TFunction
+public import Mathlib.Logic.Function.Iterate
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The cycles of an invertible T-function
@@ -46,6 +57,8 @@ Sources: A. Klimov, A. Shamir, *A new class of invertible mappings*, CHES 2002, 
 A. Khrennikov, E. Yurova, *T-functions revisited: new criteria for bijectivity/transitivity*,
 arXiv:1111.3093.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TFunctionCycles
 

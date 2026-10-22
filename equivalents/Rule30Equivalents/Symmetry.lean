@@ -1,7 +1,9 @@
-import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30WhiteSeed
-import Mathlib.Data.List.Basic
-import Mathlib.Tactic.Ring
+module
+
+public import Rule30Equivalents.Basic
+public import Ruliology.CellularAutomata.Rule30WhiteSeed
+public import Mathlib.Data.List.Basic
+public import Mathlib.Tactic.Ring
 
 /-!
 # Problem 1 for rules 86, 135 and 149: the symmetries of rule 30
@@ -65,6 +67,8 @@ definitions, `decide` also confirms the classical count of 88 classes among the 
 * Rule 30's class {30, 86, 135, 149} is computed here (`class_30`). The equivalences with Problem 1
   are immediate consequences of these symmetries. We know of no separate source for them.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents
 namespace Symmetry

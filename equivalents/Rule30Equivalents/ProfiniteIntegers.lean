@@ -1,9 +1,11 @@
-import Rule30Equivalents.ShiftOrbit
-import Mathlib.Data.Nat.Factorial.Basic
-import Mathlib.Data.Nat.Periodic
-import Mathlib.Topology.Algebra.Monoid
-import Mathlib.Topology.Compactness.Compact
-import Mathlib.Topology.Constructions
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Mathlib.Data.Nat.Factorial.Basic
+public import Mathlib.Data.Nat.Periodic
+public import Mathlib.Topology.Algebra.Monoid
+public import Mathlib.Topology.Compactness.Compact
+public import Mathlib.Topology.Constructions
 
 /-!
 # The profinite integers
@@ -24,6 +26,8 @@ natural numbers embed by `n ↦ (n mod (k+1)!)ₖ` (`Zhat.ofNat`).
 * **Problem 1 holds iff no tail of `c` extends to a continuous function on `Ẑ`**
   (`problem1_iff_no_continuous_extension`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ProfiniteIntegers
 

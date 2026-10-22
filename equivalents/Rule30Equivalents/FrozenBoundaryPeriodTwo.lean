@@ -1,5 +1,16 @@
-import Rule30Equivalents.FrozenBoundary
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
+module
+
+public import Rule30Equivalents.FrozenBoundary
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The frozen-boundary family at period 2: exact death, `Q01` and `CQ01`
@@ -49,6 +60,8 @@ period-2 question is a coupled question of its own: it is implied by `Q01`, but 
 Numerically, the forced seed of each right part, computed for all 8 steps up to depth 1200, is
 never finite.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.FrozenBoundaryPeriodTwo
 

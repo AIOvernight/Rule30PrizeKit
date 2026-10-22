@@ -1,4 +1,15 @@
-import Rule30Equivalents.LargeDeviations
+module
+
+public import Rule30Equivalents.LargeDeviations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The Erdős–Rényi law for the center column
@@ -23,6 +34,8 @@ Write `N(L) = ⌈e^(L I(α))⌉`, so that `N(L(n)) ≤ n < N(L(n) + 1)`.
   (`LargeDeviations.log_measureReal_ge`). So all of them fail with probability at most `e^(-L)`
   for large `L`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ErdosRenyi
 

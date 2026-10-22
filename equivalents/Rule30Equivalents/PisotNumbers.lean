@@ -1,8 +1,19 @@
-import Rule30Equivalents.BinaryIrrational
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
-import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
-import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+module
+
+public import Rule30Equivalents.BinaryIrrational
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 in every Pisot base `β > 2`
@@ -34,6 +45,8 @@ Sources: K. Schmidt, *On periodic expansions of Pisot numbers and Salem numbers*
 Math. Soc. 12 (1980) 269–278; A. Bertrand, *Développements en base de Pisot et répartition
 modulo 1*, C. R. Acad. Sci. Paris 285 (1977) 419–421.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.PisotNumbers
 

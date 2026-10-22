@@ -1,6 +1,17 @@
-import Rule30Equivalents.Autocorrelation
-import Rule30Equivalents.Mixing
-import Rule30Equivalents.LinearComplexity
+module
+
+public import Rule30Equivalents.Autocorrelation
+public import Rule30Equivalents.Mixing
+public import Rule30Equivalents.LinearComplexity
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The stronger statements hold for almost every configuration
@@ -42,6 +53,8 @@ when the first five cells of the column agree (`measure_not_defectBound_trace`),
 all `m ≥ 9` fails with probability at least `2^-9`, when the first nine cells are white
 (`measure_hankel_det_eq_zero_trace`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Typicality
 

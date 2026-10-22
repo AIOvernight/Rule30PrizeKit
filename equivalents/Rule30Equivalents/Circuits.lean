@@ -1,4 +1,15 @@
-import Rule30Equivalents.RandomConfigurations
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Circuit lower bounds for a random center column
@@ -20,6 +31,8 @@ gates (`card_prog_le`), and a given program computes the random function with pr
 succeeds with probability at most `2⁻ᵏ` for `k ≥ 5` (`measure_exists_small_circuit_le`), and the
 Borel–Cantelli lemma applies (`ae_eventually_no_small_circuit`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Circuits
 

@@ -1,5 +1,16 @@
-import Rule30Equivalents.LinearRelations
-import Mathlib.RingTheory.LaurentSeries
+module
+
+public import Rule30Equivalents.LinearRelations
+public import Mathlib.RingTheory.LaurentSeries
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Transcendence of the generating function: sufficient conditions
@@ -22,6 +33,8 @@ Sources: P. Fatou, *Séries trigonométriques et séries de Taylor*, Acta Math. 
 G. Christol, *Ensembles presque périodiques k-reconnaissables*, Theoret. Comput. Sci. 9 (1979)
 141–145.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Transcendence
 

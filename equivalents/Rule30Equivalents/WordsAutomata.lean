@@ -1,17 +1,19 @@
-import Rule30Equivalents.ShiftOrbit
-import Ruliology.CellularAutomata.Rule30StripCertificates
-import Mathlib.Computability.DFA
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.Data.List.GetD
-import Mathlib.Data.List.OfFn
-import Mathlib.Data.List.PeriodicityLemma
-import Mathlib.Dynamics.OmegaLimit
-import Mathlib.Topology.Baire.Lemmas
-import Mathlib.Topology.Baire.LocallyCompactRegular
-import Mathlib.Topology.Compactness.Compact
-import Mathlib.Topology.DerivedSet
-import Mathlib.Topology.DiscreteSubset
-import Mathlib.Topology.Separation.Hausdorff
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Ruliology.CellularAutomata.Rule30StripCertificates
+public import Mathlib.Computability.DFA
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Data.List.GetD
+public import Mathlib.Data.List.OfFn
+public import Mathlib.Data.List.PeriodicityLemma
+public import Mathlib.Dynamics.OmegaLimit
+public import Mathlib.Topology.Baire.Lemmas
+public import Mathlib.Topology.Baire.LocallyCompactRegular
+public import Mathlib.Topology.Compactness.Compact
+public import Mathlib.Topology.DerivedSet
+public import Mathlib.Topology.DiscreteSubset
+public import Mathlib.Topology.Separation.Hausdorff
 
 /-!
 # Problem 1 in the language of words, symbolic dynamics and finite automata
@@ -170,6 +172,8 @@ Finite automata:
   (1990) 90–99.
 * DFAs and regular languages: `Mathlib/Computability/DFA.lean`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents
 namespace WordsAutomata

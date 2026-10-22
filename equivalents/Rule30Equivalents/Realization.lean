@@ -1,7 +1,9 @@
-import Rule30Equivalents.BinaryIrrational
-import Ruliology.CellularAutomata.Rule30Realization
-import Mathlib.Analysis.Real.OfDigits
-import Mathlib.Analysis.Real.Cardinality
+module
+
+public import Rule30Equivalents.BinaryIrrational
+public import Ruliology.CellularAutomata.Rule30Realization
+public import Mathlib.Analysis.Real.OfDigits
+public import Mathlib.Analysis.Real.Cardinality
 
 /-!
 # The inverse problem, other columns, and `Real.ofDigits`
@@ -20,6 +22,8 @@ import Mathlib.Analysis.Real.Cardinality
 * `problem1_iff_irrational_cantorFunction`: the same with Mathlib's `Cardinal.cantorFunction` at
   `1/b`, which is `b` times the base-`b` value.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Realization
 

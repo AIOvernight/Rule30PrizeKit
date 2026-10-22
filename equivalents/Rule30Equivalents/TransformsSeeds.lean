@@ -1,7 +1,9 @@
-import Rule30Equivalents.ShiftOrbit
-import Ruliology.CellularAutomata.Rule30Realization
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Mathlib.Data.Nat.Factorial.Basic
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Ruliology.CellularAutomata.Rule30Realization
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Mathlib.Data.Nat.Factorial.Basic
 
 /-!
 # Problem 1 under simple transforms and decimations, its normal forms, and other seeds
@@ -149,6 +151,8 @@ center column of rule 30 from `s_n` is not eventually periodic (`problem1_iff_st
   source for them.
 * We know of no literature on the stripe seeds.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents
 namespace TransformsSeeds

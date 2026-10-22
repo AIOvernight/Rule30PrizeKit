@@ -1,5 +1,16 @@
-import Rule30Equivalents.IntegerRows
-import Ruliology.CellularAutomata.Rule30FiniteDiagonals
+module
+
+public import Rule30Equivalents.IntegerRows
+public import Ruliology.CellularAutomata.Rule30FiniteDiagonals
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The integer step of rule 30 is a T-function
@@ -41,6 +52,8 @@ Sources: A. Klimov, A. Shamir, *A new class of invertible mappings*, CHES 2002, 
 (T-functions); V. Anashin, A. Khrennikov, *Applied Algebraic Dynamics*, de Gruyter (2009),
 compatible maps of `ℤ_p`; OEIS A110240 and A269160.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TFunction
 

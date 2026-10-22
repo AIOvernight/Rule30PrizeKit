@@ -1,8 +1,10 @@
-import Rule30Equivalents.TFunctionCycles
-import Ruliology.CellularAutomata.Rule30RightPeriods
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.Topology.LocallyConstant.Basic
-import Mathlib.NumberTheory.Padics.ProperSpace
+module
+
+public import Rule30Equivalents.TFunctionCycles
+public import Ruliology.CellularAutomata.Rule30RightPeriods
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.LocallyConstant.Basic
+public import Mathlib.NumberTheory.Padics.ProperSpace
 
 /-!
 # The right edge of rule 30 is a 2-adic odometer
@@ -32,6 +34,8 @@ expansion of `Φ^t(a)` (`TFunction.testBit_orbit`).
 The finite levels are in `TFunctionCycles` (`seed_rows_return_iff`, `per_unbounded`). None of this
 reaches the center column, which reads the moving coordinate `row t t`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Odometer
 

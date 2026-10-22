@@ -1,6 +1,17 @@
-import Ruliology.CellularAutomata.Rule30Jen
-import Rule30Equivalents.Basic
-import Mathlib.ModelTheory.Arithmetic.Presburger.Definability
+module
+
+public import Ruliology.CellularAutomata.Rule30Jen
+public import Rule30Equivalents.Basic
+public import Mathlib.ModelTheory.Arithmetic.Presburger.Definability
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Multiplication in Presburger arithmetic with the black times
@@ -24,6 +35,8 @@ set. `SqPred y z` says that some window contains `0`, `1` and `z`, that the gaps
 consecutive elements up to `z` grow by `2`, and that the last gap is `2y - 1`; for a disjunctive
 `S` this holds iff `z = y²` (`sqPred_iff`), and `ab = c` iff `(a + b)² = a² + b² + 2c`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.PresburgerExpansion
 
@@ -105,7 +118,7 @@ lemma isSemilinearSet_boundedFormula_realize (hS : IsSemilinearSet S) {n}
     rcases term_realize_eq_add_dotProduct S t₁ with ⟨k₁, u₁, ht₁⟩
     rcases term_realize_eq_add_dotProduct S t₂ with ⟨k₂, u₂, ht₂⟩
     convert! Nat.isSemilinearSet_setOfPred_mulVec_eq ![k₁] ![k₂] (.of ![u₁]) (.of ![u₂])
-    simp [ht₁, ht₂]
+    simp [ht₁, ht₂, Matrix.vecHead, Matrix.mulVec]
   | rel R ts =>
     cases R with
     | inl R =>

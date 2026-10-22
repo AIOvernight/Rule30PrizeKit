@@ -1,8 +1,10 @@
-import Rule30Equivalents.Basic
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.Analysis.Asymptotics.Defs
-import Mathlib.Data.Set.Finite.List
-import Mathlib.Data.Nat.Log
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.Analysis.Asymptotics.Defs
+public import Mathlib.Data.Set.Finite.List
+public import Mathlib.Data.Nat.Log
 
 /-!
 # One-tape Turing machines: the `n log n` gap for unary input
@@ -37,6 +39,8 @@ holds iff no one-tape machine decides `{1ⁿ : c(n) = 1}` in time `o(n log n)`
 
 The proof never uses that the tape alphabet is finite. The space version is in `OfflineGap`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OneTapeGap
 

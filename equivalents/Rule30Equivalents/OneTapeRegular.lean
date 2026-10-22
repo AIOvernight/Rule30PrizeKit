@@ -1,7 +1,9 @@
-import Rule30Equivalents.OneTapeGap
-import Rule30Equivalents.Cobham
-import Mathlib.Computability.MyhillNerode
-import Mathlib.Data.Nat.Digits.Defs
+module
+
+public import Rule30Equivalents.OneTapeGap
+public import Rule30Equivalents.Cobham
+public import Mathlib.Computability.MyhillNerode
+public import Mathlib.Data.Nat.Digits.Defs
 
 /-!
 # One-tape time `o(n log n)` decides only regular languages
@@ -30,6 +32,8 @@ decide `c(n)` from the base-`2` and the base-`3` digits of `n` in time `o(ℓ lo
 is the number of digits. This is the analogue for digit input of
 `OneTapeGap.problem1_iff_no_fast_one_tape_decider`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OneTapeRegular
 

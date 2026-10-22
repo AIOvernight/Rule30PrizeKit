@@ -1,10 +1,12 @@
-import Rule30Equivalents.BinaryIrrational
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.BlackTimes
-import Mathlib.Algebra.ContinuedFractions.Computation.TerminatesIffRat
-import Mathlib.NumberTheory.DiophantineApproximation.Basic
-import Mathlib.NumberTheory.Transcendental.Liouville.LiouvilleWith
-import Mathlib.Topology.Instances.AddCircle.DenseSubgroup
+module
+
+public import Rule30Equivalents.BinaryIrrational
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.BlackTimes
+public import Mathlib.Algebra.ContinuedFractions.Computation.TerminatesIffRat
+public import Mathlib.NumberTheory.DiophantineApproximation.Basic
+public import Mathlib.NumberTheory.Transcendental.Liouville.LiouvilleWith
+public import Mathlib.Topology.Instances.AddCircle.DenseSubgroup
 
 /-!
 # Problem 1 in number theory: continued fractions, approximation, the circle, long division
@@ -132,6 +134,8 @@ every digit sequence, and then specializes them to the center column.
   (long division: only finitely many remainders occur, so one repeats, and then the digits repeat;
   a terminating expansion has a second one ending in repeated `9`s).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.NumberTheory
 

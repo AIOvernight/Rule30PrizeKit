@@ -1,5 +1,16 @@
-import Rule30Equivalents.Typicality
-import Mathlib.NumberTheory.Transcendental.Liouville.LiouvilleWith
+module
+
+public import Rule30Equivalents.Typicality
+public import Mathlib.NumberTheory.Transcendental.Liouville.LiouvilleWith
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The irrationality exponent of a random center column
@@ -21,6 +32,8 @@ it determines those digits (`eq_of_lead_eq`), so each of its values has probabil
 probability at most `16C n^(1-p)`, summable for `p > 2`, and the Borel–Cantelli lemma applies
 (`ae_not_frequently_approx`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.IrrationalityExponent
 

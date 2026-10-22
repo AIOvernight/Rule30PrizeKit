@@ -1,6 +1,17 @@
-import Rule30Equivalents.Mixing
-import Mathlib.MeasureTheory.Constructions.Polish.Basic
-import Mathlib.Topology.Metrizable.CompletelyMetrizable
+module
+
+public import Rule30Equivalents.Mixing
+public import Mathlib.MeasureTheory.Constructions.Polish.Basic
+public import Mathlib.Topology.Metrizable.CompletelyMetrizable
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Rule 30 is an automorphism of the fair-coin measure, modulo null sets
@@ -24,6 +35,8 @@ is invertible modulo null sets:
   shift is a factor of rule 30 as an automorphism of the fair-coin measure, extending
   `RandomConfigurations.trace_evol_one` from the one-sided shift.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Invertibility
 

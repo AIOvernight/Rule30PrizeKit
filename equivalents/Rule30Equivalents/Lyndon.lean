@@ -1,8 +1,10 @@
-import Mathlib.Data.List.Lex
-import Mathlib.Data.Nat.Find
-import Mathlib.Data.Set.Finite.List
-import Mathlib.Data.Set.Finite.Lemmas
-import Mathlib.Order.Monotone.Basic
+module
+
+public import Mathlib.Data.List.Lex
+public import Mathlib.Data.Nat.Find
+public import Mathlib.Data.Set.Finite.List
+public import Mathlib.Data.Set.Finite.Lemmas
+public import Mathlib.Order.Monotone.Basic
 
 /-!
 # Lyndon words and the Ehrenfeucht–Silberger theorem for infinite words
@@ -29,6 +31,8 @@ Math. 26 (1979) 101–109. K. T. Chen, R. H. Fox, R. C. Lyndon, *Free differenti
 Ann. of Math. 68 (1958) 81–95. M. Lothaire, *Combinatorics on Words*, Chapter 5. The proof through
 the Lyndon factorization is written for this library.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Lyndon
 

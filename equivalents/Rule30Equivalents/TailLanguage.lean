@@ -1,5 +1,15 @@
-import Rule30Equivalents.WordsAutomata
-import Mathlib.Tactic.Ring
+module
+
+public import Rule30Equivalents.WordsAutomata
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The tail language: no flat step, no Rauzy cycle
@@ -33,6 +43,8 @@ Sources: G. Rauzy, *Suites à termes dans un alphabet fini*, Sém. Théorie des 
 (1983); J. Cassaigne and F. Nicolas, *Factor complexity*, in Combinatorics, Automata and Number
 Theory (2010).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TailLanguage
 

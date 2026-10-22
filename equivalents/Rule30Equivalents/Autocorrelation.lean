@@ -1,4 +1,15 @@
-import Rule30Equivalents.RandomConfigurations
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Autocorrelations of the center column
@@ -21,6 +32,8 @@ A bit sequence `b` disagrees with its shift by `Ï„` at the times `t` with `b t â
   implies Problem 1 (`StrongerStatements.problem1_of_infinite_disagreements`,
   `StrongerStatements.problem1_of_far_from_periodic`, `ae_infinite_disagreements_trace`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Autocorrelation
 

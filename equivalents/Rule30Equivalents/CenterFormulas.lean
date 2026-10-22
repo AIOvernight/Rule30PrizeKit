@@ -1,13 +1,15 @@
-import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30RightPeriods
-import Ruliology.CellularAutomata.Rule30Realization
-import Mathlib.Algebra.BigOperators.Intervals
-import Mathlib.Algebra.Group.Hom.End
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Order.Interval.Finset.Defs
-import Mathlib.Data.Int.Interval
-import Mathlib.Algebra.BigOperators.Pi
-import Mathlib.Tactic.Ring
+module
+
+public import Rule30Equivalents.Basic
+public import Ruliology.CellularAutomata.Rule30RightPeriods
+public import Ruliology.CellularAutomata.Rule30Realization
+public import Mathlib.Algebra.BigOperators.Intervals
+public import Mathlib.Algebra.Group.Hom.End
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.Order.Interval.Finset.Defs
+public import Mathlib.Data.Int.Interval
+public import Mathlib.Algebra.BigOperators.Pi
+public import Mathlib.Tactic.Ring
 
 /-!
 # Two exact formulas for the center column
@@ -32,6 +34,8 @@ Neither formula decides Problem 1. The first is the identity behind the right-ha
 the second shows that the nonlinear part `x_p x_{p+1}` is what separates rule 30 from rule 150,
 whose center column is constant.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.CenterFormulas
 

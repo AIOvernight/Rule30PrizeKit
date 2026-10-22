@@ -1,6 +1,17 @@
-import Rule30Equivalents.LinearRelations
-import Mathlib.Algebra.Polynomial.Roots
-import Mathlib.Algebra.BigOperators.Field
+module
+
+public import Rule30Equivalents.LinearRelations
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 ⟺ the center column is not P-recursive
@@ -32,6 +43,8 @@ Sources: A. J. van der Poorten and I. E. Shparlinski, *On linear recurrence sequ
 polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155; R. P. Stanley, *Differentiably
 finite power series*, European J. Combin. 1 (1980) 175–188.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Holonomic
 

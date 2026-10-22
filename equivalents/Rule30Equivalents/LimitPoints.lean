@@ -1,11 +1,13 @@
-import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30FiniteConfigs
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Mathlib.Topology.Compactness.Compact
-import Mathlib.Topology.Constructions
-import Mathlib.Data.Set.Card
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.Topology.Separation.Hausdorff
+module
+
+public import Rule30Equivalents.Basic
+public import Ruliology.CellularAutomata.Rule30FiniteConfigs
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Mathlib.Topology.Compactness.Compact
+public import Mathlib.Topology.Constructions
+public import Mathlib.Data.Set.Card
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Topology.Separation.Hausdorff
 
 /-!
 # The right halves of rule 30 have infinitely many limit points
@@ -35,6 +37,8 @@ In terms of `y_t = Σ_{p ≥ 0} cell(t, p) 2^-(p+1)`, this is the rule-30 analog
 Pisot and Vijayaraghavan that `(p/q)ⁿ mod 1` has infinitely many limit points. It neither implies
 nor follows from Problem 1.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LimitPoints
 

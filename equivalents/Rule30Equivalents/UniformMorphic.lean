@@ -1,4 +1,6 @@
-import Rule30Equivalents.Cobham
+module
+
+public import Rule30Equivalents.Cobham
 
 /-!
 # Automatic sequences are the uniformly morphic ones
@@ -18,6 +20,8 @@ any multiplicatively independent `a, b ≥ 2` (`problem1_iff_not_uniformMorphic`
 uniform case of the statement for substitutions with multiplicatively independent Perron numbers;
 the general case needs Durand's theorem.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.UniformMorphic
 

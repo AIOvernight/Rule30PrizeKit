@@ -1,5 +1,16 @@
-import Rule30Equivalents.BoundedRemainder
-import Mathlib.Probability.Independence.ZeroOne
+module
+
+public import Rule30Equivalents.BoundedRemainder
+public import Mathlib.Probability.Independence.ZeroOne
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Fluctuations of the center column of a random configuration
@@ -38,6 +49,8 @@ So the fluctuations of a random center column lie between `K √n`, for every `K
 density `1/2` this strengthens `BoundedRemainder.ae_unbounded_remainder_trace`: the remainder is not
 even `O(√n)`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Fluctuations
 

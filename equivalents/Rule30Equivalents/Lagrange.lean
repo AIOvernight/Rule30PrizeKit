@@ -1,12 +1,21 @@
-import Rule30Equivalents.Basic
-import Mathlib.Algebra.Order.Floor.Ring
-import Mathlib.Algebra.Polynomial.Roots
-import Mathlib.NumberTheory.Real.Irrational
-import Mathlib.Data.Set.Finite.Lemmas
-import Mathlib.Analysis.PSeries
-import Mathlib.Topology.Algebra.InfiniteSum.Real
-import Mathlib.Tactic.LinearCombination
-import Mathlib.Tactic.Positivity
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.Algebra.Order.Floor.Ring
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.NumberTheory.Real.Irrational
+public import Mathlib.Data.Set.Finite.Lemmas
+public import Mathlib.Analysis.PSeries
+public import Mathlib.Topology.Algebra.InfiniteSum.Real
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.Bound
 
 /-!
 # Lagrange's theorem: eventually periodic continued fractions are quadratic irrationals
@@ -38,6 +47,8 @@ For an irrational `x`, the *complete quotients* are `x₀ = x` and `xₙ₊₁ =
 Sources: G. H. Hardy and E. M. Wright, *An Introduction to the Theory of Numbers*, §10.12
 (Theorems 176 and 177); J.-L. Lagrange (1770); L. Euler (1737).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Lagrange
 

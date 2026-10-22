@@ -1,13 +1,23 @@
-import Rule30Equivalents.RandomConfigurations
-import Ruliology.CellularAutomata.Rule30Diagonals
-import Mathlib.Computability.Primrec.List
-import Mathlib.Computability.Partrec
-import Mathlib.Computability.PartrecCode
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.Zify
-import Mathlib.Tactic.Tauto
-import Mathlib.Basic.Finite.Prod
-import Mathlib.Algebra.Order.Ring.Abs
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Mathlib.Computability.Primrec.List
+public import Mathlib.Computability.Partrec
+public import Mathlib.Computability.PartrecCode
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Zify
+public import Mathlib.Tactic.Tauto
+public import Mathlib.Basic.Finite.Prod
+public import Mathlib.Algebra.Order.Ring.Abs
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 is Π⁰₂ and Problem 2 is Π⁰₃
@@ -32,6 +42,8 @@ function of row `t`, stored as the list of its cells `-t, …, t` (`stepList`, `
   measure has no atoms (`RandomConfigurations.coins_singleton`), and a single sequence is nowhere
   dense (`Genericity.isNowhereDense_singleton`). The seed is special in this respect too.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Computability
 
@@ -179,9 +191,9 @@ theorem partrec_firstDefect : Partrec firstDefect := by
 
 theorem firstDefect_dom (TP : ℕ × ℕ) :
     (firstDefect TP).Dom ↔ ∃ t, defect TP.1 TP.2 t = true := by
-  simp only [firstDefect]
-  exact ⟨fun ⟨t, h, _⟩ => ⟨t, (Part.mem_some_iff.1 h).symm⟩,
-    fun ⟨t, h⟩ => ⟨t, Part.mem_some_iff.2 h.symm, fun _ _ => trivial⟩⟩
+  let p : ℕ →. Bool := fun t => Part.some (defect TP.1 TP.2 t)
+  exact (@Nat.rfind_dom p).trans ⟨fun ⟨t, h, _⟩ => ⟨t, (Part.mem_some_iff.1 h).symm⟩,
+    fun ⟨t, h⟩ => ⟨t, Part.mem_some_iff.2 h.symm, fun _ => trivial⟩⟩
 
 /-- **Problem 1 as the totality of a partial recursive function**: the search for a defect halts on
 every input. -/

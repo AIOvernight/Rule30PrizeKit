@@ -1,4 +1,15 @@
-import Rule30Equivalents.EmpiricalMeasures
+module
+
+public import Rule30Equivalents.EmpiricalMeasures
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Pattern frequencies along rule 30 orbits
@@ -27,6 +38,8 @@ Etemadi's strong law of large numbers, which needs only pairwise independence.
   patterns form a π-system of small neighbourhoods,
   `IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OrbitFrequencies
 

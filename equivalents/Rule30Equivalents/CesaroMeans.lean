@@ -1,4 +1,15 @@
-import Rule30Equivalents.ProblemTwo
+module
+
+public import Rule30Equivalents.ProblemTwo
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Cesàro means of every order
@@ -21,6 +32,8 @@ mean of order `k` (`cesaroMean`; `σ¹ n` is the average of `a 0, …, a n`).
 * `problem2_iff_cesaroMean`: **Problem 2 holds iff the Cesàro means of order `k` of the center
   column tend to `1/2`**, for every `k ≥ 1`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.CesaroMeans
 

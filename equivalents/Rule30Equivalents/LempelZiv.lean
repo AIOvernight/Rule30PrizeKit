@@ -1,4 +1,15 @@
-import Rule30Equivalents.WordForms
+module
+
+public import Rule30Equivalents.WordForms
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 ⟺ the Lempel–Ziv complexity of the prefixes is unbounded
@@ -26,6 +37,8 @@ The argument avoids extracting subsequences, and it needs no optimality theorem 
 Sources: A. Lempel and J. Ziv, *On the complexity of finite sequences*, IEEE Trans. Inform. Theory
 22 (1976) 75–81.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LempelZiv
 

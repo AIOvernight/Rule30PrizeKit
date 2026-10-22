@@ -1,7 +1,9 @@
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.Topology.ContinuousMap.Weierstrass
-import Mathlib.Analysis.SpecificLimits.Normed
-import Mathlib.Analysis.Normed.Ring.InfiniteSum
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Mathlib.Topology.ContinuousMap.Weierstrass
+public import Mathlib.Analysis.SpecificLimits.Normed
+public import Mathlib.Analysis.Normed.Ring.InfiniteSum
 
 /-!
 # The Hardy–Littlewood–Karamata Tauberian theorem
@@ -23,6 +25,8 @@ Write `Λₓ(φ) = (1 - x) ∑ aₙ xⁿ φ(xⁿ)` (`abelMean`).
 
 The converse, the Abelian direction, holds for bounded sequences (`tendsto_abel_of_tendsto_cesaro`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Tauberian
 

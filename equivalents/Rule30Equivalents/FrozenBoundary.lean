@@ -1,4 +1,15 @@
-import Rule30Equivalents.AutomatonGroup
+module
+
+public import Rule30Equivalents.AutomatonGroup
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The frozen-boundary family: edge decoupling, reduction to FinConf, and period 1
@@ -35,6 +46,8 @@ the bulk sees only as a fixed pattern. What is left beyond FinConf is the white-
 * `frozenBoundary_period_one`: for every step and every seed with an unbounded orbit, no readout is
   eventually constant. This is the period-1 case of the conjecture, for all 8 steps.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.FrozenBoundary
 

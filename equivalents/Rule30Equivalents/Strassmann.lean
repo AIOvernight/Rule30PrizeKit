@@ -1,7 +1,9 @@
-import Mathlib.NumberTheory.Padics.PadicIntegers
-import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
-import Mathlib.Analysis.Normed.Group.Ultra
-import Mathlib.Algebra.Ring.GeomSum
+module
+
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Algebra.Ring.GeomSum
 
 /-!
 # Strassmann's theorem
@@ -23,6 +25,8 @@ where `N` is the last index of a coefficient of largest norm. This is the analyt
 Sources: R. Strassmann, *Über den Wertevorrat von Potenzreihen im Gebiet der p-adischen Zahlen*,
 J. Reine Angew. Math. 159 (1928) 13–28; F. Q. Gouvêa, *p-adic Numbers*, Theorem 4.4.6.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Strassmann
 

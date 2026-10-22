@@ -1,4 +1,15 @@
-import Rule30Equivalents.BinaryIrrational
+module
+
+public import Rule30Equivalents.BinaryIrrational
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 through the Engel, Sylvester, Lüroth and factorial expansions of `x₂`
@@ -38,6 +49,8 @@ Budapest. Eötvös Sect. Math. 1 (1958) 7–32; J. Lüroth, *Ueber eine eindeuti
 Zahlen in eine unendliche Reihe*, Math. Ann. 21 (1883) 411–423; J. Galambos, *Representations of Real Numbers by
 Infinite Series*, Springer (1976).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Expansions
 

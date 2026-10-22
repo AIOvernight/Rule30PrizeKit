@@ -1,6 +1,17 @@
-import Rule30Equivalents.Basic
-import Ruliology.CellularAutomata.Rule30DrivenLeft
-import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
+module
+
+public import Rule30Equivalents.Basic
+public import Ruliology.CellularAutomata.Rule30DrivenLeft
+public import Ruliology.CellularAutomata.Rule30PeriodTwoSideways
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 as a causal fixed point of the two driven halves
@@ -17,6 +28,8 @@ and the center is updated from its two neighbours. So the center column solves t
 * `problem1_iff_coupled_halves`: Problem 1 holds iff no solution of the system is
   eventually periodic.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.CoupledHalves
 

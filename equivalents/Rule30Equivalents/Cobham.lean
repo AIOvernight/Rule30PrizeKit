@@ -1,9 +1,11 @@
-import Rule30Equivalents.Automatic
-import Mathlib.Data.Nat.Log
-import Mathlib.Tactic.Ring
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.Positivity
-import Mathlib.Tactic.Zify
+module
+
+public import Rule30Equivalents.Automatic
+public import Mathlib.Data.Nat.Log
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.Zify
 
 /-!
 # Cobham's theorem
@@ -33,6 +35,8 @@ automaticity as finiteness of the `k`-kernel (`Automatic.IsAutomatic`).
 Sources: A. Cobham, *On the base-dependence of sets of numbers recognizable by finite automata*,
 Math. Systems Theory 3 (1969) 186–192; T. J. P. Krebs, arXiv:1801.06704 (2018).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Cobham
 

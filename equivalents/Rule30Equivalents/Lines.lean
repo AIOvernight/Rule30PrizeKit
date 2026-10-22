@@ -1,9 +1,20 @@
-import Rule30Equivalents.Mixing
-import Rule30Equivalents.IteratedLogarithm
-import Rule30Equivalents.ErdosRenyi
-import Rule30Equivalents.ReturnTimes
-import Rule30Equivalents.RandomNaturalBoundary
-import Rule30Equivalents.MaxOrderComplexity
+module
+
+public import Rule30Equivalents.Mixing
+public import Rule30Equivalents.IteratedLogarithm
+public import Rule30Equivalents.ErdosRenyi
+public import Rule30Equivalents.ReturnTimes
+public import Rule30Equivalents.RandomNaturalBoundary
+public import Rule30Equivalents.MaxOrderComplexity
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Laws along every line of the spacetime diagram
@@ -30,6 +41,8 @@ of fair-coin sequences holds along all of these countably many lines at once
 The center column is the line `p = 0`, `q = 1`. Lines of velocity `1` are not fair coins
 (`Mixing.measure_diag_eq`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Lines
 

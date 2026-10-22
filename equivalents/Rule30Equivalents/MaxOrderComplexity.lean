@@ -1,6 +1,17 @@
-import Rule30Equivalents.LongestRuns
-import Rule30Equivalents.WordsAutomata
-import Rule30Equivalents.Mixing
+module
+
+public import Rule30Equivalents.LongestRuns
+public import Rule30Equivalents.WordsAutomata
+public import Rule30Equivalents.Mixing
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The maximum-order complexity of a random center column
@@ -30,6 +41,8 @@ Sources: C. J. A. Jansen and D. E. Boekee, *The shortest feedback shift register
 a given sequence*, CRYPTO '89, LNCS 435 (1990) 90–99; R. Arratia and M. S. Waterman, *An
 Erdős–Rényi law with shifts*, Adv. Math. 55 (1985) 13–23.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.MaxOrderComplexity
 

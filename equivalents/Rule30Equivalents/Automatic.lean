@@ -1,14 +1,25 @@
-import Rule30Equivalents.OmegaRegular
-import Mathlib.Computability.DFA
-import Mathlib.Order.Filter.AtTopBot.Basic
-import Mathlib.Data.Set.Finite.Range
-import Mathlib.Order.Interval.Finset.Basic
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.Data.Fintype.Powerset
-import Mathlib.Basic.Finite.Prod
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Order.Interval.Finset.Nat
-import Mathlib.Data.Set.Countable
+module
+
+public import Rule30Equivalents.OmegaRegular
+public import Mathlib.Computability.DFA
+public import Mathlib.Order.Filter.AtTopBot.Basic
+public import Mathlib.Data.Set.Finite.Range
+public import Mathlib.Order.Interval.Finset.Basic
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Data.Fintype.Powerset
+public import Mathlib.Basic.Finite.Prod
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Order.Interval.Finset.Nat
+public import Mathlib.Data.Set.Countable
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Automatic sequences and automatic complexity
@@ -40,6 +51,8 @@ Sources: J. Shallit and M.-w. Wang, *Automatic complexity of strings*, J. Autom.
 automata*, Math. Systems Theory 3 (1969) 186–192; S. Eilenberg, *Automata, Languages, and Machines*
 A (1974).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Automatic
 

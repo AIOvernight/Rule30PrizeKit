@@ -1,17 +1,19 @@
-import Mathlib.Algebra.LinearRecurrence
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Matrix.Rank
-import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
-import Mathlib.Order.Filter.AtTopBot.Basic
-import Mathlib.Algebra.Field.ZMod
-import Mathlib.Algebra.Polynomial.Degree.TrailingDegree
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.RingTheory.PowerSeries.Inverse
-import Mathlib.RingTheory.PowerSeries.Trunc
-import Rule30Equivalents.Basic
-import Rule30Equivalents.ShiftOrbit
-import Rule30Equivalents.WordsAutomata
+module
+
+public import Mathlib.Algebra.LinearRecurrence
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.LinearAlgebra.Matrix.Rank
+public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+public import Mathlib.Order.Filter.AtTopBot.Basic
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.Algebra.Polynomial.Degree.TrailingDegree
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.RingTheory.PowerSeries.Inverse
+public import Mathlib.RingTheory.PowerSeries.Trunc
+public import Rule30Equivalents.Basic
+public import Rule30Equivalents.ShiftOrbit
+public import Rule30Equivalents.WordsAutomata
 
 /-!
 # Problem 1 as the absence of linear relations, over any field
@@ -133,6 +135,8 @@ Special cases:
   Ark. Mat. 2 (1953) 417–421. The theorem is not in Mathlib, and this file does not prove it.
 * `H₁, …, H₁₂` were computed exactly from the first 23 cells of the center column.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LinearRelations
 

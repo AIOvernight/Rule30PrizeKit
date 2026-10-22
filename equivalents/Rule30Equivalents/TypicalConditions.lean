@@ -1,14 +1,25 @@
-import Rule30Equivalents.Typicality
-import Rule30Equivalents.Fluctuations
-import Rule30Equivalents.EmpiricalMeasures
-import Rule30Equivalents.PresburgerExpansion
-import Rule30Equivalents.LempelZiv
-import Rule30Equivalents.Christol
-import Rule30Equivalents.RegularSequences
-import Rule30Equivalents.PisotNumbers
-import Rule30Equivalents.SkolemMahlerLech
-import Rule30Equivalents.ProblemThree
-import Mathlib.Data.Finsupp.Encodable
+module
+
+public import Rule30Equivalents.Typicality
+public import Rule30Equivalents.Fluctuations
+public import Rule30Equivalents.EmpiricalMeasures
+public import Rule30Equivalents.PresburgerExpansion
+public import Rule30Equivalents.LempelZiv
+public import Rule30Equivalents.Christol
+public import Rule30Equivalents.RegularSequences
+public import Rule30Equivalents.PisotNumbers
+public import Rule30Equivalents.SkolemMahlerLech
+public import Rule30Equivalents.ProblemThree
+public import Mathlib.Data.Finsupp.Encodable
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # The other sufficient conditions hold almost surely
@@ -58,6 +69,8 @@ those is vacuous.
   the Lempel–Ziv complexity is unbounded, and infinitely many prefixes end with no repetition of
   exponent `φ²` (the Mignosi–Restivo–Salemi theorem).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TypicalConditions
 

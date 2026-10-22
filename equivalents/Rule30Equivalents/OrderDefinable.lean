@@ -1,6 +1,9 @@
-import Rule30Equivalents.Basic
-import Mathlib.ModelTheory.Order
-import Mathlib.ModelTheory.Definability
+module
+
+public import Rule30Equivalents.Basic
+public import Mathlib.ModelTheory.Order
+public import Mathlib.ModelTheory.Definability
+public import Mathlib.Data.Finset.Max
 
 /-!
 # The black times are not first-order definable in `(ℕ, <)`
@@ -24,6 +27,8 @@ The proof is an Ehrenfeucht–Fraïssé argument on distances, written without g
 * Two values of `x` beyond all constants of a formula by at least `2^d` are similar, so a formula in
   one variable is eventually constant.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OrderDefinable
 

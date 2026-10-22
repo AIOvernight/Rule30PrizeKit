@@ -1,11 +1,13 @@
-import Mathlib.Algebra.Field.ZMod
-import Mathlib.Algebra.Polynomial.Degree.TrailingDegree
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.RingTheory.PowerSeries.Inverse
-import Mathlib.RingTheory.PowerSeries.Trunc
-import Rule30Equivalents.Basic
-import Rule30Equivalents.LinearRelations
+module
+
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.Algebra.Polynomial.Degree.TrailingDegree
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.RingTheory.PowerSeries.Inverse
+public import Mathlib.RingTheory.PowerSeries.Trunc
+public import Rule30Equivalents.Basic
+public import Rule30Equivalents.LinearRelations
 
 /-!
 # Problem 1 over `𝔽₂`: rational generating function, linear recurrences, linear complexity
@@ -76,6 +78,8 @@ Rule 30's center column as a keystream generator: S. Wolfram, *Cryptography with
 automata*, CRYPTO '85, LNCS 218 (1986) 429–432, and *Random sequence generation by cellular
 automata*, Adv. Appl. Math. 7 (1986) 123–169.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.PowerSeriesF2
 

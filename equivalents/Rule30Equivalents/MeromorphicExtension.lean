@@ -1,9 +1,11 @@
-import Rule30Equivalents.LinearRelations
-import Rule30Equivalents.NaturalBoundary
-import Mathlib.Analysis.Analytic.OfScalars
-import Mathlib.Analysis.Normed.Ring.InfiniteSum
-import Mathlib.Analysis.Meromorphic.Basic
-import Mathlib.Analysis.Calculus.Deriv.Polynomial
+module
+
+public import Rule30Equivalents.LinearRelations
+public import Rule30Equivalents.NaturalBoundary
+public import Mathlib.Analysis.Analytic.OfScalars
+public import Mathlib.Analysis.Normed.Ring.InfiniteSum
+public import Mathlib.Analysis.Meromorphic.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 
 /-!
 # No meromorphic extension beyond the unit disk
@@ -35,6 +37,8 @@ Sources: P. Fatou, *Séries trigonométriques et séries de Taylor*, Acta Math. 
 G. Szegő, *Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten*, Sitzungsber. Preuss.
 Akad. Wiss. (1922) 88–91.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.MeromorphicExtension
 

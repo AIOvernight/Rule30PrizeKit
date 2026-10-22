@@ -1,5 +1,17 @@
-import Rule30Equivalents.NaturalBoundary
-import Rule30Equivalents.Fluctuations
+module
+
+public import Rule30Equivalents.NaturalBoundary
+public import Rule30Equivalents.Fluctuations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
+public import Mathlib.Probability.Independence.Integration
 
 /-!
 # The natural boundary of a random generating function
@@ -33,6 +45,8 @@ Potenzreihe ihre natürliche Grenze ist*, Math. Z. 31 (1930) 408–416; R. E. A.
 A. Zygmund, *On some series of functions (3)*, Proc. Cambridge Philos. Soc. 28 (1932) 190–205;
 J.-P. Kahane, *Some random series of functions*, 2nd ed., Cambridge University Press (1985).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.RandomNaturalBoundary
 

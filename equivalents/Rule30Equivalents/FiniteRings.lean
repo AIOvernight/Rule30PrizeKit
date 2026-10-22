@@ -1,5 +1,16 @@
-import Rule30Equivalents.AlgebraicDegree
-import Ruliology.CellularAutomata.Rule30Diagonals
+module
+
+public import Rule30Equivalents.AlgebraicDegree
+public import Ruliology.CellularAutomata.Rule30Diagonals
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Rule 30 on a ring of `n` cells
@@ -17,6 +28,8 @@ configuration of `{0,1}^ℤ`, and rule 30 on the ring is rule 30 on such configu
 For `n = 3` the ring's center is `1, 1, 0, 0, …` against `c = 1, 1, 0, 1, …`, so the bound
 `t < n` cannot be improved in general.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.FiniteRings
 

@@ -1,13 +1,24 @@
-import Rule30Equivalents.RandomConfigurations
-import Rule30Equivalents.Preimages
-import Rule30Equivalents.RightHalfReturns
-import Mathlib.MeasureTheory.Measure.MeasuredSets
-import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
-import Mathlib.Dynamics.Ergodic.Ergodic
-import Mathlib.Dynamics.TopologicalEntropy.Semiconj
-import Mathlib.Analysis.InnerProductSpace.MeanErgodic
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.Dynamics.Ergodic.Function
+module
+
+public import Rule30Equivalents.RandomConfigurations
+public import Rule30Equivalents.Preimages
+public import Rule30Equivalents.RightHalfReturns
+public import Mathlib.MeasureTheory.Measure.MeasuredSets
+public import Mathlib.MeasureTheory.Constructions.ProjectiveFamilyContent
+public import Mathlib.Dynamics.Ergodic.Ergodic
+public import Mathlib.Dynamics.TopologicalEntropy.Semiconj
+public import Mathlib.Analysis.InnerProductSpace.MeanErgodic
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.Dynamics.Ergodic.Function
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Rule 30 preserves the fair-coin measure and is mixing
@@ -82,6 +93,8 @@ preserves the measure, and changes no cell whose foot lies to its right.
 * `ae_isNormal_rows`: for almost every configuration the right half of every row is normal (every
   iterate preserves the measure).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Mixing
 

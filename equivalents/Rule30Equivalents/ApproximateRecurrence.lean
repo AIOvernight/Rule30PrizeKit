@@ -1,6 +1,17 @@
-import Rule30Equivalents.WordsAutomata
-import Mathlib.Algebra.Polynomial.Monic
-import Mathlib.Analysis.Normed.Field.Basic
+module
+
+public import Rule30Equivalents.WordsAutomata
+public import Mathlib.Algebra.Polynomial.Monic
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Approximate linear recurrences
@@ -28,6 +39,8 @@ Sitzungsber. Preuss. Akad. Wiss. (1922) 88–91; P. Dienes, *The Taylor series*,
 chapter X; P. Borwein, T. Erdélyi and F. Littmann, *Polynomials with coefficients from a finite
 set*, Trans. Amer. Math. Soc. 360 (2008) 5145–5154, section 3.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.ApproximateRecurrence
 

@@ -1,4 +1,6 @@
-import Rule30Equivalents.OneTapeGap
+module
+
+public import Rule30Equivalents.OneTapeGap
 
 /-!
 # Monadic second-order logic over `(ℕ, <)`
@@ -25,6 +27,8 @@ method with types defined semantically:
 * `periodicFormula`: an eventually periodic set is defined by "every family of sets that starts at
   `0` and follows the counting automaton puts `x` in an accepting set".
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.MonadicLogic
 

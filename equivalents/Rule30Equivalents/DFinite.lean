@@ -1,7 +1,18 @@
-import Rule30Equivalents.Holonomic
-import Mathlib.RingTheory.PowerSeries.Derivative
-import Mathlib.RingTheory.Polynomial.Pochhammer
-import Mathlib.Data.Rat.Floor
+module
+
+public import Rule30Equivalents.Holonomic
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.RingTheory.Polynomial.Pochhammer
+public import Mathlib.Data.Rat.Floor
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 1 ⟺ the generating series of the center column is not D-finite
@@ -31,6 +42,8 @@ Sources: R. P. Stanley, *Differentiably finite power series*, European J. Combin
 175–188; A. J. van der Poorten and I. E. Shparlinski, *On linear recurrence sequences with
 polynomial coefficients*, Glasgow Math. J. 38 (1996) 147–155.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.DFinite
 

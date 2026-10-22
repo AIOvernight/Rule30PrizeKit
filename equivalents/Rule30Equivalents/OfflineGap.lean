@@ -1,6 +1,8 @@
-import Rule30Equivalents.OneTapeRegular
-import Rule30Equivalents.LogicAutomata
-import Mathlib.Analysis.Complex.ExponentialBounds
+module
+
+public import Rule30Equivalents.OneTapeRegular
+public import Rule30Equivalents.LogicAutomata
+public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Offline Turing machines: the `log log n` space gap
@@ -34,6 +36,8 @@ For Rule 30: with unary input, **Problem 1 holds iff no such machine decides
 input and Cobham's theorem, iff no such machines decide `c(n)` from the base-`2` and the base-`3`
 digits of `n` (`problem1_iff_no_small_space_digit_deciders`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.OfflineGap
 

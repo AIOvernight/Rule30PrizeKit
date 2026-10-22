@@ -1,13 +1,25 @@
-import Rule30Equivalents.Genericity
-import Rule30Equivalents.ProblemTwo
-import Mathlib.Probability.ProductMeasure
-import Mathlib.Probability.Independence.InfinitePi
-import Mathlib.Probability.StrongLaw
-import Mathlib.Probability.Distributions.Uniform
-import Mathlib.Probability.CentralLimitTheorem
-import Mathlib.Probability.Moments.SubGaussian
-import Mathlib.Probability.ConditionalProbability
-import Mathlib.MeasureTheory.Order.Group.Lattice
+module
+
+public import Rule30Equivalents.Genericity
+public import Rule30Equivalents.ProblemTwo
+public import Mathlib.Probability.ProductMeasure
+public import Mathlib.Probability.Independence.InfinitePi
+public import Mathlib.Probability.StrongLaw
+public import Mathlib.Probability.Distributions.Uniform
+public import Mathlib.Probability.CentralLimitTheorem
+public import Mathlib.Probability.Moments.SubGaussian
+public import Mathlib.Probability.ConditionalProbability
+public import Mathlib.MeasureTheory.Order.Group.Lattice
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
+public import Mathlib.Analysis.PSeries
 
 /-!
 # Random configurations
@@ -62,6 +74,8 @@ cell is one configuration, a null set, so neither statement says anything about 
 configurations with an eventually periodic trace are dense, meager and null
 (`dense_isMeagre_null_eventuallyPeriodic_trace`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.RandomConfigurations
 

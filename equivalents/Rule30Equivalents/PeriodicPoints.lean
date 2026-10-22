@@ -1,5 +1,16 @@
-import Rule30Equivalents.Genericity
-import Rule30Equivalents.AlgebraicDegree
+module
+
+public import Rule30Equivalents.Genericity
+public import Rule30Equivalents.AlgebraicDegree
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Periodic points of rule 30
@@ -26,6 +37,8 @@ velocity `-d/k`. Periodic configurations are the case `d = 0`.
   of `…0101…`. `F x = x` says `x_{i-1} = ¬x_i ∧ x_{i+1}`, and one black cell forces the alternating
   pattern in both directions.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.PeriodicPoints
 

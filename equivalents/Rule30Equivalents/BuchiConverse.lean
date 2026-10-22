@@ -1,4 +1,7 @@
-import Rule30Equivalents.BuchiArithmetic
+module
+
+public import Rule30Equivalents.BuchiArithmetic
+public import Mathlib.Basic.Finite.Sum
 
 /-!
 # `k`-automatic sets are definable in Büchi arithmetic
@@ -21,6 +24,8 @@ and after `L` digits with `n < kᴸ` the state `g` has `g(0) = f(n)`.
   digit `d` there, then `X_{δ(g, d)}` has digit `1` at `k y`; and at the last position `Y > n`
   no state with output `0` is marked. Such numbers exist iff `f(n) = 1` (`mem_body_iff`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.BuchiConverse
 

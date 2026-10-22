@@ -1,5 +1,16 @@
-import Rule30Equivalents.ProblemTwo
-import Rule30Equivalents.WordForms
+module
+
+public import Rule30Equivalents.ProblemTwo
+public import Rule30Equivalents.WordForms
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Problem 2 through the times of the black cells
@@ -16,6 +27,8 @@ of black cells is the same as `τ k / k → 1 / L`:
   of the center column occurs at time `2k + o(k)`**.
 * `problem2_iff_mean_gap`: equivalently, the mean gap between consecutive black cells tends to `2`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.BlackTimes
 

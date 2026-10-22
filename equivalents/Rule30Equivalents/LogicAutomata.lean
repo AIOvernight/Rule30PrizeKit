@@ -1,6 +1,8 @@
-import Rule30Equivalents.ShiftOrbit
-import Mathlib.ModelTheory.Arithmetic.Presburger.Definability
-import Mathlib.Computability.MyhillNerode
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Mathlib.ModelTheory.Arithmetic.Presburger.Definability
+public import Mathlib.Computability.MyhillNerode
 
 /-!
 # Problem 1 in logic and automata
@@ -21,6 +23,8 @@ language are the unary languages of the shifts of `c`, and those of the prefix l
 prefix languages of the shifts together with the empty language. Both counts are finite exactly
 when the shift orbit is finite (`ShiftOrbit.eventuallyPeriodic_iff_finite_shifts`).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.LogicAutomata
 

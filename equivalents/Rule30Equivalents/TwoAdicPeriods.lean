@@ -1,11 +1,13 @@
-import Rule30Equivalents.LinearRelations
-import Mathlib.Algebra.Group.ForwardDiff
-import Mathlib.Data.Nat.Choose.Dvd
-import Mathlib.Data.Nat.Periodic
-import Mathlib.NumberTheory.Padics.ProperSpace
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.Topology.LocallyConstant.Basic
-import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
+module
+
+public import Rule30Equivalents.LinearRelations
+public import Mathlib.Algebra.Group.ForwardDiff
+public import Mathlib.Data.Nat.Choose.Dvd
+public import Mathlib.Data.Nat.Periodic
+public import Mathlib.NumberTheory.Padics.ProperSpace
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.LocallyConstant.Basic
+public import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
 /-!
 # Periods that are prime powers: the p-adic and Mahler forms
@@ -30,6 +32,8 @@ for `p = 2` `noTwoPowPeriod_iff_not_continuous`, `noTwoPowPeriod_iff_fwdDiff`): 
 period `p^k` iff no tail of `c` extends continuously to `ℤ_p`, iff the `𝔽_p` Mahler coefficients of
 every tail are not eventually `0`.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.TwoAdicPeriods
 

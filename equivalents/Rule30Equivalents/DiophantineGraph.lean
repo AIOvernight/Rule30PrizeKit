@@ -1,8 +1,10 @@
-import Rule30Equivalents.IntegerRows
-import Mathlib.NumberTheory.Dioph
-import Mathlib.Data.Nat.Choose.Lucas
-import Mathlib.Data.Nat.Choose.Bounds
-import Mathlib.Data.Nat.Bitwise
+module
+
+public import Rule30Equivalents.IntegerRows
+public import Mathlib.NumberTheory.Dioph
+public import Mathlib.Data.Nat.Choose.Lucas
+public import Mathlib.Data.Nat.Choose.Bounds
+public import Mathlib.Data.Nat.Bitwise
 
 /-!
 # The graph of the center column is Diophantine
@@ -29,6 +31,8 @@ Sources: Y. Matiyasevich, *Enumerable sets are Diophantine*, Soviet Math. Dokl. 
 M. Davis, *Hilbert's tenth problem is unsolvable*, Amer. Math. Monthly 80 (1973) 233–269;
 É. Lucas (1878); E. Kummer (1852).
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.DiophantineGraph
 
@@ -224,12 +228,13 @@ theorem Φ_add {w x y : ℕ} (hw : 2 ≤ w) (hx : x < 2 ^ (w - 2)) :
         simp [show 1 ≤ i by omega, show 2 ≤ i by omega, show 1 ≤ i - w by omega,
           show 2 ≤ i - w by omega]
 
-theorem Φ_blocks {w : ℕ} (hw : 2 ≤ w) : ∀ (k : ℕ) (f : ℕ → ℕ), (∀ s, s < k → f s < 2 ^ (w - 2)) →
-    Φ (blocks w f k) = blocks w (fun s => Φ (f s)) k
-  | 0, _, _ => by simp [blocks, Φ_zero]
-  | k + 1, f, hf => by
-    rw [blocks, blocks, Φ_add hw (hf 0 (by omega)),
-      Φ_blocks hw k _ fun s hs => hf _ (by omega)]
+theorem Φ_blocks {w : ℕ} (hw : 2 ≤ w) (k : ℕ) : ∀ (f : ℕ → ℕ), (∀ s, s < k → f s < 2 ^ (w - 2)) →
+    Φ (blocks w f k) = blocks w (fun s => Φ (f s)) k := by
+  induction k with
+  | zero => intro _ _; rw [blocks, blocks, Φ_zero]
+  | succ k ih =>
+    intro f hf
+    rw [blocks, blocks, Φ_add hw (hf 0 (by omega)), ih _ fun s hs => hf _ (by omega)]
 
 /-! ### The history of rule 30 as one number -/
 

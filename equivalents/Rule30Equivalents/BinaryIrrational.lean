@@ -1,7 +1,9 @@
-import Rule30Equivalents.ShiftOrbit
-import Mathlib.NumberTheory.Real.Irrational
-import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.Tactic.LinearCombination
+module
+
+public import Rule30Equivalents.ShiftOrbit
+public import Mathlib.NumberTheory.Real.Irrational
+public import Mathlib.Analysis.SpecificLimits.Basic
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Problem 1 as the irrationality of a real number
@@ -60,6 +62,8 @@ Arithmeticae* (1801), art. 312 ff.; see L. E. Dickson, *History of the Theory of
 (1919), ch. VI. A textbook treatment for an arbitrary base is G. H. Hardy and E. M. Wright,
 *An Introduction to the Theory of Numbers* (1938), ch. IX.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.BinaryIrrational
 

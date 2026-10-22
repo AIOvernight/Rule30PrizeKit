@@ -1,6 +1,17 @@
-import Rule30Equivalents.Genericity
-import Rule30Equivalents.BlackTimes
-import Rule30Equivalents.RandomConfigurations
+module
+
+public import Rule30Equivalents.Genericity
+public import Rule30Equivalents.BlackTimes
+public import Rule30Equivalents.RandomConfigurations
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Bounded remainder
@@ -33,6 +44,8 @@ sequence. An eventually periodic sequence has a *bounded remainder*: `N(n) = α 
   coins (`measurePreserving_errors`, since they are adapted to the left coins), and the predictors
   are countably many up to relabeling the states.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.BoundedRemainder
 

@@ -1,4 +1,15 @@
-import Rule30Equivalents.Genericity
+module
+
+public import Rule30Equivalents.Genericity
+public import Mathlib.Tactic.Common
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Tactic.Bound
 
 /-!
 # Preimages under rule 30
@@ -43,6 +54,8 @@ determined by `F(x)_q`, `x_q` and `x_{q+1}`.
   expansive**; for every window `[-n, n]` two different configurations have orbits that agree on
   it at all times.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Preimages
 

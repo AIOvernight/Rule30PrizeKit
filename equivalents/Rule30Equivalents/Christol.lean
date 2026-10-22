@@ -1,7 +1,9 @@
-import Rule30Equivalents.Cobham
-import Rule30Equivalents.AlgebraicDFinite
-import Mathlib.RingTheory.PowerSeries.Expand
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import Rule30Equivalents.Cobham
+public import Rule30Equivalents.AlgebraicDFinite
+public import Mathlib.RingTheory.PowerSeries.Expand
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Christol's theorem: `p`-automatic iff algebraic over `𝔽_p(X)`
@@ -34,6 +36,8 @@ Sources: G. Christol, *Ensembles presque périodiques k-reconnaissables*, Theore
 et substitutions*, Bull. Soc. Math. France 108 (1980) 401–419; J.-P. Allouche, J. Shallit,
 *Automatic Sequences* (2003), Theorem 12.2.5.
 -/
+
+@[expose] public section
 
 namespace Rule30Equivalents.Christol
 

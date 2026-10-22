@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃); c is not both 2- and 3-regular | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic`, `RegularSequences.problem1_iff_not_regularSeq_two_three` |
-| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (integer bases) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic` |
+| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (integer bases) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic`; `PerronFrobenius.tendsto_pow_div` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
 **Summary.** Of the 54 equivalent forms, 52 are proved in the library: 6 in batch 1, 21 in
@@ -2131,9 +2131,16 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   fixed point of a k-uniform morphism; the alphabet is kernel → Bool, the letter at n the column
   g ↦ g(n) of the kernel), so with Cobham's theorem
   `problem1_iff_not_uniformMorphic_two_three`: Problem 1 ⟺ c is not both 2- and 3-uniformly
-  morphic, and `problem1_iff_not_uniformMorphic` for any multiplicatively independent a, b ≥ 2. The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's
-  theorem (and, for the easy direction, Lind's theorem that every Perron number is the dominant
-  eigenvalue of a primitive substitution).
+  morphic, and `problem1_iff_not_uniformMorphic` for any multiplicatively independent a, b ≥ 2.
+  The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's theorem
+  (and, for the easy direction, Lind's theorem that every Perron number is the dominant
+  eigenvalue of a primitive substitution). The Perron–Frobenius theorem for primitive matrices,
+  which Mathlib also lacks, is proved in [PerronFrobenius](Rule30Equivalents/PerronFrobenius.lean)
+  (`tendsto_pow_div`: Aʲ/rʲ → v wᵀ). For a primitive substitution the lengths abs(σʲ(a)) are row
+  sums of Mʲ, M the incidence matrix, so they grow like c_a rʲ. Integer bases do not reduce to Cobham's theorem: a substitution whose
+  dominant eigenvalue is an integer k need not generate a k-automatic sequence. Numerically the
+  k-kernel does not stabilize for a → aab, b → bc, c → c (k = 2), nor for the primitive
+  a → ac, b → bbc, c → aabb (k = 3, other eigenvalues ±√2).
 - *Known.* No data exist for non-integer Perron bases; the kernel bounds of [42] cover only the
   integer case.
 - *Sources.* [Dur11]; [Cob69].
@@ -3045,7 +3052,8 @@ is 2 log₂ n (1 + o(1)) ([MaxOrderComplexity](Rule30Equivalents/MaxOrderComplex
       the context-free pumping lemma, the time and space gap theorems (Hennie–Trakhtenbrot and
       Stearns–Hartmanis–Lewis), meromorphic continuation of finite-valued power series (the disk
       form of Fatou–Szegő), Szegő's theorem for 0/1 coefficients (a continuation across any arc
-      of the unit circle makes the sequence eventually periodic), the Hardy–Littlewood–Karamata
+      of the unit circle makes the sequence eventually periodic), the Perron–Frobenius theorem
+      for primitive matrices, the Hardy–Littlewood–Karamata
       and Hardy Tauberian theorems, Borel's normal number theorem for fair coins, and, for rule 30,
       Hedlund's measure preservation, mixing and ergodicity. Pólya–Carlson's theorem is still
       missing.

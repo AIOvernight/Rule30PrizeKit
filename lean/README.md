@@ -83,7 +83,7 @@ lake env lean /tmp/Axioms.lean
 
 ## Added in the kit
 
-These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS` does not list them. All use only `propext`, `Classical.choice` and `Quot.sound`.
+These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS` does not list them. All use only `propext`, `Classical.choice` and `Quot.sound`. To add one, see [Contributing a partial result](../README.md#contributing-a-partial-result).
 
 | Module | Added | What it proves | Headline theorems |
 |---|---|---|---|

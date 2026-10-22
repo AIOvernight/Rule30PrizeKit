@@ -81,6 +81,46 @@ lake env lean --run Check.lean Rule30Submission --claim partial --headline Rule3
 
 `sh tests/run.sh` runs ten checker runs over seven test files: one template that passes, then `sorry`, a new axiom, `native_decide`, the forged theorem, a wrong type and a `Problem1` of the module's own, which all fail.
 
+## Contributing a partial result
+
+A partial result can join the catalog in [`lean/`](lean). Later proofs can then import it, and a submission can state it in one line. Open a pull request to this repository that adds:
+
+- **The module:** `lean/Ruliology/CellularAutomata/Rule30<Name>.lean`, in the namespace `Ruliology.CellularAutomata.Rule30<Name>`.
+  - The catalog is plain Lean 4.35.0, without Mathlib.
+  - Every file is a module of Lean's module system: `module`, then its `public import`s, then `@[expose] public section`.
+  - Its docstring states the claim and the method.
+  - Large kernel-checked data goes in a module of its own under `Rule30Certificates/`.
+- **Its listing:** its `public import` in [`lean/Ruliology.lean`](lean/Ruliology.lean), and a row in [Added in the kit](lean/README.md#added-in-the-kit) that says what it proves and who proved it.
+
+Build the module and check it as the verifier checks a partial result:
+
+```sh
+lake build Ruliology.CellularAutomata.Rule30<Name>
+lake env lean --run Check.lean Ruliology.CellularAutomata.Rule30<Name> --claim partial \
+  --headline Ruliology.CellularAutomata.Rule30<Name>.<theorem>
+```
+
+Then submit on the site as usual, with the pull request as the submission's repository. A maintainer reviews the module, merges it and tags the submission Kit Contribution.
+
+Once the verifier's kit commit has the module, a submission that uses it needs only one line of proof:
+
+```lean
+import Rule30PrizeKit
+import Ruliology.CellularAutomata.Rule30WhiteEnd
+
+namespace Rule30Submission
+
+open Ruliology.CellularAutomata
+
+theorem white_end (q : Nat) (hq : 10 ≤ q) :
+    ¬ Rule30StripCertificates.EventuallyWord (true :: List.replicate q false) :=
+  Rule30WhiteEnd.not_eventuallyWord_white_end q hq
+
+end Rule30Submission
+```
+
+A proof that needs Mathlib does not fit the catalog; submit it as it is.
+
 ## Trust
 
 - **Trusted:** the import closure (this kit, `lean/`, `equivalents/`, Mathlib) and the Lean kernel.

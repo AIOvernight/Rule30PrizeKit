@@ -3,6 +3,7 @@ import Rule30Equivalents.IteratedLogarithm
 import Rule30Equivalents.ErdosRenyi
 import Rule30Equivalents.ReturnTimes
 import Rule30Equivalents.RandomNaturalBoundary
+import Rule30Equivalents.MaxOrderComplexity
 
 /-!
 # Laws along every line of the spacetime diagram
@@ -22,7 +23,9 @@ of fair-coin sequences holds along all of these countably many lines at once
   (`LinearComplexity`);
 * `ae_maxWindow_lines`: for each `1/2 < α < 1`, the Erdős–Rényi law (`ErdosRenyi`);
 * `ae_circleIsNaturalBoundary_lines`: the generating function of the cells has the unit circle as
-  a natural boundary (`RandomNaturalBoundary`).
+  a natural boundary (`RandomNaturalBoundary`);
+* `ae_tendsto_maxOrderComplexity_lines`: the maximum-order complexity of the first `n` cells is
+  `2 log₂ n + o(log n)` (`MaxOrderComplexity`).
 
 The center column is the line `p = 0`, `q = 1`. Lines of velocity `1` are not fair coins
 (`Mixing.measure_diag_eq`).
@@ -82,5 +85,12 @@ theorem ae_circleIsNaturalBoundary_lines :
     ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
       RandomNaturalBoundary.CircleIsNaturalBoundary fun k => evol x (q * k + t₀) (p * k + x₀) :=
   Mixing.ae_lines_of_ae RandomNaturalBoundary.ae_circleIsNaturalBoundary
+
+/-- **The maximum-order complexity along every line**: `M_n/log₂ n → 2`. -/
+theorem ae_tendsto_maxOrderComplexity_lines :
+    ∀ᵐ x ∂(coins ℤ), ∀ (p : ℤ) (q t₀ : ℕ) (x₀ : ℤ), p ≠ q →
+      Tendsto (fun n : ℕ => (WordsAutomata.maxOrderComplexity
+        (fun k => evol x (q * k + t₀) (p * k + x₀)) n : ℝ) / Nat.log 2 n) atTop (𝓝 2) :=
+  Mixing.ae_lines_of_ae MaxOrderComplexity.ae_tendsto_maxOrderComplexity
 
 end Rule30Equivalents.Lines

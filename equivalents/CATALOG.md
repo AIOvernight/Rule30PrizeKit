@@ -1190,7 +1190,15 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   length n have equal successors (consistency is upward closed, `PrefixConsistent.mono`). The
   k-th order version, for every k ≥ 1, is `AlgebraicDegree.problem1_iff_no_feedback_degreeLE`:
   an EP column is generated from position 0 by the linear feedback c(i + T + P) = c(i + T), whose
-  algebraic normal form has degree 1 (`DegreeLE`, through the ANF coefficients `coef`).
+  algebraic normal form has degree 1 (`DegreeLE`, through the ANF coefficients `coef`). For almost
+  every configuration the center column has M_n = 2 log₂ n (1 + o(1)), the growth the data above
+  show for the seed ([MaxOrderComplexity](Rule30Equivalents/MaxOrderComplexity.lean),
+  `ae_tendsto_maxOrderComplexity_trace`; along every line too). From above, M_n > L needs two equal
+  windows of length L among the n² pairs, each pair equal with probability 2^−L even when the
+  windows overlap. From below, the birthday paradox: of the K² pairs of a block among the first K
+  blocks of length B and a block among the next K, each agrees in its first B − 1 letters and
+  differs in the last with probability 2^−B, any two such events are independent, and the
+  second-moment method bounds the chance that none occurs by 2^B/K².
 
   ```lean
   theorem problem1_iff_no_nlfsr : Rule30Prize.Problem1 ↔
@@ -1198,7 +1206,7 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
         ∀ i, Rule30Prize.center (i + m) = F (fun k => Rule30Prize.center (i + k))
   ```
 
-- *Sources.* [JB89]; [Li24].
+- *Sources.* [JB89]; [Li24]; [AW85].
 
 ### 3.5 Complex analysis
 
@@ -2881,7 +2889,9 @@ Stirling's formula), so the first 2n cells are exactly half black with probabili
 Erdős–Rényi law: for 1/2 < α < 1 the
     windows of length L(n) = ⌊log n/(log 2 − H(α))⌋ inside the first n cells are at most a fraction
     α + o(1) black, and some of them reach it ([ErdosRenyi](Rule30Equivalents/ErdosRenyi.lean),
-    `ae_tendsto_maxWindow_trace`; the longest runs are the case α = 1). The configurations with an
+    `ae_tendsto_maxWindow_trace`; the longest runs are the case α = 1). Its maximum-order complexity
+is 2 log₂ n (1 + o(1)) ([MaxOrderComplexity](Rule30Equivalents/MaxOrderComplexity.lean),
+`ae_tendsto_maxOrderComplexity_trace`, by the birthday paradox). The configurations with an
     eventually
     periodic trace are dense, meager and null (`dense_isMeagre_null_eventuallyPeriodic_trace`). The
     same flips show that rule 30 is a mixing measure-preserving system
@@ -3150,6 +3160,7 @@ Algebra, power series and coding theory
 - [JB89] C. J. A. Jansen, D. E. Boekee, The shortest feedback shift register that can generate a
   given sequence, CRYPTO '89, LNCS 435 (1990) 90–99.
 - [Li24] C. Li, A survey on complexity measures of pseudo-random sequences, arXiv:2405.08479 (2024).
+- [AW85] R. Arratia, M. S. Waterman, An Erdős–Rényi law with shifts, Adv. Math. 55 (1985) 13–23.
 - [Sko34] T. Skolem, Ein Verfahren zur Behandlung gewisser exponentialer Gleichungen und
   diophantischer Gleichungen, Comptes Rendus 8e Congrès des Mathématiciens Scandinaves, Stockholm
   (1934).

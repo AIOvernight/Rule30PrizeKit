@@ -26,6 +26,19 @@ explicitly from Chebyshev polynomials.
   degree `2D` and leading coefficient `2ᴰ⁻¹/(1 + c)ᴰ` (`eval_arcPoly`, `leadingCoeff_arcPoly`). On
   the unit circle `ℓ(e^{iθ}) = (2 cos θ + 1 - c)/(1 + c)`, which lies in `[-1, 1]` exactly when
   `cos θ ≤ c`: the polynomial is small on that arc.
+* `notchPoly c K D`: the monic polynomial `wᴷᴰ · wᴰ T_D(ℓ(w)) / arcLead c D`, at most
+  `2 ((1 + c)/2 · ‖w‖ᴷ⁺¹ · R)ᴰ` in modulus where `‖ℓ(w) - 1‖ + ‖ℓ(w) + 1‖ ≤ R + R⁻¹`
+  (`norm_eval_notchPoly_le`). Inside the unit circle that sum is at most `8/‖w‖` (`crude_bound`),
+  which the factor `‖w‖ᴷᴰ` beats on a circle of radius `ρ₁ < 1`. Near the arc, where
+  `Re w ≤ ‖w‖ cos τ` with `cos τ < c`, it is at most `2 + O((‖w‖ - 1)²)` (`refined_bound`).
+* `exists_notch_poly`: for every notch half-angle `0 < τ < π/2` there are radii `ρ₁ < 1 < ρ₂` and
+  `q < 1` such that for every `D` some monic polynomial is at most `2 qᴰ` in modulus on the circle
+  `‖w‖ = ρ₁` and on the part of the annulus `ρ₁ ≤ ‖w‖ ≤ ρ₂` where `Re w ≤ ‖w‖ cos τ`.
+
+Sources: G. Szegő, *Über Potenzreihen mit endlich vielen verschiedenen Koeffizienten*,
+Sitzungsber. Preuss. Akad. Wiss. (1922) 88–91; P. Borwein, T. Erdélyi and F. Littmann,
+*Polynomials with coefficients from a finite set*, Trans. Amer. Math. Soc. 360 (2008) 5145–5154,
+section 3.
 -/
 
 @[expose] public section
@@ -421,12 +434,12 @@ theorem two_add_le_add_inv {C s : ℝ} (hC : 0 ≤ C) (hs0 : 0 ≤ s) (hs1 : s �
   nlinarith [mul_nonneg hC hs0, mul_nonneg (mul_nonneg hC hC) hs0]
 
 /-- **A monic polynomial small on a notched disk.** For every notch half-angle `0 < τ < π/2` and
-every `ρ₀ < 1` there are radii `ρ₀ ≤ ρ₁ < 1 < ρ₂ ≤ 3/2` and `q < 1` such that for every `D` some
+every `ρ₀ < 1 < ρ₃` there are radii `ρ₀ ≤ ρ₁ < 1 < ρ₂ ≤ ρ₃` and `q < 1` such that for every `D` some
 monic polynomial is at most `2 qᴰ` in modulus on the circle of radius `ρ₁` and on the part of the
 annulus `ρ₁ ≤ ‖w‖ ≤ ρ₂` where `Re w ≤ ‖w‖ cos τ`. -/
-theorem exists_notch_poly {τ : ℝ} (hτ0 : 0 < τ) (hτ1 : τ < Real.pi / 2) {ρ₀ : ℝ}
-    (hρ₀ : ρ₀ < 1) :
-    ∃ ρ₁ ρ₂ q : ℝ, ρ₀ ≤ ρ₁ ∧ 1 / 2 ≤ ρ₁ ∧ ρ₁ < 1 ∧ 1 < ρ₂ ∧ ρ₂ ≤ 3 / 2 ∧ 0 < q ∧ q < 1 ∧
+theorem exists_notch_poly {τ : ℝ} (hτ0 : 0 < τ) (hτ1 : τ < Real.pi / 2) {ρ₀ ρ₃ : ℝ}
+    (hρ₀ : ρ₀ < 1) (hρ₃ : 1 < ρ₃) :
+    ∃ ρ₁ ρ₂ q : ℝ, ρ₀ ≤ ρ₁ ∧ 1 / 2 ≤ ρ₁ ∧ ρ₁ < 1 ∧ 1 < ρ₂ ∧ ρ₂ ≤ ρ₃ ∧ 0 < q ∧ q < 1 ∧
       ∀ D : ℕ, ∃ P : ℂ[X], P.Monic ∧
         (∀ w : ℂ, ‖w‖ = ρ₁ → ‖P.eval w‖ ≤ 2 * q ^ D) ∧
         (∀ w : ℂ, ρ₁ ≤ ‖w‖ → ‖w‖ ≤ ρ₂ → w.re ≤ ‖w‖ * Real.cos τ → ‖P.eval w‖ ≤ 2 * q ^ D) := by
@@ -471,9 +484,11 @@ theorem exists_notch_poly {τ : ℝ} (hτ0 : 0 < τ) (hτ1 : τ < Real.pi / 2) {
   have hev : ∀ᶠ η in nhds (0 : ℝ), (1 + c) / 2 * (1 + η) ^ (K + 1) * (1 + κ * η) < q₂ :=
     hcont.eventually (gt_mem_nhds (by simpa using hq₂c))
   obtain ⟨ε, hε, hεη⟩ := Metric.eventually_nhds_iff.1 hev
-  set η := min (ε / 2) (min (1 / 2) (γ / 4)) with hηdef
-  have hη0 : 0 < η := lt_min (by linarith) (lt_min (by norm_num) (by linarith))
-  have hηε : η < ε := lt_of_le_of_lt (min_le_left _ _) (by linarith)
+  set η := min (min (ε / 2) (ρ₃ - 1)) (min (1 / 2) (γ / 4)) with hηdef
+  have hη0 : 0 < η :=
+    lt_min (lt_min (by linarith) (by linarith)) (lt_min (by norm_num) (by linarith))
+  have hη3 : η ≤ ρ₃ - 1 := le_trans (min_le_left _ _) (min_le_right _ _)
+  have hηε : η < ε := lt_of_le_of_lt (le_trans (min_le_left _ _) (min_le_left _ _)) (by linarith)
   have hη2 : η ≤ 1 / 2 := le_trans (min_le_right _ _) (min_le_left _ _)
   have hηγ : η ≤ γ / 4 := le_trans (min_le_right _ _) (min_le_right _ _)
   have hfη : (1 + c) / 2 * (1 + η) ^ (K + 1) * (1 + κ * η) < q₂ :=

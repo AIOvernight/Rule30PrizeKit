@@ -76,6 +76,7 @@ public import Rule30Equivalents.LocalLimit
 public import Rule30Equivalents.ApproximateRecurrence
 public import Rule30Equivalents.MaxOrderComplexity
 public import Rule30Equivalents.SzegoPolynomial
+public import Rule30Equivalents.SzegoContour
 public import Rule30Equivalents.Typicality
 public import Rule30Equivalents.FiniteRings
 public import Rule30Equivalents.Lagrange

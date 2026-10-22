@@ -199,7 +199,7 @@ files. The rows follow the order of Section 3.
 | 37 | lz76 | information theory | the Lempel–Ziv complexity of the prefixes is unbounded | Proved (library) | `LempelZiv.problem1_iff_lz_unbounded` |
 | 52 | automatic-complexity | automata | the automatic complexity of the prefixes tends to ∞ | Proved (library) | `Automatic.problem1_iff_automaticComplexity_tendsto_top` |
 | 42 | cobham-christol | automata, algebra | c is not both 2- and 3-automatic; Σ c(t)Xᵗ is transcendental over F₂(X) or over F₃(X); S is not definable in both (ℕ, +, V₂) and (ℕ, +, V₃); c is not both 2- and 3-regular | Proved (library), all forms | `Cobham.problem1_iff_not_two_three_automatic`, `Cobham.problem1_iff_exists_not_automatic`, `Christol.problem1_iff_transcendental_F2_or_F3`, `BuchiArithmetic.problem1_iff_not_buchi_definable`, `Cobham.eventuallyPeriodic_of_isAutomatic`, `Christol.isAutomatic_of_isAlgebraic`, `RegularSequences.problem1_iff_not_regularSeq_two_three` |
-| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Sketch; uniform case (integer bases) proved (library) | `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic`; `PerronFrobenius.tendsto_pow_div` |
+| 46 | durand-cobham | automata | c is not both α- and β-substitutive, for multiplicatively independent Perron numbers α, β | Stated; sufficient direction for integer bases and uniform case proved (library) | `problem1_iff_not_substitutive`; `Substitutive.problem1_of_not_substitutive`, `Substitutive.problem1_of_not_substitutive_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic_two_three`, `UniformMorphic.problem1_iff_not_uniformMorphic`, `PerronFrobenius.tendsto_pow_div` |
 | 43 | gap-theorems | complexity theory | no one-tape TM decides {1ⁿ : c(n) = 1} in time o(n log n); no TM does it in space o(log log n) | Proved (library), all forms, also for digit input | `OneTapeGap.problem1_iff_no_fast_one_tape_decider`, `OneTapeRegular.problem1_iff_no_fast_digit_deciders`, `OfflineGap.problem1_iff_no_small_space_decider`, `OfflineGap.problem1_iff_no_small_space_digit_deciders` |
 
 **Summary.** Of the 54 equivalent forms, 52 are proved in the library: 6 in batch 1, 21 in
@@ -244,8 +244,9 @@ Hartmanis and Lewis, with the same splicing on the input tape of an offline mach
 ([OfflineGap](Rule30Equivalents/OfflineGap.lean)). [41] is proved through Szegő's theorem for
 0/1 sequences: Cauchy's theorem on an annular sector writes a recurrence combination of the
 coefficients as a contour integral, and an explicit monic polynomial, small on a notched disk,
-takes the place of logarithmic capacity ([Szego](Rule30Equivalents/Szego.lean)). 1 form is a
-sketch, [46]; its uniform case (integer bases, uniform substitutions) is proved.
+takes the place of logarithmic capacity ([Szego](Rule30Equivalents/Szego.lean)). 1 form is
+stated, [46] ([Substitutive](Rule30Equivalents/Substitutive.lean)); its sufficient direction for
+integer bases and its uniform case (uniform substitutions) are proved.
 
 **Next targets after batch 2.** The critic's suggestions that batch 2 does not cover:
 
@@ -2126,21 +2127,48 @@ with `open Ruliology.CellularAutomata` and `import Rule30Equivalents`.
   and β. The critic checked on arXiv that the abstract states "if and only if". k-automatic
   sequences are k-substitutive, so the 2-and-3 form of [42] is a special case.
 - *Difficulty.* Hard: it needs Durand's theorem.
-- *Lean.* The uniform case is proved in [UniformMorphic](Rule30Equivalents/UniformMorphic.lean):
-  Cobham's "little" theorem `isAutomatic_iff_isUniformMorphic` (k-automatic ⟺ a coding of a
-  fixed point of a k-uniform morphism; the alphabet is kernel → Bool, the letter at n the column
-  g ↦ g(n) of the kernel), so with Cobham's theorem
-  `problem1_iff_not_uniformMorphic_two_three`: Problem 1 ⟺ c is not both 2- and 3-uniformly
-  morphic, and `problem1_iff_not_uniformMorphic` for any multiplicatively independent a, b ≥ 2.
-  The general form stays a sketch: Mathlib has no Perron numbers, and it needs Durand's theorem
-  (and, for the easy direction, Lind's theorem that every Perron number is the dominant
-  eigenvalue of a primitive substitution). The Perron–Frobenius theorem for primitive matrices,
-  which Mathlib also lacks, is proved in [PerronFrobenius](Rule30Equivalents/PerronFrobenius.lean)
-  (`tendsto_pow_div`: Aʲ/rʲ → v wᵀ). For a primitive substitution the lengths abs(σʲ(a)) are row
-  sums of Mʲ, M the incidence matrix, so they grow like c_a rʲ. Integer bases do not reduce to Cobham's theorem: a substitution whose
-  dominant eigenvalue is an integer k need not generate a k-automatic sequence. Numerically the
-  k-kernel does not stabilize for a → aab, b → bc, c → c (k = 2), nor for the primitive
-  a → ac, b → bbc, c → aabb (k = 3, other eigenvalues ±√2).
+- *Lean.* Stated against the library's definitions in
+  [Substitutive](Rule30Equivalents/Substitutive.lean) (the statement below typechecks with
+  `sorry`), with the sufficient direction proved for integer bases.
+
+  ```lean
+  theorem problem1_iff_not_substitutive {α β : ℝ} (hα : IsPerron α) (hβ : IsPerron β)
+      (hαβ : ∀ p q : ℕ, 0 < p → 0 < q → α ^ p ≠ β ^ q) :
+      Rule30Prize.Problem1 ↔
+        ¬ (IsSubstitutive α Rule30Prize.center ∧ IsSubstitutive β Rule30Prize.center)
+  ```
+
+  - The definitions: `IsSubstitutive α f` says f = φ ∘ x for a coding φ and a fixed point x of a
+    substitution σ : B → List B with nonempty images (σ(x 0) σ(x 1) ⋯ = x, `IsFixedPoint`),
+    prolongable on x 0 (abs(σ(x 0)) > 1), with every letter of B occurring in x, and α the dominant
+    eigenvalue of the incidence matrix M b c = abs(σ(b))_c: an eigenvalue at least the modulus of
+    every complex eigenvalue (`IsDominantEigenvalue`). `IsPerron α` says α > 1 is a real algebraic
+    integer exceeding the modulus of each of its other conjugates; the integers k ≥ 2 are Perron
+    numbers (`isPerron_natCast`).
+  - The sufficient direction for integer bases, `problem1_of_not_substitutive` for any a, b ≥ 2 and
+    `problem1_of_not_substitutive_two_three`: an eventually periodic sequence is k-automatic, hence
+    k-uniformly morphic, hence k-substitutive (`isSubstitutive_of_eventuallyPeriodic`), since a
+    k-uniform substitution has incidence row sums k and so dominant eigenvalue k
+    (`isDominantEigenvalue_of_sum_eq`). For other Perron numbers this direction needs Lind's theorem
+    that every Perron number is the dominant eigenvalue of a primitive integer matrix.
+  - The uniform case is proved in [UniformMorphic](Rule30Equivalents/UniformMorphic.lean): Cobham's
+    "little" theorem `isAutomatic_iff_isUniformMorphic` (k-automatic ⟺ a coding of a fixed point of
+    a k-uniform morphism; the alphabet is kernel → Bool, the letter at n the column g ↦ g(n) of the
+    kernel), so with Cobham's theorem `problem1_iff_not_uniformMorphic_two_three`: Problem 1 ⟺ c is
+    not both 2- and 3-uniformly morphic, and `problem1_iff_not_uniformMorphic` for any
+    multiplicatively independent a, b ≥ 2.
+  - The Perron–Frobenius theorem for primitive matrices, which Mathlib lacks, is proved in
+    [PerronFrobenius](Rule30Equivalents/PerronFrobenius.lean) (`tendsto_pow_div`: Aʲ/rʲ → v wᵀ). A
+    primitive incidence matrix has its Perron root as dominant eigenvalue
+    (`Substitutive.isDominantEigenvalue_of_isPrimitive`), and the lengths abs(σʲ(a)), the row sums
+    of Mʲ, grow like c_a rʲ.
+  - Integer bases do not reduce to Cobham's theorem: a substitution whose dominant eigenvalue is an
+    integer k need not generate a k-automatic sequence. Numerically the k-kernel does not stabilize
+    for a → aab, b → bc, c → c (k = 2), nor for the primitive a → ac, b → bbc, c → aabb (k = 3,
+    other eigenvalues ±√2).
+  - What is missing is Durand's theorem itself: return words and derived sequences, the linear
+    recurrence of primitive substitutive sequences, Durand's 1998 theorem for primitive
+    substitutions and his reduction of the general case [Dur11].
 - *Known.* No data exist for non-integer Perron bases; the kernel bounds of [42] cover only the
   integer case.
 - *Sources.* [Dur11]; [Cob69].

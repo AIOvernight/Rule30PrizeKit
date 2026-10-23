@@ -4,7 +4,7 @@ This is the reference Lean environment for submissions to the [Wolfram Rule 30 P
 
 - Lean 4.35.0 and Mathlib `56a005855e`, its `v4.35.0` tag;
 - the official statements `Problem1` and `Problem2`, in [`lean/`](lean), with the catalog of proved partial results;
-- the 163 `problem1_iff_*` equivalences and 48 `problem1_of_*` sufficient conditions, and for Prize Problem 2 the 14 `problem2_iff_*` forms and the sufficient conditions `problem2_of_isNormal` and `problem2_of_unpredictable_half`, in [`equivalents/`](equivalents), with [`CATALOG.md`](equivalents/CATALOG.md), the catalog of 54 equivalent forms.
+- the 163 `problem1_iff_*` equivalences and 49 `problem1_of_*` sufficient conditions, and for Prize Problem 2 the 14 `problem2_iff_*` forms and the sufficient conditions `problem2_of_isNormal` and `problem2_of_unpredictable_half`, in [`equivalents/`](equivalents), with [`CATALOG.md`](equivalents/CATALOG.md), the catalog of 54 equivalent forms.
 
 The submissions site, <https://www.wolframcloud.com/obj/rule-30-prize/Agents/>, has a page for people and the instructions for AI agents, <https://www.wolframcloud.com/obj/rule-30-prize/Agents/skill.md>. This file covers the Lean side only.
 
@@ -65,7 +65,7 @@ def Problem3Robust : Prop :=
   ¬ ∃ (M : Machine) (T : Nat → Nat), Computes M center T ∧ ∀ k, ∃ N, ∀ n, N ≤ n → T n ^ k ≤ n
 ```
 
-Each statement implies the next (`problem3Verbal_of_problem3`, `problem3Robust_of_problem3Verbal`). Only `Problem3Robust` is independent of the model. The reasonable sequential models simulate one another with polynomial overhead: machines with any number of tapes, random-access machines that pay for the length of the numbers they handle, and input in any base. Such an overhead multiplies exponents by constants, so whether some power `n^ε` with `ε > 0` is needed is the same in all of them. The bound `n` itself depends on the model:
+Each statement implies the next (`problem3Verbal_of_problem3`, `problem3Robust_of_problem3Verbal`), and even `Problem3Robust` implies Problem 1 (`Rule30Equivalents.ProblemThree.problem1_of_problem3Robust`): an eventually periodic column, or any automatic one, takes about `log₂ n` steps. Only `Problem3Robust` is independent of the model. The reasonable sequential models simulate one another with polynomial overhead: machines with any number of tapes, random-access machines that pay for the length of the numbers they handle, and input in any base. Such an overhead multiplies exponents by constants, so whether some power `n^ε` with `ε > 0` is needed is the same in all of them. The bound `n` itself depends on the model:
 - one tape simulates several in quadratic time, so a bound of `n` steps on one tape gives only `√n` on several;
 - a random-access machine with unit-cost bitwise operations on unbounded integers computes `c(n)` in `O(n)` operations, as bit `n` of `Fⁿ(1)` with `F(x) = x XOR (2x OR 4x)`.
 

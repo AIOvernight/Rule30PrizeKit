@@ -93,6 +93,7 @@ public import Ruliology.CellularAutomata.Rule30FiniteClockSixteen
 public import Ruliology.CellularAutomata.Rule30TerminalClock
 public import Ruliology.CellularAutomata.Rule30CenterRuns
 public import Ruliology.CellularAutomata.Rule30EtherThreeErosion
+public import Ruliology.CellularAutomata.Rule30WhiteTailErosion
 
 /-!
 # Rule 30 Prize: Lean snapshot

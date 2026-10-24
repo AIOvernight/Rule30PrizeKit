@@ -95,6 +95,7 @@ public import Ruliology.CellularAutomata.Rule30CenterRuns
 public import Ruliology.CellularAutomata.Rule30EtherThreeErosion
 public import Ruliology.CellularAutomata.Rule30WhiteTailErosion
 public import Ruliology.CellularAutomata.Rule30XorRigidity
+public import Ruliology.CellularAutomata.Rule30StripeMeeting
 
 /-!
 # Rule 30 Prize: Lean snapshot

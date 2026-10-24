@@ -75,7 +75,9 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30SixTailReduction \
     Rule30SixTail \
     Rule30SixTailSharpened \
-    Rule30SuffixFamilies; do
+    Rule30SuffixFamilies \
+    Rule30Certificates.StripeMeeting \
+    Rule30StripeMeeting; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
@@ -91,6 +93,7 @@ On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four u
 | `Rule30ZeroBoundarySmall` | 19 s | 3.2 GB |
 | `Rule30ZeroBoundaryStripe` | 18 s | 1.8 GB |
 | `Rule30Certificates/WhiteEndChecks` | 34 s | 0.8 GB |
+| `Rule30Certificates/StripeMeeting` | 47 s | 5.5 GB |
 | `Rule30EtherThreeNoWall` | 9 s | 1.1 GB |
 | `Rule30BlackRuns` | 9 s | 2.2 GB |
 
@@ -181,6 +184,7 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | `Rule30EtherThreeErosion` | 2026-10-24 | The period-3 ether erodes, so it has no wall of any width. Erosion: let a rule-30 evolution of the columns `p ≥ 1` have column `0` driven by the 12 × 3 ether. If at some time the columns `1..k` carry the ether, the columns beyond `k + w` carry the ether, and some column does not, then within `3 w + 6` steps one of the columns `1..k` leaves the ether. No wall: for every attachment column `a` and every width `b ≥ 1`, `WallOK a b W` forces `W` empty. This extends `no_wall_le_12` of `Rule30EtherThreeNoWall` to every width, so `absorption3_excludes` is vacuous and the ether-and-wall route to least period 3 is closed. `AbsorptionT t001`, `Q001`, `C3s001` and `C3w(011)` do not involve walls and stay open. The leftmost defect (the front) has 24 states (class of its column mod 12, and whether the next column is a defect). A kernel check of 576 local patterns (`cert_all`, `decide +kernel`) shows one bad state, which alone can jump right by 3 or more and re-enters itself only by jumping at least 8. On the other 23 states a potential `ψ ≤ 10` makes `5 D + 2 t + ψ` non-increasing (`front_step`, `wake_good`). The rightmost defect moves right by exactly one per step (`redge_step`, left-permutivity), which bounds the run of bad steps (`run_bad`). A wall state plus one flipped cell then contradicts `trap_invariant3`. Contributed by Luis Perez Morales, Claude (Fable 5.1), as Rule 30 Prize submission `R30-20261024-1fc962`, and ported to core Lean. | `erosion3_fin`, `no_wall`, `wake_good`, `front_step`, `run_bad`, `cert_all`, `redge_step` |
 | `Rule30WhiteTailErosion` | 2026-10-24 | Extends the preceding ether-erosion argument from finite ether perturbations to a white right tail. A speed-one bound on a defect witness replaces the rightmost defect. If column zero is driven by the period-three ether and the right half is white beyond W at time T, every prefix 1..k departs from the matching ether by T + 3 max(W + 12 - k, 0) + 6. Column one departs arbitrarily late. No width bound, no temporal-clock bound, and no center-period exclusion. Contributed by Troy Lowry with OpenAI Codex, building on Luis Perez Morales and Claude's front certificate and potential. | `run_bad_bounded`, `erosion_bounded`, `white_tail_evol`, `white_tail_defect`, `white_tail_erosion`, `white_tail_often_departs` |
 | `Rule30XorRigidity` | 2026-10-24 | For any two ordinary Rule 30 histories on all integer sites, their pointwise XOR follows Rule 30 exactly when one history is zero or both are identical. No support or periodicity assumption; a nonzero history has precisely two XOR partners. The one-step identity also appears in [Dibujaron's notes](https://github.com/Dibujaron/rule30); compare Coven–Hedlund–Rhodes (1979) on commuting maps. Contributed by AIOvernight with OpenAI Codex as Rule 30 Prize submission `R30-20261024-ddbfbd`. | `xor_history_iff`, `standard_two_partners` |
+| `Rule30StripeMeeting`, `Rule30Certificates.StripeMeeting` | 2026-10-24 | For arbitrary finite integer rows and every center index, a common stripe-prefix cut with a white separator preserves the entire center trace. The relation is preserved after two steps. If two rows become stripe-related at any finite time while their preceding center observations agree, they were related at time zero or one. A 2321-state kernel certificate is connected to arbitrary row sizes and the exact stripe grammar. Completeness for equal infinite traces, numerical-normalizer equivalence, and Problem 1 remain open. Contributed by Troy Lowry with OpenAI Codex. | `stripe_related_same_trace`, `stripe_related_preserves_two`, `stripe_meeting_is_early`, `no_delayed_stripe_meeting`, `eventually_stripe_iff_early` |
 
 ## Which modules predate the attempt
 

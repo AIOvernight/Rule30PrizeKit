@@ -30,7 +30,7 @@ Barriers are also proved:
 
 You need [elan](https://github.com/leanprover/elan); it installs Lean 4.35.0 from `lean-toolchain`.
 
-`lake build` builds everything, but a cold build runs modules in parallel. The four `Rule30Certificates/ZeroBoundaryWidth52Chunks*` modules take about 20 s and 3 GB each, so a cold parallel build can need about 12.5 GB.
+`lake build` builds everything, but a cold build runs modules in parallel. The four `Rule30Certificates/ZeroBoundaryWidth52Chunks*` modules take about 20 s and 3 GB each, so a cold parallel build can need about 12.5 GB before the contributed tail modules below. Build these heavy data modules sequentially too.
 
 Building one module at a time is safest; each `lake build` below compiles exactly one module, and peak memory stays under 4 GB.
 
@@ -50,13 +50,38 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30EtherThree Rule30EtherThreeNoWall Rule30EtherThreeTrap Rule30EtherThreeReach \
     Rule30EtherThreeLeft Rule30EtherThreeSkeleton Rule30WhiteRunEight Rule30PeriodTwoSideways \
     Rule30LightCone Rule30FiniteConfigs Rule30FiniteMaskedJen Rule30Coupled Rule30FiniteBlackRuns Rule30FiniteBlackRunBlocks Rule30FiniteDiagonals Rule30FiniteWhiteRuns \
-    Rule30Certificates.WhiteEndChecks Rule30WhiteEnd; do
+    Rule30Certificates.WhiteEndChecks Rule30WhiteEnd \
+    Rule30WhitePadding \
+    Rule30FiniteStrips \
+    Rule30WhitePulse \
+    Rule30ZeroPredecessor \
+    Rule30BackwardTube \
+    Rule30WhitePaddingVacuumCriterion \
+    Rule30BackwardVacuum \
+    Rule30SparsePreimage \
+    Rule30Certificates.FiveTailTube \
+    Rule30Certificates.SixTailBackward \
+    Rule30RestrictedBackwardTube \
+    Rule30Certificates.SixTailEndpoints \
+    Rule30Certificates.WhitePaddingFamilies \
+    Rule30UniformWhitePadding \
+    Rule30WordRotation \
+    Rule30ShortTail \
+    Rule30FiveTailReduction \
+    Rule30VacuumExample \
+    Rule30WhitePadding10101 \
+    Rule30FiveTail \
+    Rule30ForbiddenSuffix \
+    Rule30SixTailReduction \
+    Rule30SixTail \
+    Rule30SixTailSharpened \
+    Rule30SuffixFamilies; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
 ```
 
-On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four modules added on 2026-10-23 take about 45 s more. Every module not listed below built in under 7 s and 1.2 GB.
+On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four upstream modules added on 2026-10-23 take about 45 s more. The contributed white-padding modules are measured separately below. Every module not listed below built in under 7 s and 1.2 GB.
 
 | Module | Time | Peak memory |
 |---|---|---|
@@ -69,7 +94,17 @@ On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four m
 | `Rule30EtherThreeNoWall` | 9 s | 1.1 GB |
 | `Rule30BlackRuns` | 9 s | 2.2 GB |
 
-The build prints no warnings.
+### Contributed white-padding modules
+
+Measured on Windows x64 with Lean 4.35.0 on 2026-10-24, each module built alone with its imports already compiled. Peak memory is the sum of the processes' RSS, sampled every 50 ms. The other 20 modules of this family build in under 3 s and 0.5 GB each.
+
+| Module | Time | Peak memory |
+|---|---|---|
+| `Rule30Certificates/WhitePaddingFamilies` | 285.22 s | 2372 MiB |
+| `Rule30Certificates/FiveTailTube` | 147.70 s | 3061 MiB |
+| `Rule30Certificates/SixTailBackward` | 84.51 s | 1376 MiB |
+| `Rule30Certificates/SixTailEndpoints` | 20.16 s | 656 MiB |
+| `Rule30SixTailReduction` | 7.12 s | 1222 MiB |
 
 To check axioms, compile a file outside this folder from here:
 
@@ -87,6 +122,31 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 
 | Module | Added | What it proves | Headline theorems |
 |---|---|---|---|
+| `Rule30BackwardTube` | 2026-10-24 | Endpoint-conditioned backward strip certificates combine a finite predecessor chain with a stable zero-driven reachable set to exclude every sufficiently long white-padding word. Contributed by Troy Lowry with OpenAI Codex. | `preCheck_sound`, `tail_tube_forces`, `no_padding_of_endpoint_tube` |
+| `Rule30FiniteStrips` | 2026-10-24 | Strip certificate soundness for every column of every configuration with a leftmost black cell, using the uniform masked Jen theorem; no initial strip-state assumption. Contributed by Troy Lowry with OpenAI Codex. | `not_eventually_word_strip`, `not_eventually_word_strip_finite` |
+| `Rule30FiveTailReduction` | 2026-10-24 | Trimming white ends and rotating periods reduces every tail of at most five bits to the shorter family or eight new black-ended cores. Contributed by Troy Lowry with OpenAI Codex. | `decomposition`, `no_five_tail_of_cores` |
+| `Rule30ForbiddenSuffix` | 2026-10-24 | A vacuum-free full-set image of a fixed suffix excludes white-padding families with arbitrary preceding tail words. Width and suffix are parameters. Contributed by Troy Lowry with OpenAI Codex. | `no_padding_of_forbidden_suffix`, `no_padding_of_forbidden_suffix_finite` |
+| `Rule30RestrictedBackwardTube` | 2026-10-24 | Backward tube soundness with white-step predecessor checks restricted to the stable forward reachable set. Contributed by Troy Lowry with OpenAI Codex. | `restrictedPreCheck_sound`, `no_padding_of_endpoint_tube` |
+| `Rule30ShortTail` | 2026-10-24 | Exclude every tail of at most four bits after at least 49 white phases, using finite strip certificates, trimming, and period rotation; uniform over all leftmost-black starts. Contributed by Troy Lowry with OpenAI Codex. | `no_short_tail_leftFinite`, `no_short_tail_finite` |
+| `Rule30SixTail` | 2026-10-24 | Exclude every tail of at most six bits after at least 77 white phases. The sixteen new six-bit cores use backward-vacuum certificate chains; shorter tails use the five-tail theorem. Contributed by Troy Lowry with OpenAI Codex. | `no_six_tail_leftFinite`, `no_six_tail_finite` |
+| `Rule30SixTailReduction` | 2026-10-24 | Trimming and rotation reduce every tail of at most six bits to the five-tail family or sixteen new black-ended cores. Contributed by Troy Lowry with OpenAI Codex. | `decomposition`, `no_six_tail_of_cores` |
+| `Rule30SparsePreimage` | 2026-10-24 | Sparse predecessor checks with a proved bitmask completeness condition recover full strip predecessor implications. Contributed by Troy Lowry with OpenAI Codex. | `restricted_of_sparse`, `colConst_inter_of_sparse` |
+| `Rule30UniformWhitePadding` | 2026-10-24 | The five pumping certificate families hold for every column of every leftmost-black start, using the generic finite-strip soundness theorem. Contributed by Troy Lowry with OpenAI Codex. | `no_paddingA_leftFinite`, `no_paddingE_leftFinite` |
+| `Rule30VacuumExample` | 2026-10-24 | Two five-bit tail applications of the generic vacuum-avoidance criterion use width-five strips; the analytic white-pulse bound handles arbitrary padding. Contributed by Troy Lowry with OpenAI Codex. | `no_paddingA`, `no_paddingB` |
+| `Rule30WhitePadding` | 2026-10-24 | A stable zero-driven reachable set and finite tail checks give a strip certificate for every sufficiently long white prefix, by pumping rather than enumerating padding lengths. Contributed by Troy Lowry with OpenAI Codex. | `zeros_stable`, `padding_strip`, `no_padding_word` |
+| `Rule30WhitePadding10101` | 2026-10-24 | The endpoint-conditioned backward tube excludes the five-bit tail 10101 after sufficiently many white phases, uniformly over all leftmost-black starts. Contributed by Troy Lowry with OpenAI Codex. | `no_padding_10101_leftFinite`, `no_padding_10101_finite` |
+| `Rule30WhitePaddingVacuumCriterion` | 2026-10-24 | A stable zero-driven reachable set and a finite vacuum-free pulse image exclude arbitrary-tail white-padding families. The pulse and its length are unrestricted parameters. Contributed by Troy Lowry with OpenAI Codex. | `no_padding_of_vacuum_avoidance`, `no_padding_seed_of_vacuum_avoidance` |
+| `Rule30WhitePulse` | 2026-10-24 | A striped block created by a long black run survives an arbitrary short boundary pulse by locality; the resulting analytic estimate supplies the padding thresholds. Contributed by Troy Lowry with OpenAI Codex. | `white_pulse_return`, `white_padding_forces_early_white` |
+| `Rule30WordRotation` | 2026-10-24 | Eventual finite-word repetition is invariant under period rotation; trimming white ends gives the core-tail decomposition. Contributed by Troy Lowry with OpenAI Codex. | `eventuallyWord_swap`, `short_decomposition` |
+| `Rule30ZeroPredecessor` | 2026-10-24 | The vacuum has a unique predecessor under a white boundary, uniformly in strip width, by induction through the strip. Contributed by Troy Lowry with OpenAI Codex. | `stripStep_zero_predecessor`, `stripStep_zero_iff` |
+| `Rule30Certificates/FiveTailTube` | 2026-10-24 | Consolidated ordinary-kernel certificate data for the five-bit 10101 endpoint tube and the remaining five-bit vacuum-avoidance cores. Contributed by Troy Lowry with OpenAI Codex. | `Tube10101.Zmask` |
+| `Rule30Certificates/SixTailBackward` | 2026-10-24 | Consolidated backward-vacuum certificate chains for the sixteen new six-bit black-ended cores. Definitions, predecessor checks, and assembly are in one module. Contributed by Troy Lowry with OpenAI Codex. | `C100001.no_padding` |
+| `Rule30Certificates/SixTailEndpoints` | 2026-10-24 | Consolidated endpoint-conditioned predecessor certificates for 110001 and 111101, used to sharpen the common six-tail bound. Contributed by Troy Lowry with OpenAI Codex. | `C110001.no_padding` |
+| `Rule30Certificates/WhitePaddingFamilies` | 2026-10-24 | Consolidated reachable-set pumping and vacuum-free suffix certificates for the general white-padding families. Contributed by Troy Lowry with OpenAI Codex. | `ForbiddenSuffix.safe011` |
+| `Rule30SixTailSharpened` | 2026-10-24 | No column of a configuration with a leftmost black cell eventually repeats `0^r u` when `r >= 74` and `u` has at most six bits. Covers all nonzero finite starts and the single seed. Backward vacuum certificates give bound 77; two endpoint refinements reduce it to 74. Earlier bounds 69 for five bits and 49 for four bits remain. Proof and formalization by OpenAI Codex through `Troyusrex2`. | `no_six_tail_leftFinite`, `no_six_tail_finite`, `no_six_tail_seed` |
+| `Rule30BackwardVacuum` | 2026-10-24 | A finite chain of backward predecessor implications, from the empty set to the vacuum along `0^N u`, excludes every eventual `0^r u` with `r >= max(N, 10*length(u)+11, K+9*(length(u)+1))`. It covers every column of every leftmost-black start without requiring a stabilized forward set. Proof and formalization by OpenAI Codex through `Troyusrex2`, using the existing white-pulse reduction. | `no_vacuum_of_backward_certificate`, `no_padding_of_backward_certificate` |
+| `Rule30SuffixFamilies` | 2026-10-24 | For every Boolean word `v` of unrestricted length, no column of a configuration with a leftmost black cell eventually repeats `0^r v 011` when `r >= 10*length(v)+41`. Suffixes `001001` and `111001` give `r >= 10*length(v)+71`. The generic `Rule30ForbiddenSuffix` criterion needs only a vacuum-free full-set image of the suffix. These are partial exclusions, not a solution of Problem 1. Proof and formalization by OpenAI Codex through `Troyusrex2`, using the existing white-pulse reduction. | `no_padding_suffix011_leftFinite`, `no_padding_suffix001001_leftFinite`, `no_padding_suffix111001_leftFinite`, `no_padding_suffix011_seed` |
+| `Rule30FiveTail` | 2026-10-24 | No column of a configuration with a leftmost black cell eventually repeats `0^r u` when `r >= 69` and `u` has at most five bits; in particular every nonzero finite start and the single seed. The stronger `r >= 49` bound remains for at most four tail bits (`Rule30ShortTail`). Includes an arbitrary-tail white-pulse reduction and finite vacuum/endpoint criteria; certificate existence for every tail is not proved. Proof and formalization by OpenAI Codex, building on the catalog's uniform masked Jen theorem. Large data is in `Rule30Certificates`. | `no_five_tail_leftFinite`, `no_five_tail_finite`, `no_five_tail_seed` |
 | `Rule30WhiteRunEight` | 2026-10-17 | The words `0^r 1 1` with `r ≥ 8` are excluded, for every transient: `Rule30BlackRuns.no_white_run_11` needs `r ≥ 10`. Proved on 2026-10-15 by the verifier of the white-run exclusion and left out of the catalog; ported here. | `no_white_run_11_ge8` |
 | `Rule30PeriodTwoSideways` | 2026-10-17 | The coupled question `CQ01` in two more forms. It holds iff no configuration with finitely many black cells has center column `1, 0, 1, 0, …` from time 0. Sideways: for every finite right half `R`, one explicit left row `Psi R` (the constrained start whose free bits complement column 1 of the driven right half) has infinitely many black cells; this holds for `R` whenever it holds for the right half two steps later, or whenever column 1 of the driven right half is eventually periodic at the white steps. Exact death: a left row keeps the center alternating exactly until the first depth where it differs from `Psi R`. States the `R = ∅` milestone `CQ01Empty` (**open**). Barrier: from finite configurations the center alternates arbitrarily long, so no ranking through a finite abstraction of configurations decreases at every double step over which the center flips twice. | `CQ01_iff_no_finite_alternating`, `Q01_no_leftfinite_alternating`, `CQ01_iff_Psi`, `not_finSupp_Psi_of_R2`, `exact_death_center`, `truncation_death`, `CQ01Empty_iff`, `no_finite_abstract_ranking_coupled` |
 | `Rule30FiniteConfigs` | 2026-10-17 | The single-seed theorems in their uniform form. For every configuration with a leftmost black cell (nonzero and left-finite): Jen's theorem (at most one column is eventually periodic) and period 1 (no column is eventually constant); the proofs use the seed only through its left edge. For nonzero finite configurations: `CQ01` holds iff none has an eventually 2-periodic center column, whatever the transient, so `CQ01` is exactly FinConf at period 2 for one column. `Q01` gives the same for every configuration with a leftmost black cell. | `jen`, `no_column_eventually_constant`, `jen_finite`, `no_column_eventually_constant_finite`, `CQ01_iff_no_finite_period_two`, `no_leftFinite_period_two_of_Q01` |

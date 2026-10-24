@@ -145,6 +145,8 @@ end Rule30Submission
 
 A proof that needs Mathlib does not fit the catalog; submit it as it is.
 
+**What the catalog takes.** Theorems about infinite families. Certificate data enters only as a step in one, in one module per family that builds in under a minute and 4 GB; see [Certificate data](lean/README.md#certificate-data). Single words, widths, windows and depths stay on the submissions site, and a better bound for a padded word `0^r u` is a change to `Rule30PaddedWords`.
+
 ## Trust
 
 - **Trusted:** the import closure (this kit, `lean/`, `equivalents/`, Mathlib) and the Lean kernel.

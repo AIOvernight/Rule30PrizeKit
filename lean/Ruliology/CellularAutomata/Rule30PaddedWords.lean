@@ -5,6 +5,7 @@ public import Ruliology.CellularAutomata.Rule30WhitePad10111
 public import Ruliology.CellularAutomata.Rule30WhiteEnd
 public import Ruliology.CellularAutomata.Rule30WhiteRunEight
 public import Ruliology.CellularAutomata.Rule30WordRotation
+public import Ruliology.CellularAutomata.Rule30GrammarRuns
 public import Ruliology.CellularAutomata.Rule30Realization
 
 /-!
@@ -17,6 +18,7 @@ of length `r` followed by a tail `u`, once `r` reaches a bound that depends on `
 
 | Tail `u` | Bound | Proof |
 |---|---|---|
+| `1111` | 7 | `not_eventuallyWord_zeros_1111`, from the uniform grammar |
 | `11` | 8 | `Rule30WhiteRunEight.no_white_run_11_ge8` |
 | `10111` | 9 | `Rule30WhitePad10111.not_eventually_zeros_10111` |
 | `1` | 10 | `Rule30WhiteEnd.not_eventuallyWord_white_end`, rotated |
@@ -39,6 +41,7 @@ def paddedBound (u : List Bool) : Nat :=
   if u = [true, true] then 8
   else if u = [true, false, true, true, true] then 9
   else if u = [true] then 10
+  else if u = [true, true, true, true] then 7
   else if u.length ≤ 4 then 49
   else if u.length ≤ 5 then 69
   else 74
@@ -81,6 +84,19 @@ theorem not_eventuallyWord_zeros_11 (r : Nat) (hr : 8 ≤ r) :
       List.getElem?_append_right (by simp)]
     simp
 
+/-- The singleton four-black grammar block, rotated to start at its white run. -/
+theorem not_eventuallyWord_zeros_1111 (q : Nat) (hq : 7 ≤ q) :
+    ¬ EventuallyWord (List.replicate q false ++ [true, true, true, true]) := by
+  intro h
+  have hg := Rule30GrammarRuns.not_eventually_grammar [(4, q)] (by simp)
+    (by
+      intro a ha
+      have ha' : a = (4, q) := by simpa using ha
+      subst a
+      exact Or.inr (Or.inr (Or.inl ⟨rfl, hq⟩)))
+  apply hg
+  simpa using eventuallyWord_swap (by simp) h
+
 /-- **No padded word**: for a tail `u` of at most six cells, the center column of the single seed is
 not eventually the repeating word `0^r u` once `paddedBound u ≤ r`, whatever the transient. -/
 theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : paddedBound u ≤ r) :
@@ -92,13 +108,15 @@ theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : pad
     exact Rule30WhitePad10111.not_eventually_zeros_10111 r (by simpa [paddedBound] using hr)
   by_cases h1 : u = [true]
   · subst h1; exact not_eventuallyWord_zeros_one r (by simpa [paddedBound] using hr)
+  by_cases h1111 : u = [true, true, true, true]
+  · subst h1111; exact not_eventuallyWord_zeros_1111 r (by simpa [paddedBound] using hr)
   by_cases h4 : u.length ≤ 4
   · exact Rule30ShortTail.no_short_tail_seed u h4 r
-      (by simpa [paddedBound, h11, h10111, h1, h4] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, h1111, h4] using hr)
   by_cases h5 : u.length ≤ 5
   · exact Rule30FiveTail.no_five_tail_seed u h5 r
-      (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, h1111, h4, h5] using hr)
   · exact Rule30SixTailSharpened.no_six_tail_seed u hu r
-      (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, h1111, h4, h5] using hr)
 
 end Ruliology.CellularAutomata.Rule30PaddedWords

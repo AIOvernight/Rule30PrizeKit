@@ -80,6 +80,11 @@ public import Ruliology.CellularAutomata.Rule30SixTailReduction
 public import Ruliology.CellularAutomata.Rule30SixTail
 public import Ruliology.CellularAutomata.Rule30SixTailSharpened
 public import Ruliology.CellularAutomata.Rule30WhitePad10111
+public import Ruliology.CellularAutomata.Rule30FastImage
+public import Ruliology.CellularAutomata.Rule30GrammarRuns
+public import Ruliology.CellularAutomata.Rule30LongWhiteSupport
+public import Ruliology.CellularAutomata.Rule30RankedWords
+public import Ruliology.CellularAutomata.Rule30RunEnvelopes
 public import Ruliology.CellularAutomata.Rule30TraceEdge
 public import Ruliology.CellularAutomata.Rule30TraceMerge
 public import Ruliology.CellularAutomata.Rule30TraceAmbiguity

@@ -6,14 +6,15 @@ public import Ruliology.CellularAutomata.Rule30WhiteEnd
 public import Ruliology.CellularAutomata.Rule30WhiteRunEight
 public import Ruliology.CellularAutomata.Rule30WordRotation
 public import Ruliology.CellularAutomata.Rule30Realization
+public import Ruliology.CellularAutomata.Rule30Certificates.ShortBlocks
 
 /-!
 # Padded words: one bound for each short tail
 
 The center column of the single seed is never eventually the repeating word `0^r u`, a white run
 of length `r` followed by a tail `u`, once `r` reaches a bound that depends on `u`.
-`paddedBound u` is the least such bound the catalog proves for a tail of at most six cells, and
-`no_padded_word` states them all at once:
+`paddedBound u` is the least such bound the catalog proves for a tail of at most nine cells, and
+`no_padded_word_nine` states them all at once; `no_padded_word` retains its original six-cell API:
 
 | Tail `u` | Bound | Proof |
 |---|---|---|
@@ -23,6 +24,7 @@ of length `r` followed by a tail `u`, once `r` reaches a bound that depends on `
 | any other of at most four cells | 49 | `Rule30ShortTail.no_short_tail_seed` |
 | any other of five cells | 69 | `Rule30FiveTail.no_five_tail_seed` |
 | any other of six cells | 74 | `Rule30SixTailSharpened.no_six_tail_seed` |
+| any other of seven to nine cells | 102 | `not_eventually_short`, rotated |
 
 For tails of every length ending in `011`, `001001` or `111001`, `Rule30SuffixFamilies` gives the
 bounds `10 · |v| + 41` and `10 · |v| + 71`.
@@ -32,16 +34,60 @@ bounds `10 · |v| + 41` and `10 · |v| + 71`.
 
 namespace Ruliology.CellularAutomata.Rule30PaddedWords
 
-open Rule30StripCertificates
+open Rule30StripCertificates Rule30Jen
 
-/-- The least `r` from which the catalog excludes `0^r u`, for a tail `u` of at most six cells. -/
+theorem controlled_short (u : List Bool) (hu : u.length ≤ 9) :
+    Rule30SparseGraph.Ctl 14 Rule30FrontBound.Sstar
+      (u ++ List.replicate 50 false) Rule30FrontBound.Sstar := by
+  have hh := Rule30SparseGraph.root_good Rule30ShortBlocksData.verified
+    (i := 0) (v := ⟨Rule30ShortBlocksData.root,0,0,166,9⟩) rfl rfl rfl u hu
+  have he : Rule30SparseGraph.mask Rule30ShortBlocksData.root = Rule30FrontBound.Sstar := by decide +kernel
+  rw [he] at hh
+  exact hh
+
+theorem not_eventually_short_nonzero (u : List Bool) (hu : u.length≤9)
+    (hblack : ∃ j, j<u.length ∧ u.getD j false=true) (q : Nat) (hq : 102≤q) :
+    ¬ EventuallyWord (u++List.replicate q false) := by
+  have hc := controlled_short u hu
+  exact Rule30FrontBound.not_eventually_of_blockBound u q hq hblack (Rule30ShortBlockBound.block_bound u hu)
+    hc.1 hc.2 Rule30FrontArrivalCapture.hcap
+
+/-- Includes the all-white block, already excluded by the kit's constant-center theorem. -/
+theorem not_eventually_short (u : List Bool) (hu : u.length≤9) (q : Nat) (hq : 102≤q) :
+    ¬ EventuallyWord (u++List.replicate q false) := by
+  by_cases hb : ∃ j, j<u.length ∧ u.getD j false=true
+  · exact not_eventually_short_nonzero u hu hb q hq
+  · intro he
+    obtain ⟨T,hT⟩ := he
+    apply Rule30Prize.center_not_eventually_constant
+    refine ⟨T,false,fun t ht => ?_⟩
+    have hf : ∀ j, u.getD j false=false := by
+      intro j
+      by_cases hj : j<u.length
+      · cases hc : u.getD j false
+        · rfl
+        · exact False.elim (hb ⟨j,hj,hc⟩)
+      · rw [List.getD_eq_getElem?_getD,List.getElem?_eq_none (by omega)];rfl
+    change cell t 0=false
+    rw [hT t ht]
+    rw [List.getD_eq_getElem?_getD]
+    by_cases hj : (t-T)%(u++List.replicate q false).length<u.length
+    · rw [List.getElem?_append_left hj]
+      exact hf _
+    · rw [List.getElem?_append_right (by omega),List.getElem?_replicate]
+      split <;> rfl
+
+
+
+/-- The least `r` from which the catalog excludes `0^r u`, for a tail `u` of at most nine cells. -/
 def paddedBound (u : List Bool) : Nat :=
   if u = [true, true] then 8
   else if u = [true, false, true, true, true] then 9
   else if u = [true] then 10
   else if u.length ≤ 4 then 49
   else if u.length ≤ 5 then 69
-  else 74
+  else if u.length ≤ 6 then 74
+  else 102
 
 /-- An eventual word of the single seed's center column may start at any of its cells. -/
 theorem eventuallyWord_swap {u v : List Bool} (hpos : 0 < (u ++ v).length)
@@ -81,9 +127,9 @@ theorem not_eventuallyWord_zeros_11 (r : Nat) (hr : 8 ≤ r) :
       List.getElem?_append_right (by simp)]
     simp
 
-/-- **No padded word**: for a tail `u` of at most six cells, the center column of the single seed is
+/-- **No padded word**: for a tail `u` of at most nine cells, the center column of the single seed is
 not eventually the repeating word `0^r u` once `paddedBound u ≤ r`, whatever the transient. -/
-theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : paddedBound u ≤ r) :
+theorem no_padded_word_nine (u : List Bool) (hu : u.length ≤ 9) (r : Nat) (hr : paddedBound u ≤ r) :
     ¬ EventuallyWord (List.replicate r false ++ u) := by
   by_cases h11 : u = [true, true]
   · subst h11; exact not_eventuallyWord_zeros_11 r (by simpa [paddedBound] using hr)
@@ -98,7 +144,17 @@ theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : pad
   by_cases h5 : u.length ≤ 5
   · exact Rule30FiveTail.no_five_tail_seed u h5 r
       (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
-  · exact Rule30SixTailSharpened.no_six_tail_seed u hu r
-      (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
+  by_cases h6 : u.length ≤ 6
+  · exact Rule30SixTailSharpened.no_six_tail_seed u h6 r
+      (by simpa [paddedBound, h11, h10111, h1, h4, h5, h6] using hr)
+  · have hr102 : 102 ≤ r := by
+      simpa [paddedBound, h11, h10111, h1, h4, h5, h6] using hr
+    exact not_eventually_short u hu r hr102 ∘
+      eventuallyWord_swap (by simp; omega)
+
+/-- Original six-cell catalog API, retaining its sharper bound for every such tail. -/
+theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : paddedBound u ≤ r) :
+    ¬ EventuallyWord (List.replicate r false ++ u) :=
+  no_padded_word_nine u (Nat.le_trans hu (by decide)) r hr
 
 end Ruliology.CellularAutomata.Rule30PaddedWords

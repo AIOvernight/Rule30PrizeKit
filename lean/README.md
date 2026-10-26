@@ -20,7 +20,7 @@ This Lake project (package `rule30prize`, library `Ruliology`) holds the officia
 | Period 2 | Reduced to Q01, a statement about the zero-boundary left half. Q01 is **open** in general. It is proved in Lean for every start of width ≤ 52. | `Rule30PeriodTwo`, `Rule30PeriodTwoCoupled`, `Rule30PeriodTwoSideways`, `Rule30ZeroBoundary*`, `Rule30ZeroBoundaryWidth52`, `Rule30PeriodTwoWidth5/6` |
 | Least period 3 | Reduced. 001 needs one of AbsorptionT t001, Q001 or C3s001. 011 needs C3w(011). All four are **open**. The ether-and-wall route is closed: the 12 × 3 ether has no wall of any width. | `Rule30EtherThree*` |
 | Least period 4 | Reduced to Absorption, the ether-and-wall trap, which is **open**. The pure ether lies in no trap of width ≤ 20. Partial: single-cell and high-support absorption are proved (`Rule30EtherSingleCell`). | `Rule30Ether`, `Rule30PeriodFourSkeleton`, `Rule30EtherTrapWidth20`, `Rule30EtherSingleCell` |
-| Longer periods | **Open.** Some words are excluded, for example by long black runs, 30 certified words and every `1 0^q` with `q ≥ 10`. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight`, `Rule30WhiteEnd` |
+| Longer periods | **Open.** Some words are excluded, for example by long black runs, 30 certified words, every `1 0^q` with `q ≥ 10`, and arbitrary mixtures with all white runs at least 17. | `Rule30BlackRuns`, `Rule30BlackRunBlocks`, `Rule30StripCertificateTable`, `Rule30WhiteRunEight`, `Rule30WhiteEnd`, `Rule30White17Runs`, `Rule30AsymmetricMixtures` |
 
 Barriers are also proved:
 - Rules 90, 150 and 210 share every structural fact the argument uses, yet their center columns are eventually constant (`Rule30Realization`).
@@ -80,7 +80,10 @@ for m in Rule30Predecessors Rule30PredecessorCounts BusyBeaverLifetimes Rule30Bl
     Rule30SixTailSharpened \
     Rule30SuffixFamilies \
     Rule30Certificates.StripeMeeting \
-    Rule30StripeMeeting; do
+    Rule30StripeMeeting \
+    Rule30RunEnvelopes Rule30FastImage Rule30LongWhiteSupport Rule30RankedWords \
+    Rule30Certificates.White17 Rule30White17Runs Rule30IsolatedMixtures \
+    Rule30AsymmetricMixtures Rule30PaddedWords; do
   lake build Ruliology.CellularAutomata.$m || break
 done
 lake build
@@ -96,6 +99,8 @@ On 2026-10-15 this took 285 s in total on an Apple M3 Max with 48 GB; the four u
 | `Rule30ZeroBoundarySmall` | 19 s | 3.2 GB |
 | `Rule30ZeroBoundaryStripe` | 18 s | 1.8 GB |
 | `Rule30Certificates/WhiteEndChecks` | 34 s | 0.8 GB |
+| `Rule30Certificates/White17` | 21.700 s (2026-10-26, prebuilt imports) | 853,110,784 bytes |
+| `Rule30AsymmetricMixtures` | 16.600 s (2026-10-26, prebuilt imports) | 855,728,128 bytes |
 | `Rule30Certificates/StripeMeeting` | 47 s | 5.5 GB |
 | `Rule30EtherSingleCellCases` | 76 s | 2.2 GB |
 | `Rule30EtherThreeNoWall` | 9 s | 1.1 GB |
@@ -208,14 +213,19 @@ These modules are not in the 2026-10-15 snapshot of the catalog, and `SHA256SUMS
 | `Rule30WhiteTailErosion` | 2026-10-24 | Extends the preceding ether-erosion argument from finite ether perturbations to a white right tail. A speed-one bound on a defect witness replaces the rightmost defect. If column zero is driven by the period-three ether and the right half is white beyond W at time T, every prefix 1..k departs from the matching ether by T + 3 max(W + 12 - k, 0) + 6. Column one departs arbitrarily late. No width bound, no temporal-clock bound, and no center-period exclusion. Contributed by Troy Lowry with OpenAI Codex, building on Luis Perez Morales and Claude's front certificate and potential. | `run_bad_bounded`, `erosion_bounded`, `white_tail_evol`, `white_tail_defect`, `white_tail_erosion`, `white_tail_often_departs` |
 | `Rule30XorRigidity` | 2026-10-24 | For any two ordinary Rule 30 histories on all integer sites, their pointwise XOR follows Rule 30 exactly when one history is zero or both are identical. No support or periodicity assumption; a nonzero history has precisely two XOR partners. The one-step identity also appears in [Dibujaron's notes](https://github.com/Dibujaron/rule30); compare Coven–Hedlund–Rhodes (1979) on commuting maps. Contributed by AIOvernight with OpenAI Codex as Rule 30 Prize submission `R30-20261024-ddbfbd`. | `xor_history_iff`, `standard_two_partners` |
 | `Rule30StripeMeeting`, `Rule30Certificates.StripeMeeting` | 2026-10-24 | For arbitrary finite integer rows and every center index, a common stripe-prefix cut with a white separator preserves the entire center trace. The relation is preserved after two steps. If two rows become stripe-related at any finite time while their preceding center observations agree, they were related at time zero or one. A 2321-state kernel certificate is connected to arbitrary row sizes and the exact stripe grammar. Completeness for equal infinite traces, numerical-normalizer equivalence, and Problem 1 remain open. Contributed by Troy Lowry with OpenAI Codex. | `stripe_related_same_trace`, `stripe_related_preserves_two`, `stripe_meeting_is_early`, `no_delayed_stripe_meeting`, `eventually_stripe_iff_early` |
-| `Rule30PaddedWords` | 2026-10-24 | One bound for each short tail. The center column of the single seed is not eventually `0^r u` for a tail `u` of at most six cells once `r ≥ paddedBound u`, the least bound the catalog proves: 8 for `11`, 9 for `10111`, 10 for `1`, and 49, 69 or 74 for any other tail of at most four, five or six cells. A better bound for a tail, or longer tails, is a change to this module. | `no_padded_word`, `not_eventuallyWord_zeros_11`, `not_eventuallyWord_zeros_one` |
+| `Rule30PaddedWords` | 2026-10-26 | One bound for each short tail, retaining the six-cell API. Bounds 8 for `11`, 9 for `10111`, 10 for `1`, 17 for every pure black tail of length at least three, and 49, 69 or 74 for other tails of at most four, five or six cells. The pure-black-tail API also covers every length beyond six. The 17-bound is the singleton consequence of the uniform long-white-run theorem, rotated. | `no_padded_word`, `no_padded_word_black`, `not_eventuallyWord_zeros_11`, `not_eventuallyWord_zeros_one` |
+| `Rule30White17Runs` | 2026-10-26 | Every white run at least 17, with black runs of every length. For every nonempty list of blocks `(r, q)` with `r ≥ 1` and `q ≥ 17`, chosen independently, the single-seed center column is not eventually the repeating word `1^(r₁) 0^(q₁) … 1^(rₖ) 0^(qₖ)`, whatever the transient. The number of blocks and every run length are unbounded. So every eventual period of the center that is not constant has a cyclic white run of length at most 16. `Rule30BlackRuns` needs black runs of length `≥ 9`; here short black runs are mixed freely, with no dominating white run. Two blocks capture every fourteen-cell strip into a 683-strip envelope (`16384 → 845 → 683`), split into nine rank regions; no block raises the rank, so the rank is eventually constant along successive periods (`Rule30RankedWords.no_word_ranked`, a composition rule for any width). A rank-keeping block has a prescribed column-1 response along its white run (rank 0: delay `2, 0, 4, 0` for `r = 1 … 4`, `1` for `r ≥ 5`; ranks 4 and 8 keep only `r = 3`, delays `3` and `10`), and masked Jen concludes. All family data, finite checks and assembly are in `Rule30Certificates/White17`; transitions use the proved-sound bit-parallel `Rule30FastImage.fcovers`, while rank predicates and observations retain the sparse checker. The pure-black-tail bound 17 is exposed in `Rule30PaddedWords`. | `not_eventually_long_white_runs`, `Rule30RankedWords.no_word_ranked`, `Rule30RunEnvelopes.no_word_of_invariant` |
+| `Rule30IsolatedMixtures` | 2026-10-26 | Mixtures of isolated ones. For every nonempty list `qs` with every entry `≥ 10`, the single-seed center column is not eventually the repeating word `1 0^(q₁) 1 0^(q₂) … 1 0^(qₖ)`, whatever the transient; the gaps may differ and are unbounded. `Rule30WhiteEnd` is the case of one gap. The eight-cell envelopes of `Rule30WhitePad10111` capture every block `1 0^q`, `q ≥ 10`, in two stages, after which column `1` reads `0 0 1 1 …` on every gap, and masked Jen concludes. | `not_eventually_isolated_mixtures` |
+| `Rule30AsymmetricMixtures` | 2026-10-26 | Mixtures of single and double black cells. For every nonempty list of blocks `(r, q)` with `r = 1` and `q ≥ 10`, or `r = 2` and `q ≥ 8`, chosen independently, the single-seed center column is not eventually the repeating word `1^(r₁) 0^(q₁) … 1^(rₖ) 0^(qₖ)`, whatever the transient. `Rule30IsolatedMixtures` is the case `r = 1` everywhere; `Rule30WhiteRunEight` gives the single word `1 1 0^q` for `q ≥ 8`. Either kind of block moves every ten-cell strip through four nested envelopes closed under white steps (`1024 → 221 → 162 → 137 → 128`; 140 kernel checks), the last closed under every block; there column `1` along a white run reads `0 0 1 …` after one black cell and `1 …` after two, so masked Jen concludes. | `not_eventually_asymmetric_mixtures` |
 
 ## Certificate data
+
 
 Some theorems rest on finite checks that the kernel evaluates with `decide`. Their data is in the modules under `Rule30Certificates/`:
 
 | Data | For | What it checks |
 |---|---|---|
+| `White17` | `Rule30White17Runs` | masks, 423 kernel checks (371 transitions via `Rule30FastImage.fcovers`), capture/rank/profile assembly for every block 1^r 0^q, r≥1, q≥17 |
 | `ZeroBoundaryWidth52Chunks0`–`3` | `Rule30ZeroBoundaryWidth52` | Q01 for every start of width at most 52 |
 | `EtherTrap0`–`5` | `Rule30EtherTrapWidth20` | that the pure ether lies in no trap of width at most 20 |
 | `ZeroBoundaryStripeCycles0`–`3` | `Rule30ZeroBoundaryStripeFamily`, `Rule30ZeroBoundaryStripeFour` | the periodic front-window orbits of the stripe prefixes |

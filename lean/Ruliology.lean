@@ -103,6 +103,10 @@ public import Ruliology.CellularAutomata.Rule30XorRigidity
 public import Ruliology.CellularAutomata.Rule30StripeMeeting
 public import Ruliology.CellularAutomata.Rule30PaddedWords
 
+public import Ruliology.CellularAutomata.Rule30White17Runs
+public import Ruliology.CellularAutomata.Rule30IsolatedMixtures
+public import Ruliology.CellularAutomata.Rule30AsymmetricMixtures
+
 /-!
 # Rule 30 Prize: Lean snapshot
 

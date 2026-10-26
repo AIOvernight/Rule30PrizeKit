@@ -5,6 +5,7 @@ public import Ruliology.CellularAutomata.Rule30WhitePad10111
 public import Ruliology.CellularAutomata.Rule30WhiteEnd
 public import Ruliology.CellularAutomata.Rule30WhiteRunEight
 public import Ruliology.CellularAutomata.Rule30WordRotation
+public import Ruliology.CellularAutomata.Rule30White17Runs
 public import Ruliology.CellularAutomata.Rule30Realization
 
 /-!
@@ -13,13 +14,15 @@ public import Ruliology.CellularAutomata.Rule30Realization
 The center column of the single seed is never eventually the repeating word `0^r u`, a white run
 of length `r` followed by a tail `u`, once `r` reaches a bound that depends on `u`.
 `paddedBound u` is the least such bound the catalog proves for a tail of at most six cells, and
-`no_padded_word` states them all at once:
+`no_padded_word` states them all at once. The additional `no_padded_word_black` API covers
+pure black tails of arbitrary length at least three, including seven and eight cells:
 
 | Tail `u` | Bound | Proof |
 |---|---|---|
 | `11` | 8 | `Rule30WhiteRunEight.no_white_run_11_ge8` |
 | `10111` | 9 | `Rule30WhitePad10111.not_eventually_zeros_10111` |
 | `1` | 10 | `Rule30WhiteEnd.not_eventuallyWord_white_end`, rotated |
+| `1^k`, `k ≥ 3` | 17 | `no_padded_word_black` (any length) |
 | any other of at most four cells | 49 | `Rule30ShortTail.no_short_tail_seed` |
 | any other of five cells | 69 | `Rule30FiveTail.no_five_tail_seed` |
 | any other of six cells | 74 | `Rule30SixTailSharpened.no_six_tail_seed` |
@@ -39,6 +42,7 @@ def paddedBound (u : List Bool) : Nat :=
   if u = [true, true] then 8
   else if u = [true, false, true, true, true] then 9
   else if u = [true] then 10
+  else if u = List.replicate u.length true ∧ 3 ≤ u.length then 17
   else if u.length ≤ 4 then 49
   else if u.length ≤ 5 then 69
   else 74
@@ -81,6 +85,13 @@ theorem not_eventuallyWord_zeros_11 (r : Nat) (hr : 8 ≤ r) :
       List.getElem?_append_right (by simp)]
     simp
 
+/-- All pure black tails of length at least three, including lengths beyond the six-cell API. -/
+theorem no_padded_word_black (k : Nat) (hk : 3 ≤ k) (q : Nat) (hq : 17 ≤ q) :
+    ¬ EventuallyWord (List.replicate q false ++ List.replicate k true) := by
+  intro h
+  exact Rule30White17Runs.not_eventually_black_white k q (by omega) hq
+    (eventuallyWord_swap (by simp; omega) h)
+
 /-- **No padded word**: for a tail `u` of at most six cells, the center column of the single seed is
 not eventually the repeating word `0^r u` once `paddedBound u ≤ r`, whatever the transient. -/
 theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : paddedBound u ≤ r) :
@@ -92,13 +103,17 @@ theorem no_padded_word (u : List Bool) (hu : u.length ≤ 6) (r : Nat) (hr : pad
     exact Rule30WhitePad10111.not_eventually_zeros_10111 r (by simpa [paddedBound] using hr)
   by_cases h1 : u = [true]
   · subst h1; exact not_eventuallyWord_zeros_one r (by simpa [paddedBound] using hr)
+  by_cases hb : u = List.replicate u.length true ∧ 3 ≤ u.length
+  · have hq : 17 ≤ r := by simpa only [paddedBound, if_neg h11, if_neg h10111, if_neg h1, if_pos hb] using hr
+    rw [hb.1]
+    exact no_padded_word_black _ hb.2 r hq
   by_cases h4 : u.length ≤ 4
   · exact Rule30ShortTail.no_short_tail_seed u h4 r
-      (by simpa [paddedBound, h11, h10111, h1, h4] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, hb, h4] using hr)
   by_cases h5 : u.length ≤ 5
   · exact Rule30FiveTail.no_five_tail_seed u h5 r
-      (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, hb, h4, h5] using hr)
   · exact Rule30SixTailSharpened.no_six_tail_seed u hu r
-      (by simpa [paddedBound, h11, h10111, h1, h4, h5] using hr)
+      (by simpa [paddedBound, h11, h10111, h1, hb, h4, h5] using hr)
 
 end Ruliology.CellularAutomata.Rule30PaddedWords

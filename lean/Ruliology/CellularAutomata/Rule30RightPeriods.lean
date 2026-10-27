@@ -2,6 +2,7 @@ module
 
 public import Ruliology.CellularAutomata.Rule30Diagonals
 public import Ruliology.CellularAutomata.Rule30Window
+public import Ruliology.CellularAutomata.Rule30DifferenceOrder
 
 /-!
 # Rule 30: the periods of the right diagonals
@@ -31,6 +32,14 @@ says it repeats with period `2^j`. Here the periods are pinned down much further
   `j < 2^(e_j + 1)`. So the periods are unbounded.
 * `per_bound`: `j ≤ 2^(e_j + 1) - 2`, that is `e_j ≥ log₂ (j + 2) - 1`.
 * `per_upper`: `e_j ≤ (2j + 1) / 3` for `j ≥ 2`.
+* `per_upper_half`: `R j` has period `2 ^ B j`, where `B j = ⌈j / 2⌉ + Q 0 ⌊j / 2⌋`
+  (`Rule30RecordCharge.B`) and `Q 0` is the inverse of a tower of twos, so
+  `e_j ≤ j / 2 + O(log* j)` (`e_le_B`); at time `2 ^ B n` the diagonals `R 1, …, R n` are white
+  again (`wall_return`). Explicitly `e_j ≤ ⌈j / 2⌉ + 3` for `j < 2^22 + 38`
+  (`per_upper_half_explicit`), and `B j < (2j + 1) / 3` for every `j ≥ 18`
+  (`Rule30RecordCharge.B_lt_two_thirds`), so it is sharper than `per_upper` from there on. The
+  proof pairs the diagonals and runs a record-charge account (`Rule30RecordCharge`) whose
+  resource is the difference order of a diagonal over one period (`Rule30DifferenceOrder`).
 * `per_14`, `per_23`, `not_half_lower`: `e_14 ≤ 6` and `e_23 ≤ 8` (kernel computation of rows
   `64` and `256`), so the guess `e_j ≥ ⌊j/2⌋` is false.
 
@@ -51,7 +60,7 @@ says it repeats with period `2^j`. Here the periods are pinned down much further
 None of this reaches the center column `c(t) = R t t`. It sits on diagonal `t` at time `t`, and
 when it is black it lies inside the first period `2^{e_t}` of that diagonal (`center_black_lt`).
 The proved bounds leave the growth of the period `2^{e_j}` between linear (`j + 2 ≤ 2^{e_j + 1}`)
-and `2^{(2j+1)/3}`; numerically `e_j ≈ 0.43 j`.
+and `2^{B j}`, `B j = j / 2 + O(log* j)`; numerically `e_j ≈ 0.43 j`.
 
 The diagonals and their recurrence are in `Rule30Diagonals`.
 -/
@@ -940,6 +949,151 @@ theorem S_rule {n e e' : Nat} (he : IsE (n + 2) e) (he' : IsE (n + 3) e') :
   rw [hp] at h'
   exact h'
 
+/-! ### The half-rate bound
+
+Pair the diagonals: at pair `i` the source is `s = R (2 i)`, of period `M = 2 ^ e_{2i}`, and
+`R (2 i + 2)` integrates `R (2 i + 1) || R (2 i)` (`R_step`). The pair weight is
+`e_{2i+2} - e_{2i} ∈ {0, 1, 2}`; by the doubling rule each unit of weight is a complementing shift
+(`leastExp_antiperiod`). The resource at pair `i` is the difference order of `s` over one period
+(`pairResource`, `Rule30DifferenceOrder.order`). The three laws of `Rule30DifferenceOrder` give the
+reset and countdown laws of a record-charge path (`pairPath`), and `Rule30RecordCharge` turns
+them into `e_{2d} ≤ d + Q 0 d`. -/
+
+section HalfRate
+
+open Rule30RecordCharge Rule30DifferenceOrder
+
+/-- The least exponent `e_j` as a function: `IsE j (leastExp j)`. -/
+noncomputable def leastExp (j : Nat) : Nat := Classical.choose (exists_IsE j)
+
+theorem leastExp_spec (j : Nat) : IsE j (leastExp j) := Classical.choose_spec (exists_IsE j)
+
+theorem leastExp_zero : leastExp 0 = 0 :=
+  (leastExp_spec 0).unique ⟨per_zero 1, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+
+theorem leastExp_succ_cases (j : Nat) :
+    leastExp (j + 1) = leastExp j ∨ leastExp (j + 1) = leastExp j + 1 := by
+  have h := e_step (leastExp_spec j) (leastExp_spec (j + 1))
+  split at h <;> omega
+
+/-- When the exponent grows, a shift by the old period complements the next diagonal. -/
+theorem leastExp_antiperiod {j : Nat} (h : leastExp (j + 1) = leastExp j + 1) (t : Nat) :
+    R (j + 1) (t + 2 ^ leastExp j) = !R (j + 1) t :=
+  antiperiod (leastExp_spec j).1 ((leastExp_spec (j + 1)).2 (leastExp j) (by omega)) t
+
+/-- The resource at pair `i`: the difference order of `R (2 i)` over one period. -/
+noncomputable def pairResource (i : Nat) : Nat := order (R (2 * i)) (2 ^ leastExp (2 * i))
+
+theorem pair_step (i t : Nat) :
+    R (2 * i + 1 + 1) (t + 1) = xor (R (2 * i + 1 + 1) t) (R (2 * i + 1) t || R (2 * i) t) :=
+  R_step (2 * i) t
+
+/-- The pairs of diagonals form a record-charge path with `nu = 0`. -/
+noncomputable def pairPath : Path 0 where
+  weight i := leastExp (2 * i + 1 + 1) - leastExp (2 * i)
+  exponent i := leastExp (2 * i)
+  resource := pairResource
+  exponent_zero := leastExp_zero
+  exponent_step i := by
+    have h0 := leastExp_succ_cases (2 * i)
+    have h1 := leastExp_succ_cases (2 * i + 1)
+    show leastExp (2 * (i + 1)) = _
+    rw [show 2 * (i + 1) = 2 * i + 1 + 1 by omega]
+    omega
+  weight_le_two i := by
+    have h0 := leastExp_succ_cases (2 * i)
+    have h1 := leastExp_succ_cases (2 * i + 1)
+    show leastExp (2 * i + 1 + 1) - leastExp (2 * i) ≤ 2
+    omega
+  reset_before i hw := by
+    have h0 := leastExp_succ_cases (2 * i)
+    have h1 := leastExp_succ_cases (2 * i + 1)
+    change leastExp (2 * i + 1 + 1) - leastExp (2 * i) = 2 at hw
+    have e0 : leastExp (2 * i + 1) = leastExp (2 * i) + 1 := by omega
+    have e1 : leastExp (2 * i + 1 + 1) = leastExp (2 * i + 1) + 1 := by omega
+    have hanti : ∀ t, R (2 * i + 1 + 1) (t + 2 * 2 ^ leastExp (2 * i)) = !R (2 * i + 1 + 1) t := by
+      intro t
+      have := leastExp_antiperiod e1 t
+      rwa [e0, two_pow_succ'] at this
+    exact order_reset_before (leastExp_spec (2 * i)).1 (leastExp_antiperiod e0) (pair_step i) hanti
+  reset_after i hw := by
+    have h0 := leastExp_succ_cases (2 * i)
+    have h1 := leastExp_succ_cases (2 * i + 1)
+    change leastExp (2 * i + 1 + 1) - leastExp (2 * i) = 2 at hw
+    have e0 : leastExp (2 * i + 1) = leastExp (2 * i) + 1 := by omega
+    have e1 : leastExp (2 * i + 1 + 1) = leastExp (2 * i + 1) + 1 := by omega
+    have hanti : ∀ t, R (2 * i + 1 + 1) (t + 2 ^ (leastExp (2 * i) + 1)) =
+        !R (2 * i + 1 + 1) t := by
+      intro t
+      have := leastExp_antiperiod e1 t
+      rwa [e0] at this
+    have hord := order_of_antiperiod hanti
+    show order (R (2 * (i + 1))) (2 ^ leastExp (2 * (i + 1))) + 1 =
+      2 ^ (0 + leastExp (2 * (i + 1)) - 1)
+    rw [show 2 * (i + 1) = 2 * i + 1 + 1 by omega, e1, e0, two_pow_succ' (leastExp (2 * i) + 1),
+      hord, show 0 + (leastExp (2 * i) + 1 + 1) - 1 = leastExp (2 * i) + 1 by omega]
+    have := Nat.one_le_two_pow (n := leastExp (2 * i) + 1)
+    omega
+  countdown i hw := by
+    have h0 := leastExp_succ_cases (2 * i)
+    have h1 := leastExp_succ_cases (2 * i + 1)
+    change leastExp (2 * i + 1 + 1) - leastExp (2 * i) = 1 at hw
+    show pairResource i ≤ order (R (2 * (i + 1))) (2 ^ leastExp (2 * (i + 1))) + 1
+    rw [show 2 * (i + 1) = 2 * i + 1 + 1 by omega]
+    unfold pairResource
+    rcases h0 with e0 | e0
+    · -- the low diagonal keeps its period: the high diagonal is complemented by `M`
+      have e1 : leastExp (2 * i + 1 + 1) = leastExp (2 * i) + 1 := by omega
+      have hanti : ∀ t, R (2 * i + 1 + 1) (t + 2 ^ leastExp (2 * i)) = !R (2 * i + 1 + 1) t := by
+        intro t
+        have := leastExp_antiperiod (j := 2 * i + 1) (by omega) t
+        rwa [e0] at this
+      rw [e1, two_pow_succ', order_of_antiperiod hanti]
+      have := order_le (R (2 * i)) (2 ^ leastExp (2 * i))
+      omega
+    · -- the low diagonal is complemented by `M`: countdown
+      have e1 : leastExp (2 * i + 1 + 1) = leastExp (2 * i) + 1 := by omega
+      rw [e1, two_pow_succ']
+      exact order_countdown (leastExp_spec (2 * i)).1 (leastExp_antiperiod e0) (pair_step i)
+
+/-- `e_{2d} ≤ d + Q 0 d`. -/
+theorem leastExp_two_mul_le (d : Nat) : leastExp (2 * d) ≤ d + Q 0 d :=
+  exponent_le_Q pairPath d
+
+theorem leastExp_le_B (j : Nat) : leastExp j ≤ B j := by
+  unfold B
+  obtain ⟨d, rfl | rfl⟩ : ∃ d, j = 2 * d ∨ j = 2 * d + 1 := ⟨j / 2, by omega⟩
+  · rw [show (2 * d + 1) / 2 = d by omega, show 2 * d / 2 = d by omega]
+    exact leastExp_two_mul_le d
+  · rw [show (2 * d + 1 + 1) / 2 = d + 1 by omega, show (2 * d + 1) / 2 = d by omega]
+    have := leastExp_two_mul_le d
+    rcases leastExp_succ_cases (2 * d) with h | h <;> omega
+
+/-- **Half-rate bound**: `R j` has period `2 ^ B j`, with `B j = ⌈j / 2⌉ + Q 0 ⌊j / 2⌋`, so
+`e_j ≤ j / 2 + O(log* j)`. Since `B j < (2 j + 1) / 3` for `j ≥ 18` (`B_lt_two_thirds`), this
+sharpens `per_upper` from `j = 18` on. -/
+theorem per_upper_half (j : Nat) : Per j (2 ^ B j) :=
+  Per.pow_mono (leastExp_spec j).1 (leastExp_le_B j)
+
+/-- Explicitly: `e_j ≤ ⌈j / 2⌉ + 3` for every `j < 2^22 + 38`. -/
+theorem per_upper_half_explicit {j : Nat} (hj : j < 2 ^ 22 + 38) : Per j (2 ^ ((j + 1) / 2 + 3)) :=
+  Per.pow_mono (per_upper_half j) (B_le_add_three (by omega))
+
+/-- The least exponent form: `e_j ≤ B j`. -/
+theorem e_le_B {j e : Nat} (he : IsE j e) : e ≤ B j :=
+  he.le (per_upper_half j)
+
+/-- **Return of the wall**: at time `2 ^ B n` the diagonals `R 1, …, R n` are all white again,
+as at time `0`. Reading the right edge as the half-line automaton `x ↦ x ⊕ (2x ∨ 4x ∨ 3)`
+started from `0` (bit `k` of its state at time `t` is `R (k + 1) t`), this says that after
+`2 ^ B n` steps the state is `0` modulo `2 ^ n`. -/
+theorem wall_return (n k : Nat) (hk : k < n) : R (k + 1) (2 ^ B n) = false := by
+  have h := per_mono_le (show k + 1 ≤ n by omega) (per_upper_half n) 0
+  rw [Nat.zero_add] at h
+  rw [h]
+  exact R_init (Nat.le_add_left 1 k)
+
+end HalfRate
 
 end Rule30RightPeriods
 end Ruliology.CellularAutomata

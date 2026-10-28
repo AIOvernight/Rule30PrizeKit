@@ -120,6 +120,9 @@ public import Ruliology.CellularAutomata.Rule30FrozenRuler
 public import Ruliology.CellularAutomata.Rule30EdgeStaircases
 public import Ruliology.CellularAutomata.Rule30PrefixMerger
 
+public import Ruliology.CellularAutomata.Rule30White17Runs
+public import Ruliology.CellularAutomata.Rule30GrammarRuns
+
 /-!
 # Rule 30 Prize: Lean snapshot
 

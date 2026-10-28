@@ -61,6 +61,7 @@ public import Ruliology.CellularAutomata.Rule30FiniteDiagonals
 public import Ruliology.CellularAutomata.Rule30AgedLeftDiagonals
 public import Ruliology.CellularAutomata.Rule30ArbitraryWhitePadding
 public import Ruliology.CellularAutomata.Rule30WhitePaddingMixtures
+public import Ruliology.CellularAutomata.Rule30ClockBirthDemodulation
 public import Ruliology.CellularAutomata.Rule30FiniteWhiteRuns
 public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFour
 public import Ruliology.CellularAutomata.Rule30ZeroBoundaryStripeFrontLift

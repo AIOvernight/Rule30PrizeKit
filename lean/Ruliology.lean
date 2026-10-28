@@ -16,6 +16,8 @@ public import Ruliology.CellularAutomata.Rule30StripCertificates
 public import Ruliology.CellularAutomata.Rule30StripCertificateTable
 public import Ruliology.CellularAutomata.Rule30DrivenLeft
 public import Ruliology.CellularAutomata.Rule30RightPeriods
+public import Ruliology.CellularAutomata.Rule30RecordCharge
+public import Ruliology.CellularAutomata.Rule30DifferenceOrder
 public import Ruliology.CellularAutomata.Rule30WhiteSeed
 public import Ruliology.CellularAutomata.Rule30Realization
 public import Ruliology.CellularAutomata.Rule30FactorWindow
